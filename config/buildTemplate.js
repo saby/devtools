@@ -1,0 +1,91 @@
+const { input, output, root, logs } = require('./config');
+const { resolve } = require('path');
+const NODE_MODULES = resolve(root, "node_modules");
+
+const WASABY_MODULES = [
+  {
+    "name": "Controls",
+    "path": "sbis3-controls/Controls"
+  },
+  {
+    "name": "Controls-theme",
+    "path": "sbis3-controls/Controls-theme"
+  },
+  {
+    "name": "WS.Core",
+    "path": "sbis3-ws/WS.Core"
+  },
+  {
+    "name": "View",
+    "path": "sbis3-ws/View"
+  },
+  {
+    "name": "Types",
+    "path": "saby-types/Types"
+  },
+  {
+    "name": "I18n",
+    "path": "saby-i18n/I18n"
+  },
+  {
+    "name": "Application",
+    "path": "wasaby-app/src/Application"
+  },
+  {
+    "name": "Env",
+    "path": "rmi/src/client/Env"
+  },
+  {
+    "name": "Browser",
+    "path": "rmi/src/client/Browser"
+  },
+  {
+    "name": "SbisEnv",
+    "path": "rmi/src/client/SbisEnv"
+  },
+  {
+    "name": "Vdom",
+    "path": "sbis3-ws/Vdom"
+  },
+  {
+    "name": "Inferno",
+    "path": "sbis3-ws/Inferno"
+  }
+].map(({ path, ...config}) => {
+  return {
+    path: resolve(NODE_MODULES, path),
+      "required": true,
+    ...config
+  }
+});
+
+
+const EXTENSION_MODULES = [
+  {
+    "name": "Test",
+    "path": resolve(input.root, "Test")
+  }
+];
+
+const MODULES = [].concat(WASABY_MODULES, EXTENSION_MODULES);
+
+module.exports = {
+  "cache":  resolve(logs.root, "builder-ui/builder-json-cache"),
+  "output": output.resource,
+  "logs": resolve(logs.root, "builder-ui/logs"),
+  "typescript": true,
+  "less": true,
+  "contents": true,
+  "deprecatedWebPageTemplates": true,
+  "htmlWml": true,
+  "themes": true,
+  "sources": true,
+  "minimize": false,
+  "wml": false,
+  "customPack": false,
+  "dependenciesGraph": false,
+  "resourcesUrl": false,
+  "joinedMeta": true,
+  "gzip" : false,
+  "modules": MODULES
+};
