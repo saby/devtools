@@ -1,0 +1,33 @@
+{
+   "name": "saby-devtool",
+   "version": "0.1.0",
+   "license": "MS-RL",
+   "repository": {
+      "type": "git",
+      "url": "git@github.com:saby/devtools.git"
+   },
+   "scripts": {
+      "build": "npm run build:extension && npm run build:injection && npm run build:app",
+      "build:injection": "node ./scripts/build_injection.js",
+      "build:extension": "node ./scripts/build_extension.js",
+      "build:app": "node ./scripts/build_app.js"
+   },
+   "devDependencies": {
+      "@types/chrome": "0.0.81"
+   },
+   "dependencies": {
+      "gulp": "^4.0.0",
+      "rollup": "^1.6.0",
+      "rollup-plugin-typescript": "^1.0.0",
+      "tslib": "^1.9.3",
+      "typescript": "^3.4.3",
+      "rmi": "git+https://git.sbis.ru/sbis/rmi.git#rc-19.400",
+      "saby-i18n": "git+https://github.com/saby/i18n.git#rc-19.400",
+      "saby-types": "git+https://github.com/saby/Types.git#rc-19.400",
+      "saby-typescript": "git+https://github.com/saby/TypeScript.git#rc-19.400",
+      "sbis3-builder": "git+https://github.com/saby/Builder.git#rc-19.400",
+      "sbis3-controls": "git+http://git.sbis.ru/sbis/controls.git#rc-19.400",
+      "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-19.400",
+      "wasaby-app": "git+https://github.com/saby/wasaby-app.git#rc-19.400"
+   }
+}
