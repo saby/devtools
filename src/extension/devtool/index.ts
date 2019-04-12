@@ -2,7 +2,7 @@ import { PANEL_NAME } from "../const";
 
 chrome.devtools.panels.create(PANEL_NAME,
     "devtool/icon.png",
-    "devtool/dependency/index.html",
+    "resource/Extension/devtool.html",
     function(panel: chrome.devtools.panels.ExtensionPanel) {
         // code invoked on panel creation
     }
