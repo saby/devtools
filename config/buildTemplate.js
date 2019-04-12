@@ -62,8 +62,8 @@ const WASABY_MODULES = [
 
 const EXTENSION_MODULES = [
   {
-    "name": "Test",
-    "path": resolve(input.root, "Test")
+    "name": "Extension",
+    "path": resolve(input.app, "Extension")
   }
 ];
 

@@ -1,21 +1,15 @@
 var fs = require('fs');
 
+const execCommand = require('./execCommand');
+
 const BUILD_DIRECTORY = 'build';
 const SOURCE_DIRECTORY = 'src\\extension';
 
-const { exec } = require('child_process');
 const { resolve } = require('path');
 const { readdir, stat, unlink, copyFile } = require('fs').promises;
 
 let buildTS = () => {
-    return new Promise((resolve, reject) => {
-        exec('npm run build:extension', (err, stdout, stderr) => {
-            if (err) {
-                return reject(stdout);
-            }
-            resolve({ stdout, stderr });
-        });
-    });
+    return execCommand('tsc -p ./config/tsconfig.extension.json');
 };
 // let copy = (origin, copyTo) => {
 //     return fs.createReadStream(origin).pipe(
