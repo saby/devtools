@@ -1,0 +1,75 @@
+/**
+ * @typedef {Function} ReplaceFunction.<T>
+ * @param {String} name
+ * @param {T} origin
+ * @return T
+ */
+type ReplaceFunction<T = any> = (name: string, origin: T) => T;
+
+interface IR1 {
+    moduleName: string;
+    dependencies: Array<string>;
+    args: Array<any>;
+}
+
+interface IR2 extends IR1 {
+    dependencyName: string;
+    getReplacement<T = any>(name: string, origin: T): T;
+}
+
+/**
+ * @param {String} moduleName Имя модуля
+ * @param {String} dependencyName Имя подменяемой зависимости
+ * @param {Array.<*>} args Массив аргументов
+ * @param {Array.<String>} dependencies Список зависимостей модуля
+ * @param {ReplaceFunction} getReplacement Список зависимостей модуля
+ */
+export let replaceDependency = ({
+     moduleName,
+     dependencyName,
+     dependencies,
+     args,
+     getReplacement
+ }: IR2 ) => {
+    if (!dependencies.includes(dependencyName)) {
+        return
+    }
+    let index = dependencies.indexOf(dependencyName);
+    let origin = args[index];
+    args[index] = getReplacement(moduleName, origin);
+};
+
+interface IR3 extends IR1 {
+    proxyModules: {
+        [dependencyName: string]: ReplaceFunction
+    };
+}
+
+/**
+ *
+ * @param {String} moduleName Имя модуля
+ * @param {String} proxyModules Объект с подменяемыми зависимостями
+ * @param {Array.<*>} args Массив аргументов
+ * @param {Array.<String>} dependencies Список зависимостей модуля
+ */
+export let replaceDependencies = ({
+   moduleName,
+   proxyModules,
+   args,
+   dependencies
+}: IR3) => {
+    if (Object.keys(proxyModules).includes(moduleName)) {
+        return args;
+    }
+    let newArgs = [...args];
+    for (let dependencyName in proxyModules) {
+        replaceDependency({
+            moduleName,
+            dependencyName,
+            dependencies,
+            args: newArgs,
+            getReplacement: proxyModules[dependencyName]
+        })
+    }
+    return newArgs;
+};
