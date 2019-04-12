@@ -1,0 +1,39 @@
+{
+  "name": "Wasaby Developer Tools",
+  "manifest_version": 2,
+  "version": "19.400.0",
+  "minimum_chrome_version": "60",
+
+  "devtools_page": "devtool.html",
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "web_accessible_resources": [
+    "injection/require.js"
+  ],
+
+  "background": {
+    "page": "background.html",
+    "persistent": true
+  },
+
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "webRequest",
+    "file:///*",
+    "http://*/*",
+    "https://*/*"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/index.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}
