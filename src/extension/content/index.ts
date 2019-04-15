@@ -22,4 +22,4 @@ let injectScript = (fileName: string) => {
         console.log("=> inject");
     }, 100)
 };
-injectScript('./injection/require.js');
+injectScript('./injection/injection.js');
