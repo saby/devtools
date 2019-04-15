@@ -1,13 +1,19 @@
 import Control = require('Core/Control');
 import template = require('wml!Extension/Extension');
+import { Memory } from 'Types/source';
 
 class Extension extends Control {
-   _template: Function = template;
-   private _value: string = '';
-   private _inputHandler(e: Event) {
-      const target = <HTMLInputElement>e.target;
-      this._value = target.value;
-   }
+   protected _template: Function = template;
+   protected _tabsSource: Memory = new Memory({
+      idProperty: '',
+      data: [{
+         id: 'Elements',
+         title: 'Elements'
+      }, {
+         id: 'Dependencies',
+         title: 'Dependencies'
+      }]
+   });
 }
 
 export default Extension;

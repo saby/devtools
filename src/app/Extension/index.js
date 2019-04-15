@@ -8,8 +8,25 @@
       // Слой совместимости по умолчанию включен, из-за этого начинает грузиться куча всего ненужного, например, jQuery.
       ispl.features.compatibleLayer = false;
 
-      require(['Extension/Extension'], (Extension) => {
-         Extension.default.createControl(Extension.default, {}, document.getElementById('root'));
+      require([
+         'Core/app-start',
+         'Controls/Application/HeadData',
+         'Application/Env',
+         'Core/app-init',
+         'View/Executor/TClosure'
+      ], function(AppStart, HeadData, AppEnv, appInit) {
+         appInit();
+
+         var headData = new HeadData([], true);
+         AppEnv.setStore('HeadData', headData);
+
+         require(['Extension/Extension'], (Extension) => {
+            Extension.default.createControl(
+               Extension.default,
+               {},
+               document.documentElement
+            );
+         });
       });
    });
 })();
