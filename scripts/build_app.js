@@ -1,35 +1,12 @@
 const { resolve } = require('path');
-const execCommand = require('./execCommand');
-const NODE_MODULES = resolve(__dirname, "../node_modules");
+const runBuilder = require('./util/runBuilder');
+const execCommand = require('./util/execCommand');
 
 const SABY_TYPESCRIPT = "saby-typescript --install --tsconfig=tsconfig.base.json";
-const CREATE_BUILD_TEMPLATE = `node ${ resolve(__dirname, "buildTemplate.js")}`;
 
-const RUN_BUILDER = [
-    "node",
-    resolve(NODE_MODULES, "gulp/bin/gulp.js"),
-    `--gulpfile=${ resolve(NODE_MODULES, "sbis3-builder/gulpfile.js") }`,
-    "build",
-    `--config="${ resolve(__dirname, "../config/buildTemplate.json") }"`,
-    "-LLLL"
-].join(' ');
-
-const COMMANDS = [
-    SABY_TYPESCRIPT,
-    CREATE_BUILD_TEMPLATE,
-    RUN_BUILDER
-];
-
-async function runBuilder () {
-    console.log('run build');
-    for (let command of COMMANDS) {
-        try {
-            await execCommand(command);
-        } catch (error) {
-            console.log('build error: ', error)
-        }
-    }
-    console.log('complete build');
+async function build () {
+    await execCommand(SABY_TYPESCRIPT);
+    await runBuilder(resolve(__dirname, "../config/buildTemplate"));
 }
 
-runBuilder();
+build();

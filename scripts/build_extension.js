@@ -1,6 +1,6 @@
 var fs = require('fs');
 
-const execCommand = require('./execCommand');
+const execCommand = require('./util/execCommand');
 
 const BUILD_DIRECTORY = 'build';
 const SOURCE_DIRECTORY = 'src\\extension';
