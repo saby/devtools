@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base",
+  "compilerOptions": {
+    "noImplicitThis": true,
+    "strictPropertyInitialization": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictNullChecks": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
+  }
+}

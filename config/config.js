@@ -29,7 +29,7 @@ module.exports = {
      * Корневая директория сборки
      */
     root: build,
-    resource: resolve(build, 'resource'),
+    resource: resolve(build, 'resources'),
     /**
      * Встраиваемый в страницу сткрип
      */
