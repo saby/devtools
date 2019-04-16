@@ -1,8 +1,9 @@
 import { DependencyWatcher } from './DependencyWatcher';
 import { GLOBAL } from "./RENAME/const";
 import { IPluginConstructor, IPlugin } from './IPlugin';
+import { InjectHook } from './InjectHook';
 
-const ALL_PLUGINS: Array<IPluginConstructor> = [ DependencyWatcher ];
+const ALL_PLUGINS: Array<IPluginConstructor> = [ DependencyWatcher, InjectHook ];
 const PLUGIN_CONFIGS = GLOBAL.wasabyDevtoolConfig || {};
 
 const PLUGINS: Map<string, IPlugin> = new Map;
