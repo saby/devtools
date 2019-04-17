@@ -1,5 +1,5 @@
-import Control = require('Core/Control');
-import template = require('wml!Extension/Extension');
+import * as Control from 'Core/Control';
+import * as template from 'wml!Extension/Devtool';
 import { Memory } from 'Types/source';
 
 class Extension extends Control {

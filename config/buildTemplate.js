@@ -64,6 +64,14 @@ const EXTENSION_MODULES = [
   {
     "name": "Extension",
     "path": resolve(input.app, "Extension")
+  },
+  {
+    "name": "DependencyWatcher",
+    "path": resolve(input.app, "DependencyWatcher")
+  },
+  {
+    "name": "Elements",
+    "path": resolve(input.app, "Elements")
   }
 ];
 
@@ -80,8 +88,8 @@ module.exports = {
   "htmlWml": true,
   "themes": true,
   "sources": true,
-  "minimize": false,
-  "wml": false,
+  "minimize": true,
+  "wml": true,
   "customPack": false,
   "dependenciesGraph": false,
   "resourcesUrl": false,

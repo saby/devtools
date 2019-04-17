@@ -1,8 +1,8 @@
 import Control = require('Core/Control');
-import template = require('wml!Extension/Elements/Elements');
+import template = require('wml!Elements/Elements');
 
 class Elements extends Control {
-   _template: Function = template;
+   _template = template;
 }
 
 export default Elements;
