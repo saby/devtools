@@ -1,0 +1,17 @@
+<span>
+   <span
+      if="{{!_expanded}}"
+      on:click="_toggleExpanded()">▶</span>
+   <span
+      if="{{_expanded}}"
+      on:click="_toggleExpanded()">▼</span>
+   <span>{{_options.name}}</span>: {{_caption}}
+   <ws:if data="{{_expanded}}">
+      <ws:for data="key, value in _options.value">
+         <ws:partial template="{{__getTemplate(value)}}"
+                     name="{{key}}"
+                     value="{{value}}"
+                     attr:key="{{key}}"/>
+      </ws:for>
+   </ws:if>
+</span>
