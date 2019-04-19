@@ -34,6 +34,7 @@ module.exports = {
      * Встраиваемый в страницу сткрип
      */
     injectScript: resolve(build, "injection/injection.js"),
+    cdn: resolve(build, "cdn"),
   },
   logs: {
     root: resolve(root, 'logs')

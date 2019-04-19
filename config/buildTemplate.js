@@ -87,7 +87,7 @@ module.exports = {
   "deprecatedWebPageTemplates": true,
   "htmlWml": true,
   "themes": true,
-  "sources": true,
+  "sources": false,
   "minimize": true,
   "wml": true,
   "customPack": false,

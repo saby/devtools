@@ -7,16 +7,18 @@
       "url": "git@github.com:saby/devtools.git"
    },
    "scripts": {
-      "build": "npm run build:extension && npm run build:injection && npm run build:app",
+      "build": "npm run build:extension && npm run build:injection && npm run build:app && npm run build:cdn",
       "build:injection": "node ./scripts/build_injection.js",
       "build:extension": "node ./scripts/build_extension.js",
-      "build:app": "node ./scripts/build_app.js"
+      "build:app": "node ./scripts/build_app.js",
+      "build:cdn": "node ./scripts/build_cdn.js"
    },
    "devDependencies": {
       "@types/chrome": "0.0.81",
       "tslint": "^5.15.0"
    },
    "dependencies": {
+      "cdn": "git+https://github.com/saby/wasaby-cdn.git#rc-19.400",
       "gulp": "^4.0.0",
       "rollup": "^1.6.0",
       "rollup-plugin-typescript": "^1.0.0",
