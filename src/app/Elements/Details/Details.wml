@@ -1,0 +1,11 @@
+<div attr:style="display: flex; flex-direction: column;">
+   <div>
+      <span>{{_options.name}}</span><span on:click="_viewSource()">View source</span>
+   </div>
+   <ws:for data="key, value in _options.options">
+      <ws:partial template="{{__getTemplate(value)}}"
+                  name="{{key}}"
+                  value="{{value}}"
+                  attr:key="{{key}}"/>
+   </ws:for>
+</div>

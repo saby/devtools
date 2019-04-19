@@ -1,17 +1,27 @@
 const TYPE = 'wasaby-devtool';
 
-window.addEventListener("message", function ({ source, data }: MessageEvent) {
-    if (source != window || data.type !== TYPE) {
-        return;
+const port = chrome.runtime.connect({
+    name: 'wasaby-contentScript'
+});
+
+function handleMessageFromDevTools(message: MessageEvent): void {
+    window.postMessage({
+        source: 'wasaby-contentScript',
+        data: message
+    }, '*');
+}
+port.onMessage.addListener(handleMessageFromDevTools);
+
+function handleMessageFromPage({ source, data }: MessageEvent): void {
+    if (source === window && data && data.type !== TYPE) {
+        port.postMessage(data);
     }
-    try {
-        chrome.runtime.sendMessage(data, function(response) {
-            // code here
-        });
-    } catch (error) {
-        debugger;
-    }
-}, false);
+}
+window.addEventListener('message', handleMessageFromPage, false);
+
+port.onDisconnect.addListener(() => {
+    window.removeEventListener('message', handleMessageFromPage);
+});
 
 let injectScript = (fileName: string) => {
     let scriptElement = document.createElement("script");

@@ -8,7 +8,7 @@
         <ws:Array>
            <ws:Object id="Elements">
               <ws:itemTemplate>
-                 <Elements.Elements test="{{_value}}"/>
+                 <Elements.Elements elements="{{_nodes}}" />
               </ws:itemTemplate>
            </ws:Object>
            <ws:Object id="Dependencies">
