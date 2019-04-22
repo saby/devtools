@@ -20,6 +20,16 @@ export interface IBroadCastCommandData {
 
 export interface IBroadCastSimpleData {
     source: string;
+    target: 'page' | 'devtool' | 'background'
+    type: string;
+}
+
+interface IMessage {
+    source: string;
+}
+
+interface IMessageFromPage extends IMessage {
+    target: 'devtool' | 'background'
     type: string;
 }
 

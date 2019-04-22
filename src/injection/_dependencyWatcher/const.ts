@@ -1,3 +1,4 @@
+export const PLUGIN_NAME = 'dependency-watcher';
 export const REQUIRE = 'require';
 
 export const DEFINE = 'define';

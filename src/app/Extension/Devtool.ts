@@ -1,7 +1,7 @@
 import * as Control from 'Core/Control';
 import * as template from 'wml!Extension/Devtool';
 import { Memory } from 'Types/source';
-import { IControlNode } from '../../extension/const';
+import { IControlNode } from '../ExtensionCore/const';
 import Channel from './Channel';
 
 const port = chrome.runtime.connect({

@@ -1,31 +1,9 @@
-import { INJECTION_SCRIPT } from "./const";
-import { injectScript } from "../injectScript";
 import { createUI } from "./UI";
 
 const MODULES = new Map();
 let isInspectedTab = (id) => {
     return chrome.devtools.inspectedWindow.tabId === id;
 };
-/*
-let inject = () => {
-    MODULES.clear();
-    injectScript(INJECTION_SCRIPT).then((result) => {
-        console.log('script was inject: ', result);
-    }, (error) => {
-        console.log('script inject error: ', error);
-    });
-};
-inject();
-chrome.tabs.onUpdated.addListener((tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-    if (!isInspectedTab(tabId)) {
-        return;
-    }
-    if (changeInfo.status !== 'loading') {
-        return;
-    }
-    inject();
-});
-*/
 
 // type Request = chrome.;
 type Sender = chrome.runtime.MessageSender;
@@ -50,6 +28,7 @@ let regModule = (name, deps) => {
         dynamicDependencies: []
     })
 };
+
 let addDependency = (name, deps) => {
     let module = MODULES.get(name);
     if (Array.isArray(deps)) {
@@ -78,13 +57,3 @@ chrome.runtime.onMessage.addListener(function(request: TabRequest, sender: Sende
 });
 createUI(MODULES);
 
-/*
-chrome.webRequest.onCompleted.addListener(
-    (details: chrome.webRequest.WebResponseCacheDetails) => {
-        console.log(details);
-    }, {
-        urls: ["<all_urls>"],
-        types: ["script"],
-        tabId: chrome.devtools.inspectedWindow.tabId
-    }
-);*/

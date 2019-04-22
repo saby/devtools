@@ -13,7 +13,7 @@
            </ws:Object>
            <ws:Object id="Dependencies">
               <ws:itemTemplate>
-                 <DependencyWatcher.MainPanel test="{{65756}}"/>
+                 <DependencyWatcher.view:Main />
               </ws:itemTemplate>
            </ws:Object>
         </ws:Array>

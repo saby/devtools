@@ -1,4 +1,4 @@
-import { PANEL_NAME } from "../const";
+import { PANEL_NAME } from "ExtensionCore/const";
 
 chrome.devtools.panels.create(PANEL_NAME,
     "devtool/icon.png",

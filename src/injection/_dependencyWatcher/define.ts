@@ -18,7 +18,7 @@ export let define: IPropertyDescriptorGetter = (config: IConfig) => {
         set(value: IDefine) {
             _realDefine = value;
         },
-        get(): IDefine {
+        get(): IDefine| void {
             if (!_realDefine) {
                 return;
             }

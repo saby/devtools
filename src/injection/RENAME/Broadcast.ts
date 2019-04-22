@@ -1,32 +1,29 @@
 import { IEventEmitter, ISerializable } from '../../interface/IEventEmitter';
 import { Emitter } from './Emitter';
-import { IBroadCastData, ICommandData, IMessageData } from "../../interface/IBroadCast";
-
-const SOURCE = 'wasaby-devtool';
+import { IBroadCastEvent, ICommandData, IMessageData } from "../../interface/IBroadCast";
+import { POST_MESSAGE_SOURCE } from "./const";
 
 class Broadcast implements IEventEmitter {
    private __emitter: Emitter;
    private __onmessageHandler;
 
-   constructor(
-       private __name: string,
-       private __port: chrome.runtime.Port
-    ) {
+   constructor(private __name: string) {
       this.__emitter = new Emitter();
       this.__onmessageHandler = this.__onmessage.bind(this);
-      this.__port.onMessage.addListener(this.__onmessageHandler);
+      window.addEventListener('message', this.__onmessageHandler);
    }
    
    dispatch(event: string, args: ISerializable): boolean {
-      this.__port.postMessage({
-         source: SOURCE,
+      window.postMessage({
+         source: POST_MESSAGE_SOURCE,
          type: 'message',
          data: {
             source: this.__name,
             args,
             event
          }
-      });
+      }, '*');
+      
       return true;
    }
    addListener(event: string, callback): this {
@@ -43,12 +40,17 @@ class Broadcast implements IEventEmitter {
    }
    destructor() {
       this.__emitter.destructor();
-      this.__port.onMessage.removeListener(this.__onmessageHandler);
+      window.removeEventListener('message', this.__onmessageHandler);
       delete this.__onmessageHandler;
    }
    
-   private __onmessage({ type, source, data }: IBroadCastData) {
-      if(source !== SOURCE) {
+   private __onmessage(event: IBroadCastEvent) {
+      if (!event.data) {
+         return;
+      }
+      let { type, source, data } = event.data;
+      
+      if(source !== POST_MESSAGE_SOURCE) {
          return;
       }
       if (type == 'command') {
@@ -65,6 +67,9 @@ class Broadcast implements IEventEmitter {
       this.__emitter.dispatch(event, args);
    }
    private __oncommand({ command }: ICommandData) {
+      if (command == 'shutdown') {
+         this.destructor();
+      }
    }
 }
 

@@ -1,13 +1,14 @@
 {
-  "extends": "./tsconfig.base",
+  "extends": "./config/tsconfig",
   "compilerOptions": {
-    "noImplicitThis": true,
-    "strictPropertyInitialization": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictNullChecks": true,
-    "typeRoots": [
-      "./node_modules/@types"
-    ]
+    "baseUrl": "./src",
+    "paths": {
+      "ExtensionCore/*": [
+        "./app/ExtensionCore/*"
+      ],
+      "tslib": [
+        "./extension/ext/tslib"
+      ]
+    }
   }
 }

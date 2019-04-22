@@ -14,11 +14,13 @@ module.exports = {
     /**
      * Встраиваемый в страницу сткрип
      */
-    injectScript: resolve(source, "injection/injection.ts"),
+    injectScript: resolve(source, "injection", "injection.ts"),
     /**
      * Директория с исходниками входных точек расширения
      */
     extension: resolve(source, "extension"),
+
+    content: resolve(source, "extension", "content", "index.ts"),
     /**
      * Директория с исходниками приложения
      */
@@ -33,7 +35,8 @@ module.exports = {
     /**
      * Встраиваемый в страницу сткрип
      */
-    injectScript: resolve(build, "injection/injection.js"),
+    injectScript: resolve(build, "injection", "injection.js"),
+    content: resolve(build, "content", "index.js"),
     cdn: resolve(build, "cdn"),
   },
   logs: {

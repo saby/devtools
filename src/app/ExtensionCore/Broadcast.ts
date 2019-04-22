@@ -1,6 +1,6 @@
-import { IEventEmitter, ISerializable } from '../interface/IEventEmitter';
+import { IEventEmitter, ISerializable } from '../../interface/IEventEmitter';
 import { Emitter } from './Emitter';
-import { IBroadCastEvent, ICommandData, IMessageData } from "../interface/IBroadCast";
+import { IBroadCastData, ICommandData, IMessageData } from "../../interface/IBroadCast";
 
 const SOURCE = 'wasaby-devtool';
 
@@ -8,14 +8,17 @@ class Broadcast implements IEventEmitter {
    private __emitter: Emitter;
    private __onmessageHandler;
 
-   constructor(private __name: string) {
+   constructor(
+       private __name: string,
+       private __port: chrome.runtime.Port
+   ) {
       this.__emitter = new Emitter();
       this.__onmessageHandler = this.__onmessage.bind(this);
-      window.addEventListener('message', this.__onmessageHandler);
+      this.__port.onMessage.addListener(this.__onmessageHandler);
    }
    
    dispatch(event: string, args: ISerializable): boolean {
-      window.postMessage({
+      this.__port.postMessage({
          source: SOURCE,
          type: 'message',
          data: {
@@ -23,8 +26,7 @@ class Broadcast implements IEventEmitter {
             args,
             event
          }
-      }, '*');
-      
+      });
       return true;
    }
    addListener(event: string, callback): this {
@@ -41,16 +43,11 @@ class Broadcast implements IEventEmitter {
    }
    destructor() {
       this.__emitter.destructor();
-      window.removeEventListener('message', this.__onmessageHandler);
+      this.__port.onMessage.removeListener(this.__onmessageHandler);
       delete this.__onmessageHandler;
    }
    
-   private __onmessage(event: IBroadCastEvent) {
-      if (!event.data) {
-         return;
-      }
-      let { type, source, data } = event.data;
-      
+   private __onmessage({ type, source, data }: IBroadCastData) {
       if(source !== SOURCE) {
          return;
       }
@@ -68,9 +65,6 @@ class Broadcast implements IEventEmitter {
       this.__emitter.dispatch(event, args);
    }
    private __oncommand({ command }: ICommandData) {
-      if (command == 'shutdown') {
-         this.destructor();
-      }
    }
 }
 

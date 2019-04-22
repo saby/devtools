@@ -1,0 +1,3 @@
+require(['content/index'], () => {
+
+});

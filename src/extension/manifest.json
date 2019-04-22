@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "minimum_chrome_version": "60",
 
-  "devtools_page": "devtool.html",
+  "devtools_page": "page/devtool.html",
 
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "web_accessible_resources": [
@@ -12,7 +12,7 @@
   ],
 
   "background": {
-    "page": "background.html",
+    "page": "page/background.html",
     "persistent": true
   },
 

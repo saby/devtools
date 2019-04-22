@@ -1,14 +1,3 @@
-let setRequireConfig = (config) => {
-    // @ts-ignore
-    (require.config || window.require.config)(config);
-};
-setRequireConfig({
-    baseUrl: '../',
-    paths: {
-        "tslib": "../ext/tslib"
-    },
-});
-
 const ports: Record<string, chrome.runtime.Port> = {};
 
 function isNumeric(name: string): boolean {

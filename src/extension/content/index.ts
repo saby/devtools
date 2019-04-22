@@ -1,35 +1,64 @@
-const SOURCE = 'wasaby-devtool';
+import {
+    POST_MESSAGE_SOURCE,
+    INJECTION_SCRIPT,
+    DEVTOOL_PORT_NAME,
+    BACKGROUND_PORT_NAME,
+    MESSAGE_TARGET
+} from "ExtensionCore/const";
+import { injectScript } from'./injectScript';
 
-const port = chrome.runtime.connect({
-    name: 'wasaby-contentScript'
-});
+let getPort = (() => {
+    let port: chrome.runtime.Port | void;
+    return (name: string) => {
+        if (port) {
+            return port;
+        }
+        port = chrome.runtime.connect({
+            name
+        });
+    
+        port.onDisconnect.addListener(() => {
+            port = undefined;
+        });
+        return port;
+    }
+})();
+
+let getDevtoolPort = () => getPort(DEVTOOL_PORT_NAME);
+let getBackgroundPort = () => getPort(BACKGROUND_PORT_NAME);
 
 function handleMessageFromDevTools(message: MessageEvent): void {
     window.postMessage({
-        source: 'wasaby-contentScript',
+        source: POST_MESSAGE_SOURCE,
+        type: 'message',
         data: message
     }, '*');
 }
-port.onMessage.addListener(handleMessageFromDevTools);
 
-function handleMessageFromPage({ source, data }: MessageEvent): void {
-    if (source === window && data && data.source === SOURCE) {
-        port.postMessage(data);
+getDevtoolPort().onMessage.addListener(handleMessageFromDevTools);
+
+function handleMessageFromPage(event: MessageEvent): void {
+    if (event.source !== window || !event.data) {
+        return;
+    }
+    
+    let { target, source, data } = event.data;
+    
+    if (source !== POST_MESSAGE_SOURCE) {
+        return;
+    }
+    if (target == MESSAGE_TARGET.devtool) {
+        getDevtoolPort().postMessage(data);
+    }
+    if (target == MESSAGE_TARGET.background) {
+        getBackgroundPort().postMessage(data);
     }
 }
 window.addEventListener('message', handleMessageFromPage, false);
 
+/*
 port.onDisconnect.addListener(() => {
     window.removeEventListener('message', handleMessageFromPage);
-});
+});*/
 
-let injectScript = (fileName: string) => {
-    let scriptElement = document.createElement("script");
-    scriptElement.setAttribute("type", "text/javascript");
-    scriptElement.src = chrome.extension.getURL(fileName);
-    setTimeout(() => {
-        document.head.appendChild(scriptElement);
-        console.log("=> inject");
-    }, 100)
-};
-injectScript('./injection/injection.js');
+injectScript(INJECTION_SCRIPT);

@@ -1,10 +1,9 @@
-import { notify } from "../notify";
+import { broadcast } from "../broadcast";
 
 export let definePlugin = (
     name: string
 ) => {
-    return notify({
-        method: 'definePlugin',
+    return broadcast.dispatch('definePlugin', {
         name,
     })
 };

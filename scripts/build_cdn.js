@@ -8,7 +8,9 @@ const CDN_ROOT = resolve(NODE_MODULES, 'cdn');
 
 const WHITE_FOLDER_LIST = [
     'EmojiFont',
-    'TensorFont'
+    'TensorFont',
+    // TODO убрать после https://online.sbis.ru/opendoc.html?guid=10295ab4-fb12-415d-b900-e4a22467169f
+    'JQuery'
 ].map(str => resolve(CDN_ROOT, str));
 const BLACK_EXTENSION_LIST = ['.s3mod', '.md', '.json', '-IE'];
 

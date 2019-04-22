@@ -1,11 +1,10 @@
-import { notify } from "../notify";
+import { broadcast } from "../broadcast";
 
 export let defineModule = (
     module: string,
-    dependency?: Array<string> | void
+    dependency: Array<string> | undefined
 ) => {
-    return notify({
-        method: 'defineModule',
+    return broadcast.dispatch('defineModule', {
         module,
         dependency
     })
