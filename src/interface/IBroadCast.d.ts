@@ -1,16 +1,30 @@
-type PrimitiveType = number | string | undefined | null;
-interface ISerializableObject {
-    [propName: string]: Serializable;
-}
-type Serializable = PrimitiveType | ISerializableObject | Array<ISerializableObject | PrimitiveType>;
+import { ISerializable } from "./IEventEmitter";
 
-export interface IBroadCast {
-    addListener(event: string, listener: (cfg: ISerializableObject) => void): this;
-    removeListener(event: string, listener: (cfg: ISerializableObject) => void): this;
-    removeAllListeners(event?: string): this;
-    emit(event: string, cfg: ISerializableObject): boolean;
+export interface IMessageData {
+    source: string;
+    args: ISerializable;
+    event: string
+}
+export interface IBroadCastMessageData {
+    type: 'message';
+    data: IMessageData
 }
 
-export interface IBroadCastConstructor {
-    new (name: string): IBroadCast;
+export interface ICommandData {
+    command: string;
+}
+export interface IBroadCastCommandData {
+    type: 'command';
+    data: ICommandData;
+}
+
+export interface IBroadCastSimpleData {
+    source: string;
+    type: string;
+}
+
+export type IBroadCastData = IBroadCastSimpleData & (IBroadCastMessageData | IBroadCastCommandData);
+
+export interface IBroadCastEvent extends MessageEvent {
+    data: IBroadCastData;
 }
