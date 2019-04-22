@@ -1,4 +1,4 @@
-const TYPE = 'wasaby-devtool';
+const SOURCE = 'wasaby-devtool';
 
 const port = chrome.runtime.connect({
     name: 'wasaby-contentScript'
@@ -13,7 +13,7 @@ function handleMessageFromDevTools(message: MessageEvent): void {
 port.onMessage.addListener(handleMessageFromDevTools);
 
 function handleMessageFromPage({ source, data }: MessageEvent): void {
-    if (source === window && data && data.type !== TYPE) {
+    if (source === window && data && data.source === SOURCE) {
         port.postMessage(data);
     }
 }

@@ -2,10 +2,12 @@ import * as Control from 'Core/Control';
 import * as template from 'wml!Extension/Devtool';
 import { Memory } from 'Types/source';
 import { IControlNode } from '../../extension/const';
+import Channel from './Channel';
 
 const port = chrome.runtime.connect({
    name: '' + chrome.devtools.inspectedWindow.tabId
 });
+const channel = new Channel(port);
 
 class Extension extends Control {
    protected _template: Function = template;
@@ -52,7 +54,7 @@ class Extension extends Control {
 
    static _getInheritOptions(): object {
       return {
-         port
+         channel
       };
    }
 }
