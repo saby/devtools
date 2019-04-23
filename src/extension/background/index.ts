@@ -1,6 +1,9 @@
-import { CONTENT_PORT_NAME } from 'ExtensionCore/const';
+import { DEVTOOL_CONTENT_PORT } from 'ExtensionCore/const';
+import { dependPorts } from './dependPorts';
 
-const ports: Record<string, chrome.runtime.Port> = {};
+dependPorts(DEVTOOL_CONTENT_PORT);
+
+/*const ports: Record<string, chrome.runtime.Port> = {};
 
 function isNumeric(name: string): boolean {
     return +name + '' === name;
@@ -39,4 +42,4 @@ chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
         ports[tab + 'devtools'].onDisconnect.addListener(shutdown);
         ports[tab + 'contentScript'].onDisconnect.addListener(shutdown);
     }
-});
+});*/

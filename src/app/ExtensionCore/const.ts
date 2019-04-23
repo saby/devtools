@@ -10,13 +10,11 @@ export const DEVTOOL_PORT_NAME = `${ PANEL_NAME }/devtool`;
 
 export const CONTENT_PORT_NAME = `${ PANEL_NAME }/content`;
 
-export const INJECTION_SCRIPT = './injection/injection.js';
+export const DEVTOOL_CONTENT_PORT = `${ PANEL_NAME }/devtool-content`;
 
-export enum MESSAGE_TARGET {
-    devtool = 'devtool',
-    page = 'page',
-    background = 'background'
-}
+export const PORT_TAB_ID_POSTFIX = `:tabId=`;
+
+export const INJECTION_SCRIPT = './injection/injection.js';
 
 export enum OperationType {
     REMOVE = 1,

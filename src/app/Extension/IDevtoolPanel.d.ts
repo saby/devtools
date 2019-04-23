@@ -1,0 +1,3 @@
+interface IDevtoolPanel {
+    onUpdatePage(): void;
+}
