@@ -50,6 +50,14 @@ const WASABY_MODULES = [
   {
     "name": "Inferno",
     "path": "sbis3-ws/Inferno"
+  },
+  {
+    "name": "Layout",
+    "path": "sbis3.engine/client/Layout"
+  },
+  {
+    "name": "Layout-theme",
+    "path": "sbis3.engine/client/Layout-theme"
   }
 ].map(({ path, ...config}) => {
   return {
@@ -91,7 +99,7 @@ module.exports = {
   "deprecatedWebPageTemplates": true,
   "htmlWml": true,
   "themes": true,
-  "sources": false,
+  "sources": true,
   "symlinks": false,
   "minimize": false,
   "wml": true,
