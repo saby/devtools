@@ -1,10 +1,10 @@
-import { broadcast } from "../broadcast";
+import { devtoolChannel } from "../devtoolChannel";
 
 export let addDependency = (
     module: string,
     dependency: string | Array<string>
 ) => {
-    return broadcast.dispatch('addDependency', {
+    return devtoolChannel.dispatch('addDependency', {
         module,
         dependency
     })

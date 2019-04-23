@@ -1,9 +1,9 @@
-import { broadcast } from "../broadcast";
+import { devtoolChannel } from "../devtoolChannel";
 
 export let definePlugin = (
     name: string
 ) => {
-    return broadcast.dispatch('definePlugin', {
+    return devtoolChannel.dispatch('definePlugin', {
         name,
     })
 };
