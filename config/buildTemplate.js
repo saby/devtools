@@ -72,6 +72,10 @@ const EXTENSION_MODULES = [
   {
     "name": "Elements",
     "path": resolve(input.app, "Elements")
+  },
+  {
+    "name": "ExtensionCore",
+    "path": resolve(input.app, "ExtensionCore")
   }
 ];
 

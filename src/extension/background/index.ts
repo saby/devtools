@@ -1,3 +1,5 @@
+import { CONTENT_PORT_NAME } from 'ExtensionCore/const';
+
 const ports: Record<string, chrome.runtime.Port> = {};
 
 function isNumeric(name: string): boolean {
@@ -12,7 +14,7 @@ chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
         tab = port.name;
         name = 'devtools';
     }
-    if (port.name === 'wasaby-contentScript') {
+    if (port.name === CONTENT_PORT_NAME) {
         tab = port.sender.tab.id;
         name = 'contentScript';
     }

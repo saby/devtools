@@ -1,13 +1,13 @@
-import { ISerializable } from "./IEventEmitter";
+import { ISerializable } from './IEventEmitter';
 
 export interface IMessageData {
     source: string;
     args: ISerializable;
-    event: string
+    event: string;
 }
 export interface IBroadCastMessageData {
     type: 'message';
-    data: IMessageData
+    data: IMessageData;
 }
 
 export interface ICommandData {
@@ -20,7 +20,7 @@ export interface IBroadCastCommandData {
 
 export interface IBroadCastSimpleData {
     source: string;
-    target: 'page' | 'devtool' | 'background'
+    target: 'page' | 'devtool' | 'background';
     type: string;
 }
 
@@ -29,7 +29,7 @@ interface IMessage {
 }
 
 interface IMessageFromPage extends IMessage {
-    target: 'devtool' | 'background'
+    target: 'devtool' | 'background';
     type: string;
 }
 

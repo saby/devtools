@@ -1,7 +1,7 @@
 import { IEventEmitter, ISerializable } from '../../interface/IEventEmitter';
 import { Emitter } from './Emitter';
-import { IBroadCastEvent, ICommandData, IMessageData } from "../../interface/IBroadCast";
-import { POST_MESSAGE_SOURCE } from "./const";
+import { IBroadCastEvent, ICommandData, IMessageData } from '../../interface/IBroadCast';
+import { POST_MESSAGE_SOURCE } from './const';
 
 class Broadcast implements IEventEmitter {
    private __emitter: Emitter;
@@ -12,8 +12,8 @@ class Broadcast implements IEventEmitter {
       this.__onmessageHandler = this.__onmessage.bind(this);
       window.addEventListener('message', this.__onmessageHandler);
    }
-   
-   dispatch(event: string, args: ISerializable): boolean {
+
+   dispatch(event: string, args?: ISerializable): boolean {
       window.postMessage({
          source: POST_MESSAGE_SOURCE,
          type: 'message',
@@ -23,7 +23,7 @@ class Broadcast implements IEventEmitter {
             event
          }
       }, '*');
-      
+
       return true;
    }
    addListener(event: string, callback): this {
@@ -43,21 +43,18 @@ class Broadcast implements IEventEmitter {
       window.removeEventListener('message', this.__onmessageHandler);
       delete this.__onmessageHandler;
    }
-   
+
    private __onmessage(event: IBroadCastEvent) {
       if (!event.data) {
          return;
       }
-      let { type, source, data } = event.data;
-      
-      if(source !== POST_MESSAGE_SOURCE) {
-         return;
+      const { type, data } = event.data;
+
+      if (type === 'command') {
+         return this.__oncommand(data as ICommandData);
       }
-      if (type == 'command') {
-         return this.__oncommand(<ICommandData> data);
-      }
-      if (type == 'message') {
-         this.__dispatch(<IMessageData> data);
+      if (type === 'message') {
+         this.__dispatch(data as IMessageData);
       }
    }
    private __dispatch({ source, args, event }: IMessageData) {
