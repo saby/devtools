@@ -1,5 +1,6 @@
 import Control = require('Core/Control');
 import template = require('wml!Elements/Details/Details');
+import { IControlNode } from '../../../interface/IControlNode';
 import { descriptor } from 'Types/entity';
 import { TEMPLATES } from './const';
 
@@ -8,7 +9,6 @@ import './templates/String';
 import './templates/Number';
 import './templates/Object';
 import './templates/Function';
-import { IControlNode } from '../../../interface/IControlNode';
 
 type IOptions = IControlNode;
 

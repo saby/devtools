@@ -50,6 +50,14 @@ const WASABY_MODULES = [
   {
     "name": "Inferno",
     "path": "sbis3-ws/Inferno"
+  },
+  {
+    "name": "Layout",
+    "path": "sbis3.engine/client/Layout"
+  },
+  {
+    "name": "Layout-theme",
+    "path": "sbis3.engine/client/Layout-theme"
   }
 ].map(({ path, ...config}) => {
   return {
@@ -61,6 +69,10 @@ const WASABY_MODULES = [
 
 
 const EXTENSION_MODULES = [
+  {
+    "name": "ExtensionCore",
+    "path": resolve(input.app, "ExtensionCore")
+  },
   {
     "name": "Extension",
     "path": resolve(input.app, "Extension")
