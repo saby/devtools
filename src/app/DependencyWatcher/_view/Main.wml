@@ -1,4 +1,4 @@
-<!--<Layout.Browser
+<Layout.Browser
     theme="default-Layout"
     source='{{ __source }}'
     keyProperty="id"
@@ -26,7 +26,7 @@
     <ws:content>
         <Controls.treeGrid:View
             keyProperty="id"
-            columns="{{ __columns }}"
+            columns="{{ __getColumns() }}"
             nodeProperty="type"
             parentProperty="parent"
         >
@@ -35,5 +35,4 @@
             </ws:emptyTemplate>
         </Controls.treeGrid:View>
     </ws:content>
-</Layout.Browser>-->
-<div> dependency tab </div>
+</Layout.Browser>
