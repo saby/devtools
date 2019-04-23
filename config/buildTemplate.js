@@ -70,10 +70,6 @@ const WASABY_MODULES = [
 
 const EXTENSION_MODULES = [
   {
-    "name": "ExtensionCore",
-    "path": resolve(input.app, "ExtensionCore")
-  },
-  {
     "name": "Extension",
     "path": resolve(input.app, "Extension")
   },
