@@ -1,4 +1,4 @@
-import { IEventEmitter, IHandler, ISerializable } from '../../interface/IEventEmitter';
+import { IEventEmitter, IHandler, ISerializable } from 'interface/IEventEmitter';
 
 class Emitter implements IEventEmitter {
    private _listeners: Map<string, Set<IHandler>> = new Map();
@@ -41,7 +41,7 @@ class Emitter implements IEventEmitter {
       
       let debounce = (callback: IHandler) => {
          setTimeout(() => {
-            callback.call(this, event, args);
+            callback.call(this, args);
          });
       };
 

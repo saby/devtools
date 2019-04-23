@@ -4,7 +4,7 @@ interface ISerializableObject {
 }
 export type ISerializable = PrimitiveType | ISerializableObject | Array<ISerializableObject | PrimitiveType>;
 
-export type IHandler = (event: string, cfg: ISerializable) => void;
+export type IHandler = (cfg: ISerializable) => void;
 
 export interface IEventEmitter {
     addListener(event: string, listener: IHandler): this;
