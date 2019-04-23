@@ -62,6 +62,10 @@ const WASABY_MODULES = [
 
 const EXTENSION_MODULES = [
   {
+    "name": "ExtensionCore",
+    "path": resolve(input.app, "ExtensionCore")
+  },
+  {
     "name": "Extension",
     "path": resolve(input.app, "Extension")
   },
@@ -87,7 +91,7 @@ module.exports = {
   "deprecatedWebPageTemplates": true,
   "htmlWml": true,
   "themes": true,
-  "sources": true,
+  "sources": false,
   "symlinks": false,
   "minimize": false,
   "wml": true,

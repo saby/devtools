@@ -1,4 +1,4 @@
-import { IControlNode, OperationType } from '../../extension/const';
+import { IControlNode, OperationType } from 'interface/Element';
 
 export interface IWasabyDevHook {
    onStartCommit: (node: IControlNode) => void;

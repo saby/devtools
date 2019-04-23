@@ -1,7 +1,7 @@
 import Control = require('Core/Control');
 import template = require('wml!Elements/Elements');
 import { descriptor } from 'Types/entity';
-import { IControlNode } from '../../extension/const';
+import { IControlNode } from 'interface/Element';
 
 interface IOptions {
    elements?: IControlNode[];

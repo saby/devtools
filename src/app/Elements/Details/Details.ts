@@ -1,6 +1,6 @@
 import Control = require('Core/Control');
 import template = require('wml!Elements/Details/Details');
-import { IControlNode } from '../../../extension/const';
+import { IControlNode } from 'interface/Element';
 import { descriptor } from 'Types/entity';
 import { TEMPLATES } from './const';
 

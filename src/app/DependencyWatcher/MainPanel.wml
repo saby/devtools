@@ -1,4 +1,0 @@
-<div>
-    dependency watcher panel
-    {{_options.test}}
-</div>
