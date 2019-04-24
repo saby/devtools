@@ -1,3 +1,5 @@
+import { IContentMessageEvent, IMessageData, IMessageWrapper } from "interface/IContentMessage";
+
 const getPort = (() => {
     let port: chrome.runtime.Port | void;
     return (name: string) => {
@@ -15,27 +17,34 @@ const getPort = (() => {
     };
 })();
 
+interface IWrapper extends IMessageWrapper {
+    __proxyMessage__?: true
+}
+
 let getProxyToPage = (source: string) => {
-    return (message: MessageEvent): void => {
-        window.postMessage({
-            ...message,
-            source
+    return (data: IMessageData): void => {
+        window.postMessage(<IWrapper>{
+            data,
+            source,
+            __proxyMessage__: true
         }, '*');
     };
 };
 
 let getProxyToPort = (
     port: chrome.runtime.Port,
-    source: string
+    proxySource: string
 ) => {
-    return (event: MessageEvent): void => {
+    return (event: IContentMessageEvent<IWrapper>): void => {
         if (event.source !== window || !event.data) {
             return;
         }
-        if (event.data.source !== source) {
+        const { source, data, __proxyMessage__ } = event.data;
+        
+        if (source !== proxySource || __proxyMessage__) {
             return;
         }
-        port.postMessage(event.data.data);
+        port.postMessage(data);
     };
 };
 

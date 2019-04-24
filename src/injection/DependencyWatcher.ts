@@ -4,7 +4,7 @@ import { DEFINE, REQUIRE } from "./_dependencyWatcher/const";
 import { GLOBAL } from "./RENAME/const";
 import { IPlugin } from "./IPlugin";
 import { IConfig } from "./_dependencyWatcher/IConfig";
-import { broadcast } from "./_dependencyWatcher/broadcast";
+import { devtoolChannel } from "./_dependencyWatcher/devtoolChannel";
 
 const DEFAULT: IConfig = {
     watchDynamicDependency: false
@@ -22,7 +22,7 @@ export class DependencyWatcher implements IPlugin {
                 // [REQUIRE]: require(CONFIG)
             });
         } catch (error) {
-            broadcast.dispatch('error', error.message);
+            devtoolChannel.dispatch('error', error.message);
         }
     }
     static getName() {

@@ -11,6 +11,6 @@ export interface IMessageWrapper {
     data: IMessageData;
 }
 
-export interface IContentMessageEvent extends MessageEvent {
-    data: IMessageWrapper;
+export interface IContentMessageEvent<T extends IMessageWrapper = IMessageWrapper> extends MessageEvent {
+    data: T | void;
 }

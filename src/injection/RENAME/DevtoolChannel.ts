@@ -1,7 +1,17 @@
 import { IEventEmitter, ISerializable } from 'interface/IEventEmitter';
 import { Emitter } from './Emitter';
-import { IMessageWrapper, IMessageData } from 'interface/IContentMessage';
+import { IMessageWrapper, IMessageData, IContentMessageEvent } from 'interface/IContentMessage';
 import { POST_MESSAGE_SOURCE } from './const';
+
+/**
+ * id вкладки, подмешиваемый во все сообщения.
+ * Нужен для того чтобы не ловить на вкладке сообщения от самих себя
+ */
+const TAB_ID = Math.random().toString().substr(2);
+
+interface IWrapper extends IMessageWrapper {
+    __tabId__: string;
+}
 
 class DevtoolChannel implements IEventEmitter {
     private __emitter: Emitter;
@@ -14,13 +24,14 @@ class DevtoolChannel implements IEventEmitter {
     }
     
     dispatch(event: string, args?: ISerializable): boolean {
-        window.postMessage({
+        window.postMessage(<IWrapper>{
             source: POST_MESSAGE_SOURCE,
             data: {
                 source: this.__name,
                 args,
                 event
-            }
+            },
+            __tabId__: TAB_ID
         }, '*');
         
         return true;
@@ -43,8 +54,12 @@ class DevtoolChannel implements IEventEmitter {
         delete this.__onmessageHandler;
     }
     
-    private __onmessage({ source, data }: IMessageWrapper) {
-        if (source !== POST_MESSAGE_SOURCE) {
+    private __onmessage(event: IContentMessageEvent<IWrapper>) {
+        if (!event.data) {
+            return;
+        }
+        const { source, data, __tabId__ } = event.data;
+        if ((source !== POST_MESSAGE_SOURCE) || (__tabId__ === TAB_ID)) {
             return;
         }
         this.__dispatch(data);
