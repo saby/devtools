@@ -5,4 +5,5 @@ export interface IWasabyDevHook {
    onStartCommit: (node: IControlNode) => void;
    onEndCommit: (node: IControlNode, typeOfOperation: OperationType) => void;
    init: () => void;
+   __node?: IControlNode;
 }

@@ -40,7 +40,7 @@ let getProxyToPort = (
             return;
         }
         const { source, data, __proxyMessage__ } = event.data;
-        
+
         if (source !== proxySource || __proxyMessage__) {
             return;
         }
@@ -58,15 +58,15 @@ let createProxy = ({
    source
 }: CreateConfig) => {
     let port = getPort(portName);
-    
+
     let proxyToPort = getProxyToPort(port, source);
     let proxyToPage = getProxyToPage(source);
-    
+
     port.onMessage.addListener(proxyToPage);
     port.onDisconnect.addListener(() => {
         window.removeEventListener('message', proxyToPort);
     });
-    
+
     window.addEventListener('message', proxyToPort, false);
 };
 

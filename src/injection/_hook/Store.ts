@@ -1,25 +1,25 @@
 import { serialize } from './serialize';
 import { IControlNode } from '../../interface/IControlNode';
 import { OperationType } from '../RENAME/const';
-import { Broadcast } from '../RENAME/Broadcast';
-
-interface IOperationEvent {
-   data: OperationPayload;
-}
-
-type OperationPayload =
-   | [OperationType.REMOVE, IControlNode['id']]
-   | [OperationType.ADD, IControlNode['id'], IControlNode['name']] //add root
-   | [OperationType.ADD, IControlNode['id'], IControlNode['name'], IControlNode['parentId']]; //add leaf
+import { IOperationEvent } from '../../interface/IOperations';
+import { DevtoolChannel } from '../RENAME/DevtoolChannel';
 
 class Store {
-   private elementsTree: Map<IControlNode['id'], IControlNode> = new Map();
+   private elements: Map<IControlNode['id'], IControlNode> = new Map();
    private isDevtoolsOpened: boolean = false;
-   private broadcast: Broadcast = new Broadcast('elements');
+   private channel: DevtoolChannel = new DevtoolChannel('elements');
 
    constructor() {
-      this.broadcast.addListener('devtoolsInitialized', () => {
-         this.__onDevtoolsOpened();
+      this.channel.addListener('devtoolsInitialized', this.__onDevtoolsOpened.bind(this));
+      this.channel.addListener('inspectElement', (id) => {
+         if (typeof id === 'number') {
+            this.__inspectElement(id);
+         }
+      });
+      this.channel.addListener('viewSource', (id) => {
+         if (typeof id === 'number') {
+            this.__viewSource(id);
+         }
       });
    }
 
@@ -28,52 +28,56 @@ class Store {
    пушим сообщения в очередь -> говорим девтулзам что есть сообщения в очереди -> eval кода из очереди внутри девтулзов
     */
    private __onDevtoolsOpened(): void {
-      if (this.isDevtoolsOpened) {
-         throw new Error('Trying to initialize elements tree, but the tree is already initialized.');
-      }
       this.isDevtoolsOpened = true;
-      const data = {};
+      const data = [];
 
-      this.elementsTree.forEach((value, key) => {
-         data[key] = serialize(value);
+      this.elements.forEach((value) => {
+         data.push(serialize({...value}));
       });
 
-      this.broadcast.dispatch('treeInitialization', data);
+      this.channel.dispatch('setInitialTree', data);
    }
 
    handleOperation(operation: OperationType, node: IControlNode): void {
       switch (operation) {
-         case OperationType.ADD:
-            this.__handleAdd(node);
-            break;
          case OperationType.REMOVE:
             this.__handleRemove(node);
+            break;
+         case OperationType.ADD:
+            this.__handleAdd(node);
             break;
       }
    }
 
+   private __inspectElement(id: IControlNode['id']): void {
+      const node = this.elements.get(id);
+      this.channel.dispatch('inspectedElement', serialize({...node}));
+   }
+
+   private __viewSource(id: IControlNode['id']): void {
+      //TODO: вообще непонятно как открывать файл. Общего у файлов только то, что у всех есть define
+      window.__WASABY_DEV_HOOK__.__instance = this.elements.get(id).type;
+   }
+
    private __handleAdd(node: IControlNode): void {
-      this.elementsTree.set(node.id, node);
+      this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent = {
-            data: [OperationType.ADD, node.id, node.name]
-         };
+         const message: IOperationEvent['args'] = [OperationType.ADD, node.id, node.name];
          if (node.parentId) {
-            message.data.push(node.parentId);
+            message.push(node.parentId);
+            message.push(node.key);
          }
-         this.broadcast.dispatch('operation', message);
+         this.channel.dispatch('operation', message);
       }
    }
 
    private __handleRemove(node: IControlNode): void {
-      this.elementsTree.delete(node.id);
+      this.elements.delete(node.id);
 
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent = {
-            data: [OperationType.REMOVE, node.id]
-         };
-         this.broadcast.dispatch('operation', message);
+         const message: IOperationEvent['args'] = [OperationType.REMOVE, node.id];
+         this.channel.dispatch('operation', message);
       }
    }
 }

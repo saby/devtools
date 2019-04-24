@@ -1,4 +1,4 @@
-import { IEventEmitter, ISerializable } from '../../interface/IEventEmitter';
+import { IEventEmitter, IHandler, ISerializable } from '../../interface/IEventEmitter';
 import { Emitter } from './Emitter';
 import { IMessageData } from "interface/IContentMessage";
 
@@ -23,11 +23,11 @@ class PortChannel implements IEventEmitter {
         });
         return true;
     }
-    addListener(event: string, callback): this {
+    addListener(event: string, callback: IHandler): this {
         this.__emitter.addListener(event, callback);
         return this;
     }
-    removeListener(event: string, callback): this {
+    removeListener(event: string, callback: IHandler): this {
         this.__emitter.removeListener(event, callback);
         return this;
     }

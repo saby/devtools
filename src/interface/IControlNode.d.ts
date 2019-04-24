@@ -5,7 +5,8 @@ export interface ITemplateNode {
    options?: object;
    attributes?: object;
    eventHandlers?: Record<string, Function>;
-   parentId: ITemplateNode['id'];
+   key?: string;
+   parentId?: ITemplateNode['id'];
 }
 
 export interface IControlNode extends ITemplateNode {

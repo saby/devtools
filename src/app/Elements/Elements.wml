@@ -1,10 +1,13 @@
 <div attr:style="display: flex;">
-    <ws:if data="{{_options.elements}}">
-        <ws:for data="element in _options.elements">
+    <ws:if data="{{_elements}}">
+        <ws:for data="element in _elements">
             <div attr:key="{{element.id}}"
                  on:click="_onItemClick(element)">{{element.name}}</div>
         </ws:for>
-        <Elements.Details.Details scope="{{_selectedItem}}" />
+        <ws:if data="{{_inspectedItem}}">
+            <Elements.Details.Details scope="{{_inspectedItem}}"
+                                      channel="{{_channel}}" />
+        </ws:if>
     </ws:if>
     <ws:else>
         <div>Connecting to Wasaby...</div>

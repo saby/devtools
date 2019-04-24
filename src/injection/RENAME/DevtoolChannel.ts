@@ -1,4 +1,4 @@
-import { IEventEmitter, ISerializable } from 'interface/IEventEmitter';
+import { IEventEmitter, IHandler, ISerializable } from 'interface/IEventEmitter';
 import { Emitter } from './Emitter';
 import { IMessageWrapper, IMessageData, IContentMessageEvent } from 'interface/IContentMessage';
 import { POST_MESSAGE_SOURCE } from './const';
@@ -36,11 +36,11 @@ class DevtoolChannel implements IEventEmitter {
         
         return true;
     }
-    addListener(event: string, callback): this {
+    addListener(event: string, callback: IHandler): this {
         this.__emitter.addListener(event, callback);
         return this;
     }
-    removeListener(event: string, callback): this {
+    removeListener(event: string, callback: IHandler): this {
         this.__emitter.removeListener(event, callback);
         return this;
     }

@@ -1,7 +1,9 @@
 type PrimitiveType = number | string | undefined | null;
-interface ISerializableObject {
-    [propName: string]: ISerializable;
-}
+//TODO: пока непонятно как правильно описать этот тип
+// interface ISerializableObject {
+//     [propName: string]: ISerializable;
+// }
+type ISerializableObject = object;
 export type ISerializable = PrimitiveType | ISerializableObject | Array<ISerializableObject | PrimitiveType>;
 
 export type IHandler = (cfg: ISerializable) => void;

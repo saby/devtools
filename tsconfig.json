@@ -2,6 +2,12 @@
   "extends": "./config/tsconfig",
   "compilerOptions": {
     "baseUrl": "./src",
+    "strictBindCallApply": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
     "paths": {
       "ExtensionCore/*": [
         "./app/ExtensionCore/*"

@@ -2,7 +2,7 @@ import { IEventEmitter, IHandler, ISerializable } from 'interface/IEventEmitter'
 
 class Emitter implements IEventEmitter {
    private _listeners: Map<string, Set<IHandler>> = new Map();
-   addListener(event: string, callback): this {
+   addListener(event: string, callback: IHandler): this {
       let listeners = this._listeners.get(event);
       if (!listeners) {
          listeners = new Set();
@@ -11,7 +11,7 @@ class Emitter implements IEventEmitter {
       listeners.add(callback);
       return this;
    }
-   removeListener(event: string, callback): this {
+   removeListener(event: string, callback: IHandler): this {
       if (this._listeners.has(event)) {
          let listeners = <Set<IHandler>> this._listeners.get(event);
          listeners.delete(callback);
@@ -34,11 +34,11 @@ class Emitter implements IEventEmitter {
          return false;
       }
       let listeners = <Set<IHandler>> this._listeners.get(event);
-      
+
       if (!listeners.size) {
          return false;
       }
-      
+
       let debounce = (callback: IHandler) => {
          setTimeout(() => {
             callback.call(this, args);

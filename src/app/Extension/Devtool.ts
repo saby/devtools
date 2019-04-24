@@ -7,44 +7,17 @@ class Extension extends Control {
    protected _activeTab: string = 'Elements';
    protected _tabsSource: Memory = new Memory({
       idProperty: '',
-      data: [{
-         id: 'Elements',
-         title: 'Elements'
-      }, {
-         id: 'Dependencies',
-         title: 'Dependencies'
-      }]
+      data: [
+         {
+            id: 'Elements',
+            title: 'Elements'
+         },
+         {
+            id: 'Dependencies',
+            title: 'Dependencies'
+         }
+      ]
    });
-   //@ts-ignore
-   protected _nodes: IControlNode[] = [];
-
-   protected _beforeMount(): Promise<undefined> {
-      return new Promise((resolve) => {
-         requirejs(['Controls/List/Mover'], (Mover: Function) => {
-            this._nodes = [{
-               id: 1,
-               name: 'Controls/List/Mover',
-               type: Mover,
-               options: {
-                  string: 'test',
-                  number: 45674958,
-                  object: {
-                     objField: 1231,
-                     anotherOne: 1,
-                     andAnotherOne: {
-                        andOneMore: '4534'
-                     },
-                     array: [1, '2', {
-                        andOneMore: '4534'
-                     }]
-                  },
-                  func: () => 1
-               }
-            }];
-            resolve();
-         });
-      });
-   }
 }
 
 export default Extension;
