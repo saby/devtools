@@ -1,13 +1,13 @@
-<div attr:style="display: flex;">
+<div attr:style="display: flex; flex-direction: column;">
     <ws:if data="{{_elements}}">
         <ws:for data="element in _elements">
             <div attr:key="{{element.id}}"
                  on:click="_onItemClick(element)">{{element.name}}</div>
         </ws:for>
-        <ws:if data="{{_inspectedItem}}">
-            <Elements.Details.Details scope="{{_inspectedItem}}"
-                                      channel="{{_channel}}" />
-        </ws:if>
+        <!--<ws:if data="{{_inspectedItem}}">-->
+            <!--<Elements.Details.Details scope="{{_inspectedItem}}"-->
+                                      <!--channel="{{_channel}}" />-->
+        <!--</ws:if>-->
     </ws:if>
     <ws:else>
         <div>Connecting to Wasaby...</div>

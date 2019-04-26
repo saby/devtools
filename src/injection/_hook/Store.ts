@@ -49,16 +49,6 @@ class Store {
       }
    }
 
-   private __inspectElement(id: IControlNode['id']): void {
-      const node = this.elements.get(id);
-      this.channel.dispatch('inspectedElement', serialize({...node}));
-   }
-
-   private __viewSource(id: IControlNode['id']): void {
-      //TODO: вообще непонятно как открывать файл. Общего у файлов только то, что у всех есть define
-      window.__WASABY_DEV_HOOK__.__instance = this.elements.get(id).type;
-   }
-
    private __handleAdd(node: IControlNode): void {
       this.elements.set(node.id, node);
 
@@ -79,6 +69,17 @@ class Store {
          const message: IOperationEvent['args'] = [OperationType.REMOVE, node.id];
          this.channel.dispatch('operation', message);
       }
+   }
+
+   //TODO: утащить эти методы из Store
+   private __inspectElement(id: IControlNode['id']): void {
+      const node = this.elements.get(id);
+      this.channel.dispatch('inspectedElement', serialize({...node}));
+   }
+
+   private __viewSource(id: IControlNode['id']): void {
+      //TODO: вообще непонятно как открывать файл. Общего у файлов только то, что у всех есть define
+      window.__WASABY_DEV_HOOK__.__instance = this.elements.get(id).type;
    }
 }
 

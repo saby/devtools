@@ -3,9 +3,8 @@ export interface ITemplateNode {
    name: string;
    type: Function;
    options?: object;
-   attributes?: object;
+   attributes?: Record<string, string>;
    eventHandlers?: Record<string, Function>;
-   key?: string;
    parentId?: ITemplateNode['id'];
 }
 

@@ -17,7 +17,8 @@ export const PORT_TAB_ID_POSTFIX = `:tabId=`;
 export const INJECTION_SCRIPT = './injection/injection.js';
 
 export enum OperationType {
-    REMOVE = 1,
+    REMOVE,
     ADD,
-    REORDER
+    REORDER,
+    UPDATE
 }

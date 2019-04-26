@@ -44,14 +44,13 @@ class Elements extends Control {
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
-      const type: OperationType = args[0];
-      switch (type) {
+      switch (args[0]) {
          case OperationType.REMOVE:
             this.__removeNode(args[1]);
             break;
          case OperationType.ADD:
-            if (args.length === 5) {
-               this.__addNode(args[1], args[2], args[3], args[4]);
+            if (args.length === 4) {
+               this.__addNode(args[1], args[2], args[3]);
             }
             break;
       }
@@ -70,8 +69,7 @@ class Elements extends Control {
    private __addNode(
       id: IControlNode['id'],
       name: IControlNode['name'],
-      parentId?: IControlNode['parentId'],
-      key?: IControlNode['key']
+      parentId?: IControlNode['parentId']
    ): void {
       if (!parentId) {
          this._elements.push({
