@@ -20,7 +20,7 @@ let isNeedDynamicWrapper = (
 };
 
 export let wrapDefineDynamic = (_realDefine: IDefine): IDefine => {
-    let dynamicDefine = (...defineArgs) => {
+    let dynamicDefine = (...defineArgs: any[]) => {
         let { dependencies, constructorFunction, name } = prepareArgs(defineArgs);
         if (!isNeedDynamicWrapper(constructorFunction, dependencies, REQUIRE, name)) {
             return _realDefine(...defineArgs);
@@ -29,7 +29,7 @@ export let wrapDefineDynamic = (_realDefine: IDefine): IDefine => {
             // @ts-ignore
             name,
             dependencies,
-        (...moduleArgs) => {
+        (...moduleArgs: any[]) => {
             let newModuleArgs = replaceDependencies({
                 proxyModules,
                 args: moduleArgs,

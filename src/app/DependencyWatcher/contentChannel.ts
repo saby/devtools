@@ -1,5 +1,5 @@
-import { ContentChannel } from "ExtensionCore/ContentChannel";
-import { PLUGIN_NAME } from "./const";
+import { ContentChannel } from "Devtool/Event/ContentChannel";
+import { PLUGIN_NAME } from "Extension/Plugins/DependencyWatcher/const";
 
 let contentChannel = new ContentChannel(PLUGIN_NAME);
 

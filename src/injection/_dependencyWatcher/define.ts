@@ -5,7 +5,7 @@ import { IConfig } from "./IConfig";
 import { IDefine } from "./define/IDefine";
 
 let wrapDefine = (config: IConfig, realDefine: IDefine): IDefine => {
-    if (config.watchDynamicDependency || 1) {
+    if (config.watchDynamicDependency) {
         return wrapDefineDynamic(realDefine);
     }
     return wrapDefineStatic(realDefine);

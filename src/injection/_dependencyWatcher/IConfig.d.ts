@@ -1,3 +1,3 @@
 export interface IConfig {
-    watchDynamicDependency: boolean;
+    watchDynamicDependency?: boolean;
 }

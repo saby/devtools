@@ -1,12 +1,12 @@
 import { IDefine, Args } from "./IDefine";
 import { prepareArgs } from "./prepareArgs";
-import { defineModule } from '../notify/defineModule';
+import { moduleStorage } from "../moduleStorage";
 
 export let wrapDefineStatic = (_realDefine: IDefine): IDefine => {
     return (...args: Array<Args>) => {
-        let { name, dependencies } = prepareArgs(args);
+        let { name, dependencies = [] } = prepareArgs(args);
         if (name) {
-            defineModule(name, dependencies);
+            moduleStorage.defineModule(name, dependencies);
         }
         return _realDefine(...args);
     }

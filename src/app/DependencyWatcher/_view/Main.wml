@@ -1,38 +1,37 @@
-<Layout.Browser
-    theme="default-Layout"
-    source='{{ __source }}'
-    keyProperty="id"
-    searchParam="name"
-    filterButtonSource="{{ __items }}"
-    fastFilterSource="{{ __fastFilterSource }}"
->
-    <ws:search>
-        <Controls.search:Input bind:value="value"/>
-    </ws:search>
-    <ws:topTemplate>
-        <div class="demo-browser-topTemplate">
-            <Controls.Button icon="icon-medium icon-AddButtonNew"/>
-            <Controls.Button icon="icon-medium icon-Unfavourite"/>
-        </div>
-    </ws:topTemplate>
-    <ws:fastFilter>
-        <Controls.Filter.Fast/>
-    </ws:fastFilter>
-    <ws:filterButton>
-        <Controls.Filter.Button
-            templateName="wml!DependencyWatcher/_view/Filter"
-        />
-    </ws:filterButton>
-    <ws:content>
-        <Controls.treeGrid:View
-            keyProperty="id"
-            columns="{{ __getColumns() }}"
-            nodeProperty="type"
-            parentProperty="parent"
-        >
-            <ws:emptyTemplate>
-                <span>empty template</span>>
-            </ws:emptyTemplate>
-        </Controls.treeGrid:View>
-    </ws:content>
-</Layout.Browser>
+<div class="DependencyWatcher_Page">
+    <Controls.Button
+        icon="icon-medium icon-AddButtonNew"
+        caption="Dependency"
+        name="dependency"
+        on:click="__changeView('dependency')"
+    />
+    <Controls.Button
+        icon="icon-medium icon-Unfavourite"
+        caption="Dependent"
+        name="dependent"
+        on:click="__changeView('dependent')"
+    />
+    <Controls.scroll:Container>
+    <Controls.list:DataContainer source="{{ __source }}" keyProperty="id">
+        <Controls.search:Controller searchParam="name" minSearchLength="{{3}}">
+            <div class="ws-fragment">
+                <Controls.search:InputContainer>
+                    <Controls.Input.Search/>
+                </Controls.search:InputContainer>
+
+                <Controls.list:Container>
+                    <Controls.operations:Container>
+                        <Controls.explorer:View
+                            attr:class="demo-Explorer"
+                            displayProperty="name"
+                            parentProperty="parent"
+                            nodeProperty="child"
+                            columns="{{ __getColumns() }}">
+                        </Controls.explorer:View>
+                    </Controls.operations:Container>
+                </Controls.list:Container>
+            </div>
+        </Controls.search:Controller>
+    </Controls.list:DataContainer>
+    </Controls.scroll:Container>
+</div>

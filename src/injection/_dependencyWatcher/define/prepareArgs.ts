@@ -6,7 +6,7 @@ let getName = (args: Array<any>): string | void => {
     }
 };
 
-let getDependencies = (args: Array<any>): Array<string> | void => {
+let getDependencies = (args: Array<any>): string[] | void => {
     if (Array.isArray(args[0])) {
         return  args[0];
     }

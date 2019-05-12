@@ -1,1 +1,10 @@
-export const PLUGIN_NAME = 'dependency-watcher';
+export enum ViewMode {
+    dependency='dependency',
+    dependent='dependent',
+    // list
+}
+
+export enum LeafType {
+    module = 'module',
+    file = 'file'
+}
