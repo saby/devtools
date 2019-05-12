@@ -14,7 +14,7 @@ module.exports = {
     /**
      * Встраиваемый в страницу сткрип
      */
-    injectScript: resolve(source, "injection", "injection.ts"),
+    injectScript: resolve(source, "injection", "wasaby_devtool.ts"),
     /**
      * Директория с исходниками входных точек расширения
      */
@@ -24,7 +24,8 @@ module.exports = {
     /**
      * Директория с исходниками приложения
      */
-    app: resolve(source, "app")
+    app: resolve(source, "app"),
+    sharedDir: resolve(source, 'shared')
   },
   output: {
     /**
@@ -35,9 +36,14 @@ module.exports = {
     /**
      * Встраиваемый в страницу сткрип
      */
-    injectScript: resolve(build, "injection", "injection.js"),
+    injectScript: resolve(build, "wasaby_devtool.js"),
     content: resolve(build, "content", "index.js"),
     cdn: resolve(build, "cdn"),
+    sharedDirs: [
+      resolve(source, 'app'),
+      resolve(source, 'injection'),
+      resolve(source, 'extension'),
+    ]
   },
   logs: {
     root: resolve(root, 'logs')

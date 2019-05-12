@@ -7,12 +7,13 @@
       "url": "git@github.com:saby/devtools.git"
    },
    "scripts": {
-      "build": "npm run build:extension && npm run build:injection && npm run build:app && npm run build:cdn",
+      "build": "npm run build:shared && npm run build:extension && npm run build:injection && npm run build:app && npm run build:cdn",
       "build:injection": "node ./scripts/build_injection.js",
       "build:content": "node ./scripts/build_content.js",
       "build:extension": "node ./scripts/build_extension.js && npm run build:content",
       "build:app": "node ./scripts/build_app.js",
-      "build:cdn": "node ./scripts/build_cdn.js"
+      "build:cdn": "node ./scripts/build_cdn.js",
+      "build:shared": "node ./scripts/copy_shared.js"
    },
    "devDependencies": {
       "@types/chrome": "0.0.81",
@@ -30,7 +31,7 @@
       "saby-types": "git+https://github.com/saby/Types.git#rc-19.400",
       "saby-typescript": "git+https://github.com/saby/TypeScript.git#rc-19.400",
       "sbis3-builder": "git+https://github.com/saby/Builder.git#rc-19.400",
-      "sbis3-controls": "git+http://git.sbis.ru/sbis/controls.git#19.400/bugfix/without_filter_compatibility",
+      "sbis3-controls": "git+http://git.sbis.ru/sbis/controls.git#rc-19.400",
       "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-19.400",
       "sbis3.engine": "git+http://git.sbis.ru/sbis/engine.git#rc-19.400",
       "wasaby-app": "git+https://github.com/saby/wasaby-app.git#rc-19.400"

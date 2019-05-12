@@ -9,8 +9,8 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "paths": {
-      "ExtensionCore/*": [
-        "./app/ExtensionCore/*"
+      "Extension/*": [
+        "./shared/Extension/*"
       ],
       "tslib": [
         "./extension/ext/tslib"

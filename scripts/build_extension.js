@@ -1,4 +1,5 @@
 const { input, output } = require('../config/config');
+const { resolve } = require('path');
 
 const execCommand = require('./util/execCommand');
 
@@ -9,6 +10,10 @@ const BLACK_EXTENSION_LIST = ['.ts'];
 
 
 let filterBlackListExtension = blackList.endsWith(BLACK_EXTENSION_LIST);
+let filterBlackListFolder = blackList.startsWith([
+    resolve(input.extension, 'Extension'),
+    input.content,
+]);
 
 let buildTS = () => {
     return execCommand('tsc -p ./config/tsconfig.extension.json');
@@ -16,7 +21,10 @@ let buildTS = () => {
 
 let build_extension = async () => {
     try {
-        await copyDirectory(input.extension, output.root, [filterBlackListExtension]);
+        await copyDirectory(input.extension, output.root, [
+            filterBlackListExtension,
+            filterBlackListFolder
+        ]);
         await buildTS();
     } catch (error) {
         console.log('=>', error);

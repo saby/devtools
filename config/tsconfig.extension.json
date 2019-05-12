@@ -14,6 +14,7 @@
     "../src/extension"
   ],
   "exclude": [
-    "../src/extension/content/*"
+    "../src/extension/content/*",
+    "../src/extension/Extension/*"
   ]
 }

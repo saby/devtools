@@ -71,7 +71,7 @@ const WASABY_MODULES = [
 const EXTENSION_MODULES = [
   {
     "name": "Extension",
-    "path": resolve(input.app, "Extension")
+    "path": resolve(input.sharedDir, "Extension")
   },
   {
     "name": "DependencyWatcher",
@@ -82,9 +82,9 @@ const EXTENSION_MODULES = [
     "path": resolve(input.app, "Elements")
   },
   {
-    "name": "ExtensionCore",
-    "path": resolve(input.app, "ExtensionCore")
-  }
+    "name": "Devtool",
+    "path": resolve(input.app, "Devtool")
+  },
 ];
 
 const MODULES = [].concat(WASABY_MODULES, EXTENSION_MODULES);
