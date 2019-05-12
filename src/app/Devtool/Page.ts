@@ -1,5 +1,5 @@
 import * as Control from 'Core/Control';
-import * as template from 'wml!Extension/Devtool';
+import * as template from 'wml!Devtool/Page/Page';
 import { Memory } from 'Types/source';
 
 class Extension extends Control {

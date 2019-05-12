@@ -1,5 +1,3 @@
-export { POST_MESSAGE_SOURCE, OperationType } from '../../app/ExtensionCore/const';
-
 export const GLOBAL = (function() {
     if (typeof self !== 'undefined') { return self; }
     if (typeof window !== 'undefined') { return window; }

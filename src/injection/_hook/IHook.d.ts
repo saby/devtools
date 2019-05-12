@@ -1,5 +1,5 @@
-import { IControlNode } from '../../interface/IControlNode';
-import { OperationType } from '../RENAME/const';
+import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { OperationType } from 'Extension/Plugins/Elements/const';
 
 export interface IWasabyDevHook {
    onStartCommit: (node: IControlNode) => void;

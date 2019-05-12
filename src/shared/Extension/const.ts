@@ -14,11 +14,4 @@ export const DEVTOOL_CONTENT_PORT = `${ PANEL_NAME }/devtool-content`;
 
 export const PORT_TAB_ID_POSTFIX = `:tabId=`;
 
-export const INJECTION_SCRIPT = './injection/injection.js';
-
-export enum OperationType {
-    REMOVE,
-    ADD,
-    REORDER,
-    UPDATE
-}
+export const INJECTION_SCRIPT = './wasaby_devtool.js';

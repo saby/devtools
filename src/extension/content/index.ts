@@ -2,7 +2,7 @@ import {
     POST_MESSAGE_SOURCE,
     INJECTION_SCRIPT,
     DEVTOOL_CONTENT_PORT
-} from 'ExtensionCore/const';
+} from 'Extension/const';
 import { injectScript } from './injectScript';
 import { createProxy } from './MessageProxy';
 

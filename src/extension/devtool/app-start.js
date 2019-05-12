@@ -18,9 +18,10 @@
             appInit();
 
             var headData = new HeadData([], true);
+            headData.isNewEnvironment = true;
             AppEnv.setStore('HeadData', headData);
 
-            require(['Extension/Devtool'], (Extension) => {
+            require(['Devtool/Page'], (Extension) => {
                 Extension.default.createControl(
                     Extension.default,
                     {},

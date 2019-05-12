@@ -1,10 +1,13 @@
+// @ts-ignore
 import Control = require('Core/Control');
+// @ts-ignore
 import template = require('wml!Elements/Elements');
+// @ts-ignore
 import { descriptor } from 'Types/entity';
-import { IControlNode } from '../../interface/IControlNode';
-import { ContentChannel } from 'ExtensionCore/ContentChannel';
-import { IOperationEvent } from '../../interface/IOperations';
-import { OperationType } from 'ExtensionCore/const';
+import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { ContentChannel } from 'Devtool/Event/ContentChannel';
+import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
+import { OperationType } from 'Extension/Plugins/Elements/const';
 
 class Elements extends Control {
    protected _template: Function = template;

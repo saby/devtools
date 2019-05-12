@@ -1,4 +1,4 @@
-import { DEVTOOL_CONTENT_PORT } from 'ExtensionCore/const';
+import { DEVTOOL_CONTENT_PORT } from 'Extension/const';
 import { dependPorts } from './dependPorts';
 
 dependPorts(DEVTOOL_CONTENT_PORT);

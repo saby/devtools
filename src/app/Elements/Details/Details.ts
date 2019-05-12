@@ -1,9 +1,9 @@
 import Control = require('Core/Control');
 import template = require('wml!Elements/Details/Details');
-import { IControlNode } from '../../../interface/IControlNode';
+import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import { TEMPLATES } from './const';
-import { ContentChannel } from 'ExtensionCore/ContentChannel';
+import { ContentChannel } from 'Devtool/Event/ContentChannel';
 
 //TODO: сделать это через async
 import './templates/String';

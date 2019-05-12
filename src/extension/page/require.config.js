@@ -7,8 +7,8 @@ setRequireConfig({
     baseUrl: '../',
     paths: {
         "tslib": "../ext/tslib",
-        "ExtensionCore": [
-            "../resources/ExtensionCore"
+        "Extension": [
+            "../resources/Extension"
         ],
     },
 });

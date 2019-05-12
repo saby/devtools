@@ -1,4 +1,8 @@
-import { IContentMessageEvent, IMessageData, IMessageWrapper } from "interface/IContentMessage";
+import {
+    IContentMessageEvent,
+    IMessageData,
+    IMessageWrapper
+} from "Extension/Event/IContentMessage";
 
 const getPort = (() => {
     let port: chrome.runtime.Port | void;

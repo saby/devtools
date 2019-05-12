@@ -1,7 +1,7 @@
 import { IWasabyDevHook } from './IHook';
 import Store from './Store';
-import { IControlNode } from '../../interface/IControlNode';
-import { OperationType } from '../RENAME/const';
+import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { OperationType } from 'Extension/Plugins/Elements/const';
 
 export class Hook implements IWasabyDevHook {
    private store: Store = new Store();

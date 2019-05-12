@@ -1,7 +1,7 @@
-import { IEventEmitter, IHandler, ISerializable } from 'interface/IEventEmitter';
-import { Emitter } from './Emitter';
-import { IMessageWrapper, IMessageData, IContentMessageEvent } from 'interface/IContentMessage';
-import { POST_MESSAGE_SOURCE } from './const';
+import { IEventEmitter, IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
+import { Emitter } from 'Extension/Event/Emitter';
+import { IMessageWrapper, IMessageData, IContentMessageEvent } from 'Extension/Event/IContentMessage';
+import { POST_MESSAGE_SOURCE } from 'Extension/const';
 
 /**
  * id вкладки, подмешиваемый во все сообщения.
@@ -15,7 +15,7 @@ interface IWrapper extends IMessageWrapper {
 
 class DevtoolChannel implements IEventEmitter {
     private __emitter: Emitter;
-    private __onmessageHandler;
+    private __onmessageHandler: (event: IContentMessageEvent<IWrapper>) => void;
     
     constructor(private __name: string) {
         this.__emitter = new Emitter();
@@ -36,11 +36,11 @@ class DevtoolChannel implements IEventEmitter {
         
         return true;
     }
-    addListener(event: string, callback: IHandler): this {
+    addListener<T>(event: string, callback: IHandler<T>): this {
         this.__emitter.addListener(event, callback);
         return this;
     }
-    removeListener(event: string, callback: IHandler): this {
+    removeListener<T>(event: string, callback: IHandler<T>): this {
         this.__emitter.removeListener(event, callback);
         return this;
     }

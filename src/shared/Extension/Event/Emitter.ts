@@ -1,8 +1,8 @@
-import { IEventEmitter, IHandler, ISerializable } from 'interface/IEventEmitter';
+import { IEventEmitter, IHandler, ISerializable } from './IEventEmitter';
 
 class Emitter implements IEventEmitter {
-   private _listeners: Map<string, Set<IHandler>> = new Map();
-   addListener(event: string, callback): this {
+   private _listeners: Map<string, Set<IHandler<any>>> = new Map();
+   addListener<T>(event: string, callback: IHandler<T>): this {
       let listeners = this._listeners.get(event);
       if (!listeners) {
          listeners = new Set();
@@ -11,9 +11,9 @@ class Emitter implements IEventEmitter {
       listeners.add(callback);
       return this;
    }
-   removeListener(event: string, callback): this {
+   removeListener<T>(event: string, callback: IHandler<T>): this {
       if (this._listeners.has(event)) {
-         let listeners = <Set<IHandler>> this._listeners.get(event);
+         let listeners = <Set<IHandler<T>>> this._listeners.get(event);
          listeners.delete(callback);
       }
       return this;

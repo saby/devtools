@@ -1,10 +1,10 @@
-import { IEventEmitter, IHandler, ISerializable } from '../../interface/IEventEmitter';
-import { Emitter } from './Emitter';
-import { IMessageData } from "interface/IContentMessage";
+import { IEventEmitter, IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
+import { Emitter } from 'Extension/Event/Emitter';
+import { IMessageData } from "Extension/Event/IContentMessage";
 
 class PortChannel implements IEventEmitter {
     private __emitter: Emitter;
-    private __onmessageHandler;
+    private __onmessageHandler: (arg: IMessageData) => void;
     
     constructor(
         private __name: string,
@@ -23,11 +23,11 @@ class PortChannel implements IEventEmitter {
         });
         return true;
     }
-    addListener(event: string, callback: IHandler): this {
+    addListener<T>(event: string, callback: IHandler<T>): this {
         this.__emitter.addListener(event, callback);
         return this;
     }
-    removeListener(event: string, callback: IHandler): this {
+    removeListener<T>(event: string, callback: IHandler<T>): this {
         this.__emitter.removeListener(event, callback);
         return this;
     }

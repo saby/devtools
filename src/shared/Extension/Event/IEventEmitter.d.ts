@@ -6,14 +6,14 @@ type PrimitiveType = number | string | undefined | null;
 type ISerializableObject = object;
 export type ISerializable = PrimitiveType | ISerializableObject | Array<ISerializableObject | PrimitiveType>;
 
-export type IHandler = (cfg: ISerializable) => void;
+export type IHandler<T = ISerializable> = (arg: T) => void;
 
 export interface IEventEmitter {
-    addListener(event: string, listener: IHandler): this;
-    removeListener(event: string, listener: IHandler): this;
+    addListener<T>(event: string, listener: IHandler<T>): this;
+    removeListener<T>(event: string, listener: IHandler<T>): this;
     removeAllListeners(event?: string): this;
     dispatch(event: string, cfg: ISerializable): boolean;
-    destructor();
+    destructor(): void;
 }
 
 export interface IEventEmitterConstructor {

@@ -1,4 +1,5 @@
-<div>
+<div class="Devtool_Page">
+  <Controls.Popup.Compatible.ManagerWrapper />
   <Controls.Tabs.Buttons
      bind:selectedKey="_activeTab"
      keyProperty="id"

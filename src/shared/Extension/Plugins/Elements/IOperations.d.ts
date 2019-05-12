@@ -1,6 +1,6 @@
-import { OperationType } from 'ExtensionCore/const';
+import { OperationType } from './const';
 import { IControlNode } from './IControlNode';
-import { IMessageData } from './IContentMessage';
+import { IMessageData } from 'Extension/Event/IContentMessage';
 
 export interface IOperationEvent extends IMessageData {
    args: OperationPayload;

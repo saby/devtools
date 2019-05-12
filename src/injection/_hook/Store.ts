@@ -1,8 +1,8 @@
 import { serialize } from './serialize';
-import { IControlNode } from '../../interface/IControlNode';
-import { OperationType } from '../RENAME/const';
-import { IOperationEvent } from '../../interface/IOperations';
-import { DevtoolChannel } from '../RENAME/DevtoolChannel';
+import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { OperationType } from 'Extension/Plugins/Elements/const';
+import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
+import { DevtoolChannel } from '../_devtool/Channel';
 
 class Store {
    private elements: Map<IControlNode['id'], IControlNode> = new Map();
