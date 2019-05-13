@@ -1,0 +1,10 @@
+<ws:if data="{{ __caption }}">
+    <Controls.heading:Back
+        caption="{{ __caption }}"
+        style="{{ _options.backButtonStyle }}"
+        on:click="__onClick()"
+    />
+</ws:if>
+<ws:else>
+    <invisible-node />
+</ws:else>

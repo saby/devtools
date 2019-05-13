@@ -7,6 +7,8 @@ import { getColumns } from "./getColumns";
 import { ViewMode } from "../const";
 import { contentChannel } from "../contentChannel";
 import { RPC } from "Extension/Event/RPC";
+// @ts-ignore
+import { HierarchicalMemory } from 'Types/source';
 
 type Children = {
     list: Control;
@@ -25,13 +27,14 @@ let createSource = (config: source.IConfig, viewMode: ViewMode) => {
 
 export default class Main extends Control {
     _markedKey = 1;
-    _filter = { demo: 123 };
+    _filter = { };
     _navigation = {
         source: 'page',
         view: 'page',
         sourceConfig: {
             pageSize: 50,
-            page: 0
+            page: 0,
+            mode: "totalCount"
         }
     };
     
@@ -50,9 +53,9 @@ export default class Main extends Control {
     private __getColumns() {
         return getColumns(this._viewMode);
     }
-    protected destroy() {
-        debugger;
-    }
+    // protected destroy() {
+    //     debugger;
+    // }
     private __changeView(event: unknown, mode: ViewMode) {
         if (this._viewMode == mode) {
             return;
@@ -63,8 +66,27 @@ export default class Main extends Control {
     }
     private __getISource() {
         let config = {
-            rpc: this.__rpc
+            rpc: this.__rpc,
+            idProperty: 'id',
+            parentProperty: 'parent'
         };
-        return createSource(config, this._viewMode);
+        let source = createSource(config, this._viewMode);
+        return source;
+        // костыль для отображения хлебных крошек
+        /*let hierarchical = new HierarchicalMemory(config);
+        hierarchical._source = source;
+        // ещё костыль, для работоспособности hierarchical
+        hierarchical.setOptions = hierarchical.setOptions || ((o: unknown) => {
+            hierarchical._options = o;
+        });
+        hierarchical.getOptions = hierarchical.getOptions || (() => {
+            return hierarchical._options || {};
+        });
+        
+        return hierarchical;*/
+    }
+    private _root: string | void;
+    __changeRoot(event: unknown, id: string) {
+        this._root = id;
     }
 }

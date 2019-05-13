@@ -1,5 +1,7 @@
 // @ts-ignore
 import { DataSet, ICrud, Query } from 'Types/source';
+// @ts-ignore
+import { adapter } from 'Types/entity';
 import { IFilterData, ListItem } from "../../interface/View";
 import {
     DependencyType,
@@ -18,7 +20,8 @@ import { IQuery } from "./IQuery";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 
 export interface ISourceConfig {
-    rpc: RPC
+    rpc: RPC;
+    idProperty: string;
 }
 
 let convertData = (data: DependenciesRecord): IModulesDependencyMap => {
@@ -41,14 +44,15 @@ let convertData = (data: DependenciesRecord): IModulesDependencyMap => {
 };
 
 export abstract class Abstract<
-    TTreeData extends ListItem,
+    TTreeData extends ListItem = ListItem,
     TFilter extends IFilterData = IFilterData
 > implements ICrud {
     protected _rpc: RPC;
     private __lastQueryResult: DependenciesRecord;
     private __lastBundles: Bundles;
-    constructor({ rpc }: ISourceConfig) {
+    constructor({ rpc, idProperty }: ISourceConfig) {
         this._rpc = rpc;
+        this._idProperty = idProperty;
     }
     query(query: Query): Promise<DataSet> {
         let where: TFilter = query.getWhere();
@@ -68,9 +72,10 @@ export abstract class Abstract<
         then(applyOrderBy<TTreeData>(query.getOrderBy())).
         then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).
         then((rawData: TTreeData[]) => {
-            return new DataSet({
-                rawData
-            })
+            let dataSet = new DataSet({
+                rawData,
+            });
+            return dataSet;
         }).catch((error) => {
             console.log('Abstract => query:catch', this, error);
             return error;
@@ -125,7 +130,7 @@ export abstract class Abstract<
         console.log('create', arguments);
         return Promise.reject(new Error('noup'))
     }
-    read(): Promise<any>{
+    read<T>(arg: T): Promise<any>{
         console.log('read', arguments);
         return Promise.reject(new Error('noup'))
     }
@@ -143,6 +148,14 @@ export abstract class Abstract<
     }
     getOptions() {
         return this.__opt || {};
+    }
+    private _idProperty: string;
+    getIdProperty() {
+        return this._idProperty;
+    }
+    private _adapter = new adapter.Json;
+    getAdapter() {
+        return this._adapter;
     }
     /// endregion compatibility
 }

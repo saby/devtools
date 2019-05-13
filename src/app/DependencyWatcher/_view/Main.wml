@@ -12,21 +12,29 @@
         on:click="__changeView('dependent')"
     />
     <Controls.scroll:Container>
-    <Controls.list:DataContainer source="{{ __source }}" keyProperty="id">
+    <Controls.list:DataContainer source="{{ __source }}" keyProperty="id" bind:filter="_filter">
         <Controls.search:Controller searchParam="name" minSearchLength="{{3}}">
             <div class="ws-fragment">
                 <Controls.search:InputContainer>
                     <Controls.Input.Search/>
                 </Controls.search:InputContainer>
-
+<!--                <DependencyWatcher._view.list.BackButton-->
+<!--                    source="{{  __source }}"-->
+<!--                    id="{{ __root }}"-->
+<!--                    on:change="__changeRoot()"-->
+<!--                />-->
                 <Controls.list:Container>
                     <Controls.operations:Container>
                         <Controls.explorer:View
+                            bind:root="_root"
                             attr:class="demo-Explorer"
                             displayProperty="name"
+                            keyProperty="id"
                             parentProperty="parent"
                             nodeProperty="child"
-                            columns="{{ __getColumns() }}">
+                            columns="{{ __getColumns() }}"
+                            navigation="{{ _navigation }}"
+                        >
                         </Controls.explorer:View>
                     </Controls.operations:Container>
                 </Controls.list:Container>
