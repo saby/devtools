@@ -1,64 +1,22 @@
 import { ViewMode } from "../const";
-import { IDependencyTreeData, ListItem } from "../interface/View";
 
-/*
-
-на шаблоне в MyTemplate могу получить доступ к опции следующим образом: {{colData.myOption}}
-
- */
-interface IColumn<TItem extends ListItem = ListItem> {
-    title: string;
-    displayProperty: keyof TItem;
-    width: string;
-    template: string;
-}
-
-type Columns<TItem extends ListItem = ListItem, TColumn extends IColumn<TItem> = IColumn<TItem>> = Array<Partial<TColumn>>
-
-const COLUMN: Columns = [
-    {
-        title: 'Module',
-        displayProperty: 'name'
-    },
-];
-
-const LIST_COLUMNS = [
-    ...COLUMN
-];
-
-interface IDependencyColumn extends IColumn<IDependencyTreeData> {
-
-}
-const DEPENDENT_COLUMNS: Columns = [
-    ...COLUMN,
-];
-
-const DEPENDENCY_COLUMNS: Columns<IDependencyTreeData, IDependencyColumn> = [
-    // {
-    //     title: 'type',
-    //     displayProperty: 'type',
-    //     width: '100px'
-    // },
-    ...COLUMN,
-    // {
-    //     displayProperty: 'unique'
-    // }
-];
-
+import { columns as listColumns } from './list/column';
+import { columns as dependencyColumns } from './dependency/column';
+import { columns as dependentColumns } from './dependent/column';
 
 let getColumns = (mode: ViewMode) => {
     switch (mode) {
         case ViewMode.dependency: {
-            return DEPENDENCY_COLUMNS;
+            return dependencyColumns;
         }
         case ViewMode.dependent: {
-            return DEPENDENT_COLUMNS;
+            return dependentColumns;
         }
         // case ViewMode.list: {
-        //     return LIST_COLUMNS;
+        //     return listColumns;
         // }
         default: {
-            return LIST_COLUMNS;
+            return listColumns;
         }
     }
 };
