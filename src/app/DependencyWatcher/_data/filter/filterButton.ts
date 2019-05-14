@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Memory } from 'Types/source';
 
 let filterButton = [{

@@ -14,6 +14,18 @@
       ],
       "tslib": [
         "./extension/ext/tslib"
+      ],
+      "Types/*": [
+        "../node_modules/saby-types/Types/*"
+      ],
+      "Core/*": [
+        "../node_modules/sbis3-ws/WS.Core/core/*"
+      ],
+      "Browser/*": [
+        "../node_modules/rmi/src/client/Browser/*"
+      ],
+      "Env/*": [
+        "../node_modules/rmi/src/client/Env/*"
       ]
     }
   }

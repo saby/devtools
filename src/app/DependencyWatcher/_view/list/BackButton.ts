@@ -2,21 +2,20 @@
 import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/list/BackButton';
-import { source } from "../../data";
+import { source, types } from "../../data";
 
 type Options = {
     paths: string[];
     source: source.Abstract;
     id: string;
 };
-export class BackButton extends Control {
+export default class BackButton extends Control {
     protected _template = template;
-    protected options: Options;
+    protected _options: Options;
     private __caption: string;
     private __paths: string[] = [];
     private __currentId: string | void;
     private set __id(root: string | void) {
-        console.log('Main => set _root');
         this.__currentId = root;
         if (!root) {
             this.__paths.length = 0;
@@ -33,11 +32,11 @@ export class BackButton extends Control {
         return this.__currentId;
     }
     private __onClick() {
-        let paths = this.options.paths;
+        let paths = this.__paths;
         let id = paths[paths.length - 2];
         // @ts-ignore
         this._notify('change', [id]);
-        this.__read(id, this.options.source);
+        this.__read(id, this._options.source);
     }
     protected _beforeUpdate(options: Options) {
         return this.__read(options.id, options.source);
@@ -46,17 +45,24 @@ export class BackButton extends Control {
         return this.__read(options.id, options.source);
     }
     private __read(id: string, source: source.Abstract) {
+        if (this.__id == id) {
+            return;
+        }
+
         this.__id = id;
-        
+
         if (!id) {
             delete this.__caption;
             return;
         }
 
-        return source.read(id).then((current: any) => {
-            this.__caption = current;
+        return source.read(id).then((item: types.ListItem) => {
+            this.__caption = item.name;
         }).catch((error) => {
             this.__caption = id;
+        }).then(() => {
+            // @ts-ignore
+            this._forceUpdate();
         });
     }
 }

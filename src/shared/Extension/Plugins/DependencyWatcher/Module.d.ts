@@ -4,8 +4,6 @@ export type IModuleDependency = Record<DependencyType, string[]>;
 
 export type IModulesDependencyMap = Map<string, IModuleDependency>
 
-
-
 export type Dependencies = Record<string, Array<string>>;
 export type DependenciesRecord = Record<DependencyType, Dependencies>;
 

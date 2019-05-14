@@ -1,4 +1,4 @@
-import { ListItem } from "../../interface/View";
+import { ListItem } from "../../_data/types";
 
 /*
 

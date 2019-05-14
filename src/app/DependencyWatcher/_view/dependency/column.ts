@@ -1,4 +1,4 @@
-import { IDependencyTreeData, ListItem } from "../../interface/View";
+import { IDependencyTreeData, ListItem } from "../../_data/types/View";
 import {
     columns as listColumn,
     Columns,

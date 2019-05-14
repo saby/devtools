@@ -1,23 +1,28 @@
-<div class="Devtool_Page">
-  <Controls.Popup.Compatible.ManagerWrapper />
-  <Controls.Tabs.Buttons
-     bind:selectedKey="_activeTab"
-     keyProperty="id"
-     source="{{ _tabsSource }}"/>
-  <Controls.SwitchableArea bind:selectedKey="_activeTab">
-     <ws:items>
-        <ws:Array>
-           <ws:Object id="Elements">
-              <ws:itemTemplate>
-                 <Elements.Elements />
-              </ws:itemTemplate>
-           </ws:Object>
-           <ws:Object id="Dependencies">
-              <ws:itemTemplate>
-                 <DependencyWatcher.view:Main />
-              </ws:itemTemplate>
-           </ws:Object>
-        </ws:Array>
-     </ws:items>
-  </Controls.SwitchableArea>
+<div
+    class="Devtool_Page"
+>
+    <Controls.Tabs.Buttons
+        bind:selectedKey="_activeTab"
+        keyProperty="id"
+        source="{{ _tabsSource }}"
+        attr:class="Devtool_Page__tabButton"
+    />
+
+    <Controls.Popup.Compatible.ManagerWrapper/>
+    <Controls.SwitchableArea bind:selectedKey="_activeTab">
+        <ws:items>
+            <ws:Array>
+                <ws:Object id="Dependencies">
+                    <ws:itemTemplate>
+                        <DependencyWatcher.view:Main/>
+                    </ws:itemTemplate>
+                </ws:Object>
+                <ws:Object id="Elements">
+                    <ws:itemTemplate>
+                        <Elements.Elements/>
+                    </ws:itemTemplate>
+                </ws:Object>
+            </ws:Array>
+        </ws:items>
+    </Controls.SwitchableArea>
 </div>

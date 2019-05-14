@@ -1,8 +1,12 @@
 // @ts-ignore
 import { DataSet, ICrud, Query } from 'Types/source';
 // @ts-ignore
-import { adapter } from 'Types/entity';
-import { IFilterData, ListItem } from "../../interface/View";
+import { adapter, Model } from 'Types/entity';
+import {
+    IFilterData,
+    ListItem
+} from "../types";
+
 import {
     DependencyType,
     RPCMethods,
@@ -13,11 +17,11 @@ import {
     DependenciesRecord,
     IModulesDependencyMap
 } from "Extension/Plugins/DependencyWatcher/Module";
-import { applyWhere } from "./applyWhere";
-import { applyOrderBy } from "./applyOrderBy";
-import { applyPaging } from "./applyPaging";
-import { IQuery } from "./IQuery";
+import { applyWhere } from "./util/applyWhere";
+import { applyOrderBy } from "./util/applyOrderBy";
+import { applyPaging } from "./util/applyPaging";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
+import { deserialize } from "./util/id";
 
 export interface ISourceConfig {
     rpc: RPC;
@@ -55,34 +59,55 @@ export abstract class Abstract<
         this._idProperty = idProperty;
     }
     query(query: Query): Promise<DataSet> {
-        let where: TFilter = query.getWhere();
-        
-        return Promise.all([
-            this.__getModules(),
-            this.__getBundles()
-        ]).
-        then(([data, bundles]) => {
-            return this._query({
-                data,
-                where,
-                bundles
+        return this._query(query).
+            then(applyWhere<TTreeData, TFilter>(query.getWhere(), query.getLimit())).
+            then(applyOrderBy<TTreeData>(query.getOrderBy())).
+            then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).
+            then((rawData: TTreeData[]) => {
+                return new DataSet({
+                    rawData,
+                });
+            }).catch((error) => {
+                console.log('Abstract => query:catch', this, error);
+                return error;
             });
-        }).
-        then(applyWhere<TTreeData, TFilter>(where, query.getLimit())).
-        then(applyOrderBy<TTreeData>(query.getOrderBy())).
-        then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).
-        then((rawData: TTreeData[]) => {
-            let dataSet = new DataSet({
-                rawData,
-            });
-            return dataSet;
-        }).catch((error) => {
-            console.log('Abstract => query:catch', this, error);
-            return error;
-        });
     }
-    protected abstract _query(query: IQuery<TFilter>): Promise<TTreeData[]> | TTreeData[];
+    protected abstract _query(query: Query<TFilter>): Promise<TTreeData[]>;
 
+    read<TKey extends string, TMeta = unknown>(id: TKey, meta?: TMeta): Promise<Model<TTreeData>> {
+        // return Promise.resolve(module);
+        try {
+            return Promise.resolve(this._read(id, meta));
+        }
+        catch (e) {
+            console.log(e);
+            let [ name ] = deserialize(id);
+            return Promise.resolve(new Model({
+                rawData: {
+                    name,
+                    child: false,
+                    id
+                }
+            }));
+        }
+        
+    }
+    protected abstract _read<TKey extends string, TMeta = unknown>(id: TKey, meta?: TMeta): Promise<TTreeData> | TTreeData;
+    
+    create(): Promise<any> {
+        console.log('create', arguments);
+        return Promise.reject(new Error('noup'))
+    }
+    
+    update(): Promise<any>{
+        console.log('update', arguments);
+        return Promise.reject(new Error('noup'))
+    }
+    delete(): Promise<any>{
+        console.log('delete', arguments);
+        return Promise.reject(new Error('noup'))
+    }
+    
     private __checkNewModules(): Promise<boolean> {
         let data = this.__lastQueryResult;
         if (!data) {
@@ -101,7 +126,7 @@ export abstract class Abstract<
         this.__lastQueryResult = data;
         return data;
     }
-    private __getModules(): Promise<IModulesDependencyMap> {
+    protected _getModules(): Promise<IModulesDependencyMap> {
         return this.__checkNewModules().then((hasNewModules: boolean) => {
             if (!hasNewModules) {
                 return convertData(this.__lastQueryResult);
@@ -112,7 +137,7 @@ export abstract class Abstract<
                 then(convertData);
         });
     }
-    private __getBundles(): Promise<Bundles> {
+    protected _getBundles(): Promise<Bundles> {
         if (this.__lastBundles) {
             return Promise.resolve(this.__lastBundles);
         }
@@ -126,22 +151,6 @@ export abstract class Abstract<
     
     /// region compatibility
     readonly '[Types/_source/ICrud]': boolean = true;
-    create(): Promise<any> {
-        console.log('create', arguments);
-        return Promise.reject(new Error('noup'))
-    }
-    read<T>(arg: T): Promise<any>{
-        console.log('read', arguments);
-        return Promise.reject(new Error('noup'))
-    }
-    update(): Promise<any>{
-        console.log('update', arguments);
-        return Promise.reject(new Error('noup'))
-    }
-    delete(): Promise<any>{
-        console.log('delete', arguments);
-        return Promise.reject(new Error('noup'))
-    }
     private __opt: unknown;
     setOptions(opt: unknown) {
         this.__opt = opt;

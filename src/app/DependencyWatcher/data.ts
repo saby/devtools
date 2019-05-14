@@ -1,5 +1,5 @@
 import * as source from './_data/source';
-export { filterButton } from './_data/filterButton';
-export { fastFilter } from './_data/fastFilter';
-export { ModuleCollector } from './_data/ModuleCollector';
-export { source };
+import * as types from './_data/types';
+import * as markers from './_data/markers';
+
+export { source, types, markers };

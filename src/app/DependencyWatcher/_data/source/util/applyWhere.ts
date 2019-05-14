@@ -1,4 +1,4 @@
-import { IFilterData, ListItem } from "../../interface/View";
+import { IFilterData, ListItem } from "../../types/View";
 import { PrepareFunction } from "./PrepareFunction";
 
 export let applyWhere = <TTreeData extends ListItem, T extends IFilterData> (

@@ -1,0 +1,20 @@
+<div class="DependencyWatcher_Page">
+    <Controls.scroll:Container
+        attr:class="DependencyWatcher_Page__scroll"
+    >
+        <ws:partial template="{{ __list }}" sourceConfig="{{ __sourceConfig }}">
+            <ws:modeController>
+                <Controls.Button
+                    icon="icon-medium icon-AddButtonNew"
+                    caption="Dependency"
+                    on:click="__changeView('dependency')"
+                />
+                <Controls.Button
+                    icon="icon-medium icon-Unfavourite"
+                    caption="Dependent"
+                    on:click="__changeView('dependent')"
+                />
+            </ws:modeController>
+        </ws:partial>
+    </Controls.scroll:Container>
+</div>

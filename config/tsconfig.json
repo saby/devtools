@@ -23,7 +23,8 @@
     "locale": "ru",
     "experimentalDecorators": true,
     "typeRoots": [
-      "../node_modules/@types"
+      "../node_modules/@types",
+      "../node_modules/sbis3-ws/WS.Core/ws.d.ts"
     ]
   }
 }
