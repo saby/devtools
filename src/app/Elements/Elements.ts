@@ -8,6 +8,7 @@ import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
+import 'css!Elements/Elements';
 
 class Elements extends Control {
    protected _template: Function = template;
@@ -19,22 +20,26 @@ class Elements extends Control {
            id: IControlNode['id'];
            name?: IControlNode['name'];
            parentId?: IControlNode['parentId'];
-        }>;
+           depth: number;
+        }> = [];
    protected _channel: ContentChannel = new ContentChannel('elements');
+   protected _highlightedElements: Set<IControlNode['id']> = new Set();
 
    constructor() {
       super();
       this._channel.addListener('inspectedElement', (node: IControlNode) => {
          this._inspectedItem = node;
       });
-   }
-
-   _afterMount(): void {
       this._channel.addListener('setInitialTree', (args: IControlNode[]) => {
-         this._elements = args.slice();
+         args.forEach((element) => {
+            this.__addNode(element.id, element.name, element.parentId);
+         });
          this.__selectElement(this._elements[0].id);
       });
       this._channel.addListener('operation', this._operationHandler.bind(this));
+   }
+
+   _afterMount(): void {
       this._channel.dispatch('devtoolsInitialized');
    }
 
@@ -51,11 +56,23 @@ class Elements extends Control {
          case OperationType.REMOVE:
             this.__removeNode(args[1]);
             break;
+         case OperationType.UPDATE:
+            this.__highlightNode(args[1]);
+            break;
          case OperationType.ADD:
             if (args.length === 4) {
                this.__addNode(args[1], args[2], args[3]);
             }
             break;
+         case OperationType.REORDER:
+            break;
+      }
+   }
+
+   protected _onAnimationEnd(e: Event, element: IControlNode): void {
+      const nativeEvent = e.nativeEvent as AnimationEvent;
+      if (nativeEvent.animationName === 'flash') {
+         this._highlightedElements.delete(element.id);
       }
    }
 
@@ -74,26 +91,46 @@ class Elements extends Control {
       name: IControlNode['name'],
       parentId?: IControlNode['parentId']
    ): void {
-      if (!parentId) {
+      if (!parentId || parentId === '_') { //TODO: Controls/Application/Core строится в отдельной ветке из app-start, надо вклиниваться где-то в другом месте
          this._elements.push({
             id,
             name,
-            parentId
+            parentId,
+            depth: 0
          });
       } else {
          // TODO: сделать добавление в произвольное место
-         let lastChildIndex = 0;
-         for (let i = 0; i < this._elements.length; i++) {
-            if (this._elements[i].parentId === parentId) {
-               lastChildIndex = i;
+         const parentIndex = this._elements.findIndex((element) => element.id === parentId);
+         let lastChildIndex = parentIndex + 1;
+         if (parentIndex === -1) { //TODO: иногда ребёнок раньше родителя приходит, что-то не то. И зацикливания бывают, видимо неправильно беру parentId
+            lastChildIndex = 0;
+         } else {
+            while (this._elements[lastChildIndex] && this._elements[lastChildIndex].parentId === parentId) {
+               lastChildIndex++;
             }
          }
-         this._elements.splice(lastChildIndex + 1, 0, {
+         this._elements.splice(lastChildIndex, 0, {
             id,
             name,
-            parentId
+            parentId,
+            depth: this.__getDepth(parentId)
          });
       }
+      this.__highlightNode(id);
+   }
+
+   private __highlightNode(id: IControlNode['id']): void {
+      this._highlightedElements.add(id);
+   }
+
+   private __getDepth(parentId?: IControlNode['parentId']): number {
+      if (parentId) {
+         const parent = this._elements.find((element) => element.id === parentId);
+         if (parent) {
+            return parent.depth + 1;
+         }
+      }
+      return 0;
    }
 }
 

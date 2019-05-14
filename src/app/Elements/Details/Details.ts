@@ -6,10 +6,10 @@ import { TEMPLATES } from './const';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 
 //TODO: сделать это через async
-import './templates/String';
-import './templates/Number';
-import './templates/Object';
-import './templates/Function';
+import './templates/StringTemplate';
+import './templates/NumberTemplate';
+import './templates/ObjectTemplate';
+import './templates/FunctionTemplate';
 
 interface IOptions extends IControlNode {
    channel: ContentChannel;
@@ -27,29 +27,28 @@ class Details extends Control {
       return TEMPLATES.string;
    }
 
-   private __viewSource(): void {
-      this._options.channel.dispatch('viewSource', this._options.id);
+   private __viewTemplate(): void {
+      this._options.channel.dispatch('viewTemplate', this._options.id);
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
-            'inspect(window.__WASABY_DEV_HOOK__.__instance)'
+            'inspect(window.__WASABY_DEV_HOOK__.__template)'
          );
       }, 100);
    }
 
-   static getOptionTypes(): Record<keyof IOptions, unknown> {
-      return {
-         channel: descriptor(ContentChannel).required(),
-         id: descriptor(Number).required(),
-         name: descriptor(String).required(),
-         type: descriptor(String).required(),
-         options: descriptor(Object),
-         attributes: descriptor(Object),
-         eventHandlers: descriptor(Object),
-         state: descriptor(Object),
-         parentId: descriptor(Number),
-         key: descriptor(Number)
-      };
-   }
+   // static getOptionTypes(): Record<keyof IOptions, unknown> {
+   //    return {
+   //       channel: descriptor(ContentChannel).required(),
+   //       id: descriptor(Number).required(),
+   //       name: descriptor(String).required(),
+   //       template: descriptor(String).required(),
+   //       options: descriptor(Object),
+   //       attributes: descriptor(Object),
+   //       eventHandlers: descriptor(Object),
+   //       state: descriptor(Object),
+   //       parentId: descriptor(Number)
+   //    };
+   // }
 }
 
 export default Details;

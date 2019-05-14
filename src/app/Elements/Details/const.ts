@@ -1,6 +1,6 @@
 export const TEMPLATES: Record<string, string> = {
-   string: 'Elements/Details/templates/String',
-   number: 'Elements/Details/templates/Number',
-   object: 'Elements/Details/templates/Object',
-   function: 'Elements/Details/templates/Function'
+   string: 'Elements/Details/templates/StringTemplate',
+   number: 'Elements/Details/templates/NumberTemplate',
+   object: 'Elements/Details/templates/ObjectTemplate',
+   function: 'Elements/Details/templates/FunctionTemplate'
 };

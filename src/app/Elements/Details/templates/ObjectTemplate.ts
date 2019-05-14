@@ -1,5 +1,5 @@
 import Control = require('Core/Control');
-import template = require('wml!Elements/Details/templates/Object');
+import template = require('wml!Elements/Details/templates/ObjectTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
 import { TEMPLATES } from '../const';

@@ -1,10 +1,10 @@
-import { serialize } from './serialize';
+import prepareForSerialization from './prepareForSerialization';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 
-class Store {
+class Agent {
    private elements: Map<IControlNode['id'], IControlNode> = new Map();
    private isDevtoolsOpened: boolean = false;
    private channel: DevtoolChannel = new DevtoolChannel('elements');
@@ -12,27 +12,20 @@ class Store {
    constructor() {
       this.channel.addListener('devtoolsInitialized', this.__onDevtoolsOpened.bind(this));
       this.channel.addListener('inspectElement', (id) => {
-         if (typeof id === 'number') {
-            this.__inspectElement(id);
-         }
+         this.__inspectElement(id);
       });
-      this.channel.addListener('viewSource', (id) => {
-         if (typeof id === 'number') {
-            this.__viewSource(id);
-         }
+      this.channel.addListener('viewTemplate', (id) => {
+         this.__viewTemplate(id);
       });
    }
 
-   /*
-   Если тут будет работать медленно из-за сериализации, то можно попробовать ту схему из Augury:
-   пушим сообщения в очередь -> говорим девтулзам что есть сообщения в очереди -> eval кода из очереди внутри девтулзов
-    */
    private __onDevtoolsOpened(): void {
       this.isDevtoolsOpened = true;
       const data = [];
 
       this.elements.forEach((value) => {
-         data.push(serialize({...value}));
+         const {id, name, parentId}: IControlNode = value;
+         data.push({id, name, parentId});
       });
 
       this.channel.dispatch('setInitialTree', data);
@@ -46,6 +39,11 @@ class Store {
          case OperationType.ADD:
             this.__handleAdd(node);
             break;
+         case OperationType.REORDER:
+            break;
+         case OperationType.UPDATE:
+            this.__handleUpdate(node);
+            break;
       }
    }
 
@@ -56,14 +54,24 @@ class Store {
          const message: IOperationEvent['args'] = [OperationType.ADD, node.id, node.name];
          if (node.parentId) {
             message.push(node.parentId);
-            message.push(node.key);
          }
+         this.channel.dispatch('operation', message);
+      }
+   }
+
+   private __handleUpdate(node: IControlNode): void {
+      node.parentId = this.elements.get(node.id).parentId; //TODO: костыль, потому что при апдейте пока непонятно откуда брать parentId
+      this.elements.set(node.id, node);
+
+      if (this.isDevtoolsOpened) {
+         const message: IOperationEvent['args'] = [OperationType.UPDATE, node.id];
          this.channel.dispatch('operation', message);
       }
    }
 
    private __handleRemove(node: IControlNode): void {
       this.elements.delete(node.id);
+      this.__removeChildren(node.id);
 
       if (this.isDevtoolsOpened) {
          const message: IOperationEvent['args'] = [OperationType.REMOVE, node.id];
@@ -71,16 +79,26 @@ class Store {
       }
    }
 
-   //TODO: утащить эти методы из Store
-   private __inspectElement(id: IControlNode['id']): void {
-      const node = this.elements.get(id);
-      this.channel.dispatch('inspectedElement', serialize({...node}));
+   private __removeChildren(id: IControlNode['id']): void {
+      const parents: Array<IControlNode['parentId']> = [];
+      this.elements.forEach((element, key) => {
+         if (element.parentId === id || parents.indexOf(element.parentId) !== -1) {
+            this.elements.delete(key);
+            parents.push(key);
+            const message: IOperationEvent['args'] = [OperationType.REMOVE, key];
+            this.channel.dispatch('operation', message);
+         }
+      });
    }
 
-   private __viewSource(id: IControlNode['id']): void {
-      //TODO: вообще непонятно как открывать файл. Общего у файлов только то, что у всех есть define
-      window.__WASABY_DEV_HOOK__.__instance = this.elements.get(id).type;
+   private __inspectElement(id: IControlNode['id']): void {
+      const node = this.elements.get(id);
+      this.channel.dispatch('inspectedElement', prepareForSerialization({...node, container: null}));
+   }
+
+   private __viewTemplate(id: IControlNode['id']): void {
+      window.__WASABY_DEV_HOOK__.__template = this.elements.get(id).template;
    }
 }
 
-export default Store;
+export default Agent;

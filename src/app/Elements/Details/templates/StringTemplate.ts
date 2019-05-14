@@ -1,5 +1,5 @@
 import Control = require('Core/Control');
-import template = require('wml!Elements/Details/templates/String');
+import template = require('wml!Elements/Details/templates/StringTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
 
@@ -13,7 +13,7 @@ class StringTemplate extends Control {
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
-         value: descriptor(String).required(),
+         value: descriptor(String, Boolean).required(), //TODO: под boolean скорее всего проще отдельный тип завести
          name: descriptor(String, Number).required()
       };
    }
