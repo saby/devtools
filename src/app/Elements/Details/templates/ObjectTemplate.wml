@@ -1,10 +1,12 @@
 <span>
-   <span
-      if="{{!_expanded}}"
-      on:click="_toggleExpanded()">▶</span>
-   <span
-      if="{{_expanded}}"
-      on:click="_toggleExpanded()">▼</span>
+   <ws:if data="{{_options.value !== null}}">
+      <span
+         if="{{!_expanded}}"
+         on:click="_toggleExpanded()">▶</span>
+      <span
+         if="{{_expanded}}"
+         on:click="_toggleExpanded()">▼</span>
+   </ws:if>
    <span>{{_options.name}}</span>: {{_caption}}
    <ws:if data="{{_expanded}}">
       <ws:for data="key, value in _options.value">

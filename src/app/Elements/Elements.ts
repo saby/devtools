@@ -34,17 +34,29 @@ class Elements extends Control {
          args.forEach((element) => {
             this.__addNode(element.id, element.name, element.parentId);
          });
-         this.__selectElement(this._elements[0].id);
       });
+      this._channel.addListener('setSelectedItem', this.__selectElement.bind(this));
       this._channel.addListener('operation', this._operationHandler.bind(this));
+      window.elementsPanel = this;
    }
 
    _afterMount(): void {
       this._channel.dispatch('devtoolsInitialized');
    }
 
+   getSelectedItem(): void {
+      chrome.devtools.inspectedWindow.eval('window.__WASABY_DEV_HOOK__.$0 = $0', () => {
+         this._channel.dispatch('getSelectedItem');
+      });
+   }
+
+   hideOverlay(): void {
+      this._channel.dispatch('hideOverlay');
+   }
+
    protected _beforeUnmount(): void {
       this._inspectedItem = undefined;
+      window.elementsPanel = undefined;
    }
 
    protected _onItemClick(e: Event, item: IControlNode): void {
@@ -73,6 +85,7 @@ class Elements extends Control {
       const nativeEvent = e.nativeEvent as AnimationEvent;
       if (nativeEvent.animationName === 'flash') {
          this._highlightedElements.delete(element.id);
+         this._forceUpdate();
       }
    }
 

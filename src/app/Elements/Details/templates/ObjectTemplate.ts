@@ -16,12 +16,12 @@ class ObjectTemplate extends Control {
 
    constructor(options: Readonly<IOptions>) {
       super();
-      this._caption = options.value instanceof Array ? `Array[${options.value.length}]` : 'Object';
+      this._caption = this.__getCaption(options.value);
    }
 
    _beforeUpdate(newOptions: Readonly<IOptions>): void {
       if (this._options.value !== newOptions.value) {
-         this._caption = newOptions.value instanceof Array ? `Array[${newOptions.value.length}]` : 'Object';
+         this._caption = this.__getCaption(newOptions.value);
       }
    }
 
@@ -37,9 +37,19 @@ class ObjectTemplate extends Control {
       return TEMPLATES.string;
    }
 
+   private __getCaption(value: object): string {
+      if (value instanceof Array) {
+         return `Array[${value.length}]`;
+      } else if (value === null) {
+         return 'null';
+      } else {
+         return 'Object';
+      }
+   }
+
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
-         value: descriptor(Object).required(),
+         value: descriptor(Object, null).required(),
          name: descriptor(String, Number).required()
       };
    }

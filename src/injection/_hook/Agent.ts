@@ -1,21 +1,26 @@
 import prepareForSerialization from './prepareForSerialization';
+import debounce from 'Extension/Utils/debounce';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
+import Overlay from './Overlay';
 
 class Agent {
    private elements: Map<IControlNode['id'], IControlNode> = new Map();
    private isDevtoolsOpened: boolean = false;
    private channel: DevtoolChannel = new DevtoolChannel('elements');
+   private overlay: Overlay;
+   private previousSelectedItemId: IControlNode['id'] | undefined;
+   private mouseMoveHandler?: (e: MouseEvent) => void;
 
    constructor() {
       this.channel.addListener('devtoolsInitialized', this.__onDevtoolsOpened.bind(this));
-      this.channel.addListener('inspectElement', (id) => {
-         this.__inspectElement(id);
-      });
-      this.channel.addListener('viewTemplate', (id) => {
-         this.__viewTemplate(id);
+      this.channel.addListener('inspectElement', this.__inspectElement.bind(this));
+      this.channel.addListener('viewTemplate', this.__viewTemplate.bind(this));
+      this.channel.addListener('getSelectedItem', this.__getSelectedItem.bind(this));
+      this.channel.addListener('hideOverlay', () => {
+         this.__toggleSelectFromPage(false);
       });
    }
 
@@ -98,6 +103,49 @@ class Agent {
 
    private __viewTemplate(id: IControlNode['id']): void {
       window.__WASABY_DEV_HOOK__.__template = this.elements.get(id).template;
+   }
+
+   private __toggleSelectFromPage(state: boolean): void {
+      if (state) {
+         if (!this.overlay) {
+            this.overlay = new Overlay();
+         }
+
+         this.mouseMoveHandler = debounce((e: MouseEvent) => {
+            const element = document.elementFromPoint(e.x, e.y);
+            if (element) {
+               this.overlay.inspect(element);
+            }
+         }, 50);
+
+         window.addEventListener('mousemove', this.mouseMoveHandler);
+      } else {
+         if (this.overlay) {
+            this.overlay.remove();
+         }
+         if (this.mouseMoveHandler) {
+            window.removeEventListener('mousemove', this.mouseMoveHandler);
+         }
+      }
+   }
+
+   private __findControlByDomNode(element: Element): IControlNode | undefined {
+      let currentElement = element;
+      while (currentElement) {
+         if (currentElement.controlNodes) {
+            return this.elements.get(currentElement.controlNodes[currentElement.controlNodes.length - 1].key);
+         }
+         currentElement = currentElement.parentElement;
+      }
+      return;
+   }
+
+   private __getSelectedItem(): void {
+      const node = this.__findControlByDomNode(window.__WASABY_DEV_HOOK__.$0) || this.elements.values().next().value;
+      if (node && this.previousSelectedItemId !== node.id) {
+         this.channel.dispatch('setSelectedItem', node.id);
+         this.previousSelectedItemId = node.id;
+      }
    }
 }
 

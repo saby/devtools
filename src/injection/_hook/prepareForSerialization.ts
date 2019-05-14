@@ -1,6 +1,6 @@
 function replaceFunctions<T>(value: T): T | string {
    if (typeof value === 'function') {
-      return 'function';
+      return value.name.replace('bound ', '');
    }
    return value;
 }
@@ -98,7 +98,7 @@ function decycle<T>(object: T, replacer?: <U>(value: U) => U | string): T {
 }
 
 // TODO: опции, через которые тянется всё дерево компонентов, поэтому с ними нужно что-то делать. В идеале бы нужно просто заменять их на строки с названием контрола, и соотносить со ссылками на инстансы
-const LONG_OPTIONS = ['_logicParent', 'opener', '_events'];
+const LONG_OPTIONS = ['_logicParent', 'opener', '_events', 'content'];
 
 function deleteLongOptions(value: object): void {
    if (value.options) {

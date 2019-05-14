@@ -2,7 +2,8 @@
     <ws:if data="{{_elements.length > 0}}">
         <ws:for data="element in _elements">
             <div attr:key="{{element.id}}"
-                 attr:class="{{_highlightedElements.has(element.id) ? 'flash'}}"
+                 attr:class="{{_highlightedElements.has(element.id) ? 'flash'}}
+                 {{_selectedItemId === element.id ? 'selected'}}"
                  attr:style="padding-left: {{10 * element.depth}}px;"
                  on:animationend="_onAnimationEnd(element)"
                  on:click="_onItemClick(element)">{{element.name}}</div>
