@@ -32,7 +32,6 @@
                         parentProperty="parent"
                         nodeProperty="child"
                         columns="{{ __column }}"
-                        groupingKeyCallback="{{ _options.grouping || __groupingCallback }}"
                     >
                     </Controls.explorer:View>
                 </Controls.operations:Container>

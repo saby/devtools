@@ -1,4 +1,4 @@
-import { IFilterData, ListItem } from "../../types/View";
+import { IFilterData, ListItem } from "../../types";
 import { PrepareFunction } from "./PrepareFunction";
 
 export let applyWhere = <TTreeData extends ListItem, T extends IFilterData> (
@@ -6,7 +6,7 @@ export let applyWhere = <TTreeData extends ListItem, T extends IFilterData> (
     limits: number
 ): PrepareFunction<TTreeData> => {
     let { name = '', parent } = where;
-    name = name.toLocaleString();
+    name = name.toLowerCase();
     return (set: TTreeData[]) => {
         console.log('applyWhere =>', where, limits);
         if(!name){
