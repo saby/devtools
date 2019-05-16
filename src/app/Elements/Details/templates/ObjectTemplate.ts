@@ -3,9 +3,11 @@ import template = require('wml!Elements/Details/templates/ObjectTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
 import { TEMPLATES } from '../const';
+import 'css!Elements/Details/templates/ObjectTemplate';
 
 interface IOptions extends ITemplateOptions {
    value: object;
+   depth?: number;
 }
 
 class ObjectTemplate extends Control {
@@ -23,6 +25,10 @@ class ObjectTemplate extends Control {
       if (this._options.value !== newOptions.value) {
          this._caption = this.__getCaption(newOptions.value);
       }
+   }
+
+   protected _viewFunctionSource(e: Event, path: Array<string | number>): void {
+      this._notify('viewFunctionSource', [path.concat(this._options.name)]);
    }
 
    protected _toggleExpanded(): void {
@@ -50,7 +56,14 @@ class ObjectTemplate extends Control {
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          value: descriptor(Object, null).required(),
-         name: descriptor(String, Number).required()
+         name: descriptor(String, Number).required(),
+         depth: descriptor(Number)
+      };
+   }
+
+   static getDefaultOptions(): object {
+      return {
+         depth: 1
       };
    }
 }

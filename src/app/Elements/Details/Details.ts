@@ -9,7 +9,7 @@ import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import './templates/StringTemplate';
 import './templates/NumberTemplate';
 import './templates/ObjectTemplate';
-import './templates/FunctionTemplate';
+import 'css!Elements/Details/Details';
 
 interface IOptions extends IControlNode {
    channel: ContentChannel;
@@ -18,6 +18,18 @@ interface IOptions extends IControlNode {
 class Details extends Control {
    protected _template: Function = template;
    protected readonly _options: Readonly<IOptions>;
+
+   protected _viewFunctionSource(e: Event, path: Array<string | number>): void {
+      this._options.channel.dispatch('viewFunctionSource', {
+         id: this._options.id,
+         path: path.concat('options')
+      });
+      setTimeout(() => {
+         chrome.devtools.inspectedWindow.eval(
+            'inspect(window.__WASABY_DEV_HOOK__.__function)'
+         );
+      }, 100);
+   }
 
    private __getTemplate(value: unknown): string {
       const type = typeof value;

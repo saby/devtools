@@ -19,6 +19,7 @@ class Agent {
       this.channel.addListener('inspectElement', this.__inspectElement.bind(this));
       this.channel.addListener('viewTemplate', this.__viewTemplate.bind(this));
       this.channel.addListener('getSelectedItem', this.__getSelectedItem.bind(this));
+      this.channel.addListener('viewFunctionSource', this.__viewFunctionSource.bind(this));
       this.channel.addListener('hideOverlay', () => {
          this.__toggleSelectFromPage(false);
       });
@@ -103,6 +104,23 @@ class Agent {
 
    private __viewTemplate(id: IControlNode['id']): void {
       window.__WASABY_DEV_HOOK__.__template = this.elements.get(id).template;
+   }
+
+   private __viewFunctionSource({
+      id,
+      path
+   }: {
+      id: IControlNode['id'];
+      path: Array<string | number>;
+   }): void {
+      const node = this.elements.get(id);
+      let currentProperty = path.pop();
+      let func = node[currentProperty];
+      while (path.length) {
+         currentProperty = path.pop();
+         func = func[currentProperty];
+      }
+      window.__WASABY_DEV_HOOK__.__function = func;
    }
 
    private __toggleSelectFromPage(state: boolean): void {

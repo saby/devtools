@@ -1,3 +1,3 @@
 <span>
-   <span>{{_options.name}}</span>: <span>"{{_options.value}}"</span>
+   <span>{{_options.name}}</span>: <span on:click="_handleClick()">"{{_options.value}}"</span>
 </span>

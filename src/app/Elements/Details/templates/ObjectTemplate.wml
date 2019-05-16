@@ -1,4 +1,4 @@
-<span>
+<div>
    <ws:if data="{{_options.value !== null}}">
       <span
          if="{{!_expanded}}"
@@ -9,11 +9,16 @@
    </ws:if>
    <span>{{_options.name}}</span>: {{_caption}}
    <ws:if data="{{_expanded}}">
-      <ws:for data="key, value in _options.value">
-         <ws:partial template="{{__getTemplate(value)}}"
-                     name="{{key}}"
-                     value="{{value}}"
-                     attr:key="{{key}}"/>
-      </ws:for>
+      <div attr:class="ObjectTemplate__items"
+           attr:style="padding-left: {{10 * _options.depth}}px;">
+         <ws:for data="key, value in _options.value">
+            <ws:partial template="{{__getTemplate(value)}}"
+                        name="{{key}}"
+                        value="{{value}}"
+                        depth="{{_options.depth + 1}}"
+                        on:viewFunctionSource="_viewFunctionSource()"
+                        attr:key="{{key}}"/>
+         </ws:for>
+      </div>
    </ws:if>
-</span>
+</div>

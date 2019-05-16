@@ -1,19 +1,23 @@
-<div attr:style="display: flex; flex-direction: column;">
-    <ws:if data="{{_elements.length > 0}}">
-        <ws:for data="element in _elements">
+<div attr:class="Elements">
+   <ws:if data="{{_elements.length > 0}}">
+      <Controls.scroll:Container
+         attr:class="Elements__tree"
+      >
+         <ws:for data="element in _elements">
             <div attr:key="{{element.id}}"
                  attr:class="{{_highlightedElements.has(element.id) ? 'flash'}}
-                 {{_selectedItemId === element.id ? 'selected'}}"
+                             {{_selectedItemId === element.id ? 'selected'}}"
                  attr:style="padding-left: {{10 * element.depth}}px;"
                  on:animationend="_onAnimationEnd(element)"
                  on:click="_onItemClick(element)">{{element.name}}</div>
-        </ws:for>
-        <ws:if data="{{_inspectedItem}}">
-            <Elements.Details.Details scope="{{_inspectedItem}}"
-                                      channel="{{_channel}}" />
-        </ws:if>
-    </ws:if>
-    <ws:else>
-        <div>Connecting to Wasaby...</div>
-    </ws:else>
+         </ws:for>
+      </Controls.scroll:Container>
+      <ws:if data="{{_inspectedItem}}">
+         <Elements.Details.Details scope="{{_inspectedItem}}"
+                                   channel="{{_channel}}" />
+      </ws:if>
+   </ws:if>
+   <ws:else>
+      <div>Connecting to Wasaby...</div>
+   </ws:else>
 </div>

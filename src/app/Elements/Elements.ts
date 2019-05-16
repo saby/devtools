@@ -8,6 +8,7 @@ import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
+import retrocycle from './retrocycle';
 import 'css!Elements/Elements';
 
 class Elements extends Control {
@@ -28,7 +29,7 @@ class Elements extends Control {
    constructor() {
       super();
       this._channel.addListener('inspectedElement', (node: IControlNode) => {
-         this._inspectedItem = node;
+         this._inspectedItem = retrocycle(node);
       });
       this._channel.addListener('setInitialTree', (args: IControlNode[]) => {
          args.forEach((element) => {
