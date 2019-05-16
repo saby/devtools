@@ -27,7 +27,6 @@ interface IConfig {
 export default class Main extends Control {
     protected _template = template;
     protected _children: Children;
-    private __filter: object = {};
     private __column: Columns;
     private __navigation: object;
     private __source: source.Abstract;
@@ -41,6 +40,17 @@ export default class Main extends Control {
     __changeRoot(event: unknown, id: string) {
         this._root = id;
     }
+    private __filterObject: object = {};
+    private get __filter() {
+        return {
+            root: this._root,
+            ...this.__filterObject
+        }
+    };
+    private set __filter(value) {
+        this.__filterObject = value;
+    }
+    
     private __groupingCallback(item: unknown) {
         return viewConstants.hiddenGroup;
     }

@@ -8,5 +8,5 @@ interface IMarkerClass {
 }
 
 export interface IMarker extends IMarkerClass, IMarkerIcon {
-
+    type: string
 }

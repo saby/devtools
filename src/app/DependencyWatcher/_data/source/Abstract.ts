@@ -59,13 +59,24 @@ export abstract class Abstract<
         this._idProperty = idProperty;
     }
     query(query: Query): Promise<DataSet> {
+        let countAfterFilter: number;
         return this._query(query).
             then(applyWhere<TTreeData, TFilter>(query.getWhere(), query.getLimit())).
+            then((set) => {
+                countAfterFilter = set.length;
+                return set;
+            }).
             then(applyOrderBy<TTreeData>(query.getOrderBy())).
             then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).
-            then((rawData: TTreeData[]) => {
+            then((data: TTreeData[]) => {
+                
                 return new DataSet({
-                    rawData,
+                    rawData: {
+                        data,
+                        meta: { more: countAfterFilter > query.getOffset() + data.length }
+                    },
+                    itemsProperty: 'data',
+                    metaProperty: 'meta'
                 });
             }).catch((error) => {
                 console.log('Abstract => query:catch', this, error);
