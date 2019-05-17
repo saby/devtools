@@ -18,6 +18,8 @@ class Agent {
       this.channel.addListener('devtoolsInitialized', this.__onDevtoolsOpened.bind(this));
       this.channel.addListener('inspectElement', this.__inspectElement.bind(this));
       this.channel.addListener('viewTemplate', this.__viewTemplate.bind(this));
+      this.channel.addListener('viewConstructor', this.__viewConstructor.bind(this));
+      this.channel.addListener('storeAsGlobal', this.__storeAsGlobal.bind(this));
       this.channel.addListener('getSelectedItem', this.__getSelectedItem.bind(this));
       this.channel.addListener('viewFunctionSource', this.__viewFunctionSource.bind(this));
       this.channel.addListener('hideOverlay', () => {
@@ -99,11 +101,23 @@ class Agent {
 
    private __inspectElement(id: IControlNode['id']): void {
       const node = this.elements.get(id);
-      this.channel.dispatch('inspectedElement', prepareForSerialization({...node, container: null}));
+      if (node) {
+         this.channel.dispatch('inspectedElement', prepareForSerialization({...node, container: null, isControl: !!node.instance}));
+      }
    }
 
    private __viewTemplate(id: IControlNode['id']): void {
-      window.__WASABY_DEV_HOOK__.__template = this.elements.get(id).template;
+      const node = this.elements.get(id);
+      if (node) {
+         window.__WASABY_DEV_HOOK__.__template = node.template;
+      }
+   }
+
+   private __viewConstructor(id: IControlNode['id']): void {
+      const node = this.elements.get(id);
+      if (node && node.instance) {
+         window.__WASABY_DEV_HOOK__.__constructor = node.instance.constructor;
+      }
    }
 
    private __viewFunctionSource({
@@ -113,14 +127,32 @@ class Agent {
       id: IControlNode['id'];
       path: Array<string | number>;
    }): void {
+      window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(id, path);
+   }
+
+   private __storeAsGlobal({
+      id,
+      path
+   }: {
+      id: IControlNode['id'];
+      path: Array<string | number>;
+   }): void {
+      window.$tmp = this.__getValueByPath(id, path);
+      console.log('$tmp = ', window.$tmp);
+   }
+
+   private __getValueByPath(
+      id: IControlNode['id'],
+      path: Array<string | number>
+   ): unknown {
       const node = this.elements.get(id);
       let currentProperty = path.pop();
-      let func = node[currentProperty];
+      let value = node[currentProperty];
       while (path.length) {
          currentProperty = path.pop();
-         func = func[currentProperty];
+         value = value[currentProperty];
       }
-      window.__WASABY_DEV_HOOK__.__function = func;
+      return value;
    }
 
    private __toggleSelectFromPage(state: boolean): void {

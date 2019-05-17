@@ -1,13 +1,15 @@
 <div attr:class="Details">
    <div>
-      <span>{{_options.name}}</span><span on:click="__viewTemplate()">View template</span>
+     <div on:click="__viewTemplate()">View template</div>
+     <div if="{{_options.isControl}}" on:click="__viewConstructor()">View constructor</div>
    </div>
    <Controls.scroll:Container>
       <ws:for data="key, value in _options.options">
          <ws:partial template="{{__getTemplate(value)}}"
                      name="{{key}}"
                      value="{{value}}"
-                     on:viewFunctionSource="_viewFunctionSource()"
+                     on:viewFunctionSource="__viewFunctionSource()"
+                     on:storeAsGlobal="__storeAsGlobal()"
                      attr:key="{{key}}"/>
       </ws:for>
    </Controls.scroll:Container>

@@ -31,6 +31,10 @@ class ObjectTemplate extends Control {
       this._notify('viewFunctionSource', [path.concat(this._options.name)]);
    }
 
+   protected _storeAsGlobal(e: Event, path: Array<string | number> = []): void {
+      this._notify('storeAsGlobal', [path.concat(this._options.name)]);
+   }
+
    protected _toggleExpanded(): void {
       this._expanded = !this._expanded;
    }

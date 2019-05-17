@@ -7,7 +7,7 @@
          if="{{_expanded}}"
          on:click="_toggleExpanded()">▼</span>
    </ws:if>
-   <span>{{_options.name}}</span>: {{_caption}}
+   <span on:click="_storeAsGlobal()">{{_options.name}}</span>: {{_caption}}
    <ws:if data="{{_expanded}}">
       <div attr:class="ObjectTemplate__items"
            attr:style="padding-left: {{10 * _options.depth}}px;">
@@ -17,6 +17,7 @@
                         value="{{value}}"
                         depth="{{_options.depth + 1}}"
                         on:viewFunctionSource="_viewFunctionSource()"
+                        on:storeAsGlobal="_storeAsGlobal()"
                         attr:key="{{key}}"/>
          </ws:for>
       </div>

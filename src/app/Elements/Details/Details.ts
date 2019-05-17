@@ -19,7 +19,15 @@ class Details extends Control {
    protected _template: Function = template;
    protected readonly _options: Readonly<IOptions>;
 
-   protected _viewFunctionSource(e: Event, path: Array<string | number>): void {
+   private __getTemplate(value: unknown): string {
+      const type = typeof value;
+      if (TEMPLATES.hasOwnProperty(type)) {
+         return TEMPLATES[type];
+      }
+      return TEMPLATES.string;
+   }
+
+   private __viewFunctionSource(e: Event, path: Array<string | number>): void {
       this._options.channel.dispatch('viewFunctionSource', {
          id: this._options.id,
          path: path.concat('options')
@@ -31,12 +39,20 @@ class Details extends Control {
       }, 100);
    }
 
-   private __getTemplate(value: unknown): string {
-      const type = typeof value;
-      if (TEMPLATES.hasOwnProperty(type)) {
-         return TEMPLATES[type];
-      }
-      return TEMPLATES.string;
+   private __viewConstructor(): void {
+      this._options.channel.dispatch('viewConstructor', this._options.id);
+      setTimeout(() => {
+         chrome.devtools.inspectedWindow.eval(
+            'inspect(window.__WASABY_DEV_HOOK__.__constructor)'
+         );
+      }, 100);
+   }
+
+   private __storeAsGlobal(e: Event, path: Array<string | number>): void {
+      this._options.channel.dispatch('storeAsGlobal', {
+         id: this._options.id,
+         path: path.concat('options')
+      });
    }
 
    private __viewTemplate(): void {
