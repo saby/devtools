@@ -4,12 +4,12 @@
     >
         <ws:partial template="{{ __list }}" sourceConfig="{{ __sourceConfig }}">
             <ws:modeController>
-                <Controls.Button
+                <Controls.buttons:Button
                     icon="icon-medium icon-AddButtonNew"
                     caption="Dependency"
                     on:click="__changeView('dependency')"
                 />
-                <Controls.Button
+                <Controls.buttons:Button
                     icon="icon-medium icon-Unfavourite"
                     caption="Dependent"
                     on:click="__changeView('dependent')"
