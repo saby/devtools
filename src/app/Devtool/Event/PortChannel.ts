@@ -5,7 +5,7 @@ import { IMessageData } from "Extension/Event/IContentMessage";
 class PortChannel implements IEventEmitter {
     private __emitter: Emitter;
     private __onmessageHandler: (arg: IMessageData) => void;
-    
+
     constructor(
         private __name: string,
         private __port: chrome.runtime.Port
@@ -14,7 +14,7 @@ class PortChannel implements IEventEmitter {
         this.__onmessageHandler = this.__onmessage.bind(this);
         this.__port.onMessage.addListener(this.__onmessageHandler);
     }
-    
+
     dispatch(event: string, args?: ISerializable): boolean {
         this.__port.postMessage({
             source: this.__name,
@@ -40,12 +40,27 @@ class PortChannel implements IEventEmitter {
         this.__port.onMessage.removeListener(this.__onmessageHandler);
         delete this.__onmessageHandler;
     }
-    
+
     private __onmessage({ source, args, event }: IMessageData) {
         if (source !== this.__name) {
             return;
         }
-        this.__emitter.dispatch(event, args);
+        if (event === 'longMessage') {
+            this.__onLongMessage();
+        } else {
+            this.__emitter.dispatch(event, args);
+        }
+    }
+
+    private __onLongMessage(): void {
+        chrome.devtools.inspectedWindow.eval(
+           'window.__WASABY_DEV_HOOK__.readMessageQueue()',
+           (result: Array<[string, ISerializable?]>) => {
+               result.forEach((event) => {
+                   this.__emitter.dispatch(event[0], event[1]);
+               });
+           }
+        );
     }
 }
 

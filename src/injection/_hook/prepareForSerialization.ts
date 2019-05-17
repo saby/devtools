@@ -5,7 +5,12 @@ function replaceFunctions<T>(value: T): T | string {
    return value;
 }
 
-function decycle<T>(object: T, replacer?: <U>(value: U) => U | string): T {
+function decycle<T>(
+   object: T,
+   options?: {
+      replacer?: <U>(value: U) => U | string,
+      ignore?: string[]
+   }): T {
    // Make a deep copy of an object or array, assuring that there is at most
    // one instance of each object or array in the resulting structure. The
    // duplicate references (which might be forming cycles) are replaced with
@@ -40,8 +45,8 @@ function decycle<T>(object: T, replacer?: <U>(value: U) => U | string): T {
 
       // If a replacer function was provided, then call it to get a replacement value.
 
-      if (replacer !== undefined) {
-         value = replacer(value);
+      if (options && typeof options.replacer === 'function') {
+         value = options.replacer(value);
       }
 
       // typeof null === "object", so go on if this value is really an object but not
@@ -82,6 +87,9 @@ function decycle<T>(object: T, replacer?: <U>(value: U) => U | string): T {
 
             nu = {};
             Object.keys(value).forEach(function(name) {
+               if (options.ignore && options.ignore.indexOf(name) !== -1) {
+                  return;
+               }
                nu[name] = derez(
                   value[name],
                   path + '[' + JSON.stringify(name) + ']'
@@ -94,32 +102,11 @@ function decycle<T>(object: T, replacer?: <U>(value: U) => U | string): T {
    })(object, '$');
 }
 
-// TODO: опции, через которые тянется всё дерево компонентов, поэтому с ними нужно что-то делать. В идеале бы нужно просто заменять их на строки с названием контрола, и соотносить со ссылками на инстансы
-// const LONG_OPTIONS = ['_logicParent', 'opener', '_events', 'content'];
-
-function deleteLongOptions<T>(value: T): T {
-   if (typeof value !== 'object' || value === null) {
-      return value;
-   }
-   const nu = {};
-   Object.keys(value).forEach((key) => {
-      if (key.startsWith('_')) { //TODO: пока игнорирую все приватные опции, иначе невозможно перебрать все места, где сообщение может быть слишком большим.
-         return;
-      } else if (typeof value[key] === 'object' && value[key] !== null) {
-         if (value[key] instanceof Array) {
-            nu[key] = value[key].map((item) => {
-               return deleteLongOptions(item);
-            });
-         } else {
-            nu[key] = deleteLongOptions(value[key]);
-         }
-      } else {
-         nu[key] = value[key];
-      }
-   });
-   return nu;
-}
+const LONG_OPTIONS = ['_logicParent', '_events', 'controlNode', 'content', '_container'];
 
 export default function prepareForSerialization(value: object): object {
-   return decycle(deleteLongOptions(value), replaceFunctions);
+   return decycle(value, {
+      replacer: replaceFunctions,
+      ignore: LONG_OPTIONS
+   });
 }

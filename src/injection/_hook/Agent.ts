@@ -102,7 +102,16 @@ class Agent {
    private __inspectElement(id: IControlNode['id']): void {
       const node = this.elements.get(id);
       if (node) {
-         this.channel.dispatch('inspectedElement', prepareForSerialization({...node, container: null, isControl: !!node.instance}));
+         window.__WASABY_DEV_HOOK__.pushMessage(
+            'inspectedElement',
+            prepareForSerialization({
+               ...node,
+               container: null,
+               instance: null,
+               isControl: !!node.instance
+            })
+         );
+         this.channel.dispatch('longMessage');
       }
    }
 
