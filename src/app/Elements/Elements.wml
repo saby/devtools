@@ -9,11 +9,14 @@
                              {{_selectedItemId === element.id ? 'selected'}}"
                  attr:style="padding-left: {{10 * element.depth}}px;"
                  on:animationend="_onAnimationEnd(element)"
+                 on:mouseenter="__highlightElement(element.id)"
+                 on:mouseleave="__highlightElement()"
                  on:click="_onItemClick(element)">{{element.name}}</div>
          </ws:for>
       </Controls.scroll:Container>
       <ws:if data="{{_inspectedItem}}">
          <Elements.Details.Details scope="{{_inspectedItem}}"
+                                   attr:key="{{_inspectedItem.id}}"
                                    channel="{{_channel}}" />
       </ws:if>
    </ws:if>

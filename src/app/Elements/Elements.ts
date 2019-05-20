@@ -90,6 +90,10 @@ class Elements extends Control {
       }
    }
 
+   private __highlightElement(e: Event, id?: IControlNode['id']): void {
+      this._channel.dispatch('highlightElement', id);
+   }
+
    private __selectElement(id: IControlNode['id']): void {
       this._selectedItemId = id;
       this._channel.dispatch('inspectElement', this._selectedItemId);

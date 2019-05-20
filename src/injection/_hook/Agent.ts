@@ -22,6 +22,7 @@ class Agent {
       this.channel.addListener('storeAsGlobal', this.__storeAsGlobal.bind(this));
       this.channel.addListener('getSelectedItem', this.__getSelectedItem.bind(this));
       this.channel.addListener('viewFunctionSource', this.__viewFunctionSource.bind(this));
+      this.channel.addListener('highlightElement', this.__highlightElement.bind(this));
       this.channel.addListener('hideOverlay', () => {
          this.__toggleSelectFromPage(false);
       });
@@ -162,6 +163,24 @@ class Agent {
          value = value[currentProperty];
       }
       return value;
+   }
+
+   private __highlightElement(id?: IControlNode['id']): void {
+      if (!this.overlay) {
+         this.overlay = new Overlay();
+      }
+
+      if (!id) {
+         this.overlay.remove();
+         return;
+      }
+
+      const node = this.elements.get(id);
+      if (node && node.instance && node.instance._container) {
+         this.overlay.inspect(node.instance._container, node.name);
+      } else {
+         this.overlay.remove();
+      }
    }
 
    private __toggleSelectFromPage(state: boolean): void {
