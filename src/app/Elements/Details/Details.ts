@@ -27,10 +27,10 @@ class Details extends Control {
       return TEMPLATES.string;
    }
 
-   private __viewFunctionSource(e: Event, path: Array<string | number>): void {
+   private __viewFunctionSource(e: Event, rootField: string, path: Array<string | number>): void {
       this._options.channel.dispatch('viewFunctionSource', {
          id: this._options.id,
-         path: path.concat('options')
+         path: path.concat(rootField)
       });
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(

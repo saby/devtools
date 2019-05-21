@@ -1,6 +1,6 @@
 export enum OperationType {
-    REMOVE,
-    ADD,
+    DELETE,
+    CREATE,
     REORDER,
     UPDATE
 }

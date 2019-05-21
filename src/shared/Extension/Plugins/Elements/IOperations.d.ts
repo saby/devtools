@@ -7,8 +7,8 @@ export interface IOperationEvent extends IMessageData {
 }
 
 type OperationPayload =
-   | [OperationType.REMOVE, IControlNode['id']]
+   | [OperationType.DELETE, IControlNode['id']]
    | [OperationType.UPDATE, IControlNode['id']]
-   | [OperationType.ADD, IControlNode['id'], IControlNode['name']] //add root
-   | [OperationType.ADD, IControlNode['id'], IControlNode['name'], IControlNode['parentId']] //add leaf
+   | [OperationType.CREATE, IControlNode['id'], IControlNode['name']] //add root
+   | [OperationType.CREATE, IControlNode['id'], IControlNode['name'], IControlNode['parentId']] //add leaf
    | [OperationType.REORDER, IControlNode['id'], number, ...Array<IControlNode['id']>];

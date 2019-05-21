@@ -66,13 +66,13 @@ class Elements extends Control {
 
    protected _operationHandler(args: IOperationEvent['args']): void {
       switch (args[0]) {
-         case OperationType.REMOVE:
+         case OperationType.DELETE:
             this.__removeNode(args[1]);
             break;
          case OperationType.UPDATE:
             this.__highlightNode(args[1]);
             break;
-         case OperationType.ADD:
+         case OperationType.CREATE:
             if (args.length === 4) {
                this.__addNode(args[1], args[2], args[3]);
             }
@@ -80,6 +80,13 @@ class Elements extends Control {
          case OperationType.REORDER:
             break;
       }
+   }
+
+   protected __updateNode(id: IControlNode['id']): void {
+      if (this._selectedItemId === id) {
+         this._channel.dispatch('inspectElement', this._selectedItemId);
+      }
+      this.__highlightNode(id);
    }
 
    protected _onAnimationEnd(e: Event, element: IControlNode): void {
@@ -109,7 +116,7 @@ class Elements extends Control {
       name: IControlNode['name'],
       parentId?: IControlNode['parentId']
    ): void {
-      if (!parentId || parentId === '_') { //TODO: Controls/Application/Core строится в отдельной ветке из app-start, надо вклиниваться где-то в другом месте
+      if (!parentId) {
          this._elements.push({
             id,
             name,

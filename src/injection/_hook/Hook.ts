@@ -16,6 +16,14 @@ export class Hook implements IWasabyDevHook {
       this.agent.handleOperation(typeOfOperation, node);
    }
 
+   onStartSync(rootId: IControlNode['id']): void {
+
+   }
+
+   onEndSync(rootId: IControlNode['id']): void {
+
+   }
+
    init(): void {
       // TODO: поменять цвет иконки, создать вкладку в дев тулзах, загрузить плагины, навесить всякие обработчики
    }

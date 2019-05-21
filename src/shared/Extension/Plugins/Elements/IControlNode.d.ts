@@ -6,11 +6,14 @@ export interface ITemplateNode {
    container?: HTMLElement;
    options?: object;
    attributes?: Record<string, string>;
-   eventHandlers?: Record<string, Function>;
+   eventHandlers?: Record<
+      string,
+      Array<{ function: Function; arguments: unknown[] }>
+   >;
    parentId?: ITemplateNode['id'];
 }
 
 export interface IControlNode extends ITemplateNode {
-   instance?: Function;
+   instance?: object;
    state?: object;
 }

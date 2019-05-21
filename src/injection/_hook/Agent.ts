@@ -15,14 +15,35 @@ class Agent {
    private mouseMoveHandler?: (e: MouseEvent) => void;
 
    constructor() {
-      this.channel.addListener('devtoolsInitialized', this.__onDevtoolsOpened.bind(this));
-      this.channel.addListener('inspectElement', this.__inspectElement.bind(this));
+      this.channel.addListener(
+         'devtoolsInitialized',
+         this.__onDevtoolsOpened.bind(this)
+      );
+      this.channel.addListener(
+         'inspectElement',
+         this.__inspectElement.bind(this)
+      );
       this.channel.addListener('viewTemplate', this.__viewTemplate.bind(this));
-      this.channel.addListener('viewConstructor', this.__viewConstructor.bind(this));
-      this.channel.addListener('storeAsGlobal', this.__storeAsGlobal.bind(this));
-      this.channel.addListener('getSelectedItem', this.__getSelectedItem.bind(this));
-      this.channel.addListener('viewFunctionSource', this.__viewFunctionSource.bind(this));
-      this.channel.addListener('highlightElement', this.__highlightElement.bind(this));
+      this.channel.addListener(
+         'viewConstructor',
+         this.__viewConstructor.bind(this)
+      );
+      this.channel.addListener(
+         'storeAsGlobal',
+         this.__storeAsGlobal.bind(this)
+      );
+      this.channel.addListener(
+         'getSelectedItem',
+         this.__getSelectedItem.bind(this)
+      );
+      this.channel.addListener(
+         'viewFunctionSource',
+         this.__viewFunctionSource.bind(this)
+      );
+      this.channel.addListener(
+         'highlightElement',
+         this.__highlightElement.bind(this)
+      );
       this.channel.addListener('hideOverlay', () => {
          this.__toggleSelectFromPage(false);
       });
@@ -33,8 +54,8 @@ class Agent {
       const data = [];
 
       this.elements.forEach((value) => {
-         const {id, name, parentId}: IControlNode = value;
-         data.push({id, name, parentId});
+         const { id, name, parentId }: IControlNode = value;
+         data.push({ id, name, parentId });
       });
 
       this.channel.dispatch('setInitialTree', data);
@@ -42,10 +63,10 @@ class Agent {
 
    handleOperation(operation: OperationType, node: IControlNode): void {
       switch (operation) {
-         case OperationType.REMOVE:
+         case OperationType.DELETE:
             this.__handleRemove(node);
             break;
-         case OperationType.ADD:
+         case OperationType.CREATE:
             this.__handleAdd(node);
             break;
          case OperationType.REORDER:
@@ -60,7 +81,11 @@ class Agent {
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent['args'] = [OperationType.ADD, node.id, node.name];
+         const message: IOperationEvent['args'] = [
+            OperationType.CREATE,
+            node.id,
+            node.name
+         ];
          if (node.parentId) {
             message.push(node.parentId);
          }
@@ -69,11 +94,13 @@ class Agent {
    }
 
    private __handleUpdate(node: IControlNode): void {
-      node.parentId = this.elements.get(node.id).parentId; //TODO: костыль, потому что при апдейте пока непонятно откуда брать parentId
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent['args'] = [OperationType.UPDATE, node.id];
+         const message: IOperationEvent['args'] = [
+            OperationType.UPDATE,
+            node.id
+         ];
          this.channel.dispatch('operation', message);
       }
    }
@@ -83,7 +110,10 @@ class Agent {
       this.__removeChildren(node.id);
 
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent['args'] = [OperationType.REMOVE, node.id];
+         const message: IOperationEvent['args'] = [
+            OperationType.DELETE,
+            node.id
+         ];
          this.channel.dispatch('operation', message);
       }
    }
@@ -91,10 +121,16 @@ class Agent {
    private __removeChildren(id: IControlNode['id']): void {
       const parents: Array<IControlNode['parentId']> = [];
       this.elements.forEach((element, key) => {
-         if (element.parentId === id || parents.indexOf(element.parentId) !== -1) {
+         if (
+            element.parentId === id ||
+            parents.indexOf(element.parentId) !== -1
+         ) {
             this.elements.delete(key);
             parents.push(key);
-            const message: IOperationEvent['args'] = [OperationType.REMOVE, key];
+            const message: IOperationEvent['args'] = [
+               OperationType.DELETE,
+               key
+            ];
             this.channel.dispatch('operation', message);
          }
       });
@@ -107,6 +143,7 @@ class Agent {
             'inspectedElement',
             prepareForSerialization({
                ...node,
+               eventHandlers: this.__getEvents(id),
                container: null,
                instance: null,
                isControl: !!node.instance
@@ -155,9 +192,13 @@ class Agent {
       id: IControlNode['id'],
       path: Array<string | number>
    ): unknown {
-      const node = this.elements.get(id);
       let currentProperty = path.pop();
-      let value = node[currentProperty];
+      let value;
+      if (currentProperty === 'eventHandlers') {
+         value = this.__getEvents(id);
+      } else {
+         value = this.elements.get(id)[currentProperty];
+      }
       while (path.length) {
          currentProperty = path.pop();
          value = value[currentProperty];
@@ -211,7 +252,11 @@ class Agent {
       let currentElement = element;
       while (currentElement) {
          if (currentElement.controlNodes) {
-            return this.elements.get(currentElement.controlNodes[currentElement.controlNodes.length - 1].key);
+            return this.elements.get(
+               currentElement.controlNodes[
+                  currentElement.controlNodes.length - 1
+               ].key
+            );
          }
          currentElement = currentElement.parentElement;
       }
@@ -219,11 +264,53 @@ class Agent {
    }
 
    private __getSelectedItem(): void {
-      const node = this.__findControlByDomNode(window.__WASABY_DEV_HOOK__.$0) || this.elements.values().next().value;
+      const node =
+         this.__findControlByDomNode(window.__WASABY_DEV_HOOK__.$0) ||
+         this.elements.values().next().value;
       if (node && this.previousSelectedItemId !== node.id) {
          this.channel.dispatch('setSelectedItem', node.id);
          this.previousSelectedItemId = node.id;
       }
+   }
+
+   private __getEvents(
+      id: IControlNode['id']
+   ): Record<string, Array<{ func: Function; args: unknown[] }>> {
+      /*
+      TODO: пока только для контролов, потому что я не имею доступа к контейнерам шаблонов
+       */
+      const node = this.elements.get(id);
+      const events: Record<
+         string,
+         Array<{ function: Function; arguments: unknown[] }>
+      > = {};
+      if (
+         node &&
+         node.instance &&
+         node.instance._container &&
+         node.instance._container.eventProperties
+      ) {
+         Object.keys(node.instance._container.eventProperties).forEach(
+            (key) => {
+               events[key.slice(3)] = node.instance._container.eventProperties[
+                  key
+               ].map((handler) => {
+                  if (handler.fn.control[handler.value]) {
+                     return {
+                        function: handler.fn.control[handler.value],
+                        arguments: handler.args
+                     };
+                  } else {
+                     return {
+                        function: handler.fn,
+                        arguments: handler.args
+                     };
+                  }
+               });
+            }
+         );
+      }
+      return events;
    }
 }
 
