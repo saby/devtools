@@ -18,10 +18,12 @@ import {
     IModulesDependencyMap
 } from "Extension/Plugins/DependencyWatcher/Module";
 import { applyWhere } from "./util/applyWhere";
-import { applyOrderBy } from "./util/applyOrderBy";
+import { orderBy } from "./list/orderBy";
 import { applyPaging } from "./util/applyPaging";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { deserialize } from "./util/id";
+import { SortFunction } from "./list/Sort";
+import { sortFunctions } from "./list/sortFunctions";
 
 export interface ISourceConfig {
     rpc: RPC;
@@ -52,6 +54,7 @@ export abstract class Abstract<
     TFilter extends IFilterData = IFilterData
 > implements ICrud {
     protected _rpc: RPC;
+    protected _sortFunctions: SortFunction<TTreeData>[] = sortFunctions;
     private __lastQueryResult: DependenciesRecord;
     private __lastBundles: Bundles;
     constructor({ rpc, idProperty }: ISourceConfig) {
@@ -66,7 +69,7 @@ export abstract class Abstract<
                 countAfterFilter = set.length;
                 return set;
             }).
-            then(applyOrderBy<TTreeData>(query.getOrderBy())).
+            then(orderBy<TTreeData>(query.getOrderBy(), this._sortFunctions)).
             then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).
             then((data: TTreeData[]) => {
                 

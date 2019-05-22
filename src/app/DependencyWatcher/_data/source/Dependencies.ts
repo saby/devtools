@@ -7,7 +7,8 @@ import { Query } from 'Types/source';
 import { LeafType, dependency, IMarker } from "../types";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { findFile } from "./util/findFile";
-import * as markers from "../markers";
+import { SortFunction } from "./list/Sort";
+import { sortFunctions } from "./dependencies/sortFunctions";
 
 let hasChild = (dependencies?: IModuleDependency): boolean => {
     if (!dependencies) {
@@ -66,7 +67,8 @@ export class Dependencies<
     TFilter extends dependency.IFilterData = dependency.IFilterData
 > extends Abstract<dependency.Item, TFilter> {
     private readonly _fileModuleUsing: Map<string, Set<string>> = new Map();
-    protected _query(query: Query<TFilter>): Promise<dependency.Item[]> {
+    protected _sortFunctions: SortFunction<dependency.Item>[] = sortFunctions;
+    protected _query(query: Query): Promise<dependency.Item[]> {
         console.log('Dependencies => _query:', query);
         const { parent } = query.getWhere();
     
