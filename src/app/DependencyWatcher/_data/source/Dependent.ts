@@ -6,7 +6,6 @@ import { deserialize, serialize } from "./util/id";
 import { dependent } from "../types";
 // @ts-ignore
 import { Query } from 'Types/source';
-import * as markers from "../markers";
 
 type Cache = Record<string, [DependencyType, string][]>;
 
@@ -83,7 +82,7 @@ export class Dependent<
                     id: serialize(name),
                     parent,
                     child: !isGlobal(name) || null,
-                    markers: type == DependencyType.dynamic? [markers.dynamic]: undefined
+                    isDynamic: type == DependencyType.dynamic
                 }
             });
         });

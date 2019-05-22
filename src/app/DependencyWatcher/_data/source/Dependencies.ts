@@ -4,7 +4,7 @@ import { Abstract } from "./Abstract";
 import { deserialize, serialize } from "./util/id";
 // @ts-ignore
 import { Query } from 'Types/source';
-import { LeafType, dependency, IMarker } from "../types";
+import { dependency, LeafType } from "../types";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { findFile } from "./util/findFile";
 import { SortFunction } from "./list/Sort";
@@ -23,15 +23,39 @@ let createItem = (
     type: LeafType,
     parent: string | undefined,
     child: boolean,
-    markers?: IMarker[]
+    isDynamic?: boolean
 ): dependency.Item => {
     return {
         name,
         id: serialize(name, type),
         parent,
         child: child || null,
-        type,
-        markers
+        type: type,
+        isDynamic,
+    }
+};
+
+let createFile = (
+    name: string,
+    parent: string | undefined,
+    isDynamic?: boolean
+): dependency.ItemFile => {
+    let file = <dependency.ItemFile> createItem(name, LeafType.file, parent, true, isDynamic);
+    return {
+        ...file
+    }
+};
+let createModule = (
+    name: string,
+    parent: string | undefined,
+    child: boolean,
+    isDynamic: boolean = false,
+    notUsed: boolean = false
+): dependency.ItemModule => {
+    let module = <dependency.ItemModule> createItem(name, LeafType.module, parent, child, isDynamic);
+    return {
+        ...module,
+        notUsed
     }
 };
 
@@ -110,12 +134,12 @@ export class Dependencies<
         ]).then(([bundle, modules]) => {
             return bundle.map((moduleName) => {
                 let subDependencies = modules.get(moduleName);
-                return <dependency.ItemModule> createItem(
+                return createModule(
                     moduleName,
-                    LeafType.module,
                     id,
                     hasChild(subDependencies),
-                    this.__isUsingInFile(id, moduleName)? undefined: [ markers.notUsedBundleModule ]
+                    false,
+                    !this.__isUsingInFile(id, moduleName)
                 );
             });
         });
@@ -152,12 +176,11 @@ export class Dependencies<
                 if (!fileName) {
                     let subDependencies = modules.get(moduleName);
                     items.push(
-                        createItem(
+                        createModule(
                             moduleName,
-                            LeafType.module,
                             id,
                             hasChild(subDependencies),
-                            isDynamic? [ markers.dynamic ]: undefined
+                            isDynamic
                         )
                     );
                     return;
@@ -179,17 +202,15 @@ export class Dependencies<
         isDynamic: boolean,
         id?: string,
     ) {
-        let file = <dependency.ItemFile> files.get(fileName) || createItem(
+        let file = <dependency.ItemFile> files.get(fileName) || createFile(
             fileName,
-            LeafType.file,
             id,
-            true,
-            isDynamic? [ markers.dynamic ]: []
+            isDynamic
         );
     
         // файл является динамической зависимостью только тогда, когда все модули от которых мы зависим в нём тоже динамические
-        if (!isDynamic && file.markers && file.markers.includes(markers.dynamic)) {
-            file.markers = file.markers.filter(m => m !== markers.dynamic);
+        if (!isDynamic && file.isDynamic) {
+            file.isDynamic = false;
         }
     
         this.__addUsingFile(file.id, moduleName);
