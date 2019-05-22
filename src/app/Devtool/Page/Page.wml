@@ -1,5 +1,6 @@
 <div
     class="Devtool_Page"
+    on:serviceError="PopupGlobal._openDialogHandler()"
 >
     <Controls.Tabs.Buttons
         bind:selectedKey="_activeTab"
@@ -25,4 +26,5 @@
             </ws:Array>
         </ws:items>
     </Controls.SwitchableArea>
+    <Controls.Popup.Global name="PopupGlobal" />
 </div>
