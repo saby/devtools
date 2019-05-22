@@ -1,16 +1,17 @@
-import { source, types, markers } from "../../data";
+import { types } from "../../data";
 // @ts-ignore
 import { Model } from 'Types/entity';
 // @ts-ignore
 import { view as viewConstants } from "Controls/Constants";
+// @ts-ignore
+import { rk } from 'Core/i18n';
 
 export let grouping = <T extends types.ListItem>(item: Model<T>): string | void => {
-    let itemMarkers: types.IMarker[] = item.get('markers') || [];
-    if (itemMarkers.some((marker) => (marker.type === markers.notUsedBundleModule.type))) {
-        return markers.notUsedBundleModule.type
+    if (!item.get('parent')) {
+        return viewConstants.hiddenGroup;
     }
-    if (itemMarkers.some((marker) => (marker.type === markers.dynamic.type))) {
-        return markers.dynamic.type
+    if (item.get('isDynamic')) {
+        return rk('Динамические зависимости');
     }
     return viewConstants.hiddenGroup;
 };

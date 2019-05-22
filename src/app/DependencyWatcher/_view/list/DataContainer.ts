@@ -4,6 +4,7 @@ import * as Control from 'Core/Control';
 import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
 import { source } from "../../data";
 import { Columns } from "./column";
+import { grouping } from "./grouping";
 // @ts-ignore
 import { ColumnTemplate } from "Controls/grid";
 
@@ -57,7 +58,5 @@ export default class Main extends Control {
         this.__filterObject = value;
     }
     
-    private __groupingCallback(item: unknown) {
-        return viewConstants.hiddenGroup;
-    }
+    private __groupingCallback = grouping
 }

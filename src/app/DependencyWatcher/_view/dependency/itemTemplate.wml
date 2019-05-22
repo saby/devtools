@@ -1,0 +1,27 @@
+<Controls.grid:ColumnTemplate
+    itemData="{{ itemData }}"
+/>
+<!--<ws:template name="defaultCellContent">-->
+
+<!--</ws:template>-->
+<!--<div class="controls-Grid__row-cell__content controls-Grid__row-cell__content_baseline_L">-->
+<!--    <ws:if data="{{ itemData.item['isDynamic'] }}">-->
+<!--        <Controls.buttons:Button-->
+<!--                icon="{{ marker.icon }}"-->
+<!--                readOnly="{{ true }}"-->
+<!--                tooltip="{{ marker.title }}"-->
+<!--        />-->
+<!--    </ws:if>-->
+<!--    <ws:if data="{{ itemData.column.needSearchHighlight }}">-->
+<!--        <Controls.decorator:Highlight highlight="{{ itemData.searchValue }}">-->
+<!--            <ws:text>-->
+<!--                <ws:String>-->
+<!--                    {{ itemData.item['module'] }}-->
+<!--                </ws:String>-->
+<!--            </ws:text>-->
+<!--        </Controls.decorator:Highlight>-->
+<!--    </ws:if>-->
+<!--    <ws:else>-->
+<!--        {{ itemData.item['module'] }}-->
+<!--    </ws:else>-->
+<!--</div>-->
