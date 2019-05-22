@@ -5,7 +5,7 @@ import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
 import { source } from "../../data";
 import { Columns } from "./column";
 // @ts-ignore
-import { view as viewConstants } from "Controls/Constants";
+import { ColumnTemplate } from "Controls/grid";
 
 type Children = {
     list: Control;
@@ -19,9 +19,9 @@ interface IConfig {
     sourceConfig: source.IConfig;
     Source: SourceConstructor;
     navigation: object;
-    column: Columns;
     modeController?: Control;
     grouping<T>(item:T): string;
+    itemTemplate?: Function;
 }
 
 export default class Main extends Control {
@@ -34,7 +34,13 @@ export default class Main extends Control {
         super(cfg);
         this.__source = new cfg.Source(cfg.sourceConfig);
         this.__navigation = cfg.navigation;
-        this.__column = cfg.column;
+        this.__column = [
+            {
+                title: 'module',
+                displayProperty: 'name',
+                template: cfg.itemTemplate || ColumnTemplate
+            }
+        ];
     }
     private _root: string| void;
     __changeRoot(event: unknown, id: string) {

@@ -8,7 +8,6 @@ import { grouping } from "../list/grouping";
 
 export default class List extends Control {
     protected _template = template;
-    private __column = columns;
     private __navigation = {};
     private __source = source.Dependencies;
     private __sourceOption: object;

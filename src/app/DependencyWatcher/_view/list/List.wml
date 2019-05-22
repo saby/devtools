@@ -4,5 +4,6 @@
     navigation="{{ __navigation }}"
     column="{{ __column }}"
     grouping="{{ __grouping }}"
+    itemTemplate="{{ __itemTemplate }}"
     modeController="{{ _options.modeController }}"
 />
