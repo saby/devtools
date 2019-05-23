@@ -50,6 +50,10 @@ const WASABY_MODULES = [
   {
     "name": "Inferno",
     "path": "sbis3-ws/Inferno"
+  },
+  {
+    "name": "UI",
+    "path": "saby-ui/UI"
   }
 ].map(({ path, ...config}) => {
   return {
