@@ -2,8 +2,6 @@
 import Control = require('Core/Control');
 // @ts-ignore
 import template = require('wml!Elements/Elements');
-// @ts-ignore
-import { descriptor } from 'Types/entity';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';

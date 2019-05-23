@@ -18,6 +18,9 @@ interface IOptions extends IControlNode {
 class Details extends Control {
    protected _template: Function = template;
    protected readonly _options: Readonly<IOptions>;
+   protected _optionsExpanded: boolean = true;
+   protected _stateExpanded: boolean = true;
+   protected _eventsExpanded: boolean = false;
 
    private __getTemplate(value: unknown): string {
       const type = typeof value;
@@ -48,10 +51,19 @@ class Details extends Control {
       }, 100);
    }
 
-   private __storeAsGlobal(e: Event, path: Array<string | number>): void {
+   private __viewContainer(): void {
+      this._options.channel.dispatch('viewContainer', this._options.id);
+      setTimeout(() => {
+         chrome.devtools.inspectedWindow.eval(
+            'inspect(window.__WASABY_DEV_HOOK__.__container)'
+         );
+      }, 100);
+   }
+
+   private __storeAsGlobal(e: Event, rootField: string, path: Array<string | number>): void {
       this._options.channel.dispatch('storeAsGlobal', {
          id: this._options.id,
-         path: path.concat('options')
+         path: path.concat(rootField)
       });
    }
 
@@ -62,6 +74,20 @@ class Details extends Control {
             'inspect(window.__WASABY_DEV_HOOK__.__template)'
          );
       }, 100);
+   }
+
+   private __toggleExpanded(e: Event, tabName: 'state' | 'options' | 'events'): void {
+      switch (tabName) {
+         case 'options':
+            this._optionsExpanded = !this._optionsExpanded;
+            break;
+         case 'state':
+            this._stateExpanded = !this._stateExpanded;
+            break;
+         case 'events':
+            this._eventsExpanded = !this._eventsExpanded;
+            break;
+      }
    }
 
    // static getOptionTypes(): Record<keyof IOptions, unknown> {

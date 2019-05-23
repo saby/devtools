@@ -29,6 +29,10 @@ class Agent {
          this.__viewConstructor.bind(this)
       );
       this.channel.addListener(
+         'viewContainer',
+         this.__viewContainer.bind(this)
+      );
+      this.channel.addListener(
          'storeAsGlobal',
          this.__storeAsGlobal.bind(this)
       );
@@ -150,6 +154,8 @@ class Agent {
             })
          );
          this.channel.dispatch('longMessage');
+
+         window.$wasaby = { ...node };
       }
    }
 
@@ -164,6 +170,13 @@ class Agent {
       const node = this.elements.get(id);
       if (node && node.instance) {
          window.__WASABY_DEV_HOOK__.__constructor = node.instance.constructor;
+      }
+   }
+
+   private __viewContainer(id: IControlNode['id']): void {
+      const node = this.elements.get(id);
+      if (node && node.instance) {
+         window.__WASABY_DEV_HOOK__.__container = node.instance._container;
       }
    }
 
@@ -252,6 +265,14 @@ class Agent {
       let currentElement = element;
       while (currentElement) {
          if (currentElement.controlNodes) {
+            if (
+               this.previousSelectedItemId &&
+               currentElement.controlNodes.find(
+                  (node) => node.key === this.previousSelectedItemId
+               )
+            ) {
+               return this.elements.get(this.previousSelectedItemId);
+            }
             return this.elements.get(
                currentElement.controlNodes[
                   currentElement.controlNodes.length - 1
@@ -275,7 +296,7 @@ class Agent {
 
    private __getEvents(
       id: IControlNode['id']
-   ): Record<string, Array<{ func: Function; args: unknown[] }>> {
+   ): Record<string, Array<{ function: Function; arguments: unknown[] }>> {
       /*
       TODO: пока только для контролов, потому что я не имею доступа к контейнерам шаблонов
        */
