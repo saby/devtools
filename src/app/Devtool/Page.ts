@@ -8,7 +8,7 @@ import 'css!Controls/Application/Application';
 
 class Extension extends Control {
    protected _template: Function = template;
-   protected _activeTab: string = 'Dependencies';
+   protected _activeTab: string = 'Elements';
    protected _tabsSource: Memory = new Memory({
       idProperty: '',
       data: [
