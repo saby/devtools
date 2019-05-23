@@ -1,29 +1,23 @@
 import Control = require('Core/Control');
-import template = require('wml!Elements/Details/templates/StringTemplate');
+import template = require('wml!Elements/Details/templates/BooleanTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
 
 interface IOptions extends ITemplateOptions {
-   value: string;
+   value: boolean;
 }
 
-class StringTemplate extends Control {
+class BooleanTemplate extends Control {
    protected _template: Function = template;
    protected readonly _options: Readonly<IOptions>;
 
-   private _handleClick(): void {
-      if (this._options.value.startsWith('function ')) {
-         this._notify('viewFunctionSource', [[this._options.name]]);
-      }
-   }
-
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
-         value: descriptor(String).required(),
+         value: descriptor(Boolean).required(),
          name: descriptor(String, Number).required()
       };
    }
 }
 
 // TODO: ws:partial плохо работатает с дефолтными экспортами, надо будет раскопать почему
-export = StringTemplate;
+export = BooleanTemplate;

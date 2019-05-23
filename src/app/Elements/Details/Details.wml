@@ -12,7 +12,7 @@
                               style="secondary" />
    </div>
    <ws:if data="{{ _optionsExpanded }}">
-      <Controls.scroll:Container>
+      <Controls.scroll:Container attr:class="Details__tabContent">
          <ws:for data="key, value in _options.options">
             <ws:partial template="{{__getTemplate(value)}}"
                         name="{{key}}"
@@ -32,7 +32,7 @@
                                  style="secondary" />
       </div>
       <ws:if data="{{ _stateExpanded }}">
-         <Controls.scroll:Container>
+         <Controls.scroll:Container attr:class="Details__tabContent">
             <ws:for data="key, value in _options.state">
                <ws:partial template="{{__getTemplate(value)}}"
                            name="{{key}}"
@@ -51,7 +51,7 @@
                                  style="secondary" />
       </div>
       <ws:if data="{{ _eventsExpanded }}">
-         <Controls.scroll:Container>
+         <Controls.scroll:Container attr:class="Details__tabContent">
             <ws:for data="key, value in _options.eventHandlers">
                <ws:partial template="{{__getTemplate(value)}}"
                            name="{{key}}"

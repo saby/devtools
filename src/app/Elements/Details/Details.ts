@@ -9,6 +9,7 @@ import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import './templates/StringTemplate';
 import './templates/NumberTemplate';
 import './templates/ObjectTemplate';
+import './templates/BooleanTemplate';
 import 'css!Elements/Details/Details';
 
 interface IOptions extends IControlNode {
