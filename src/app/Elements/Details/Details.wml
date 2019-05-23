@@ -1,10 +1,19 @@
 <div attr:class="Details">
-   <div>
-     <div on:click="__viewTemplate()">View template</div>
-     <div if="{{_options.isControl}}" on:click="__viewConstructor()">View constructor</div>
-     <div if="{{_options.isControl}}" on:click="__viewContainer()">View DOM element</div>
+   <div attr:class="Details__buttons">
+      <Controls.buttons:Button caption="View template"
+                               viewMode="link"
+                               on:click="__viewTemplate()" />
+      <Controls.buttons:Button if="{{_options.isControl}}"
+                               caption="View constructor"
+                               viewMode="link"
+                               on:click="__viewConstructor()" />
+      <Controls.buttons:Button if="{{_options.isControl}}"
+                               caption="View DOM element"
+                               viewMode="link"
+                               on:click="__viewContainer()" />
    </div>
-   <div on:click="__toggleExpanded('options')">
+   <div attr:class="Details__header"
+        on:click="__toggleExpanded('options')">
       <Controls.buttons:Button icon="{{_optionsExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
                                viewMode="link" />
       <Controls.heading:Title caption="Options"
@@ -24,7 +33,8 @@
       </Controls.scroll:Container>
    </ws:if>
    <ws:if data="{{_options.isControl}}">
-      <div on:click="__toggleExpanded('state')">
+      <div attr:class="Details__header"
+           on:click="__toggleExpanded('state')">
          <Controls.buttons:Button icon="{{_stateExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
                                   viewMode="link" />
          <Controls.heading:Title caption="State"
@@ -43,7 +53,8 @@
             </ws:for>
          </Controls.scroll:Container>
       </ws:if>
-      <div on:click="__toggleExpanded('events')">
+      <div attr:class="Details__header"
+           on:click="__toggleExpanded('events')">
          <Controls.buttons:Button icon="{{_eventsExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
                                   viewMode="link" />
          <Controls.heading:Title caption="Events"

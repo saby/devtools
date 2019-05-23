@@ -11,10 +11,8 @@ class StringTemplate extends Control {
    protected _template: Function = template;
    protected readonly _options: Readonly<IOptions>;
 
-   private _handleClick(): void {
-      if (this._options.value.startsWith('function ')) {
-         this._notify('viewFunctionSource', [[this._options.name]]);
-      }
+   private __viewFunctionSource(): void {
+      this._notify('viewFunctionSource', [[this._options.name]]);
    }
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
