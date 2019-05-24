@@ -18,11 +18,13 @@
                           on:storeAsGlobal="__storeAsGlobal()"
                           bind:expanded="_optionsExpanded"/>
    <ws:if data="{{_options.isControl}}">
-      <Elements.Details.Pane caption="State"
-                             data="{{_options.state}}"
-                             on:viewFunctionSource="__viewFunctionSource()"
-                             on:storeAsGlobal="__storeAsGlobal()"
-                             bind:expanded="_stateExpanded"/>
+      <ws:if data="{{ _options.state }}">
+         <Elements.Details.Pane caption="State"
+                                data="{{_options.state}}"
+                                on:viewFunctionSource="__viewFunctionSource()"
+                                on:storeAsGlobal="__storeAsGlobal()"
+                                bind:expanded="_stateExpanded"/>
+      </ws:if>
       <Elements.Details.Pane caption="Events"
                              data="{{_options.events}}"
                              canStoreAsGlobal="{{false}}"

@@ -23,6 +23,7 @@ class Elements extends Control {
         }> = [];
    protected _channel: ContentChannel = new ContentChannel('elements');
    protected _highlightedElements: Set<IControlNode['id']> = new Set();
+   protected _collapsedNodes: Set<IControlNode['id']> = new Set();
 
    constructor() {
       super();
@@ -150,7 +151,10 @@ class Elements extends Control {
    }
 
    private __highlightNode(id: IControlNode['id']): void {
-      this._highlightedElements.add(id);
+      const elementIndex = this._elements.findIndex((element) => element.id === id);
+      if (this.__isVisible(elementIndex, this._elements[elementIndex].depth)) {
+         this._highlightedElements.add(id);
+      }
    }
 
    private __getDepth(parentId?: IControlNode['parentId']): number {
@@ -161,6 +165,31 @@ class Elements extends Control {
          }
       }
       return 0;
+   }
+
+   private __isVisible(index: number, startDepth: number): boolean {
+      if (this._collapsedNodes.size > 0) {
+         let currentDepth = startDepth;
+         for (let i = index - 1; i >= 0; i--) {
+            if (this._elements[i].depth < currentDepth) {
+               currentDepth--;
+               if (this._collapsedNodes.has(this._elements[i].id)) {
+                  return false;
+               }
+            }
+         }
+      }
+      return true;
+   }
+
+   private __toggleCollapsed(e: Event, id: IControlNode['id']): void {
+      e.stopPropagation();
+      if (this._collapsedNodes.has(id)) {
+         this._collapsedNodes.delete(id);
+      } else {
+         this._collapsedNodes.add(id);
+      }
+      this._forceUpdate();
    }
 }
 

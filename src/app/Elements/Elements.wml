@@ -3,15 +3,24 @@
       <Controls.scroll:Container
          attr:class="Elements__tree"
       >
-         <ws:for data="element in _elements">
-            <div attr:key="{{element.id}}"
-                 attr:class="{{_highlightedElements.has(element.id) ? 'flash'}}
+         <ws:for data="index, element in _elements">
+            <ws:if data="{{ __isVisible(index, element.depth) }}">
+               <div attr:key="{{element.id}}"
+                    attr:class="{{_highlightedElements.has(element.id) ? 'flash'}}
                              {{_selectedItemId === element.id ? 'selected'}}"
-                 attr:style="padding-left: {{10 * element.depth}}px;"
-                 on:animationend="_onAnimationEnd(element)"
-                 on:mouseenter="__highlightElement(element.id)"
-                 on:mouseleave="__highlightElement()"
-                 on:click="_onItemClick(element)">{{element.name}}</div>
+                    attr:style="padding-left: {{10 * element.depth}}px;"
+                    on:animationend="_onAnimationEnd(element)"
+                    on:mouseenter="__highlightElement(element.id)"
+                    on:mouseleave="__highlightElement()"
+                    on:click="_onItemClick(element)">
+                  <ws:if data="{{ _elements[index + 1] && _elements[index + 1].depth > element.depth }}">
+                     <Controls.buttons:Button icon="{{_collapsedNodes.has(element.id) ? 'icon-DayForward' : 'icon-ArrowDown'}} icon-small"
+                                              viewMode="link"
+                                              on:click="__toggleCollapsed(element.id)" />
+                  </ws:if>
+                  {{element.name}}
+               </div>
+            </ws:if>
          </ws:for>
       </Controls.scroll:Container>
       <ws:if data="{{_inspectedItem}}">
