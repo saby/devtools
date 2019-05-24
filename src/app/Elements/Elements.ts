@@ -106,7 +106,14 @@ class Elements extends Control {
 
    private __removeNode(id: IControlNode['id']): void {
       const nodeIndex = this._elements.findIndex((node) => node.id === id);
-      this._elements.splice(nodeIndex, 1);
+      let deleteCount = 1;
+      for (let i = nodeIndex; i < this._elements.length; i++) {
+         if (this._elements[i].depth <= this._elements[nodeIndex].depth) {
+            break;
+         }
+         deleteCount++;
+      }
+      this._elements.splice(nodeIndex, deleteCount);
    }
 
    private __addNode(
