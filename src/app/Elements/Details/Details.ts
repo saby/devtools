@@ -2,14 +2,8 @@ import Control = require('Core/Control');
 import template = require('wml!Elements/Details/Details');
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
-import { TEMPLATES } from './const';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 
-//TODO: сделать это через async
-import './templates/StringTemplate';
-import './templates/NumberTemplate';
-import './templates/ObjectTemplate';
-import './templates/BooleanTemplate';
 import 'css!Elements/Details/Details';
 
 interface IOptions extends IControlNode {
@@ -23,18 +17,10 @@ class Details extends Control {
    protected _stateExpanded: boolean = true;
    protected _eventsExpanded: boolean = false;
 
-   private __getTemplate(value: unknown): string {
-      const type = typeof value;
-      if (TEMPLATES.hasOwnProperty(type)) {
-         return TEMPLATES[type];
-      }
-      return TEMPLATES.string;
-   }
-
-   private __viewFunctionSource(e: Event, rootField: string, path: Array<string | number>): void {
+   private __viewFunctionSource(e: Event, path: Array<string | number>): void {
       this._options.channel.dispatch('viewFunctionSource', {
          id: this._options.id,
-         path: path.concat(rootField)
+         path
       });
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
@@ -61,10 +47,10 @@ class Details extends Control {
       }, 100);
    }
 
-   private __storeAsGlobal(e: Event, rootField: string, path: Array<string | number>): void {
+   private __storeAsGlobal(e: Event, path: Array<string | number>): void {
       this._options.channel.dispatch('storeAsGlobal', {
          id: this._options.id,
-         path: path.concat(rootField)
+         path
       });
    }
 
@@ -75,20 +61,6 @@ class Details extends Control {
             'inspect(window.__WASABY_DEV_HOOK__.__template)'
          );
       }, 100);
-   }
-
-   private __toggleExpanded(e: Event, tabName: 'state' | 'options' | 'events'): void {
-      switch (tabName) {
-         case 'options':
-            this._optionsExpanded = !this._optionsExpanded;
-            break;
-         case 'state':
-            this._stateExpanded = !this._stateExpanded;
-            break;
-         case 'events':
-            this._eventsExpanded = !this._eventsExpanded;
-            break;
-      }
    }
 
    // static getOptionTypes(): Record<keyof IOptions, unknown> {

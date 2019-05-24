@@ -128,7 +128,7 @@ class Elements extends Control {
          if (parentIndex === -1) { //TODO: иногда ребёнок раньше родителя приходит, что-то не то. И зацикливания бывают, видимо неправильно беру parentId
             lastChildIndex = 0;
          } else {
-            while (this._elements[lastChildIndex] && this._elements[lastChildIndex].parentId === parentId) {
+            while (this._elements[lastChildIndex] && this._elements[lastChildIndex].depth > this._elements[parentIndex].depth) {
                lastChildIndex++;
             }
          }

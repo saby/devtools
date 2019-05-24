@@ -12,65 +12,22 @@
                                viewMode="link"
                                on:click="__viewContainer()" />
    </div>
-   <div attr:class="Details__header"
-        on:click="__toggleExpanded('options')">
-      <Controls.buttons:Button icon="{{_optionsExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
-                               viewMode="link" />
-      <Controls.heading:Title caption="Options"
-                              size="s"
-                              style="secondary" />
-   </div>
-   <ws:if data="{{ _optionsExpanded }}">
-      <Controls.scroll:Container attr:class="Details__tabContent">
-         <ws:for data="key, value in _options.options">
-            <ws:partial template="{{__getTemplate(value)}}"
-                        name="{{key}}"
-                        value="{{value}}"
-                        on:viewFunctionSource="__viewFunctionSource('options')"
-                        on:storeAsGlobal="__storeAsGlobal('options')"
-                        attr:key="{{key}}"/>
-         </ws:for>
-      </Controls.scroll:Container>
-   </ws:if>
+   <Elements.Details.Pane caption="Options"
+                          data="{{_options.options}}"
+                          on:viewFunctionSource="__viewFunctionSource()"
+                          on:storeAsGlobal="__storeAsGlobal()"
+                          bind:expanded="_optionsExpanded"/>
    <ws:if data="{{_options.isControl}}">
-      <div attr:class="Details__header"
-           on:click="__toggleExpanded('state')">
-         <Controls.buttons:Button icon="{{_stateExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
-                                  viewMode="link" />
-         <Controls.heading:Title caption="State"
-                                 size="s"
-                                 style="secondary" />
-      </div>
-      <ws:if data="{{ _stateExpanded }}">
-         <Controls.scroll:Container attr:class="Details__tabContent">
-            <ws:for data="key, value in _options.state">
-               <ws:partial template="{{__getTemplate(value)}}"
-                           name="{{key}}"
-                           value="{{value}}"
-                           on:viewFunctionSource="__viewFunctionSource('state')"
-                           on:storeAsGlobal="__storeAsGlobal('state')"
-                           attr:key="{{key}}"/>
-            </ws:for>
-         </Controls.scroll:Container>
-      </ws:if>
-      <div attr:class="Details__header"
-           on:click="__toggleExpanded('events')">
-         <Controls.buttons:Button icon="{{_eventsExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
-                                  viewMode="link" />
-         <Controls.heading:Title caption="Events"
-                                 size="s"
-                                 style="secondary" />
-      </div>
-      <ws:if data="{{ _eventsExpanded }}">
-         <Controls.scroll:Container attr:class="Details__tabContent">
-            <ws:for data="key, value in _options.eventHandlers">
-               <ws:partial template="{{__getTemplate(value)}}"
-                           name="{{key}}"
-                           value="{{value}}"
-                           on:viewFunctionSource="__viewFunctionSource('eventHandlers')"
-                           attr:key="{{key}}"/>
-            </ws:for>
-         </Controls.scroll:Container>
-      </ws:if>
+      <Elements.Details.Pane caption="State"
+                             data="{{_options.state}}"
+                             on:viewFunctionSource="__viewFunctionSource()"
+                             on:storeAsGlobal="__storeAsGlobal()"
+                             bind:expanded="_stateExpanded"/>
+      <Elements.Details.Pane caption="Events"
+                             data="{{_options.events}}"
+                             canStoreAsGlobal="{{false}}"
+                             on:viewFunctionSource="__viewFunctionSource()"
+                             on:storeAsGlobal="__storeAsGlobal()"
+                             bind:expanded="_eventsExpanded"/>
    </ws:if>
 </div>

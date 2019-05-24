@@ -147,7 +147,7 @@ class Agent {
             'inspectedElement',
             prepareForSerialization({
                ...node,
-               eventHandlers: this.__getEvents(id),
+               events: this.__getEvents(id),
                container: null,
                instance: null,
                isControl: !!node.instance
@@ -207,7 +207,7 @@ class Agent {
    ): unknown {
       let currentProperty = path.pop();
       let value;
-      if (currentProperty === 'eventHandlers') {
+      if (currentProperty === 'events') {
          value = this.__getEvents(id);
       } else {
          value = this.elements.get(id)[currentProperty];
