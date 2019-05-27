@@ -5,7 +5,7 @@ import template = require('wml!Elements/Elements');
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
-import { OperationType } from 'Extension/Plugins/Elements/const';
+import { OperationType, ControlType } from 'Extension/Plugins/Elements/const';
 import retrocycle from './retrocycle';
 import 'css!Elements/Elements';
 
@@ -20,6 +20,7 @@ class Elements extends Control {
            name?: IControlNode['name'];
            parentId?: IControlNode['parentId'];
            depth: number;
+           controlType: ControlType
         }> = [];
    protected _channel: ContentChannel = new ContentChannel('elements');
    protected _highlightedElements: Set<IControlNode['id']> = new Set();
@@ -32,7 +33,7 @@ class Elements extends Control {
       });
       this._channel.addListener('setInitialTree', (args: IControlNode[]) => {
          args.forEach((element) => {
-            this.__addNode(element.id, element.name, element.parentId);
+            this.__addNode(element.id, element.name, element.controlType, element.parentId);
          });
       });
       this._channel.addListener('setSelectedItem', this.__selectElement.bind(this));
@@ -72,9 +73,7 @@ class Elements extends Control {
             this.__highlightNode(args[1]);
             break;
          case OperationType.CREATE:
-            if (args.length === 4) {
-               this.__addNode(args[1], args[2], args[3]);
-            }
+            this.__addNode(args[1], args[2], args[3], args[4]);
             break;
          case OperationType.REORDER:
             break;
@@ -93,6 +92,17 @@ class Elements extends Control {
       if (nativeEvent.animationName === 'flash') {
          this._highlightedElements.delete(element.id);
          this._forceUpdate();
+      }
+   }
+
+   private __getClassByControlType(controlType: ControlType): string {
+      switch (controlType) {
+         case ControlType.HOC:
+            return 'Elements__node_hoc';
+         case ControlType.CONTROL:
+            return 'Elements__node_control';
+         case ControlType.TEMPLATE:
+            return 'Elements__node_template';
       }
    }
 
@@ -120,6 +130,7 @@ class Elements extends Control {
    private __addNode(
       id: IControlNode['id'],
       name: IControlNode['name'],
+      controlType: ControlType,
       parentId?: IControlNode['parentId']
    ): void {
       if (!parentId) {
@@ -127,6 +138,7 @@ class Elements extends Control {
             id,
             name,
             parentId,
+            controlType,
             depth: 0
          });
       } else {
@@ -144,6 +156,7 @@ class Elements extends Control {
             id,
             name,
             parentId,
+            controlType,
             depth: this.__getDepth(parentId)
          });
       }
@@ -190,6 +203,19 @@ class Elements extends Control {
          this._collapsedNodes.add(id);
       }
       this._forceUpdate();
+   }
+
+   private __getPath(node: IControlNode): IControlNode[] {
+      const index = this._elements.indexOf(node);
+      const path = [node];
+      let currentDepth = node.depth;
+      for (let i = index; i >= 0; i--) {
+         if (this._elements[i].depth < currentDepth) {
+            currentDepth--;
+            path.push(this._elements[i]);
+         }
+      }
+      return path.reverse();
    }
 }
 

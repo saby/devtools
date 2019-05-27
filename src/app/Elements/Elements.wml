@@ -6,8 +6,8 @@
          <ws:for data="index, element in _elements">
             <ws:if data="{{ __isVisible(index, element.depth) }}">
                <div attr:key="{{element.id}}"
-                    attr:class="{{_highlightedElements.has(element.id) ? 'flash'}}
-                             {{_selectedItemId === element.id ? 'selected'}}"
+                    attr:class="{{_highlightedElements.has(element.id) ? 'Elements__node_flash'}}
+                             {{_selectedItemId === element.id ? 'Elements__node_selected'}}"
                     attr:style="padding-left: {{10 * element.depth}}px;"
                     on:animationend="_onAnimationEnd(element)"
                     on:mouseenter="__highlightElement(element.id)"
@@ -18,7 +18,7 @@
                                               viewMode="link"
                                               on:click="__toggleCollapsed(element.id)" />
                   </ws:if>
-                  {{element.name}}
+                  <span attr:class="Elements__node {{__getClassByControlType(element.controlType)}}">{{element.name}}</span>
                </div>
             </ws:if>
          </ws:for>

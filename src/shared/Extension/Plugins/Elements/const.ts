@@ -4,3 +4,9 @@ export enum OperationType {
     REORDER,
     UPDATE
 }
+
+export enum ControlType {
+    TEMPLATE,
+    CONTROL,
+    HOC
+}

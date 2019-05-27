@@ -1,7 +1,7 @@
 import prepareForSerialization from './prepareForSerialization';
 import debounce from 'Extension/Utils/debounce';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import { OperationType } from 'Extension/Plugins/Elements/const';
+import { OperationType, ControlType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import Overlay from './Overlay';
@@ -57,9 +57,14 @@ class Agent {
       this.isDevtoolsOpened = true;
       const data = [];
 
-      this.elements.forEach((value) => {
-         const { id, name, parentId }: IControlNode = value;
-         data.push({ id, name, parentId });
+      this.elements.forEach((node) => {
+         const { id, name, parentId }: IControlNode = node;
+         data.push({
+            id,
+            name,
+            parentId,
+            controlType: this.__getControlType(node)
+         });
       });
 
       this.channel.dispatch('setInitialTree', data);
@@ -88,13 +93,21 @@ class Agent {
          const message: IOperationEvent['args'] = [
             OperationType.CREATE,
             node.id,
-            node.name
+            node.name,
+            this.__getControlType(node)
          ];
          if (node.parentId) {
             message.push(node.parentId);
          }
          this.channel.dispatch('operation', message);
       }
+   }
+
+   private __getControlType(node: IControlNode): ControlType {
+      if (node.instance) {
+         return typeof node.options === 'object' && node.options.content ? ControlType.HOC : ControlType.CONTROL;
+      }
+      return ControlType.TEMPLATE;
    }
 
    private __handleUpdate(node: IControlNode): void {
