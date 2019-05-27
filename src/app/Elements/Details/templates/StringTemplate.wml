@@ -5,10 +5,10 @@
                                on:click="__viewFunctionSource()" />
    </ws:if>
    <ws:else>
-      <span>"{{_options.value}}"</span>
+      "<span attr:class="StringTemplate__value">{{_options.value}}</span>"
    </ws:else>
 </ws:template>
 
 <span>
-   <span>{{_options.name}}</span>: <ws:partial template="valueTemplate" />
+   <span attr:class="StringTemplate__fieldName">{{_options.name}}</span>: <ws:partial template="valueTemplate" />
 </span>

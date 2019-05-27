@@ -2,6 +2,7 @@ import Control = require('Core/Control');
 import template = require('wml!Elements/Details/templates/BooleanTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
+import 'css!Elements/Details/templates/BooleanTemplate';
 
 interface IOptions extends ITemplateOptions {
    value: boolean;

@@ -1,3 +1,3 @@
 <span>
-   <span>{{_options.name}}</span>: <span>{{_options.value}}</span>
+   <span attr:class="NumberTemplate__fieldName">{{_options.name}}</span>: <span attr:class="NumberTemplate__value">{{_options.value}}</span>
 </span>

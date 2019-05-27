@@ -4,7 +4,8 @@
                                viewMode="link"
                                on:click="_toggleExpanded()" />
    </ws:if>
-   <span on:click="_storeAsGlobal()">{{_options.name}}</span>: {{_caption}}
+   <span on:click="_storeAsGlobal()"
+         attr:class="ObjectTemplate__fieldName">{{_options.name}}</span>: {{_caption}}
    <ws:if data="{{_expanded}}">
       <div attr:class="ObjectTemplate__items"
            attr:style="padding-left: {{10 * _options.depth}}px;">

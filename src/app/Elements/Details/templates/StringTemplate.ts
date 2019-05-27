@@ -2,6 +2,7 @@ import Control = require('Core/Control');
 import template = require('wml!Elements/Details/templates/StringTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
+import 'css!Elements/Details/templates/StringTemplate';
 
 interface IOptions extends ITemplateOptions {
    value: string;
