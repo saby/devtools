@@ -102,7 +102,7 @@ function decycle<T>(
    })(object, '$');
 }
 
-const IGNORE_FIELDS = ['_logicParent', '_events', 'controlNode', '_container', '__lastGetterPath'];
+const IGNORE_FIELDS = ['_logicParent', '_events', 'controlNode', 'content', '_container', '__lastGetterPath'];
 
 export default function prepareForSerialization(value: object): object {
    return decycle(value, {

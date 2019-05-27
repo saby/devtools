@@ -133,6 +133,10 @@ class Elements extends Control {
       controlType: ControlType,
       parentId?: IControlNode['parentId']
    ): void {
+      if (this._elements.findIndex((node) => node.id === id) !== -1) {
+         return; //TODO: Макс для корня постоянно стреляет CREATE, в итоге в _elements добавляется пачка одинаковых элементов
+      }
+
       if (!parentId) {
          this._elements.push({
             id,
