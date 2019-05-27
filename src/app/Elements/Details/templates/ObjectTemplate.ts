@@ -15,15 +15,18 @@ class ObjectTemplate extends Control {
    protected readonly _options: Readonly<IOptions>;
    protected _expanded: boolean = false;
    protected _caption: string;
+   protected _isEmpty: boolean;
 
    constructor(options: Readonly<IOptions>) {
       super();
       this._caption = this.__getCaption(options.value);
+      this._isEmpty = Object.keys(options.value).length === 0;
    }
 
    _beforeUpdate(newOptions: Readonly<IOptions>): void {
       if (this._options.value !== newOptions.value) {
          this._caption = this.__getCaption(newOptions.value);
+         this._isEmpty = Object.keys(newOptions.value).length === 0;
       }
    }
 
@@ -54,6 +57,16 @@ class ObjectTemplate extends Control {
          return 'null';
       } else {
          return 'Object';
+      }
+   }
+
+   private __isEmpty(value: object): boolean {
+      if (value instanceof Array) {
+         return value.length === 0;
+      } else if (value === null) {
+         return true;
+      } else {
+         return Object.keys(value).length === 0;
       }
    }
 
