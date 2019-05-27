@@ -25,11 +25,16 @@ class Elements extends Control {
    protected _channel: ContentChannel = new ContentChannel('elements');
    protected _highlightedElements: Set<IControlNode['id']> = new Set();
    protected _collapsedNodes: Set<IControlNode['id']> = new Set();
+   protected _children: Record<IControlNode['id'], HTMLElement>;
 
    constructor() {
       super();
       this._channel.addListener('inspectedElement', (node: IControlNode) => {
          this._inspectedItem = retrocycle(node);
+         this._children[node.id].scrollIntoView({
+            block: 'nearest',
+            inline: 'nearest'
+         });
       });
       this._channel.addListener('setInitialTree', (args: IControlNode[]) => {
          args.forEach((element) => {

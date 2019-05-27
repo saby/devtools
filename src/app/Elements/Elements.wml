@@ -12,7 +12,8 @@
                     on:animationend="_onAnimationEnd(element)"
                     on:mouseenter="__highlightElement(element.id)"
                     on:mouseleave="__highlightElement()"
-                    on:click="_onItemClick(element)">
+                    on:click="_onItemClick(element)"
+                    name="{{element.id}}">
                   <ws:if data="{{ _elements[index + 1] && _elements[index + 1].depth > element.depth }}">
                      <Controls.buttons:Button icon="{{_collapsedNodes.has(element.id) ? 'icon-DayForward' : 'icon-ArrowDown'}} icon-small"
                                               viewMode="link"
