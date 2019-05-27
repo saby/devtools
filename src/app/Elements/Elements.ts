@@ -70,7 +70,7 @@ class Elements extends Control {
             this.__removeNode(args[1]);
             break;
          case OperationType.UPDATE:
-            this.__highlightNode(args[1]);
+            this.__updateNode(args[1]);
             break;
          case OperationType.CREATE:
             this.__addNode(args[1], args[2], args[3], args[4]);
