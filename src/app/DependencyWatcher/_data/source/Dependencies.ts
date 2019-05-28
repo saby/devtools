@@ -9,6 +9,7 @@ import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { findFile } from "./util/findFile";
 import { SortFunction } from "./list/Sort";
 import { sortFunctions } from "./dependencies/sortFunctions";
+import { getSize } from "./dependencies/getSize";
 
 let hasChild = (dependencies?: IModuleDependency): boolean => {
     if (!dependencies) {
@@ -24,7 +25,8 @@ let createItem = (
     parent: string | undefined,
     child: boolean,
     isDynamic?: boolean
-): dependency.Item => {
+): Promise<dependency.Item> => {
+    
     return {
         name,
         id: serialize(name, type),
@@ -91,10 +93,12 @@ export class Dependencies<
     TFilter extends dependency.IFilterData = dependency.IFilterData
 > extends Abstract<dependency.Item, TFilter> {
     private readonly _fileModuleUsing: Map<string, Set<string>> = new Map();
+    private readonly __sizes: Record<string, number> = Object.create(null);
     protected _sortFunctions: SortFunction<dependency.Item>[] = sortFunctions;
     protected _query(query: Query): Promise<dependency.Item[]> {
-        console.log('Dependencies => _query:', query);
-        const { parent } = query.getWhere();
+        // console.log('Dependencies => _query:', query);
+        // @ts-ignore
+        const { parent } = <TFilter> query.getWhere();
     
         if (!parent) {
             return  this.__queryModule(GLOBAL_MODULE_NAME);
@@ -127,9 +131,9 @@ export class Dependencies<
      * @param {string} id - полный id родительского узла (файла)
      */
     private __queryFile(fileName: string, id: string): Promise<dependency.Item[]> {
-        console.log('Dependencies => _queryFile:', fileName);
+        // console.log('Dependencies => _queryFile:', fileName);
         return Promise.all([
-            this.__getFile(fileName),
+            this.__getBundleModules(fileName),
             this._getModules()
         ]).then(([bundle, modules]) => {
             return bundle.map((moduleName) => {
@@ -233,9 +237,20 @@ export class Dependencies<
         return fileModuleUsing.has(moduleName);
     }
 
-    private __getFile(fileName: string): Promise<string[]> {
+    private __getBundleModules(fileName: string): Promise<string[]> {
         return this._getBundles().then((bundles) => {
             return bundles[fileName];
+        })
+    }
+    private __getSize(module: string): Promise<number | void> {
+        if (this.__sizes[module]) {
+            return Promise.resolve(this.__sizes[module]);
+        }
+        return getSize(module).then((size?: number) => {
+            if (size) {
+                this.__sizes[module] = size;
+            }
+            return size;
         })
     }
 }

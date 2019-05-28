@@ -61,10 +61,10 @@ export class Dependent<
 > extends Abstract<dependent.Item, TFilter> {
     private __dependentCache: Cache;
     private __lastSize: number;
-    protected _query(query: Query<TFilter>): Promise<dependent.Item[]> {
+    protected _query(query: Query): Promise<dependent.Item[]> {
         console.log('Dependent => _query:', query);
-    
-        const { parent } = query.getWhere();
+        // @ts-ignore
+        const { parent } = <TFilter> query.getWhere();
     
         let module = parent? deserialize(parent)[0]: undefined;
         

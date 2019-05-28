@@ -8,7 +8,7 @@ export let applyWhere = <TTreeData extends ListItem, T extends IFilterData> (
     let { name = '', parent } = where;
     name = name.toLowerCase();
     return (set: TTreeData[]) => {
-        console.log('applyWhere =>', where, limits);
+        // console.log('applyWhere =>', where, limits);
         if(!name){
             return set;
         }

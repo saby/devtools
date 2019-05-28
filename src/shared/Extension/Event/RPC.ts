@@ -43,8 +43,16 @@ export class RPC {
     
     constructor(cfg: IConfig) {
         this.__channel = cfg.channel;
-        this.__channel.addListener(this.__requestEvent, this.__requestHandler.bind(this));
-        this.__channel.addListener(this.__responseEvent, this.__responseHandler.bind(this));
+        this.__onRequest = this.__requestHandler.bind(this);
+        this.__onResponse = this.__responseHandler.bind(this);
+        this.__channel.addListener(this.__requestEvent, this.__onRequest);
+        this.__channel.addListener(this.__responseEvent, this.__onResponse);
+    }
+    destructor() {
+        this.__channel.removeListener(this.__requestEvent, this.__onRequest);
+        this.__channel.removeListener(this.__responseEvent, this.__onResponse);
+        delete this.__onRequest;
+        delete this.__onResponse;
     }
     execute<TRes, TArg = void>({
        methodName,
@@ -91,6 +99,7 @@ export class RPC {
         resultError.code = error.code;
         resolve(Promise.reject(resultError));
     }
+    private __onResponse: (response: IMessageResponse) => void;
     private __requestHandler({ methodName, args, id }: IMessageRequest) {
         let method = this.__methods.get(methodName);
     
@@ -107,6 +116,7 @@ export class RPC {
             return this.__responseError(id, 500, message);
         })
     }
+    private __onRequest: (request: IMessageRequest) => void;
     private __responseError(id: string, code: number, message?: string){
         this.__channel.dispatch(this.__responseEvent, <IMessageResponse>{
             id,

@@ -2,9 +2,10 @@
 import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
+// @ts-ignore
+import * as itemTemplate from 'wml!DependencyWatcher/_view/list/itemTemplate';
 import { source } from "../../data";
 import { Columns } from "./column";
-import { grouping } from "./grouping";
 // @ts-ignore
 import { ColumnTemplate } from "Controls/grid";
 
@@ -39,7 +40,8 @@ export default class Main extends Control {
             {
                 title: 'module',
                 displayProperty: 'name',
-                template: cfg.itemTemplate || ColumnTemplate
+                // template: ColumnTemplate
+                template: cfg.itemTemplate || itemTemplate
             }
         ];
     }
@@ -57,6 +59,4 @@ export default class Main extends Control {
     private set __filter(value) {
         this.__filterObject = value;
     }
-    
-    private __groupingCallback = grouping
 }

@@ -15,3 +15,10 @@ export const DEVTOOL_CONTENT_PORT = `${ PANEL_NAME }/devtool-content`;
 export const PORT_TAB_ID_POSTFIX = `:tabId=`;
 
 export const INJECTION_SCRIPT = './wasaby_devtool.js';
+
+export const GLOBAL_CHANNEL_NAME = '';
+
+export enum GlobalMessages {
+    devtoolsInitialized = 'devtoolsInitialized',
+    wasabyInitialized = 'wasabyInitialized',
+}

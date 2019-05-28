@@ -1,4 +1,3 @@
-import { PrepareFunction } from "../util/PrepareFunction";
 import { ListItem } from "../../types";
 
 export enum SortResult {

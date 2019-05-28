@@ -28,17 +28,4 @@
     </ws:else>
 </ws:template>
 
-<ws:template name="notUsedWrapper">
-    <ws:if data="{{ itemData.item['notUsed'] }}">
-        <ws:partial
-            template="dynamicWrapper"
-            attr:class="DependencyWatcher_item__notUsed"
-            attr:title="{[Неиспользуемый, в данной цепочке зависимостей, модуль бандла]}"
-        />
-    </ws:if>
-    <ws:else>
-        <ws:partial template="dynamicWrapper"/>
-    </ws:else>
-</ws:template>
-
-<ws:partial template="notUsedWrapper" />
+<ws:partial template="dynamicWrapper" />

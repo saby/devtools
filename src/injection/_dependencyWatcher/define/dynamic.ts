@@ -1,5 +1,4 @@
 import { IDefine} from "./IDefine";
-import { REQUIRE } from "../const";
 import { prepareArgs } from "./prepareArgs";
 import { wrapDefineStatic } from './static';
 import { proxyModules } from './proxyModules';
@@ -7,22 +6,26 @@ import { replaceDependencies } from './replaceDependency';
 
 let isNeedDynamicWrapper = (
     constructorFunction: void | Function,
-    dependencies: void | Array<string>,
-    dependencyName: string,
+    moduleDependencies: void | string[],
+    replacedModules: string[],
     name: string | void
 ): boolean => {
     return !!(
         name &&
         constructorFunction &&
-        dependencies &&
-        dependencies.includes(dependencyName)
-    )
+        moduleDependencies
+    ) &&
+    moduleDependencies.some((dependency: string) => {
+        return replacedModules.includes(dependency);
+    })
 };
+
+let replacedModules: string[] = Object.keys(proxyModules);
 
 export let wrapDefineDynamic = (_realDefine: IDefine): IDefine => {
     let dynamicDefine = (...defineArgs: any[]) => {
         let { dependencies, constructorFunction, name } = prepareArgs(defineArgs);
-        if (!isNeedDynamicWrapper(constructorFunction, dependencies, REQUIRE, name)) {
+        if (!isNeedDynamicWrapper(constructorFunction, dependencies, replacedModules, name)) {
             return _realDefine(...defineArgs);
         }
         return _realDefine(

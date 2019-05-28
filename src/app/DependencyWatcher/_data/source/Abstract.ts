@@ -64,6 +64,7 @@ export abstract class Abstract<
     query(query: Query): Promise<DataSet> {
         let countAfterFilter: number;
         return this._query(query).
+            // @ts-ignore
             then(applyWhere<TTreeData, TFilter>(query.getWhere(), query.getLimit())).
             then((set) => {
                 countAfterFilter = set.length;
@@ -86,7 +87,7 @@ export abstract class Abstract<
                 return error;
             });
     }
-    protected abstract _query(query: Query<TFilter>): Promise<TTreeData[]>;
+    protected abstract _query(query: Query): Promise<TTreeData[]>;
 
     read<TKey extends string, TMeta = unknown>(id: TKey, meta?: TMeta): Promise<Model<TTreeData>> {
         // return Promise.resolve(module);
