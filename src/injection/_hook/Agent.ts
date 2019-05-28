@@ -55,19 +55,22 @@ class Agent {
 
    private __onDevtoolsOpened(): void {
       this.isDevtoolsOpened = true;
-      const data = [];
 
       this.elements.forEach((node) => {
-         const { id, name, parentId }: IControlNode = node;
-         data.push({
-            id,
-            name,
-            parentId,
-            controlType: this.__getControlType(node)
-         });
+         const message: IOperationEvent['args'] = [
+            OperationType.CREATE,
+            node.id,
+            node.name,
+            this.__getControlType(node)
+         ];
+         if (node.parentId) {
+            message.push(node.parentId);
+         }
+
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       });
 
-      this.channel.dispatch('setInitialTree', data);
+      this.channel.dispatch('longMessage');
    }
 
    handleOperation(operation: OperationType, node: IControlNode): void {

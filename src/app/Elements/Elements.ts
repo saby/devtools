@@ -36,14 +36,16 @@ class Elements extends Control {
             inline: 'nearest'
          });
       });
-      this._channel.addListener('setInitialTree', (args: IControlNode[]) => {
-         args.forEach((element) => {
-            this.__addNode(element.id, element.name, element.controlType, element.parentId);
-         });
-      });
       this._channel.addListener('setSelectedItem', this.__selectElement.bind(this));
       this._channel.addListener('operation', this._operationHandler.bind(this));
       window.elementsPanel = this;
+      chrome.devtools.network.onNavigated.addListener(() => {
+         //TODO: это должен делать корневой компонент девтулзов
+         this._elements = [];
+         this._highlightedElements = new Set();
+         this._collapsedNodes = new Set();
+         this._channel.dispatch('devtoolsInitialized');
+      });
    }
 
    _afterMount(): void {
