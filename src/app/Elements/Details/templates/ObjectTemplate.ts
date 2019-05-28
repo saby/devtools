@@ -20,13 +20,13 @@ class ObjectTemplate extends Control {
    constructor(options: Readonly<IOptions>) {
       super();
       this._caption = this.__getCaption(options.value);
-      this._isEmpty = Object.keys(options.value).length === 0;
+      this._isEmpty = this.__isEmpty(options.value);
    }
 
    _beforeUpdate(newOptions: Readonly<IOptions>): void {
       if (this._options.value !== newOptions.value) {
          this._caption = this.__getCaption(newOptions.value);
-         this._isEmpty = Object.keys(newOptions.value).length === 0;
+         this._isEmpty = this.__isEmpty(newOptions.value);
       }
    }
 
