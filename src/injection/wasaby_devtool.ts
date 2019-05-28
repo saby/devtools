@@ -14,3 +14,9 @@ ALL_PLUGINS.forEach((Plugin: IPluginConstructor) => {
     });
     PLUGINS.set(name, plugin);
 });
+
+const globalChannel = new DevtoolChannel('globalChannel');
+globalChannel.addListener('devtoolsInitialized', () => {
+    globalChannel.dispatch('wasabyInitialized');
+});
+globalChannel.dispatch('wasabyInitialized');
