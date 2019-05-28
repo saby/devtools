@@ -31,21 +31,16 @@ class Elements extends Control {
       super();
       this._channel.addListener('inspectedElement', (node: IControlNode) => {
          this._inspectedItem = retrocycle(node);
-         this._children[node.id].scrollIntoView({
-            block: 'nearest',
-            inline: 'nearest'
-         });
+         if (this._children[node.id]) {
+            this._children[node.id].scrollIntoView({
+               block: 'nearest',
+               inline: 'nearest'
+            });
+         }
       });
       this._channel.addListener('setSelectedItem', this.__selectElement.bind(this));
       this._channel.addListener('operation', this._operationHandler.bind(this));
       window.elementsPanel = this;
-      chrome.devtools.network.onNavigated.addListener(() => {
-         //TODO: это должен делать корневой компонент девтулзов
-         this._elements = [];
-         this._highlightedElements = new Set();
-         this._collapsedNodes = new Set();
-         this._channel.dispatch('devtoolsInitialized');
-      });
    }
 
    _afterMount(): void {
@@ -63,7 +58,11 @@ class Elements extends Control {
    }
 
    protected _beforeUnmount(): void {
+      this._channel.destructor();
       this._inspectedItem = undefined;
+      this._elements = [];
+      this._highlightedElements.clear();
+      this._collapsedNodes.clear();
       window.elementsPanel = undefined;
    }
 
