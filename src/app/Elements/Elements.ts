@@ -31,12 +31,6 @@ class Elements extends Control {
       super();
       this._channel.addListener('inspectedElement', (node: IControlNode) => {
          this._inspectedItem = retrocycle(node);
-         if (this._children[node.id]) {
-            this._children[node.id].scrollIntoView({
-               block: 'nearest',
-               inline: 'nearest'
-            });
-         }
       });
       this._channel.addListener('setSelectedItem', this.__selectElement.bind(this));
       this._channel.addListener('operation', this._operationHandler.bind(this));
@@ -119,6 +113,12 @@ class Elements extends Control {
    private __selectElement(id: IControlNode['id']): void {
       this._selectedItemId = id;
       this._channel.dispatch('inspectElement', this._selectedItemId);
+      if (this._children[id]) {
+         this._children[id].scrollIntoView({
+            block: 'nearest',
+            inline: 'nearest'
+         });
+      }
    }
 
    private __removeNode(id: IControlNode['id']): void {
