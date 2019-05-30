@@ -1,7 +1,7 @@
 import prepareForSerialization from './prepareForSerialization';
 import debounce from 'Extension/Utils/debounce';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import { OperationType, ControlType } from 'Extension/Plugins/Elements/const';
+import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import Overlay from './Overlay';
@@ -13,6 +13,17 @@ class Agent {
    private overlay: Overlay;
    private previousSelectedItemId: IControlNode['id'] | undefined;
    private mouseMoveHandler?: (e: MouseEvent) => void;
+   private changedRoots: Map<
+      IControlNode['id'],
+      Map<
+         IControlNode['id'],
+         {
+            node: IControlNode;
+            operation: OperationType;
+         }
+      >
+   > = new Map();
+   private rootStack: Array<IControlNode['id']> = [];
 
    constructor() {
       this.channel.addListener(
@@ -73,20 +84,70 @@ class Agent {
       this.channel.dispatch('longMessage');
    }
 
-   handleOperation(operation: OperationType, node: IControlNode): void {
-      switch (operation) {
-         case OperationType.DELETE:
-            this.__handleRemove(node);
-            break;
-         case OperationType.CREATE:
-            this.__handleAdd(node);
-            break;
-         case OperationType.REORDER:
-            break;
-         case OperationType.UPDATE:
-            this.__handleUpdate(node);
-            break;
+   onStartSync(rootId: IControlNode['id']): void {
+      this.rootStack.push(rootId);
+      this.changedRoots.set(rootId, new Map());
+   }
+
+   onStartCommit(node: IControlNode, operation: OperationType): void {
+      const currentRootId = this.rootStack[this.rootStack.length - 1];
+      const currentRoot = this.changedRoots.get(currentRootId);
+      if (!currentRoot) {
+         throw new Error('Trying to change nonexistent root');
       }
+      currentRoot.set(node.id + currentRootId, {
+         node,
+         operation
+      });
+   }
+
+   onEndCommit(node: IControlNode): void {
+      const currentRootId = this.rootStack[this.rootStack.length - 1];
+      const id = node.id + currentRootId;
+      const currentRoot = this.changedRoots.get(currentRootId);
+      if (!currentRoot) {
+         throw new Error('Trying to change nonexistent root');
+      }
+      const changedNode = currentRoot.get(id);
+      if (!changedNode) {
+         throw new Error('Trying to change nonexistent node');
+      }
+
+      currentRoot.set(id, {
+         ...changedNode,
+         node: {
+            ...changedNode.node,
+            ...node,
+            id,
+            parentId: changedNode.node.parentId
+               ? changedNode.node.parentId + currentRootId
+               : undefined
+         }
+      });
+   }
+
+   onEndSync(rootId: IControlNode['id']): void {
+      const changedNodes = this.changedRoots.get(rootId);
+      if (!changedNodes) {
+         throw new Error('Trying to change nonexistent root');
+      }
+      changedNodes.forEach(({ operation, node }) => {
+         switch (operation) {
+            case OperationType.DELETE:
+               this.__handleRemove(node);
+               break;
+            case OperationType.CREATE:
+               this.__handleAdd(node);
+               break;
+            case OperationType.REORDER:
+               break;
+            case OperationType.UPDATE:
+               this.__handleUpdate(node);
+               break;
+         }
+      });
+      this.changedRoots.delete(rootId);
+      this.rootStack.pop();
    }
 
    private __handleAdd(node: IControlNode): void {
@@ -108,7 +169,9 @@ class Agent {
 
    private __getControlType(node: IControlNode): ControlType {
       if (node.instance) {
-         return typeof node.options === 'object' && node.options.content ? ControlType.HOC : ControlType.CONTROL;
+         return typeof node.options === 'object' && node.options.content
+            ? ControlType.HOC
+            : ControlType.CONTROL;
       }
       return ControlType.TEMPLATE;
    }
@@ -277,14 +340,31 @@ class Agent {
       }
    }
 
-   private __findControlByDomNode(element: Element): IControlNode | undefined {
+   private __findControlByDomNode(element: HTMLElement): IControlNode | undefined {
       let currentElement = element;
+
+      /*
+      TODO: сейчас на странице могут быть элементы с одинаковыми ключами, для этого я к ключу каждого элемента добавляю id корня, в котором он находится
+      Потом ключи будут браться из инферно и будут уникальными, и все костыли с приклеиванием rootId можно будет убрать
+       */
+      function getRootId(elem: HTMLElement): string {
+         let currentRoot = elem;
+         while (currentRoot) {
+            if (currentRoot.controlNodes && currentRoot.controlNodes[currentRoot.controlNodes.length - 1].key === '_') {
+               return '_' + currentRoot.controlNodes[currentRoot.controlNodes.length - 1].id;
+            }
+            currentRoot = currentElement.parentElement;
+         }
+         return '_inst_1';
+      }
+      const rootId = getRootId(element);
+
       while (currentElement) {
          if (currentElement.controlNodes) {
             if (
                this.previousSelectedItemId &&
                currentElement.controlNodes.find(
-                  (node) => node.key === this.previousSelectedItemId
+                  (node) => node.key + rootId === this.previousSelectedItemId
                )
             ) {
                return this.elements.get(this.previousSelectedItemId);
@@ -292,7 +372,7 @@ class Agent {
             return this.elements.get(
                currentElement.controlNodes[
                   currentElement.controlNodes.length - 1
-               ].key
+               ].key + rootId
             );
          }
          currentElement = currentElement.parentElement;

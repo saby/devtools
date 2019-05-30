@@ -8,20 +8,20 @@ export class Hook implements IWasabyDevHook {
    private agent: Agent = new Agent();
    private messageQueue: Array<[string, ISerializable?]> = [];
 
-   onStartCommit(node: IControlNode): void {
-      // TODO: тут нужно будет запоминать текущий рендерящийся контрол, возможно замерять время
+   onStartCommit(node: IControlNode, typeOfOperation: OperationType): void {
+      this.agent.onStartCommit(node, typeOfOperation);
    }
 
-   onEndCommit(node: IControlNode, typeOfOperation: OperationType): void {
-      this.agent.handleOperation(typeOfOperation, node);
+   onEndCommit(node: IControlNode): void {
+      this.agent.onEndCommit(node);
    }
 
-   onStartSync(rootId: IControlNode['id']): void {
-
+   onStartSync(rootId: IControlNode['id'], instanceId: string): void {
+      this.agent.onStartSync(rootId + instanceId);
    }
 
-   onEndSync(rootId: IControlNode['id']): void {
-
+   onEndSync(rootId: IControlNode['id'], instanceId: string): void {
+      this.agent.onEndSync(rootId + instanceId);
    }
 
    init(): void {

@@ -139,10 +139,6 @@ class Elements extends Control {
       controlType: ControlType,
       parentId?: IControlNode['parentId']
    ): void {
-      if (this._elements.findIndex((node) => node.id === id) !== -1) {
-         return; //TODO: Макс для корня постоянно стреляет CREATE, в итоге в _elements добавляется пачка одинаковых элементов
-      }
-
       if (!parentId) {
          this._elements.push({
             id,
@@ -155,7 +151,11 @@ class Elements extends Control {
          // TODO: сделать добавление в произвольное место
          const parentIndex = this._elements.findIndex((element) => element.id === parentId);
          let lastChildIndex = parentIndex + 1;
-         if (parentIndex === -1) { //TODO: иногда ребёнок раньше родителя приходит, что-то не то. И зацикливания бывают, видимо неправильно беру parentId
+         if (parentIndex === -1) {
+            /**
+             * TODO: иногда возникают циклические зависимости (пока такое встречалось только в попапах), и "родитель" приходит раньше "ребёнка"
+             * Засовываем такие поддеревья в корень, чтобы хоть как-то их показать
+             */
             lastChildIndex = 0;
          } else {
             while (this._elements[lastChildIndex] && this._elements[lastChildIndex].depth > this._elements[parentIndex].depth) {
