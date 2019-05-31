@@ -25,7 +25,7 @@ let createItem = (
     parent: string | undefined,
     child: boolean,
     isDynamic?: boolean
-): Promise<dependency.Item> => {
+): dependency.Item => {
     
     return {
         name,

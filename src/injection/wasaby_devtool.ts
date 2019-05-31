@@ -2,6 +2,8 @@ import { DependencyWatcher } from './DependencyWatcher';
 import { IPluginConstructor, IPlugin } from './IPlugin';
 import { InjectHook } from './InjectHook';
 import { DevtoolChannel } from "./_devtool/Channel";
+import { GlobalMessages } from "Extension/const";
+import { globalChannel } from "./globalChannel";
 
 const ALL_PLUGINS: Array<IPluginConstructor> = [ DependencyWatcher, InjectHook ];
 
@@ -15,8 +17,7 @@ ALL_PLUGINS.forEach((Plugin: IPluginConstructor) => {
     PLUGINS.set(name, plugin);
 });
 
-const globalChannel = new DevtoolChannel('globalChannel');
-globalChannel.addListener('devtoolsInitialized', () => {
-    globalChannel.dispatch('wasabyInitialized');
+globalChannel.addListener(GlobalMessages.devtoolsInitialized, () => {
+    globalChannel.dispatch(GlobalMessages.wasabyInitialized);
 });
-globalChannel.dispatch('wasabyInitialized');
+globalChannel.dispatch(GlobalMessages.wasabyInitialized);
