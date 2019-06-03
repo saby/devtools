@@ -12,24 +12,28 @@
                                viewMode="link"
                                on:click="__viewContainer()" />
    </div>
-   <Elements.Details.Pane caption="Options"
-                          data="{{_options.options}}"
-                          on:viewFunctionSource="__viewFunctionSource()"
-                          on:storeAsGlobal="__storeAsGlobal()"
-                          bind:expanded="_optionsExpanded"/>
+   <ws:if data="{{ __hasData(_options.options) }}">
+      <Elements.Details.Pane caption="Options"
+                             data="{{_options.options}}"
+                             on:viewFunctionSource="__viewFunctionSource()"
+                             on:storeAsGlobal="__storeAsGlobal()"
+                             bind:expanded="_optionsExpanded"/>
+   </ws:if>
    <ws:if data="{{_options.isControl}}">
-      <ws:if data="{{ _options.state }}">
+      <ws:if data="{{ __hasData(_options.state) }}">
          <Elements.Details.Pane caption="State"
                                 data="{{_options.state}}"
                                 on:viewFunctionSource="__viewFunctionSource()"
                                 on:storeAsGlobal="__storeAsGlobal()"
                                 bind:expanded="_stateExpanded"/>
       </ws:if>
-      <Elements.Details.Pane caption="Events"
-                             data="{{_options.events}}"
-                             canStoreAsGlobal="{{false}}"
-                             on:viewFunctionSource="__viewFunctionSource()"
-                             on:storeAsGlobal="__storeAsGlobal()"
-                             bind:expanded="_eventsExpanded"/>
+      <ws:if data="{{ __hasData(_options.events) }}">
+         <Elements.Details.Pane caption="Events"
+                                data="{{_options.events}}"
+                                canStoreAsGlobal="{{false}}"
+                                on:viewFunctionSource="__viewFunctionSource()"
+                                on:storeAsGlobal="__storeAsGlobal()"
+                                bind:expanded="_eventsExpanded"/>
+      </ws:if>
    </ws:if>
 </div>

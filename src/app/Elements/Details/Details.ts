@@ -63,6 +63,10 @@ class Details extends Control {
       }, 100);
    }
 
+   private __hasData(data: object): boolean {
+      return Object.keys(data).length > 0;
+   }
+
    // static getOptionTypes(): Record<keyof IOptions, unknown> {
    //    return {
    //       channel: descriptor(ContentChannel).required(),
