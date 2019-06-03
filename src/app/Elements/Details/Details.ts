@@ -64,7 +64,7 @@ class Details extends Control {
    }
 
    private __hasData(data: object): boolean {
-      return Object.keys(data).length > 0;
+      return data && Object.keys(data).length > 0;
    }
 
    // static getOptionTypes(): Record<keyof IOptions, unknown> {
