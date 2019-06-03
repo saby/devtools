@@ -2,7 +2,7 @@
     class="Devtool_Page"
 >
     <ws:if data="{{ _hasWasabyOnPage }}">
-        <Controls.Tabs.Buttons
+        <Controls.tabs:Buttons
            bind:selectedKey="_activeTab"
            keyProperty="id"
            source="{{ _tabsSource }}"
@@ -10,7 +10,7 @@
         />
 
         <Controls.Popup.Compatible.ManagerWrapper/>
-        <Controls.SwitchableArea bind:selectedKey="_activeTab">
+        <Controls.switchableArea:View bind:selectedKey="_activeTab">
             <ws:items>
                 <ws:Array>
                     <ws:Object id="Dependencies">
@@ -25,7 +25,7 @@
                     </ws:Object>
                 </ws:Array>
             </ws:items>
-        </Controls.SwitchableArea>
+        </Controls.switchableArea:View>
     </ws:if>
     <ws:else>
         Connecting to Wasaby...

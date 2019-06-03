@@ -26,6 +26,9 @@
       ],
       "Env/*": [
         "../node_modules/rmi/src/client/Env/*"
+      ],
+      "UI/*": [
+        "../node_modules/saby-ui/UI/*"
       ]
     }
   }
