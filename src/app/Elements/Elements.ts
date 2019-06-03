@@ -20,7 +20,7 @@ class Elements extends Control {
            name?: IControlNode['name'];
            parentId?: IControlNode['parentId'];
            depth: number;
-           controlType: ControlType
+           class: string;
         }> = [];
    protected _channel: ContentChannel = new ContentChannel('elements');
    protected _highlightedElements: Set<IControlNode['id']> = new Set();
@@ -139,7 +139,7 @@ class Elements extends Control {
             id,
             name,
             parentId,
-            controlType,
+            class: this.__getClassByControlType(controlType),
             depth: 0
          });
       } else {
@@ -161,7 +161,7 @@ class Elements extends Control {
             id,
             name,
             parentId,
-            controlType,
+            class: this.__getClassByControlType(controlType),
             depth: this.__getDepth(parentId)
          });
       }

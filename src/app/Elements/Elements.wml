@@ -18,7 +18,7 @@
                         <i attr:class="{{_collapsedNodes.has(element.id) ? 'icon-DayForward' : 'icon-ArrowDown'}} icon-small icon-primary"
                            on:click="__toggleCollapsed(element.id)" />
                      </ws:if>
-                     <span attr:class="Elements__node {{__getClassByControlType(element.controlType)}}">{{element.name}}</span>
+                     <span attr:class="Elements__node {{element.class}}">{{element.name}}</span>
                   </div>
                </div>
             </ws:if>
