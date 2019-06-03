@@ -26,6 +26,7 @@ class Elements extends Control {
    protected _highlightedElements: Set<IControlNode['id']> = new Set();
    protected _collapsedNodes: Set<IControlNode['id']> = new Set();
    protected _children: Record<IControlNode['id'], HTMLElement>;
+   protected _elementsChanged: boolean = false;
 
    constructor() {
       super();
@@ -35,6 +36,20 @@ class Elements extends Control {
       this._channel.addListener('setSelectedItem', this.__selectElement.bind(this));
       this._channel.addListener('operation', this._operationHandler.bind(this));
       window.elementsPanel = this;
+   }
+
+   _beforeUpdate(): void {
+      //TODO: удалить после того как ключи будут браться из инферно
+      if (this._elementsChanged) {
+         const uniqueIds: Set<IControlNode['id']> = new Set();
+         this._elements = this._elements.filter((element) => {
+            if (uniqueIds.has(element.id)) {
+               return false;
+            }
+            uniqueIds.add(element.id);
+            return true;
+         });
+      }
    }
 
    _afterMount(): void {
@@ -65,6 +80,7 @@ class Elements extends Control {
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
+      this._elementsChanged = true;
       switch (args[0]) {
          case OperationType.DELETE:
             this.__removeNode(args[1]);
