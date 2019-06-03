@@ -9,7 +9,7 @@ import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { findFile } from "./util/findFile";
 import { SortFunction } from "./list/Sort";
 import { sortFunctions } from "./dependencies/sortFunctions";
-import { getSize } from "./dependencies/getSize";
+import { getSize } from "./util/getSize";
 
 let hasChild = (dependencies?: IModuleDependency): boolean => {
     if (!dependencies) {
@@ -93,7 +93,6 @@ export class Dependencies<
     TFilter extends dependency.IFilterData = dependency.IFilterData
 > extends Abstract<dependency.Item, TFilter> {
     private readonly _fileModuleUsing: Map<string, Set<string>> = new Map();
-    private readonly __sizes: Record<string, number> = Object.create(null);
     protected _sortFunctions: SortFunction<dependency.Item>[] = sortFunctions;
     protected _query(query: Query): Promise<dependency.Item[]> {
         // console.log('Dependencies => _query:', query);
@@ -111,18 +110,6 @@ export class Dependencies<
         }
     
         return  this.__queryModule(module, parent);
-    }
-    protected _read<
-        TKey extends string,
-        TMeta = unknown
-    >(id: TKey, meta?: TMeta): Promise<dependency.Item> | dependency.Item {
-        let [ name, type ] = deserialize(id);
-        return Promise.resolve(<dependency.Item> {
-            name,
-            child: false,
-            id,
-            type
-        });
     }
     
     /**
@@ -240,17 +227,6 @@ export class Dependencies<
     private __getBundleModules(fileName: string): Promise<string[]> {
         return this._getBundles().then((bundles) => {
             return bundles[fileName];
-        })
-    }
-    private __getSize(module: string): Promise<number | void> {
-        if (this.__sizes[module]) {
-            return Promise.resolve(this.__sizes[module]);
-        }
-        return getSize(module).then((size?: number) => {
-            if (size) {
-                this.__sizes[module] = size;
-            }
-            return size;
         })
     }
 }

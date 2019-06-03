@@ -4,4 +4,5 @@ export interface Item {
     child: boolean | null;
     id: string;
     isDynamic?: boolean;
+    size?: number;
 }

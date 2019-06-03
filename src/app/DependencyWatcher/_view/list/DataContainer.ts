@@ -6,8 +6,6 @@ import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
 import * as itemTemplate from 'wml!DependencyWatcher/_view/list/itemTemplate';
 import { source } from "../../data";
 import { Columns } from "./column";
-// @ts-ignore
-import { ColumnTemplate } from "Controls/grid";
 
 type Children = {
     list: Control;
@@ -42,6 +40,11 @@ export default class Main extends Control {
                 displayProperty: 'name',
                 // template: ColumnTemplate
                 template: cfg.itemTemplate || itemTemplate
+            },
+            {
+                title: 'size',
+                displayProperty: 'size',
+                width: '100px'
             }
         ];
     }

@@ -27,16 +27,6 @@ let getHAR = (): Promise<HAR> => {
     });
 };
 
-
-let findSize = (module: string, har: HAR): number | void => {
-    for (let { request, response } of har.entries) {
-        if (request.url.includes(module)) {
-            return response._transferSize;
-        }
-    }
-};
-
-let lastHar: HAR | void;
 let findResponse = (module: string, har: HAR): HARResponse | undefined => {
     for (let { request, response } of har.entries) {
         if (request.url.includes(module)) {
@@ -45,7 +35,9 @@ let findResponse = (module: string, har: HAR): HARResponse | undefined => {
     }
     return;
 };
-let find = (module: string): Promise<HARResponse | undefined> => {
+
+let lastHar: HAR | void;
+let findResponseCached = (module: string): Promise<HARResponse | undefined> => {
     if (lastHar) {
         let response = findResponse(module, lastHar);
         if (response) {
@@ -59,7 +51,7 @@ let find = (module: string): Promise<HARResponse | undefined> => {
 };
 
 export let getSize = (module: string): Promise<number | undefined> => {
-    return find(module).then((response?: HARResponse) => {
+    return findResponseCached(module).then((response?: HARResponse) => {
         if (!response) {
             return;
         }

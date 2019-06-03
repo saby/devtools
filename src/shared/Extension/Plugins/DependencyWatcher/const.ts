@@ -3,7 +3,8 @@ export const PLUGIN_NAME = 'dependency-watcher';
 export enum EventNames {
     addDependency = "addDependency",
     defineModule = "defineModule",
-    require = "require"
+    require = "require",
+    update = "update"
 }
 
 export enum RPCMethods {

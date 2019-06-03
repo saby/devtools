@@ -1,5 +1,5 @@
-import { IFilterData, ListItem } from "../../types";
-import { PrepareFunction } from "./PrepareFunction";
+import { IFilterData, ListItem } from "../../../types";
+import { PrepareFunction } from "../../util/PrepareFunction";
 
 export let applyWhere = <TTreeData extends ListItem, T extends IFilterData> (
     where: T,

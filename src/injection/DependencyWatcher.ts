@@ -5,19 +5,24 @@ import { IPlugin, IPluginConfig } from "./IPlugin";
 import { IEventEmitter } from "Extension/Event/IEventEmitter";
 import { RPC } from "Extension/Event/RPC";
 import { getBundles } from "./_dependencyWatcher/RPC/getBundles";
-import { PLUGIN_NAME, RPCMethods } from "Extension/Plugins/DependencyWatcher/const";
+import { EventNames, PLUGIN_NAME, RPCMethods } from "Extension/Plugins/DependencyWatcher/const";
 import { getModules } from "./_dependencyWatcher/RPC/getModules";
 import { getModulesList } from "./_dependencyWatcher/RPC/getModulesList";
 import { GLOBAL } from "./const";
 import { hasNewModules } from "./_dependencyWatcher/RPC/hasNewModules";
+import { moduleStorage, UpdateType } from './_dependencyWatcher/moduleStorage';
+import debounce from "Extension/Utils/debounce";
+
+const SEC = 1000;
 
 export class DependencyWatcher implements IPlugin {
-    private __channel: IEventEmitter;
+    private readonly __channel: IEventEmitter;
     private __rpc: RPC;
     constructor({ devtoolChannel }: IPluginConfig) {
         this.__channel = devtoolChannel;
         this.__createRPC();
         this.__defineProperty();
+        this.__notifyUpdate();
     }
 
     private __createRPC () {
@@ -39,6 +44,11 @@ export class DependencyWatcher implements IPlugin {
         } catch (error) {
             this.__channel.dispatch('error', error.message);
         }
+    }
+    private __notifyUpdate() {
+        moduleStorage.onupdate = debounce(() => {
+            this.__channel.dispatch(EventNames.update, {});
+        }, SEC);
     }
 
     static getName() {

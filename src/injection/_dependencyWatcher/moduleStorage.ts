@@ -27,16 +27,26 @@ let normalizeDependencies = (dependencies: string[]): string[] => {
   return filterHelpers(dependencies).map(removePrefix);
 };
 
-let getUniques = (modules: string[]): string[] => {
-    return [...new Set(modules)]
-};
+enum UpdateType {
+    define,
+    require,
+    clear,
+}
+interface UpdateHandler {
+    // <TArgs extends unknown[] = unknown[]>(type: UpdateType, ...args: TArgs): void;
+    (type: UpdateType.require, module: string, dependencies: string[]): void;
+    (type: UpdateType.define, module: string, dependencies?: string[]): void;
+    (type: UpdateType.clear): void;
+}
 
 class ModuleStorage {
     private __static: Dependencies = Object.create(null);
     private __dynamic: Dependencies = Object.create(null);
     
     defineModule(module: string, dependencies?: string[]): void {
-        this.__static[module] = dependencies? normalizeDependencies(dependencies): [];
+        let _dependencies = dependencies? normalizeDependencies(dependencies): [];
+        this.__static[module] = _dependencies;
+        this.onupdate(UpdateType.define, module, _dependencies);
     }
     addDependency(module: string, dependencies: string | string[]): void {
         let dynamic = normalizeDependencies(
@@ -44,11 +54,20 @@ class ModuleStorage {
                 dependencies:
                 [dependencies]
         );
+        
+        let withoutStatic = filterCrossing(dynamic, this.__static[module] || []);
+        let withoutExisting = filterCrossing(withoutStatic, this.__dynamic[module] || []);
 
-        this.__dynamic[module] = getUniques([
-            ...filterCrossing(dynamic, this.__static[module] || []),
-            ...(this.__dynamic[module] || [])
-        ]);
+        if (!withoutExisting.length) {
+            return;
+        }
+
+        this.__dynamic[module] = [
+            ...(this.__dynamic[module] || []),
+            ...withoutExisting
+        ];
+
+        this.onupdate(UpdateType.require, module, withoutExisting);
     }
     get(type: DependencyType): Dependencies  {
         switch (type) {
@@ -69,10 +88,20 @@ class ModuleStorage {
     clear() {
         this.__static = Object.create(null);
         this.__dynamic = Object.create(null);
+        this.onupdate(UpdateType.clear);
     }
     
+    private __onupdate: UpdateHandler = () => {};
+    set onupdate(value) {
+        if (typeof value == "function") {
+            this.__onupdate = <UpdateHandler> value;
+        }
+    }
+    get onupdate(): UpdateHandler {
+        return this.__onupdate;
+    }
 }
 
 let moduleStorage = new ModuleStorage();
 
-export { moduleStorage }
+export { moduleStorage, UpdateType }

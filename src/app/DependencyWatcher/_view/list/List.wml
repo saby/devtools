@@ -6,4 +6,5 @@
     grouping="{{ __grouping }}"
     itemTemplate="{{ __itemTemplate }}"
     modeController="{{ _options.modeController }}"
+    name="dataContainer"
 />

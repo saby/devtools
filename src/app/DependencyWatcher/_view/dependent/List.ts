@@ -1,12 +1,8 @@
-// @ts-ignore
-import * as Control from 'Core/Control';
-// @ts-ignore
-import * as template from 'wml!DependencyWatcher/_view/list/List';
-import { source, types } from "DependencyWatcher/data";
+import { source } from "DependencyWatcher/data";
 import { navigation } from "./navigation";
+import { List as ListControl } from "../list/List";
 
-export default class List extends Control {
-    protected _template = template;
+export default class List extends ListControl {
     private __navigation = navigation;
     private __source = source.Dependent;
     private __sourceOption: object;

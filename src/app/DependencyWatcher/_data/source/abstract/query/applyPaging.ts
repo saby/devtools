@@ -1,4 +1,4 @@
-import { PrepareFunction } from "./PrepareFunction";
+import { PrepareFunction } from "../../util/PrepareFunction";
 
 export let applyPaging = <TTreeData>(offset: number = 0, limits: number): PrepareFunction<TTreeData> => {
     return (set: TTreeData[]) => {
