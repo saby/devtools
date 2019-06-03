@@ -192,6 +192,24 @@ class Agent {
       this.elements.delete(node.id);
       this.__removeChildren(node.id);
 
+      //TODO: удалить после того как ключи будут браться из инферно
+      if (node.id.indexOf('popup') !== -1) {
+         this.elements.forEach((element, key) => {
+            if (element.instance && element.instance._destroyed) {
+               this.elements.delete(key);
+               this.__removeChildren(key);
+
+               if (this.isDevtoolsOpened) {
+                  const message: IOperationEvent['args'] = [
+                     OperationType.DELETE,
+                     key
+                  ];
+                  this.channel.dispatch('operation', message);
+               }
+            }
+         });
+      }
+
       if (this.isDevtoolsOpened) {
          const message: IOperationEvent['args'] = [
             OperationType.DELETE,
@@ -353,7 +371,7 @@ class Agent {
             if (currentRoot.controlNodes && currentRoot.controlNodes[currentRoot.controlNodes.length - 1].key === '_') {
                return '_' + currentRoot.controlNodes[currentRoot.controlNodes.length - 1].id;
             }
-            currentRoot = currentElement.parentElement;
+            currentRoot = currentRoot.parentElement;
          }
          return '_inst_1';
       }

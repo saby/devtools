@@ -123,14 +123,9 @@ class Elements extends Control {
 
    private __removeNode(id: IControlNode['id']): void {
       const nodeIndex = this._elements.findIndex((node) => node.id === id);
-      let deleteCount = 1;
-      for (let i = nodeIndex; i < this._elements.length; i++) {
-         if (this._elements[i].depth <= this._elements[nodeIndex].depth) {
-            break;
-         }
-         deleteCount++;
+      if (nodeIndex !== -1) {
+         this._elements.splice(nodeIndex, 1);
       }
-      this._elements.splice(nodeIndex, deleteCount);
    }
 
    private __addNode(
@@ -175,8 +170,9 @@ class Elements extends Control {
 
    private __highlightNode(id: IControlNode['id']): void {
       const elementIndex = this._elements.findIndex((element) => element.id === id);
-      if (this.__isVisible(elementIndex, this._elements[elementIndex].depth)) {
+      if (elementIndex !== -1 && this.__isVisible(elementIndex, this._elements[elementIndex].depth)) {
          this._highlightedElements.add(id);
+         this._forceUpdate();
       }
    }
 

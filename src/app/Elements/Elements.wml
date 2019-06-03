@@ -15,9 +15,8 @@
                   <div attr:class="{{_selectedItemId === element.id ? 'Elements__node_selected'}}"
                        attr:style="padding-left: {{10 * element.depth}}px;">
                      <ws:if data="{{ _elements[index + 1] && _elements[index + 1].depth > element.depth }}">
-                        <Controls.buttons:Button icon="{{_collapsedNodes.has(element.id) ? 'icon-DayForward' : 'icon-ArrowDown'}} icon-small"
-                                                 viewMode="link"
-                                                 on:click="__toggleCollapsed(element.id)" />
+                        <i attr:class="{{_collapsedNodes.has(element.id) ? 'icon-DayForward' : 'icon-ArrowDown'}} icon-small icon-primary"
+                           on:click="__toggleCollapsed(element.id)" />
                      </ws:if>
                      <span attr:class="Elements__node {{__getClassByControlType(element.controlType)}}">{{element.name}}</span>
                   </div>
