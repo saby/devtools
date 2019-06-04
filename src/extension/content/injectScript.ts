@@ -1,11 +1,11 @@
-let injectScript = (fileName: string) => {
-    let scriptElement = document.createElement("script");
-    scriptElement.setAttribute("type", "text/javascript");
+const injectScript = (fileName: string) => {
+    const scriptElement = document.createElement('script');
+    scriptElement.setAttribute('type', 'text/javascript');
     scriptElement.src = chrome.extension.getURL(fileName);
     document.documentElement.appendChild(scriptElement);
-    // setTimeout(() => {
-    //     document.head.appendChild(scriptElement);
-    // }, 100)
+    if (scriptElement.parentNode) {
+        scriptElement.parentNode.removeChild(scriptElement);
+    }
 };
 
 export { injectScript };
