@@ -1,4 +1,4 @@
-<div attr:class="Breadcrumbs">
+<div attr:class="Breadcrumbs" on:wheel="_wheelHandler()">
    <ws:if data="{{_options.items.length > 0}}">
       <ws:for data="crumb in _options.items">
          <div attr:key="{{crumb.id}}"

@@ -39,6 +39,13 @@ class Breadcrumbs extends Control<IOptions> {
       this._notify('itemClick', [id]);
    }
 
+   protected _wheelHandler(e: Event): void {
+      const nativeEvent: WheelEvent = e.nativeEvent;
+      if (!nativeEvent.shiftKey) {
+         this._container.scrollLeft += nativeEvent.deltaY;
+      }
+   }
+
    private __scrollToElement(): void {
       const selectedChild = this._children[this._options.selectedItemId];
       if (selectedChild instanceof HTMLElement) {
