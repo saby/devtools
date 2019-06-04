@@ -3,7 +3,8 @@ import { IPluginConstructor, IPlugin } from './IPlugin';
 import { InjectHook } from './InjectHook';
 import { DevtoolChannel } from "./_devtool/Channel";
 import { GlobalMessages } from "Extension/const";
-import { globalChannel } from "./globalChannel";
+import { globalChannel } from "./_devtool/globalChannel";
+import { logger } from "./_devtool/logger";
 
 const ALL_PLUGINS: Array<IPluginConstructor> = [ DependencyWatcher, InjectHook ];
 
@@ -12,7 +13,8 @@ const PLUGINS: Map<string, IPlugin> = new Map;
 ALL_PLUGINS.forEach((Plugin: IPluginConstructor) => {
     let name = Plugin.getName();
     let plugin = new Plugin({
-        devtoolChannel: new DevtoolChannel(name)
+        channel: new DevtoolChannel(name),
+        logger: logger.create(name)
     });
     PLUGINS.set(name, plugin);
 });
