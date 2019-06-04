@@ -105,10 +105,10 @@ class Elements extends Control {
       this.__highlightNode(id);
    }
 
-   protected _onAnimationEnd(e: Event, element: IControlNode): void {
+   protected _onAnimationEnd(e: Event, id: IControlNode['id']): void {
       const nativeEvent = e.nativeEvent as AnimationEvent;
       if (nativeEvent.animationName === 'flash') {
-         this._highlightedElements.delete(element.id);
+         this._highlightedElements.delete(id);
          this._forceUpdate();
       }
    }

@@ -6,7 +6,7 @@
                <ws:if data="{{ __isVisible(index, element.depth) }}">
                   <div attr:key="{{element.id}}"
                        attr:class="{{_highlightedElements.has(element.id) ? 'Elements__node_flash'}}"
-                       on:animationend="_onAnimationEnd(element)"
+                       on:animationend="_onAnimationEnd(element.id)"
                        on:mouseenter="__highlightElement(element.id)"
                        on:mouseleave="__highlightElement()"
                        on:click="_onItemClick(element.id)"
@@ -26,6 +26,8 @@
          <ws:if data="{{_path}}">
             <Elements.Breadcrumbs.Breadcrumbs items="{{_path}}"
                                               selectedItemId="{{_selectedItemId}}"
+                                              on:itemMouseEnter="__highlightElement()"
+                                              on:itemMouseLeave="__highlightElement()"
                                               on:itemClick="_onItemClick()"/>
          </ws:if>
       </div>

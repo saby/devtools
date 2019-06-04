@@ -46,6 +46,14 @@ class Breadcrumbs extends Control<IOptions> {
       }
    }
 
+   protected _onMouseEnter(e: Event, id: IControlNode['id']): void {
+      this._notify('itemMouseEnter', [id]);
+   }
+
+   protected _onMouseLeave(e: Event, id: IControlNode['id']): void {
+      this._notify('itemMouseLeave', [id]);
+   }
+
    private __scrollToElement(): void {
       const selectedChild = this._children[this._options.selectedItemId];
       if (selectedChild instanceof HTMLElement) {
