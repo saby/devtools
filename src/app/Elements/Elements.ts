@@ -6,6 +6,7 @@ import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType, ControlType } from 'Extension/Plugins/Elements/const';
+import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
 import retrocycle from './retrocycle';
 import 'css!Elements/Elements';
 
@@ -17,7 +18,7 @@ class Elements extends Control {
    protected _elements:
       | Array<{
            id: IControlNode['id'];
-           name?: IControlNode['name'];
+           name: IControlNode['name'];
            parentId?: IControlNode['parentId'];
            depth: number;
            class: string;
@@ -27,6 +28,7 @@ class Elements extends Control {
    protected _collapsedNodes: Set<IControlNode['id']> = new Set();
    protected _children: Record<IControlNode['id'], HTMLElement>;
    protected _elementsChanged: boolean = false;
+   protected _path: BreadcrumbsOptions['items'];
 
    constructor() {
       super();
@@ -75,8 +77,8 @@ class Elements extends Control {
       window.elementsPanel = undefined;
    }
 
-   protected _onItemClick(e: Event, item: IControlNode): void {
-      this.__selectElement(item.id);
+   protected _onItemClick(e: Event, id: IControlNode['id']): void {
+      this.__selectElement(id);
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
@@ -127,6 +129,7 @@ class Elements extends Control {
    }
 
    private __selectElement(id: IControlNode['id']): void {
+      this._path = this.__getPath(id);
       this._selectedItemId = id;
       this._channel.dispatch('inspectElement', this._selectedItemId);
       if (this._children[id]) {
@@ -227,17 +230,27 @@ class Elements extends Control {
       this._forceUpdate();
    }
 
-   private __getPath(node: IControlNode): IControlNode[] {
-      const index = this._elements.indexOf(node);
-      const path = [node];
-      let currentDepth = node.depth;
-      for (let i = index; i >= 0; i--) {
-         if (this._elements[i].depth < currentDepth) {
-            currentDepth--;
-            path.push(this._elements[i]);
+   private __getPath(id: IControlNode['id']): BreadcrumbsOptions['items'] {
+      const index = this._elements.findIndex((node) => node.id === id);
+      if (index !== -1) {
+         const node = this._elements[index];
+         const path = [node];
+         let currentDepth = node.depth;
+         for (let i = index; i >= 0; i--) {
+            if (this._elements[i].depth < currentDepth) {
+               currentDepth--;
+               path.push(this._elements[i]);
+            }
          }
+         return path.map((node) => {
+            return {
+               id: node.id,
+               name: node.name,
+               class: node.class
+            };
+         }).reverse();
       }
-      return path.reverse();
+      throw new Error('Trying to find nonexistent item');
    }
 }
 

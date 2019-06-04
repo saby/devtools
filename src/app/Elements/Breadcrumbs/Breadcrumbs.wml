@@ -1,0 +1,10 @@
+<div attr:class="Breadcrumbs">
+   <ws:if data="{{_options.items.length > 0}}">
+      <ws:for data="crumb in _options.items">
+         <div attr:key="{{crumb.id}}"
+              attr:name="{{crumb.id}}"
+              attr:class="Breadcrumbs__crumb {{crumb.class}} {{crumb.id === _options.selectedItemId ? 'Breadcrumbs__crumb_selected'}}"
+              on:click="_onItemClick(crumb.id)">{{crumb.name}}</div>
+      </ws:for>
+   </ws:if>
+</div>
