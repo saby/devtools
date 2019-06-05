@@ -2,9 +2,10 @@ import * as Control from 'Core/Control';
 import * as template from 'wml!Devtool/Page/Page';
 import { Memory } from 'Types/source';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
+import { GlobalMessages } from 'Extension/const';
 import 'css!Devtool/Page/Page';
 
-//TODO: пока не подключили application берём шрифты отсюда
+// TODO: пока не подключили application берём шрифты отсюда
 import 'css!Controls/Application/Application';
 
 class Extension extends Control {
@@ -27,8 +28,8 @@ class Extension extends Control {
    protected _hasWasabyOnPage: boolean = false;
    constructor() {
       super();
-      this._channel.dispatch('devtoolsInitialized');
-      this._channel.addListener('wasabyInitialized', () => {
+      this._channel.dispatch(GlobalMessages.devtoolsInitialized);
+      this._channel.addListener(GlobalMessages.wasabyInitialized, () => {
          this._hasWasabyOnPage = true;
       });
       chrome.devtools.network.onNavigated.addListener(() => {
