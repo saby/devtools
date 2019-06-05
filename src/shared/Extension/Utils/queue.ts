@@ -2,6 +2,8 @@ interface PromiseConstruct<T> {
     (): Promise<T>;
 }
 
+/*
+// До лучших времён, когда билдер научится в esnext
 export let queue = async <T>(steps: PromiseConstruct<T>[]): Promise<T[]> => {
     let results: T[] = [];
     for (let step of steps) {
@@ -9,8 +11,9 @@ export let queue = async <T>(steps: PromiseConstruct<T>[]): Promise<T[]> => {
     }
     return Promise.resolve(results);
 };
+*/
 
-export let queue2 = async <T>(steps: PromiseConstruct<T>[]): Promise<T[]> => {
+export let queue = async <T>(steps: PromiseConstruct<T>[]): Promise<T[]> => {
     let _steps = [...steps];
     let results: T[] = [];
     return new Promise((resolve) => {
