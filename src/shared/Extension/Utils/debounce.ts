@@ -1,7 +1,10 @@
-function debounce<T extends unknown[]>(originalFunction: (...args: T) => void, delay: number): (...args: T) => void {
+function debounce<TArgs extends unknown[] = unknown[], TResult = void>(
+    originalFunction: (...args: TArgs) => TResult,
+    delay: number
+): (...args: TArgs) => void {
    let timer: number;
 
-   return (...args: T): void => {
+   return (...args: TArgs): void => {
       if (timer) {
          window.clearTimeout(timer);
       }

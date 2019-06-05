@@ -2,7 +2,11 @@
     <Controls.scroll:Container
         attr:class="DependencyWatcher_Page__scroll"
     >
-        <ws:partial template="{{ __list }}" sourceConfig="{{ __sourceConfig }}">
+        <ws:partial
+            name="listContainer"
+            template="{{ __list }}"
+            sourceConfig="{{ __sourceConfig }}"
+        >
             <ws:modeController>
                 <Controls.buttons:Button
                     icon="icon-medium icon-AddButtonNew"

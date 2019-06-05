@@ -1,16 +1,11 @@
+import { source } from "DependencyWatcher/data";
 // @ts-ignore
-import * as Control from 'Core/Control';
-// @ts-ignore
-import * as template from 'wml!DependencyWatcher/_view/list/List';
-import { source, types, markers } from "../../data";
-import { columns } from "./column";
-import { grouping } from "../list/grouping";
+import * as itemTemplate from "wml!DependencyWatcher/_view/dependency/itemTemplate";
+import { List as ListControl } from "../list/List";
 
-export default class List extends Control {
-    protected _template = template;
-    private __column = columns;
+export default class List extends ListControl {
     private __navigation = {};
     private __source = source.Dependencies;
     private __sourceOption: object;
-    private __grouping = grouping
+    private __itemTemplate = itemTemplate;
 }

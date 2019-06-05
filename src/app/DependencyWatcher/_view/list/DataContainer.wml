@@ -32,6 +32,7 @@
                         parentProperty="parent"
                         nodeProperty="child"
                         columns="{{ __column }}"
+                        columnScroll="{{ true }}"
                     >
                     </Controls.explorer:View>
                 </Controls.operations:Container>

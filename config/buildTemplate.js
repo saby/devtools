@@ -40,10 +40,6 @@ const WASABY_MODULES = [
     "path": "rmi/src/client/Browser"
   },
   {
-    "name": "SbisEnv",
-    "path": "rmi/src/client/SbisEnv"
-  },
-  {
     "name": "Vdom",
     "path": "sbis3-ws/Vdom"
   },

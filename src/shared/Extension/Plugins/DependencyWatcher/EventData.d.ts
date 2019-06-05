@@ -17,10 +17,15 @@ export interface RequireModule {
     dependencies: string[]
 }
 
-export interface Events extends Record<EventNames, ModuleOperation | RequireModule>{
+export interface Update {
+
+}
+
+export interface Events extends Record<EventNames, unknown>{
     [EventNames.addDependency]: AddDependency;
-    [EventNames.defineModule]: DefineModule;
+    [EventNames.define]: DefineModule;
     [EventNames.require]: RequireModule;
+    [EventNames.update]: Update;
 }
 
 export type Bundle = string[];
