@@ -62,6 +62,7 @@ export class RPC {
         return new Promise<TRes>((resolve, reject) => {
             let id: string = guid();
             this.__waitingRequests.set(id, resolve);
+            // @ts-ignore
             let timer: number = setTimeout(() => {
                 reject(new Error('timeout'));
                 this.__waitingRequests.delete(id);
