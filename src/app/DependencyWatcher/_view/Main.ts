@@ -52,6 +52,7 @@ export default class Main extends Control {
         //     this.__sourceConfig = getSourceConfig(contentChannel);
         //     this._forceUpdate();
         // });
+        this.__addListener();
     }
     private __sourceConfig = getSourceConfig(contentChannel);
     private __changeView(event: unknown, mode: ViewMode) {

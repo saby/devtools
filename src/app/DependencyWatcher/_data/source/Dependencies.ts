@@ -1,4 +1,3 @@
-import { IModuleDependency, IModulesDependencyMap } from "Extension/Plugins/DependencyWatcher/Module";
 import { DependencyType, GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
 import { Abstract } from "./Abstract";
 import { deserialize, serialize } from "./util/id";
@@ -9,14 +8,14 @@ import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { findFile } from "./util/findFile";
 import { SortFunction } from "./list/Sort";
 import { sortFunctions } from "./dependencies/sortFunctions";
-import { getSize } from "./util/getSize";
+import { IModuleDependency, ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
 
-let hasChild = (dependencies?: IModuleDependency): boolean => {
-    if (!dependencies) {
+let hasChild = (module?: TransferModule): boolean => {
+    if (!module) {
         return false;
     }
-    return (dependencies.dynamic && dependencies.dynamic.length > 0) ||
-        (dependencies.static && dependencies.static.length > 0);
+    return (module.dependencies.dynamic && module.dependencies.dynamic.length > 0) ||
+        (module.dependencies.static && module.dependencies.static.length > 0);
 };
 
 let createItem = (
@@ -79,13 +78,16 @@ let getFileName = (
 };
 
 let eachDependencies = (
-    dependencies: IModuleDependency,
-    callback: (type:DependencyType, moduleName: string) => void
+    modules: ModulesRecord<TransferModule>,
+    module: TransferModule,
+    callback: (type: DependencyType, moduleName: string) => void
 ) => {
-    for (let type in dependencies) {
-        let dependency = dependencies[<DependencyType>type];
-        let cb =  callback.bind(null, <DependencyType> type);
-        dependency.forEach(cb);
+    for (let type in module.dependencies) {
+        let dependencies = Object.values(modules).filter((dependency: TransferModule) => {
+            return module.dependencies[<DependencyType>type].includes(dependency.id);
+        }).map(module => module.name);
+        let cb = callback.bind(null, <DependencyType> type);
+        dependencies.forEach(cb);
     }
 };
 
@@ -93,6 +95,7 @@ export class Dependencies<
     TFilter extends dependency.IFilterData = dependency.IFilterData
 > extends Abstract<dependency.Item, TFilter> {
     private readonly _fileModuleUsing: Map<string, Set<string>> = new Map();
+    // @ts-ignore
     protected _sortFunctions: SortFunction<dependency.Item>[] = sortFunctions;
     protected _query(query: Query): Promise<dependency.Item[]> {
         // console.log('Dependencies => _query:', query);
@@ -124,7 +127,7 @@ export class Dependencies<
             this._getModules()
         ]).then(([bundle, modules]) => {
             return bundle.map((moduleName) => {
-                let subDependencies = modules.get(moduleName);
+                let subDependencies = modules[moduleName];
                 return createModule(
                     moduleName,
                     id,
@@ -137,13 +140,13 @@ export class Dependencies<
     }
     
     private __queryModule(module: string, id?: string): Promise<dependency.Item[]> {
-        return this._getModules().then((modules: IModulesDependencyMap) => {
-            let dependencies = modules.get(module);
+        return this._getModules().then((modules: ModulesRecord<TransferModule>) => {
+            let dependencies = modules[module];
             if (!dependencies) {
                 return [];
             }
             return this.__mapDependencies(modules, dependencies, id);
-        })
+        });
     }
     
     /**
@@ -154,18 +157,18 @@ export class Dependencies<
      * @private
      */
     private __mapDependencies(
-        modules: IModulesDependencyMap,
-        dependencies: IModuleDependency,
+        modules: ModulesRecord<TransferModule>,
+        dependencies: TransferModule,
         id?: string
     ): Promise<dependency.Item[]> {
         return this._getBundles().then((bundles) => {
             let items: dependency.Item[] = [];
             let files: Map<string, dependency.ItemFile> = new Map();
-            eachDependencies(dependencies, (type, moduleName) => {
+            eachDependencies(modules, dependencies, (type, moduleName) => {
                 let fileName = getFileName(bundles, moduleName, id);
                 let isDynamic = type === DependencyType.dynamic;
                 if (!fileName) {
-                    let subDependencies = modules.get(moduleName);
+                    let subDependencies = modules[moduleName];
                     items.push(
                         createModule(
                             moduleName,

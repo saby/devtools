@@ -6,7 +6,7 @@ import { IFilterData, ListItem } from "../../types";
 import { SortFunction } from "../list/Sort";
 import { sortFunctions } from "../list/sortFunctions";
 import { getSize } from "../util/getSize";
-import { queue } from "../util/queue";
+import { queue } from "Extension/Utils/queue";
 
 export interface IQueryConfig {
 
@@ -81,10 +81,15 @@ export abstract class QuerySource<
     private __mapData(data: TTreeData[]): (() => Promise<TTreeData>)[] {
         return data.map((item) => {
             return () => {
+                if (item.size) {
+                    return  Promise.resolve(item);
+                }
                 return this.__getSize(item.name).then((size: number | void) => {
                     if (!size) {
                         return item;
                     }
+                    //@ts-ignore
+                    this._setSize(item.name, size);
                     return {
                         ...item,
                         size
