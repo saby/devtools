@@ -1,20 +1,24 @@
 import { IDefine, Args } from "./IDefine";
 import { prepareArgs } from "./prepareArgs";
-import { moduleStorage } from "../moduleStorage";
+import { ModuleStorage } from "../ModuleStorage";
+import { ILogger } from "Extension/Logger/ILogger";
 
-let regDeps = (args: Array<Args>) => {
-    try {
-        let { name, dependencies = [] } = prepareArgs(args);
-        if (name) {
-            moduleStorage.defineModule(name, dependencies);
+let regDepsFunction = (storage: ModuleStorage, logger: ILogger) => {
+    return (args: Array<Args>) => {
+        try {
+            let { name, dependencies = [] } = prepareArgs(args);
+            if (name) {
+                storage.define(name, dependencies);
+            }
         }
-    }
-    catch (e) {
-    
-    }
+        catch (error) {
+            logger.error(error);
+        }
+    };
 };
 
-export let wrapDefineStatic = (_realDefine: IDefine): IDefine => {
+export let wrapDefineStatic = (_realDefine: IDefine, storage: ModuleStorage, logger: ILogger): IDefine => {
+    let regDeps = regDepsFunction(storage, logger);
     return (...args: Array<Args>) => {
         regDeps(args);
         return _realDefine(...args);

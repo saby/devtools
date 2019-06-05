@@ -1,8 +1,10 @@
 import { IDefine} from "./IDefine";
 import { prepareArgs } from "./prepareArgs";
 import { wrapDefineStatic } from './static';
-import { proxyModules } from './proxyModules';
+import { getProxyModules } from './proxyModules';
 import { replaceDependencies } from './replaceDependency';
+import { ModuleStorage } from "../ModuleStorage";
+import { ILogger } from "Extension/Logger/ILogger";
 
 let isNeedDynamicWrapper = (
     constructorFunction: void | Function,
@@ -20,9 +22,10 @@ let isNeedDynamicWrapper = (
     })
 };
 
-let replacedModules: string[] = Object.keys(proxyModules);
+export let wrapDefineDynamic = (_realDefine: IDefine, storage: ModuleStorage, logger: ILogger): IDefine => {
+    let proxyModules = getProxyModules(storage, logger);
+    let replacedModules: string[] = Object.keys(proxyModules);
 
-export let wrapDefineDynamic = (_realDefine: IDefine): IDefine => {
     let dynamicDefine = (...defineArgs: any[]) => {
         let { dependencies, constructorFunction, name } = prepareArgs(defineArgs);
         if (!isNeedDynamicWrapper(constructorFunction, dependencies, replacedModules, name)) {
@@ -45,7 +48,7 @@ export let wrapDefineDynamic = (_realDefine: IDefine): IDefine => {
             return constructorFunction(...newModuleArgs);
         });
     };
-    return  wrapDefineStatic(dynamicDefine);
+    return  wrapDefineStatic(dynamicDefine, storage, logger);
 };
 
 
