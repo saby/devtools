@@ -23,7 +23,7 @@ export interface Update {
 
 export interface Events extends Record<EventNames, unknown>{
     [EventNames.addDependency]: AddDependency;
-    [EventNames.defineModule]: DefineModule;
+    [EventNames.define]: DefineModule;
     [EventNames.require]: RequireModule;
     [EventNames.update]: Update;
 }
