@@ -1,11 +1,13 @@
 import { IEventEmitter } from "Extension/Event/IEventEmitter";
+import { INamedLogger } from "Extension/Logger/ILogger";
 
 export interface IPlugin {
     // update(config)
 }
 
 export interface IPluginConfig<TParams = void> {
-    devtoolChannel: IEventEmitter;
+    channel: IEventEmitter;
+    logger: INamedLogger;
 }
 
 export interface IPluginConstructor {

@@ -2,10 +2,10 @@
 import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
+// @ts-ignore
+import * as itemTemplate from 'wml!DependencyWatcher/_view/list/itemTemplate';
 import { source } from "../../data";
 import { Columns } from "./column";
-// @ts-ignore
-import { view as viewConstants } from "Controls/Constants";
 
 type Children = {
     list: Control;
@@ -19,9 +19,9 @@ interface IConfig {
     sourceConfig: source.IConfig;
     Source: SourceConstructor;
     navigation: object;
-    column: Columns;
     modeController?: Control;
     grouping<T>(item:T): string;
+    itemTemplate?: Function;
 }
 
 export default class Main extends Control {
@@ -34,7 +34,19 @@ export default class Main extends Control {
         super(cfg);
         this.__source = new cfg.Source(cfg.sourceConfig);
         this.__navigation = cfg.navigation;
-        this.__column = cfg.column;
+        this.__column = [
+            {
+                title: 'module',
+                displayProperty: 'name',
+                // template: ColumnTemplate
+                template: cfg.itemTemplate || itemTemplate
+            },
+            {
+                title: 'size',
+                displayProperty: 'size',
+                width: '100px'
+            }
+        ];
     }
     private _root: string| void;
     __changeRoot(event: unknown, id: string) {
@@ -49,9 +61,5 @@ export default class Main extends Control {
     };
     private set __filter(value) {
         this.__filterObject = value;
-    }
-    
-    private __groupingCallback(item: unknown) {
-        return viewConstants.hiddenGroup;
     }
 }

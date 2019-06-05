@@ -1,8 +1,8 @@
 /**
  * @typedef {Function} ReplaceFunction.<T>
  * @param {String} name
- * @param {T} origin
- * @return T
+ * @param {TCollection} origin
+ * @return TCollection
  */
 type ReplaceFunction<T = any> = (name: string, origin: T) => T;
 

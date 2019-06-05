@@ -1,3 +1,10 @@
+import { ModuleStorage } from "./moduleStorage";
+import { INamedLogger } from "Extension/Logger/ILogger";
+
 export interface IConfig {
-    watchDynamicDependency?: boolean;
+    logger: INamedLogger;
+}
+
+export interface IConfigWithStorage extends IConfig{
+    moduleStorage: ModuleStorage;
 }
