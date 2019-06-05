@@ -57,9 +57,9 @@ let getDependentModules = (
             result.push({
                 name: module.name,
                 isDynamic: false,
-                id: serialize(name),
+                id: serialize(module.name),
                 parent: <string> parentId,
-                child: true,
+                child: !isGlobal(module.name) || null,
                 size: module.size
             });
             return ;
@@ -68,9 +68,9 @@ let getDependentModules = (
             result.push({
                 name: module.name,
                 isDynamic: true,
-                id: serialize(name),
+                id: serialize(module.name),
                 parent: <string> parentId,
-                child: true,
+                child: !isGlobal(module.name) || null,
                 size: module.size
             });
             return ;
@@ -80,7 +80,7 @@ let getDependentModules = (
     if (!result.length) {
         return [{
             name: <string> parentModule.bundle,
-            child: false,
+            child: null,
             isDynamic: false,
             parent: <string> parentId,
             id: serialize(<string> parentModule.bundle)
