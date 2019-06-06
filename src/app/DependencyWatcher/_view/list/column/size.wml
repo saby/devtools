@@ -1,0 +1,3 @@
+<DependencyWatcher._view.list.decorator.Size
+    size="{{ itemData.item['size'] }}"
+/>

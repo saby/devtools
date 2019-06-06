@@ -2,6 +2,7 @@
     source="{{ __source }}"
     keyProperty="id"
     navigation="{{ __navigation }}"
+    virtualScrolling="{{ true }}"
     bind:filter="__filter"
 >
     <Controls.search:Controller searchParam="name" minSearchLength="{{3}}">
@@ -26,7 +27,7 @@
 
             <Controls.list:Container>
                 <Controls.operations:Container>
-                    <Controls.explorer:View
+                    <Controls.treeGrid:View
                         bind:root="_root"
                         displayProperty="name"
                         parentProperty="parent"
@@ -34,7 +35,7 @@
                         columns="{{ __column }}"
                         columnScroll="{{ true }}"
                     >
-                    </Controls.explorer:View>
+                    </Controls.treeGrid:View>
                 </Controls.operations:Container>
             </Controls.list:Container>
         </div>

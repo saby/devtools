@@ -3,7 +3,9 @@ import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
 // @ts-ignore
-import * as itemTemplate from 'wml!DependencyWatcher/_view/list/itemTemplate';
+import * as nameTemplate from 'wml!DependencyWatcher/_view/list/column/name';
+// @ts-ignore
+import * as sizeTemplate from 'wml!DependencyWatcher/_view/list/column/size';
 import { source } from "../../data";
 import { Columns } from "./column";
 
@@ -39,12 +41,13 @@ export default class Main extends Control {
                 title: 'module',
                 displayProperty: 'name',
                 // template: ColumnTemplate
-                template: cfg.itemTemplate || itemTemplate
+                template: cfg.itemTemplate || nameTemplate
             },
             {
                 title: 'size',
                 displayProperty: 'size',
-                width: '100px'
+                width: '100px',
+                template: sizeTemplate
             }
         ];
     }
