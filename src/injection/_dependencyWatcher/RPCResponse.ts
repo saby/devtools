@@ -8,6 +8,7 @@ import { ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatch
 import { Require } from "./Require";
 import { GLOBAL } from "../const";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
+import { getFileName } from "./require/getFileName";
 
 interface Config extends IConfigWithStorage{
     rpc: RPC,
@@ -61,7 +62,7 @@ export class RPCResponse {
         return this.__storage.getNewModules();
     }
     private __getFileName(name: string) {
-        return this.__require.getRequire().toUrl(name).replace(/\?.+/, '');
+        return getFileName(this.__require.getRequire(), name);
     }
     private setSize({ name, size }: { name: string, size: number }): boolean {
         let module = this.__storage.getModule(name);
