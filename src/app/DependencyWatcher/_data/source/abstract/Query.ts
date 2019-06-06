@@ -67,13 +67,17 @@ export abstract class QuerySource<
     }
 
     private readonly __sizes: Record<string, number> = Object.create(null);
-    private __getSize(module: string): Promise<number | void> {
-        if (this.__sizes[module]) {
-            return Promise.resolve(this.__sizes[module]);
+    private __getSize(module: TTreeData): Promise<number | void> {
+        if (this.__sizes[module.name]) {
+            return Promise.resolve(this.__sizes[module.name]);
         }
-        return getSize(module).then((size?: number) => {
+        return getSize(
+            module.fileName ||
+            module.bundle ||
+            module.name
+        ).then((size?: number) => {
             if (size) {
-                this.__sizes[module] = size;
+                this.__sizes[module.name] = size;
             }
             return size;
         })
@@ -84,7 +88,7 @@ export abstract class QuerySource<
                 if (item.size) {
                     return  Promise.resolve(item);
                 }
-                return this.__getSize(item.name).then((size: number | void) => {
+                return this.__getSize(item).then((size: number | void) => {
                     if (!size) {
                         return item;
                     }
