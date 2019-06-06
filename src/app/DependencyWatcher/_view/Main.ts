@@ -3,14 +3,14 @@ import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/main/Main';
 import { ViewMode } from "../const";
-import { contentChannel } from "../contentChannel";
 import { RPC } from "Extension/Event/RPC";
 import { default as Dependency } from "./dependency/List";
 import { default as Dependent } from "./dependent/List";
 import 'css!DependencyWatcher/_view/main/Main';
 import { IEventEmitter } from "Extension/Event/IEventEmitter";
-import { EventNames } from "Extension/Plugins/DependencyWatcher/const";
+import { EventNames, PLUGIN_NAME } from "Extension/Plugins/DependencyWatcher/const";
 import { List } from "./list/List";
+import { ContentChannel } from "../../Devtool/Event/ContentChannel";
 
 let getList = (viewMode: ViewMode) => {
     switch (viewMode) {
@@ -42,19 +42,12 @@ export default class Main extends Control {
     protected readonly _children: IChildren;
     private __viewMode: ViewMode = ViewMode.dependency;
     private __list: Control = getList(this.__viewMode);
+    private __channel: IEventEmitter = new ContentChannel(PLUGIN_NAME);
     constructor(...args: unknown[]) {
         super(...args);
-        // chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-        //     if (tabId != chrome.devtools.inspectedWindow.tabId) {
-        //         return;
-        //     }
-        //     this.__sourceConfig.rpc.destructor();
-        //     this.__sourceConfig = getSourceConfig(contentChannel);
-        //     this._forceUpdate();
-        // });
         this.__addListener();
     }
-    private __sourceConfig = getSourceConfig(contentChannel);
+    private __sourceConfig = getSourceConfig(this.__channel);
     private __changeView(event: unknown, mode: ViewMode) {
         if (this.__viewMode == mode) {
             return;
@@ -64,14 +57,15 @@ export default class Main extends Control {
     }
     private __addListener() {
         this.__onUpdateHandler = this.__onUpdate.bind(this);
-        contentChannel.addListener(EventNames.update, this.__onUpdateHandler);
+        this.__channel.addListener(EventNames.update, this.__onUpdateHandler);
     }
     private __onUpdateHandler: () => void;
     private __onUpdate(...args: unknown[]) {
         this._children.listContainer.update(...args);
     }
-    destroy() {
-        contentChannel.removeListener(EventNames.update, this.__onUpdateHandler);
-        super.destroy();
+    protected _beforeUnmount() {
+        this.__channel.removeListener(EventNames.update, this.__onUpdateHandler);
+        this.__channel.destructor();
+        delete this.__channel;
     }
 }
