@@ -8,6 +8,7 @@ export interface IPlugin {
 export interface IPluginConfig<TParams = void> {
     channel: IEventEmitter;
     logger: INamedLogger;
+    plugins: Map<string, IPlugin>;
 }
 
 export interface IPluginConstructor {

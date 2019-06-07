@@ -1,27 +1,31 @@
 import { IWasabyDevHook } from './IHook';
-import Agent from './Agent';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
+import Agent from './Agent';
 
 export class Hook implements IWasabyDevHook {
-   private agent: Agent = new Agent();
-   private messageQueue: Array<[string, ISerializable?]> = [];
+   private _agent: Agent;
+   private _messageQueue: Array<[string, ISerializable?]> = [];
+
+   constructor(agent: Agent) {
+      this._agent = agent;
+   }
 
    onStartCommit(node: IControlNode, typeOfOperation: OperationType): void {
-      this.agent.onStartCommit(node, typeOfOperation);
+      this._agent.onStartCommit(node, typeOfOperation);
    }
 
    onEndCommit(node: IControlNode): void {
-      this.agent.onEndCommit(node);
+      this._agent.onEndCommit(node);
    }
 
    onStartSync(rootId: IControlNode['id'], instanceId: string): void {
-      this.agent.onStartSync(rootId + instanceId);
+      this._agent.onStartSync(rootId + instanceId);
    }
 
    onEndSync(rootId: IControlNode['id'], instanceId: string): void {
-      this.agent.onEndSync(rootId + instanceId);
+      this._agent.onEndSync(rootId + instanceId);
    }
 
    init(): void {
@@ -29,12 +33,12 @@ export class Hook implements IWasabyDevHook {
    }
 
    pushMessage(eventName: string, args?: ISerializable): void {
-      this.messageQueue.push([eventName, args]);
+      this._messageQueue.push([eventName, args]);
    }
 
    readMessageQueue(): Array<[string, ISerializable?]> {
-      const messages = this.messageQueue.slice();
-      this.messageQueue = [];
+      const messages = this._messageQueue.slice();
+      this._messageQueue = [];
       return messages;
    }
 }

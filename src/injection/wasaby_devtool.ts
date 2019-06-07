@@ -8,13 +8,14 @@ import { logger } from './_devtool/logger';
 
 const ALL_PLUGINS: IPluginConstructor[] = [ DependencyWatcher, InjectHook ];
 
-const PLUGINS: Map<string, IPlugin> = new Map;
+const PLUGINS: Map<string, IPlugin> = new Map();
 
 ALL_PLUGINS.forEach((Plugin: IPluginConstructor) => {
     const name = Plugin.getName();
     const plugin = new Plugin({
         channel: new DevtoolChannel(name),
-        logger: logger.create(name)
+        logger: logger.create(name),
+        plugins: PLUGINS
     });
     PLUGINS.set(name, plugin);
 });

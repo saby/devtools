@@ -24,6 +24,7 @@ class Agent {
       >
    > = new Map();
    private rootStack: Array<IControlNode['id']> = [];
+   private currentModuleName: string = '';
 
    constructor() {
       this.channel.addListener(
@@ -95,6 +96,7 @@ class Agent {
       if (!currentRoot) {
          throw new Error('Trying to change nonexistent root');
       }
+      this.currentModuleName = node.name;
       currentRoot.set(node.id + currentRootId, {
          node,
          operation
@@ -148,6 +150,10 @@ class Agent {
       });
       this.changedRoots.delete(rootId);
       this.rootStack.pop();
+   }
+
+   getCurrentModuleName(): string {
+      return this.currentModuleName;
    }
 
    private __handleAdd(node: IControlNode): void {
