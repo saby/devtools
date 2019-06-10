@@ -61,7 +61,9 @@ export default class Main extends Control {
     }
     private __onUpdateHandler: () => void;
     private __onUpdate(...args: unknown[]) {
-        this._children.listContainer.update(...args);
+        if (this._children.listContainer) {
+            this._children.listContainer.update(...args);
+        }
     }
     protected _beforeUnmount() {
         this.__channel.removeListener(EventNames.update, this.__onUpdateHandler);

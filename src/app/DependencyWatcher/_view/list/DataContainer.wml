@@ -1,6 +1,7 @@
 <Controls.list:DataContainer
     source="{{ __source }}"
     keyProperty="id"
+    parentProperty="parent"
     navigation="{{ __navigation }}"
     virtualScrolling="{{ true }}"
     bind:filter="__filter"
@@ -17,27 +18,32 @@
                     <ws:partial template="{{ _options.modeController }}" />
                 </ws:if>
             </Controls.scroll:StickyHeader>
-            <div class="ws-fragment">
-                <DependencyWatcher._view.list.BackButton
-                    source="{{ __source }}"
-                    id="{{ _root }}"
-                    on:change="__changeRoot()"
-                />
-            </div>
 
             <Controls.list:Container>
                 <Controls.operations:Container>
-                    <Controls.treeGrid:View
-                        bind:root="_root"
+                    <Controls.explorer:View
+                        name="listView"
+                        root="{{ null }}"
                         displayProperty="name"
-                        parentProperty="parent"
                         nodeProperty="child"
                         columns="{{ __column }}"
                         columnScroll="{{ true }}"
                     >
-                    </Controls.treeGrid:View>
+                        <ws:header>
+                            <ws:Array>
+                                <ws:Object title="module" sortingProperty="name"/>
+                                <ws:Object title="size" sortingProperty="size"/>
+                            </ws:Array>
+                        </ws:header>
+                    </Controls.explorer:View>
                 </Controls.operations:Container>
             </Controls.list:Container>
+<!--            <Controls.popup:Notification-->
+<!--                name="notificationOpener"-->
+<!--                template="wml!Controls/popupTemplate:NotificationSimple"-->
+<!--            >-->
+<!--                <ws:templateOptions style="success" text="HelloWorld!" icon="Admin"></ws:templateOptions>-->
+<!--            </Controls.popup:Notification>-->
         </div>
     </Controls.search:Controller>
 </Controls.list:DataContainer>

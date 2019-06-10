@@ -2,9 +2,8 @@ import { DependencyType, GLOBAL_MODULE_NAME, } from 'Extension/Plugins/Dependenc
 import { Abstract } from "./Abstract";
 import { deserialize, serialize } from "./util/id";
 import { dependent } from "../types";
-// @ts-ignore
-import { Query } from 'Types/source';
 import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
+import { findModule } from "./util/findModule";
 
 let isGlobal = (module: string): boolean => {
     return module === GLOBAL_MODULE_NAME;
@@ -84,10 +83,9 @@ let getModules = (
 export class Dependent<
     TFilter extends dependent.IFilterData = dependent.IFilterData
 > extends Abstract<dependent.Item, TFilter> {
-    protected _query(query: Query): Promise<dependent.Item[]> {
-        console.log('Dependent => _query:', query);
-        // @ts-ignore
-        const { parent } = <TFilter> query.getWhere();
+    protected _query(where: TFilter): Promise<dependent.Item[]> {
+        console.log('Dependent => _query:', where);
+        const { parent } = where;
 
         let parentModule = parent? deserialize(parent)[0]: undefined;
         return Promise.all([

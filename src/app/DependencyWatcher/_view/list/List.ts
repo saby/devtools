@@ -12,6 +12,6 @@ export class List extends Control {
     protected _template = template;
     protected _children: IListChildren;
     update(...args: unknown[]): void {
-        console.log('update >= ', ...args);
+        this._children.dataContainer.update(...args);
     }
 }

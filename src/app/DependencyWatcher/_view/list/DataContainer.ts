@@ -10,7 +10,8 @@ import { source } from "../../data";
 import { Columns } from "./column";
 
 type Children = {
-    list: Control;
+    listView: Control;
+    notificationOpener: Control;
 }
 
 interface SourceConstructor {
@@ -64,5 +65,9 @@ export default class Main extends Control {
     };
     private set __filter(value) {
         this.__filterObject = value;
+    }
+    update(...args: unknown[]): void {
+        
+        // this._children.listView.reload();
     }
 }

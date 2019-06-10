@@ -8,13 +8,22 @@ let removePrefix = (prefix: string): IRequirePlugin => {
     };
 };
 
-let fileFormat = (format: string): IRequirePlugin<string | false> => {
+interface Format {
+    ext?: string;
+    module: string
+}
+let fileFormat = (format: string): IRequirePlugin<Format> => {
     let pluginPrefix = `${ format }!`;
-    return (module: string): string | false => {
+    return (module: string): Format => {
         if (module.includes(pluginPrefix)) {
-            return module.replace(pluginPrefix, '') + `.${ format }`;
+            return {
+                ext: '.' + format,
+                module: module.replace(pluginPrefix, '')
+            }
         }
-        return false;
+        return {
+            module
+        };
     };
 };
 
@@ -24,13 +33,13 @@ export let optional: IRequirePlugin<string> = removePrefix('optional!');
 
 export let preload: IRequirePlugin<string> = removePrefix('preload!');
 
-export let json: IRequirePlugin<string | false> = fileFormat('json');
+export let json: IRequirePlugin<Format> = fileFormat('json');
 
-export let css: IRequirePlugin<string | false> = fileFormat('css');
+export let css: IRequirePlugin<Format> = fileFormat('css');
 
-export let wml: IRequirePlugin<string | false> = fileFormat('wml');
+export let wml: IRequirePlugin<Format> = fileFormat('wml');
 
-export let tmpl: IRequirePlugin<string | false> = fileFormat('tmpl');
+export let tmpl: IRequirePlugin<Format> = fileFormat('tmpl');
 
 
 /*
@@ -61,13 +70,13 @@ let allPlugins = {
 /**
  * Плагины, которые можно игнорировать
  */
-export let ignoredPlugins = [
+export let ignoredPlugins: IRequirePlugin<string>[] = [
     browser, optional, preload
 ];
 
 /**
  * Плагины, влияющие на расширение файла
  */
-export let extensionPlugins = [
+export let extensionPlugins: IRequirePlugin<Format>[] = [
     json, css, wml, tmpl
 ];

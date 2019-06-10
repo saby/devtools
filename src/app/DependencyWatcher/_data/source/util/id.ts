@@ -16,7 +16,8 @@ export let remove = (module: string): string => {
 
 const SPLITTER = ';';
 
-export let serialize = <T extends string[] = string[]>(...args: T): string => {
+type StringOrNumber = string | number;
+export let serialize = <T extends StringOrNumber[] = StringOrNumber[]>(...args: T): string => {
     return [...args, getId()].join(SPLITTER);
 };
 

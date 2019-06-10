@@ -11,6 +11,18 @@ import { queue } from "Extension/Utils/queue";
 export interface IQueryConfig {
 
 }
+let getName = (module: string): string => {
+    let [ ext, name ] = module.split('!');
+    if (!name) {
+        name = ext;
+        ext = 'js';
+    }
+    ext = '.' + ext;
+    if (name.endsWith(ext)) {
+        return name;
+    }
+    return name + ext;
+};
 
 export abstract class QuerySource<
     TTreeData extends ListItem = ListItem,
@@ -21,8 +33,16 @@ export abstract class QuerySource<
     
     }
     query(query: Query): Promise<DataSet> {
+        // @ts-ignore
+        let where = <TFilter> query.getWhere();
+        // if (Array.isArray(parent)) {
+        //     return queue(parent.map((_parent) => {
+        //         return this.qu
+        //     }));
+        // }
+        
         let filter = this.__getFilter(query);
-        return filter(this._query(query)).then(({ data, hasMore}) => {
+        return filter(this._query(where)).then(({ data, hasMore}) => {
             return queue(this.__mapData(data)).then((newData: TTreeData[]) => {
                 return {
                     data: newData,
@@ -43,7 +63,7 @@ export abstract class QuerySource<
             return error;
         });
     }
-    protected abstract _query(query: Query): Promise<TTreeData[]>;
+    protected abstract _query(where: TFilter): Promise<TTreeData[]>;
 
     private __getFilter(query: Query) {
         let countAfterFilter: number;
@@ -74,7 +94,7 @@ export abstract class QuerySource<
         return getSize(
             module.fileName ||
             module.bundle ||
-            module.name
+            getName(module.name)
         ).then((size?: number) => {
             if (size) {
                 this.__sizes[module.name] = size;

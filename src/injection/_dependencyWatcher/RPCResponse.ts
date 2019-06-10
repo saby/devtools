@@ -52,8 +52,8 @@ export class RPCResponse {
         let modules = this.__storage.getModules(dependencies);
         modules.forEach((module) => {
             if (!module.fileName) {
-                module.fileName = this.__getFileName(module.name);
                 module.bundle = findFile(this.__require.getConfig().bundles, module.name) || '';
+                module.fileName = this.__getFileName(module.name, module.bundle);
             }
         });
         return convertToRecord(this.__storage.getModules(dependencies));
@@ -61,8 +61,8 @@ export class RPCResponse {
     private getNewModules(): string[] {
         return this.__storage.getNewModules();
     }
-    private __getFileName(name: string) {
-        return getFileName(this.__require.getRequire(), name);
+    private __getFileName(name: string, bundle?: string) {
+        return getFileName(name, this.__require.getRequire(), bundle, this.__require.getConfig().buildMode );
     }
     private setSize({ name, size }: { name: string, size: number }): boolean {
         let module = this.__storage.getModule(name);

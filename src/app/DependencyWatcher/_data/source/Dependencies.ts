@@ -1,8 +1,6 @@
 import { GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
 import { Abstract } from "./Abstract";
 import { deserialize, serialize } from "./util/id";
-// @ts-ignore
-import { Query } from 'Types/source';
 import { dependency, LeafType } from "../types";
 import { SortFunction } from "./list/Sort";
 import { sortFunctions } from "./dependencies/sortFunctions";
@@ -55,10 +53,9 @@ export class Dependencies<
     private readonly _fileModuleUsing: Map<string, Set<string>> = new Map();
     // @ts-ignore
     protected _sortFunctions: SortFunction<dependency.Item>[] = sortFunctions;
-    protected _query(query: Query): Promise<dependency.Item[]> {
+    protected _query(where: TFilter): Promise<dependency.Item[]> {
         // console.log('Dependencies => _query:', query);
-        // @ts-ignore
-        const { parent } = <TFilter> query.getWhere();
+        const { parent } = where;
     
         if (!parent) {
             return  this.__queryModule(GLOBAL_MODULE_NAME);
@@ -116,14 +113,14 @@ export class Dependencies<
             let items: dependency.Item[] = [];
             let files: Map<string, dependency.ItemFile> = new Map();
             module.dependencies.dynamic.forEach((subModule: Module) => {
-                if (subModule.bundle) {
+                if (subModule.bundle && module.bundle != subModule.bundle) {
                     this.__addFile(files, subModule.bundle, subModule.name, true, parentId);
                     return;
                 }
                 items.push(getItem(subModule, parentId, true));
             });
             module.dependencies.static.forEach((subModule: Module) => {
-                if (subModule.bundle) {
+                if (subModule.bundle && module.bundle != subModule.bundle) {
                     this.__addFile(files, subModule.bundle, subModule.name, false, parentId);
                     return;
                 }
