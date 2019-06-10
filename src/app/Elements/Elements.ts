@@ -2,12 +2,11 @@
 import Control = require('Core/Control');
 // @ts-ignore
 import template = require('wml!Elements/Elements');
-// @ts-ignore
-import { descriptor } from 'Types/entity';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
-import { OperationType } from 'Extension/Plugins/Elements/const';
+import { OperationType, ControlType } from 'Extension/Plugins/Elements/const';
+import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
 import retrocycle from './retrocycle';
 import 'css!Elements/Elements';
 
@@ -19,26 +18,40 @@ class Elements extends Control {
    protected _elements:
       | Array<{
            id: IControlNode['id'];
-           name?: IControlNode['name'];
+           name: IControlNode['name'];
            parentId?: IControlNode['parentId'];
            depth: number;
+           class: string;
         }> = [];
    protected _channel: ContentChannel = new ContentChannel('elements');
    protected _highlightedElements: Set<IControlNode['id']> = new Set();
+   protected _collapsedNodes: Set<IControlNode['id']> = new Set();
+   protected _children: Record<IControlNode['id'], HTMLElement>;
+   protected _elementsChanged: boolean = false;
+   protected _path: BreadcrumbsOptions['items'];
 
    constructor() {
       super();
       this._channel.addListener('inspectedElement', (node: IControlNode) => {
          this._inspectedItem = retrocycle(node);
       });
-      this._channel.addListener('setInitialTree', (args: IControlNode[]) => {
-         args.forEach((element) => {
-            this.__addNode(element.id, element.name, element.parentId);
-         });
-      });
       this._channel.addListener('setSelectedItem', this.__selectElement.bind(this));
       this._channel.addListener('operation', this._operationHandler.bind(this));
       window.elementsPanel = this;
+   }
+
+   _beforeUpdate(): void {
+      //TODO: удалить после того как ключи будут браться из инферно
+      if (this._elementsChanged) {
+         const uniqueIds: Set<IControlNode['id']> = new Set();
+         this._elements = this._elements.filter((element) => {
+            if (uniqueIds.has(element.id)) {
+               return false;
+            }
+            uniqueIds.add(element.id);
+            return true;
+         });
+      }
    }
 
    _afterMount(): void {
@@ -56,37 +69,58 @@ class Elements extends Control {
    }
 
    protected _beforeUnmount(): void {
+      this._channel.destructor();
       this._inspectedItem = undefined;
+      this._elements = [];
+      this._highlightedElements.clear();
+      this._collapsedNodes.clear();
       window.elementsPanel = undefined;
    }
 
-   protected _onItemClick(e: Event, item: IControlNode): void {
-      this.__selectElement(item.id);
+   protected _onItemClick(e: Event, id: IControlNode['id']): void {
+      this.__selectElement(id);
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
+      this._elementsChanged = true;
       switch (args[0]) {
-         case OperationType.REMOVE:
+         case OperationType.DELETE:
             this.__removeNode(args[1]);
             break;
          case OperationType.UPDATE:
-            this.__highlightNode(args[1]);
+            this.__updateNode(args[1]);
             break;
-         case OperationType.ADD:
-            if (args.length === 4) {
-               this.__addNode(args[1], args[2], args[3]);
-            }
+         case OperationType.CREATE:
+            this.__addNode(args[1], args[2], args[3], args[4]);
             break;
          case OperationType.REORDER:
             break;
       }
    }
 
-   protected _onAnimationEnd(e: Event, element: IControlNode): void {
+   protected __updateNode(id: IControlNode['id']): void {
+      if (this._selectedItemId === id) {
+         this._channel.dispatch('inspectElement', this._selectedItemId);
+      }
+      this.__highlightNode(id);
+   }
+
+   protected _onAnimationEnd(e: Event, id: IControlNode['id']): void {
       const nativeEvent = e.nativeEvent as AnimationEvent;
       if (nativeEvent.animationName === 'flash') {
-         this._highlightedElements.delete(element.id);
+         this._highlightedElements.delete(id);
          this._forceUpdate();
+      }
+   }
+
+   private __getClassByControlType(controlType: ControlType): string {
+      switch (controlType) {
+         case ControlType.HOC:
+            return 'Elements__node_hoc';
+         case ControlType.CONTROL:
+            return 'Elements__node_control';
+         case ControlType.TEMPLATE:
+            return 'Elements__node_template';
       }
    }
 
@@ -95,35 +129,50 @@ class Elements extends Control {
    }
 
    private __selectElement(id: IControlNode['id']): void {
+      this._path = this.__getPath(id);
       this._selectedItemId = id;
       this._channel.dispatch('inspectElement', this._selectedItemId);
+      if (this._children[id]) {
+         this._children[id].scrollIntoView({
+            block: 'nearest',
+            inline: 'nearest'
+         });
+      }
    }
 
    private __removeNode(id: IControlNode['id']): void {
       const nodeIndex = this._elements.findIndex((node) => node.id === id);
-      this._elements.splice(nodeIndex, 1);
+      if (nodeIndex !== -1) {
+         this._elements.splice(nodeIndex, 1);
+      }
    }
 
    private __addNode(
       id: IControlNode['id'],
       name: IControlNode['name'],
+      controlType: ControlType,
       parentId?: IControlNode['parentId']
    ): void {
-      if (!parentId || parentId === '_') { //TODO: Controls/Application/Core строится в отдельной ветке из app-start, надо вклиниваться где-то в другом месте
+      if (!parentId) {
          this._elements.push({
             id,
             name,
             parentId,
+            class: this.__getClassByControlType(controlType),
             depth: 0
          });
       } else {
          // TODO: сделать добавление в произвольное место
          const parentIndex = this._elements.findIndex((element) => element.id === parentId);
          let lastChildIndex = parentIndex + 1;
-         if (parentIndex === -1) { //TODO: иногда ребёнок раньше родителя приходит, что-то не то. И зацикливания бывают, видимо неправильно беру parentId
+         if (parentIndex === -1) {
+            /**
+             * TODO: иногда возникают циклические зависимости (пока такое встречалось только в попапах), и "родитель" приходит раньше "ребёнка"
+             * Засовываем такие поддеревья в корень, чтобы хоть как-то их показать
+             */
             lastChildIndex = 0;
          } else {
-            while (this._elements[lastChildIndex] && this._elements[lastChildIndex].parentId === parentId) {
+            while (this._elements[lastChildIndex] && this._elements[lastChildIndex].depth > this._elements[parentIndex].depth) {
                lastChildIndex++;
             }
          }
@@ -131,6 +180,7 @@ class Elements extends Control {
             id,
             name,
             parentId,
+            class: this.__getClassByControlType(controlType),
             depth: this.__getDepth(parentId)
          });
       }
@@ -138,7 +188,11 @@ class Elements extends Control {
    }
 
    private __highlightNode(id: IControlNode['id']): void {
-      this._highlightedElements.add(id);
+      const elementIndex = this._elements.findIndex((element) => element.id === id);
+      if (elementIndex !== -1 && this.__isVisible(elementIndex, this._elements[elementIndex].depth)) {
+         this._highlightedElements.add(id);
+         this._forceUpdate();
+      }
    }
 
    private __getDepth(parentId?: IControlNode['parentId']): number {
@@ -149,6 +203,54 @@ class Elements extends Control {
          }
       }
       return 0;
+   }
+
+   private __isVisible(index: number, startDepth: number): boolean {
+      if (this._collapsedNodes.size > 0) {
+         let currentDepth = startDepth;
+         for (let i = index - 1; i >= 0; i--) {
+            if (this._elements[i].depth < currentDepth) {
+               currentDepth--;
+               if (this._collapsedNodes.has(this._elements[i].id)) {
+                  return false;
+               }
+            }
+         }
+      }
+      return true;
+   }
+
+   private __toggleCollapsed(e: Event, id: IControlNode['id']): void {
+      e.stopPropagation();
+      if (this._collapsedNodes.has(id)) {
+         this._collapsedNodes.delete(id);
+      } else {
+         this._collapsedNodes.add(id);
+      }
+      this._forceUpdate();
+   }
+
+   private __getPath(id: IControlNode['id']): BreadcrumbsOptions['items'] {
+      const index = this._elements.findIndex((node) => node.id === id);
+      if (index !== -1) {
+         const node = this._elements[index];
+         const path = [node];
+         let currentDepth = node.depth;
+         for (let i = index; i >= 0; i--) {
+            if (this._elements[i].depth < currentDepth) {
+               currentDepth--;
+               path.push(this._elements[i]);
+            }
+         }
+         return path.map((node) => {
+            return {
+               id: node.id,
+               name: node.name,
+               class: node.class
+            };
+         }).reverse();
+      }
+      throw new Error('Trying to find nonexistent item');
    }
 }
 

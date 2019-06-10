@@ -102,11 +102,11 @@ function decycle<T>(
    })(object, '$');
 }
 
-const LONG_OPTIONS = ['_logicParent', '_events', 'controlNode', 'content', '_container'];
+const IGNORE_FIELDS = ['_logicParent', '_events', 'controlNode', '_container', '__lastGetterPath'];
 
 export default function prepareForSerialization(value: object): object {
    return decycle(value, {
       replacer: replaceFunctions,
-      ignore: LONG_OPTIONS
+      ignore: IGNORE_FIELDS
    });
 }

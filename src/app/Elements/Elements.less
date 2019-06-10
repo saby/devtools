@@ -15,13 +15,36 @@
 
 .Elements__tree {
    width: 100%;
+   display: flex;
+   flex-direction: column;
+   overflow: hidden;
 }
 
-.flash {
+.Elements__node {
+   cursor: pointer;
+}
+
+.Elements__node:hover {
+   background-color: rgba(0, 190, 210, 0.1);
+}
+
+.Elements__node_control {
+   color: #D94700;
+}
+
+.Elements__node_hoc {
+   color: #313E78;
+}
+
+.Elements__node_template {
+   color: #555;
+}
+
+.Elements__node_flash {
    animation: flash 1s;
    animation-fill-mode: forwards;
 }
 
-.selected {
+.Elements__node_selected {
    background-color: rgba(0, 190, 210, 0.2);
 }

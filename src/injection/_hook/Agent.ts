@@ -1,7 +1,7 @@
 import prepareForSerialization from './prepareForSerialization';
 import debounce from 'Extension/Utils/debounce';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import { OperationType } from 'Extension/Plugins/Elements/const';
+import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import Overlay from './Overlay';
@@ -13,16 +13,53 @@ class Agent {
    private overlay: Overlay;
    private previousSelectedItemId: IControlNode['id'] | undefined;
    private mouseMoveHandler?: (e: MouseEvent) => void;
+   private changedRoots: Map<
+      IControlNode['id'],
+      Map<
+         IControlNode['id'],
+         {
+            node: IControlNode;
+            operation: OperationType;
+         }
+      >
+   > = new Map();
+   private rootStack: Array<IControlNode['id']> = [];
+   private currentModuleName: string = '';
 
    constructor() {
-      this.channel.addListener('devtoolsInitialized', this.__onDevtoolsOpened.bind(this));
-      this.channel.addListener('inspectElement', this.__inspectElement.bind(this));
+      this.channel.addListener(
+         'devtoolsInitialized',
+         this.__onDevtoolsOpened.bind(this)
+      );
+      this.channel.addListener(
+         'inspectElement',
+         this.__inspectElement.bind(this)
+      );
       this.channel.addListener('viewTemplate', this.__viewTemplate.bind(this));
-      this.channel.addListener('viewConstructor', this.__viewConstructor.bind(this));
-      this.channel.addListener('storeAsGlobal', this.__storeAsGlobal.bind(this));
-      this.channel.addListener('getSelectedItem', this.__getSelectedItem.bind(this));
-      this.channel.addListener('viewFunctionSource', this.__viewFunctionSource.bind(this));
-      this.channel.addListener('highlightElement', this.__highlightElement.bind(this));
+      this.channel.addListener(
+         'viewConstructor',
+         this.__viewConstructor.bind(this)
+      );
+      this.channel.addListener(
+         'viewContainer',
+         this.__viewContainer.bind(this)
+      );
+      this.channel.addListener(
+         'storeAsGlobal',
+         this.__storeAsGlobal.bind(this)
+      );
+      this.channel.addListener(
+         'getSelectedItem',
+         this.__getSelectedItem.bind(this)
+      );
+      this.channel.addListener(
+         'viewFunctionSource',
+         this.__viewFunctionSource.bind(this)
+      );
+      this.channel.addListener(
+         'highlightElement',
+         this.__highlightElement.bind(this)
+      );
       this.channel.addListener('hideOverlay', () => {
          this.__toggleSelectFromPage(false);
       });
@@ -30,37 +67,105 @@ class Agent {
 
    private __onDevtoolsOpened(): void {
       this.isDevtoolsOpened = true;
-      const data = [];
 
-      this.elements.forEach((value) => {
-         const {id, name, parentId}: IControlNode = value;
-         data.push({id, name, parentId});
+      this.elements.forEach((node) => {
+         const message: IOperationEvent['args'] = [
+            OperationType.CREATE,
+            node.id,
+            node.name,
+            this.__getControlType(node)
+         ];
+         if (node.parentId) {
+            message.push(node.parentId);
+         }
+
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       });
 
-      this.channel.dispatch('setInitialTree', data);
+      this.channel.dispatch('longMessage');
    }
 
-   handleOperation(operation: OperationType, node: IControlNode): void {
-      switch (operation) {
-         case OperationType.REMOVE:
-            this.__handleRemove(node);
-            break;
-         case OperationType.ADD:
-            this.__handleAdd(node);
-            break;
-         case OperationType.REORDER:
-            break;
-         case OperationType.UPDATE:
-            this.__handleUpdate(node);
-            break;
+   onStartSync(rootId: IControlNode['id']): void {
+      this.rootStack.push(rootId);
+      this.changedRoots.set(rootId, new Map());
+   }
+
+   onStartCommit(node: IControlNode, operation: OperationType): void {
+      const currentRootId = this.rootStack[this.rootStack.length - 1];
+      const currentRoot = this.changedRoots.get(currentRootId);
+      if (!currentRoot) {
+         throw new Error('Trying to change nonexistent root');
       }
+      this.currentModuleName = node.name;
+      currentRoot.set(node.id + currentRootId, {
+         node,
+         operation
+      });
+   }
+
+   onEndCommit(node: IControlNode): void {
+      const currentRootId = this.rootStack[this.rootStack.length - 1];
+      const id = node.id + currentRootId;
+      const currentRoot = this.changedRoots.get(currentRootId);
+      if (!currentRoot) {
+         throw new Error('Trying to change nonexistent root');
+      }
+      const changedNode = currentRoot.get(id);
+      if (!changedNode) {
+         throw new Error('Trying to change nonexistent node');
+      }
+
+      currentRoot.set(id, {
+         ...changedNode,
+         node: {
+            ...changedNode.node,
+            ...node,
+            id,
+            parentId: changedNode.node.parentId
+               ? changedNode.node.parentId + currentRootId
+               : undefined
+         }
+      });
+   }
+
+   onEndSync(rootId: IControlNode['id']): void {
+      const changedNodes = this.changedRoots.get(rootId);
+      if (!changedNodes) {
+         throw new Error('Trying to change nonexistent root');
+      }
+      changedNodes.forEach(({ operation, node }) => {
+         switch (operation) {
+            case OperationType.DELETE:
+               this.__handleRemove(node);
+               break;
+            case OperationType.CREATE:
+               this.__handleAdd(node);
+               break;
+            case OperationType.REORDER:
+               break;
+            case OperationType.UPDATE:
+               this.__handleUpdate(node);
+               break;
+         }
+      });
+      this.changedRoots.delete(rootId);
+      this.rootStack.pop();
+   }
+
+   getCurrentModuleName(): string {
+      return this.currentModuleName;
    }
 
    private __handleAdd(node: IControlNode): void {
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent['args'] = [OperationType.ADD, node.id, node.name];
+         const message: IOperationEvent['args'] = [
+            OperationType.CREATE,
+            node.id,
+            node.name,
+            this.__getControlType(node)
+         ];
          if (node.parentId) {
             message.push(node.parentId);
          }
@@ -68,12 +173,23 @@ class Agent {
       }
    }
 
+   private __getControlType(node: IControlNode): ControlType {
+      if (node.instance) {
+         return typeof node.options === 'object' && node.options.content
+            ? ControlType.HOC
+            : ControlType.CONTROL;
+      }
+      return ControlType.TEMPLATE;
+   }
+
    private __handleUpdate(node: IControlNode): void {
-      node.parentId = this.elements.get(node.id).parentId; //TODO: костыль, потому что при апдейте пока непонятно откуда брать parentId
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent['args'] = [OperationType.UPDATE, node.id];
+         const message: IOperationEvent['args'] = [
+            OperationType.UPDATE,
+            node.id
+         ];
          this.channel.dispatch('operation', message);
       }
    }
@@ -82,8 +198,29 @@ class Agent {
       this.elements.delete(node.id);
       this.__removeChildren(node.id);
 
+      //TODO: удалить после того как ключи будут браться из инферно
+      if (node.id.indexOf('popup') !== -1) {
+         this.elements.forEach((element, key) => {
+            if (element.instance && element.instance._destroyed) {
+               this.elements.delete(key);
+               this.__removeChildren(key);
+
+               if (this.isDevtoolsOpened) {
+                  const message: IOperationEvent['args'] = [
+                     OperationType.DELETE,
+                     key
+                  ];
+                  this.channel.dispatch('operation', message);
+               }
+            }
+         });
+      }
+
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent['args'] = [OperationType.REMOVE, node.id];
+         const message: IOperationEvent['args'] = [
+            OperationType.DELETE,
+            node.id
+         ];
          this.channel.dispatch('operation', message);
       }
    }
@@ -91,10 +228,16 @@ class Agent {
    private __removeChildren(id: IControlNode['id']): void {
       const parents: Array<IControlNode['parentId']> = [];
       this.elements.forEach((element, key) => {
-         if (element.parentId === id || parents.indexOf(element.parentId) !== -1) {
+         if (
+            element.parentId === id ||
+            parents.indexOf(element.parentId) !== -1
+         ) {
             this.elements.delete(key);
             parents.push(key);
-            const message: IOperationEvent['args'] = [OperationType.REMOVE, key];
+            const message: IOperationEvent['args'] = [
+               OperationType.DELETE,
+               key
+            ];
             this.channel.dispatch('operation', message);
          }
       });
@@ -107,12 +250,15 @@ class Agent {
             'inspectedElement',
             prepareForSerialization({
                ...node,
+               events: this.__getEvents(id),
                container: null,
                instance: null,
                isControl: !!node.instance
             })
          );
          this.channel.dispatch('longMessage');
+
+         window.$wasaby = { ...node };
       }
    }
 
@@ -127,6 +273,13 @@ class Agent {
       const node = this.elements.get(id);
       if (node && node.instance) {
          window.__WASABY_DEV_HOOK__.__constructor = node.instance.constructor;
+      }
+   }
+
+   private __viewContainer(id: IControlNode['id']): void {
+      const node = this.elements.get(id);
+      if (node && node.instance) {
+         window.__WASABY_DEV_HOOK__.__container = node.instance._container;
       }
    }
 
@@ -155,9 +308,13 @@ class Agent {
       id: IControlNode['id'],
       path: Array<string | number>
    ): unknown {
-      const node = this.elements.get(id);
       let currentProperty = path.pop();
-      let value = node[currentProperty];
+      let value;
+      if (currentProperty === 'events') {
+         value = this.__getEvents(id);
+      } else {
+         value = this.elements.get(id)[currentProperty];
+      }
       while (path.length) {
          currentProperty = path.pop();
          value = value[currentProperty];
@@ -207,11 +364,40 @@ class Agent {
       }
    }
 
-   private __findControlByDomNode(element: Element): IControlNode | undefined {
+   private __findControlByDomNode(element: HTMLElement): IControlNode | undefined {
       let currentElement = element;
+
+      /*
+      TODO: сейчас на странице могут быть элементы с одинаковыми ключами, для этого я к ключу каждого элемента добавляю id корня, в котором он находится
+      Потом ключи будут браться из инферно и будут уникальными, и все костыли с приклеиванием rootId можно будет убрать
+       */
+      function getRootId(elem: HTMLElement): string {
+         let currentRoot = elem;
+         while (currentRoot) {
+            if (currentRoot.controlNodes && currentRoot.controlNodes[currentRoot.controlNodes.length - 1].key === '_') {
+               return '_' + currentRoot.controlNodes[currentRoot.controlNodes.length - 1].id;
+            }
+            currentRoot = currentRoot.parentElement;
+         }
+         return '_inst_1';
+      }
+      const rootId = getRootId(element);
+
       while (currentElement) {
          if (currentElement.controlNodes) {
-            return this.elements.get(currentElement.controlNodes[currentElement.controlNodes.length - 1].key);
+            if (
+               this.previousSelectedItemId &&
+               currentElement.controlNodes.find(
+                  (node) => node.key + rootId === this.previousSelectedItemId
+               )
+            ) {
+               return this.elements.get(this.previousSelectedItemId);
+            }
+            return this.elements.get(
+               currentElement.controlNodes[
+                  currentElement.controlNodes.length - 1
+               ].key + rootId
+            );
          }
          currentElement = currentElement.parentElement;
       }
@@ -219,11 +405,53 @@ class Agent {
    }
 
    private __getSelectedItem(): void {
-      const node = this.__findControlByDomNode(window.__WASABY_DEV_HOOK__.$0) || this.elements.values().next().value;
+      const node =
+         this.__findControlByDomNode(window.__WASABY_DEV_HOOK__.$0) ||
+         this.elements.values().next().value;
       if (node && this.previousSelectedItemId !== node.id) {
          this.channel.dispatch('setSelectedItem', node.id);
          this.previousSelectedItemId = node.id;
       }
+   }
+
+   private __getEvents(
+      id: IControlNode['id']
+   ): Record<string, Array<{ function: Function; arguments: unknown[] }>> {
+      /*
+      TODO: пока только для контролов, потому что я не имею доступа к контейнерам шаблонов
+       */
+      const node = this.elements.get(id);
+      const events: Record<
+         string,
+         Array<{ function: Function; arguments: unknown[] }>
+      > = {};
+      if (
+         node &&
+         node.instance &&
+         node.instance._container &&
+         node.instance._container.eventProperties
+      ) {
+         Object.keys(node.instance._container.eventProperties).forEach(
+            (key) => {
+               events[key.slice(3)] = node.instance._container.eventProperties[
+                  key
+               ].map((handler) => {
+                  if (handler.fn.control[handler.value]) {
+                     return {
+                        function: handler.fn.control[handler.value],
+                        arguments: handler.args
+                     };
+                  } else {
+                     return {
+                        function: handler.fn,
+                        arguments: handler.args
+                     };
+                  }
+               });
+            }
+         );
+      }
+      return events;
    }
 }
 

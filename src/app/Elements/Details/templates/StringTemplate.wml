@@ -1,3 +1,14 @@
+<ws:template name="valueTemplate">
+   <ws:if data="{{ _options.value.startsWith('function ') }}">
+      <Controls.buttons:Button caption='"{{_options.value}}"'
+                               viewMode="link"
+                               on:click="__viewFunctionSource()" />
+   </ws:if>
+   <ws:else>
+      "<span attr:class="StringTemplate__value">{{_options.value}}</span>"
+   </ws:else>
+</ws:template>
+
 <span>
-   <span>{{_options.name}}</span>: <span on:click="_handleClick()">"{{_options.value}}"</span>
+   <span attr:class="StringTemplate__fieldName">{{_options.name}}</span>: <ws:partial template="valueTemplate" />
 </span>

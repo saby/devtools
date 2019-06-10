@@ -1,0 +1,22 @@
+<div attr:class="Pane">
+   <div attr:class="Pane__header"
+        on:click="__toggleExpanded()">
+      <Controls.buttons:Button icon="{{_options.expanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
+                               viewMode="link" />
+      <Controls.heading:Title caption="{{ _options.caption }}"
+                              size="s"
+                              style="secondary" />
+   </div>
+   <ws:if data="{{ _options.expanded }}">
+      <Controls.scroll:Container attr:class="Pane__tabContent">
+         <ws:for data="key, value in _options.data">
+            <ws:partial template="{{__getTemplate(value)}}"
+                        name="{{key}}"
+                        value="{{value}}"
+                        on:viewFunctionSource="__viewFunctionSource()"
+                        on:storeAsGlobal="__storeAsGlobal()"
+                        attr:key="{{key}}"/>
+         </ws:for>
+      </Controls.scroll:Container>
+   </ws:if>
+</div>

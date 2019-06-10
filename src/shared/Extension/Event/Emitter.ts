@@ -12,8 +12,8 @@ class Emitter implements IEventEmitter {
       return this;
    }
    removeListener<T>(event: string, callback: IHandler<T>): this {
-      if (this._listeners.has(event)) {
-         let listeners = <Set<IHandler<T>>> this._listeners.get(event);
+      const listeners = this._listeners.get(event);
+      if (listeners) {
          listeners.delete(callback);
       }
       return this;
@@ -23,23 +23,17 @@ class Emitter implements IEventEmitter {
          this._listeners.clear();
          return this;
       }
-      if (this._listeners.has(event)) {
-         let listeners = <Set<IHandler>> this._listeners.get(event);
-         listeners.clear();
-      }
+      this._listeners.delete(event);
       return this;
    }
    dispatch(event: string, args: ISerializable): boolean {
-      if (!this._listeners.has(event)) {
+      const listeners = this._listeners.get(event);
+
+      if (!listeners) {
          return false;
       }
-      let listeners = <Set<IHandler>> this._listeners.get(event);
-      
-      if (!listeners.size) {
-         return false;
-      }
-      
-      let debounce = (callback: IHandler) => {
+
+      const debounce = (callback: IHandler) => {
          setTimeout(() => {
             callback.call(this, args);
          });
@@ -51,7 +45,7 @@ class Emitter implements IEventEmitter {
 
       return true;
    }
-   destructor(){
+   destructor(): void {
       this.removeAllListeners();
    }
 }

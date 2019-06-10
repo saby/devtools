@@ -1,16 +1,39 @@
 <div attr:class="Details">
-   <div>
-     <div on:click="__viewTemplate()">View template</div>
-     <div if="{{_options.isControl}}" on:click="__viewConstructor()">View constructor</div>
+   <div attr:class="Details__buttons">
+      <Controls.buttons:Button caption="View template"
+                               viewMode="link"
+                               on:click="__viewTemplate()" />
+      <Controls.buttons:Button if="{{_options.isControl}}"
+                               caption="View constructor"
+                               viewMode="link"
+                               on:click="__viewConstructor()" />
+      <Controls.buttons:Button if="{{_options.isControl}}"
+                               caption="View DOM element"
+                               viewMode="link"
+                               on:click="__viewContainer()" />
    </div>
-   <Controls.scroll:Container>
-      <ws:for data="key, value in _options.options">
-         <ws:partial template="{{__getTemplate(value)}}"
-                     name="{{key}}"
-                     value="{{value}}"
-                     on:viewFunctionSource="__viewFunctionSource()"
-                     on:storeAsGlobal="__storeAsGlobal()"
-                     attr:key="{{key}}"/>
-      </ws:for>
-   </Controls.scroll:Container>
+   <ws:if data="{{ __hasData(_options.options) }}">
+      <Elements.Details.Pane caption="Options"
+                             data="{{_options.options}}"
+                             on:viewFunctionSource="__viewFunctionSource()"
+                             on:storeAsGlobal="__storeAsGlobal()"
+                             bind:expanded="_optionsExpanded"/>
+   </ws:if>
+   <ws:if data="{{_options.isControl}}">
+      <ws:if data="{{ __hasData(_options.state) }}">
+         <Elements.Details.Pane caption="State"
+                                data="{{_options.state}}"
+                                on:viewFunctionSource="__viewFunctionSource()"
+                                on:storeAsGlobal="__storeAsGlobal()"
+                                bind:expanded="_stateExpanded"/>
+      </ws:if>
+      <ws:if data="{{ __hasData(_options.events) }}">
+         <Elements.Details.Pane caption="Events"
+                                data="{{_options.events}}"
+                                canStoreAsGlobal="{{false}}"
+                                on:viewFunctionSource="__viewFunctionSource()"
+                                on:storeAsGlobal="__storeAsGlobal()"
+                                bind:expanded="_eventsExpanded"/>
+      </ws:if>
+   </ws:if>
 </div>

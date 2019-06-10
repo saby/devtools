@@ -2,13 +2,8 @@ import Control = require('Core/Control');
 import template = require('wml!Elements/Details/Details');
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
-import { TEMPLATES } from './const';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 
-//TODO: сделать это через async
-import './templates/StringTemplate';
-import './templates/NumberTemplate';
-import './templates/ObjectTemplate';
 import 'css!Elements/Details/Details';
 
 interface IOptions extends IControlNode {
@@ -18,19 +13,14 @@ interface IOptions extends IControlNode {
 class Details extends Control {
    protected _template: Function = template;
    protected readonly _options: Readonly<IOptions>;
-
-   private __getTemplate(value: unknown): string {
-      const type = typeof value;
-      if (TEMPLATES.hasOwnProperty(type)) {
-         return TEMPLATES[type];
-      }
-      return TEMPLATES.string;
-   }
+   protected _optionsExpanded: boolean = true;
+   protected _stateExpanded: boolean = true;
+   protected _eventsExpanded: boolean = false;
 
    private __viewFunctionSource(e: Event, path: Array<string | number>): void {
       this._options.channel.dispatch('viewFunctionSource', {
          id: this._options.id,
-         path: path.concat('options')
+         path
       });
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
@@ -48,10 +38,19 @@ class Details extends Control {
       }, 100);
    }
 
+   private __viewContainer(): void {
+      this._options.channel.dispatch('viewContainer', this._options.id);
+      setTimeout(() => {
+         chrome.devtools.inspectedWindow.eval(
+            'inspect(window.__WASABY_DEV_HOOK__.__container)'
+         );
+      }, 100);
+   }
+
    private __storeAsGlobal(e: Event, path: Array<string | number>): void {
       this._options.channel.dispatch('storeAsGlobal', {
          id: this._options.id,
-         path: path.concat('options')
+         path
       });
    }
 
@@ -62,6 +61,10 @@ class Details extends Control {
             'inspect(window.__WASABY_DEV_HOOK__.__template)'
          );
       }, 100);
+   }
+
+   private __hasData(data: object): boolean {
+      return data && Object.keys(data).length > 0;
    }
 
    // static getOptionTypes(): Record<keyof IOptions, unknown> {

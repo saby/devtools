@@ -1,6 +1,12 @@
 export enum OperationType {
-    REMOVE,
-    ADD,
+    DELETE,
+    CREATE,
     REORDER,
     UPDATE
+}
+
+export enum ControlType {
+    TEMPLATE,
+    CONTROL,
+    HOC
 }

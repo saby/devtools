@@ -1,19 +1,31 @@
 import { IWasabyDevHook } from './IHook';
-import Agent from './Agent';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
+import Agent from './Agent';
 
 export class Hook implements IWasabyDevHook {
-   private agent: Agent = new Agent();
-   private messageQueue: Array<[string, ISerializable?]> = [];
+   private _agent: Agent;
+   private _messageQueue: Array<[string, ISerializable?]> = [];
 
-   onStartCommit(node: IControlNode): void {
-      // TODO: тут нужно будет запоминать текущий рендерящийся контрол, возможно замерять время
+   constructor(agent: Agent) {
+      this._agent = agent;
    }
 
-   onEndCommit(node: IControlNode, typeOfOperation: OperationType): void {
-      this.agent.handleOperation(typeOfOperation, node);
+   onStartCommit(node: IControlNode, typeOfOperation: OperationType): void {
+      this._agent.onStartCommit(node, typeOfOperation);
+   }
+
+   onEndCommit(node: IControlNode): void {
+      this._agent.onEndCommit(node);
+   }
+
+   onStartSync(rootId: IControlNode['id'], instanceId: string): void {
+      this._agent.onStartSync(rootId + instanceId);
+   }
+
+   onEndSync(rootId: IControlNode['id'], instanceId: string): void {
+      this._agent.onEndSync(rootId + instanceId);
    }
 
    init(): void {
@@ -21,12 +33,12 @@ export class Hook implements IWasabyDevHook {
    }
 
    pushMessage(eventName: string, args?: ISerializable): void {
-      this.messageQueue.push([eventName, args]);
+      this._messageQueue.push([eventName, args]);
    }
 
    readMessageQueue(): Array<[string, ISerializable?]> {
-      const messages = this.messageQueue.slice();
-      this.messageQueue = [];
+      const messages = this._messageQueue.slice();
+      this._messageQueue = [];
       return messages;
    }
 }
