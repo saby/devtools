@@ -1,8 +1,8 @@
 import Control = require('Core/Control');
-import template = require('wml!Elements/Details/templates/NumberTemplate');
+import template = require('wml!Elements/Details/Pane/templates/NumberTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
-import 'css!Elements/Details/templates/NumberTemplate';
+import 'css!Elements/Details/Pane/templates/NumberTemplate';
 
 interface IOptions extends ITemplateOptions {
    value: number;
@@ -15,7 +15,8 @@ class NumberTemplate extends Control {
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          value: descriptor(Number).required(),
-         name: descriptor(String, Number).required()
+         name: descriptor(String, Number).required(),
+         key: descriptor(String).required()
       };
    }
 }

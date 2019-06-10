@@ -1,8 +1,8 @@
 import Control = require('Core/Control');
-import template = require('wml!Elements/Details/templates/BooleanTemplate');
+import template = require('wml!Elements/Details/Pane/templates/BooleanTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
-import 'css!Elements/Details/templates/BooleanTemplate';
+import 'css!Elements/Details/Pane/templates/BooleanTemplate';
 
 interface IOptions extends ITemplateOptions {
    value: boolean;
@@ -15,7 +15,8 @@ class BooleanTemplate extends Control {
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          value: descriptor(Boolean).required(),
-         name: descriptor(String, Number).required()
+         name: descriptor(String, Number).required(),
+         key: descriptor(String).required()
       };
    }
 }

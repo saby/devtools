@@ -1,0 +1,29 @@
+<div attr:class="Pane">
+   <div attr:class="Pane__header"
+        on:click="__toggleExpanded()">
+      <Controls.buttons:Button icon="{{_options.expanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
+                               viewMode="link" />
+      <Controls.heading:Title caption="{{ _options.caption }}"
+                              size="s"
+                              style="secondary" />
+   </div>
+   <ws:if data="{{ _options.expanded }}">
+      <Controls.scroll:Container attr:class="Pane__tabContent">
+         <Controls.explorer:View keyProperty="key"
+                                 parentProperty="parent"
+                                 nodeProperty="hasChildren"
+                                 root="{{ null }}"
+                                 source="{{ _source }}"
+                                 columns="{{ _columns }}"
+                                 itemActions="{{ _itemActions }}"
+                                 itemActionVisibilityCallback="{{ _visibilityCallback }}"
+                                 on:viewFunctionSource="__viewFunctionSource()">
+            <ws:itemTemplate>
+               <ws:partial template="Controls/treeGrid:ItemTemplate"
+                           expanderSize="s" />
+            </ws:itemTemplate>
+            <ws:itemPadding left="xs" right="xs" top="s" bottom="s" />
+         </Controls.explorer:View>
+      </Controls.scroll:Container>
+   </ws:if>
+</div>

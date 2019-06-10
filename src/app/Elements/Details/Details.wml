@@ -13,7 +13,7 @@
                                on:click="__viewContainer()" />
    </div>
    <ws:if data="{{ __hasData(_options.options) }}">
-      <Elements.Details.Pane caption="Options"
+      <Elements.Details.Pane.Pane caption="Options"
                              data="{{_options.options}}"
                              on:viewFunctionSource="__viewFunctionSource()"
                              on:storeAsGlobal="__storeAsGlobal()"
@@ -21,14 +21,14 @@
    </ws:if>
    <ws:if data="{{_options.isControl}}">
       <ws:if data="{{ __hasData(_options.state) }}">
-         <Elements.Details.Pane caption="State"
+         <Elements.Details.Pane.Pane caption="State"
                                 data="{{_options.state}}"
                                 on:viewFunctionSource="__viewFunctionSource()"
                                 on:storeAsGlobal="__storeAsGlobal()"
                                 bind:expanded="_stateExpanded"/>
       </ws:if>
       <ws:if data="{{ __hasData(_options.events) }}">
-         <Elements.Details.Pane caption="Events"
+         <Elements.Details.Pane.Pane caption="Events"
                                 data="{{_options.events}}"
                                 canStoreAsGlobal="{{false}}"
                                 on:viewFunctionSource="__viewFunctionSource()"

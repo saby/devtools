@@ -5,8 +5,6 @@
             <ws:for data="index, element in _elements">
                <ws:if data="{{ __isVisible(index, element.depth) }}">
                   <div attr:key="{{element.id}}"
-                       attr:class="{{_highlightedElements.has(element.id) ? 'Elements__node_flash'}}"
-                       on:animationend="_onAnimationEnd(element.id)"
                        on:mouseenter="__highlightElement(element.id)"
                        on:mouseleave="__highlightElement()"
                        on:click="_onItemClick(element.id)"

@@ -7,6 +7,7 @@ import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType, ControlType } from 'Extension/Plugins/Elements/const';
 import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
+import { highlightUpdate } from './highlightUpdate';
 import retrocycle from './retrocycle';
 import 'css!Elements/Elements';
 
@@ -24,7 +25,6 @@ class Elements extends Control {
            class: string;
         }> = [];
    protected _channel: ContentChannel = new ContentChannel('elements');
-   protected _highlightedElements: Set<IControlNode['id']> = new Set();
    protected _collapsedNodes: Set<IControlNode['id']> = new Set();
    protected _children: Record<IControlNode['id'], HTMLElement>;
    protected _elementsChanged: boolean = false;
@@ -72,7 +72,6 @@ class Elements extends Control {
       this._channel.destructor();
       this._inspectedItem = undefined;
       this._elements = [];
-      this._highlightedElements.clear();
       this._collapsedNodes.clear();
       window.elementsPanel = undefined;
    }
@@ -103,14 +102,6 @@ class Elements extends Control {
          this._channel.dispatch('inspectElement', this._selectedItemId);
       }
       this.__highlightNode(id);
-   }
-
-   protected _onAnimationEnd(e: Event, id: IControlNode['id']): void {
-      const nativeEvent = e.nativeEvent as AnimationEvent;
-      if (nativeEvent.animationName === 'flash') {
-         this._highlightedElements.delete(id);
-         this._forceUpdate();
-      }
    }
 
    private __getClassByControlType(controlType: ControlType): string {
@@ -190,7 +181,9 @@ class Elements extends Control {
    private __highlightNode(id: IControlNode['id']): void {
       const elementIndex = this._elements.findIndex((element) => element.id === id);
       if (elementIndex !== -1 && this.__isVisible(elementIndex, this._elements[elementIndex].depth)) {
-         this._highlightedElements.add(id);
+         if (this._children[id]) {
+            highlightUpdate(this._children[id]);
+         }
          this._forceUpdate();
       }
    }

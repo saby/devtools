@@ -1,0 +1,3 @@
+<div>
+   <span attr:class="ObjectTemplate__fieldName">{{_options.name}}</span>: {{_caption}}
+</div>

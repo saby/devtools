@@ -1,0 +1,8 @@
+<ws:partial template="Controls/grid:ColumnTemplate">
+   <ws:contentTemplate>
+      <ws:partial template="{{ itemData.column.getTemplate(itemData.item.value) }}"
+                  value="{{ itemData.item.value }}"
+                  name="{{ itemData.item.name }}"
+                  key="{{ itemData.item.key }}"/>
+   </ws:contentTemplate>
+</ws:partial>
