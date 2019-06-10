@@ -5,6 +5,7 @@ import { descriptor, Model } from 'Types/entity';
 import { TEMPLATES } from './const';
 import { Source } from './Source';
 import columnTemplate = require('wml!Elements/Details/Pane/columnTemplate');
+import { highlightUpdate } from '../../highlightUpdate';
 
 import 'css!Elements/Details/Pane/Pane';
 
@@ -12,6 +13,7 @@ interface IOptions extends IControlOptions {
    caption: string;
    data: object;
    expanded: boolean;
+   changedData?: object;
    canStoreAsGlobal?: boolean;
 }
 
@@ -83,6 +85,33 @@ class Pane extends Control<IOptions> {
       }
    }
 
+   protected _afterUpdate(oldOptions: IOptions): void {
+      if (
+         this._options.changedData &&
+         this._options.changedData !== oldOptions.changedData
+      ) {
+         /**
+          * TODO: Подсветка изменившихся опций. Пока без учёта сортировки, фильтрации, виртуальный скролл и т.д.
+          * Сделано через прямые манипуляции с DOM по двум причинам:
+          * 1) Я не знаю какие элементы отрисованы в определённый момент. Действия должны производится только над видимыми элементами,
+          * и если в списке есть виртуальный скролл, то понять какой элемент видим официально нельзя.
+          * 2) Это быстрее. Другой вариант: вешать класс на элементы, который запустит анимацию. Подписаться на окончание анимации и снимать этот класс.
+          * Такой вариант в худшем случае может вызывать N перерисовок, где N - количество изменившихся элементов. Также если элемент уничтожится за время
+          * анимации, то он никогда не удалится из списка изменившихся.
+          */
+         const items = this._children.list._container.querySelectorAll(
+            '.controls-GridViewV__itemsContainer .controls-Grid__row-cell'
+         );
+         const keys = Object.keys(this._options.data);
+         Object.keys(this._options.changedData).forEach((key) => {
+            let index = keys.indexOf(key);
+            if (index !== -1 && items[index]) {
+               highlightUpdate(items[index]);
+            }
+         });
+      }
+   }
+
    protected _itemActionVisibilityCallback(
       action: IItemAction,
       item: Model
@@ -91,7 +120,9 @@ class Pane extends Control<IOptions> {
       switch (action.id) {
          case 'storeAsGlobal':
             return (
-               !!this._options.canStoreAsGlobal && typeof value === 'object'
+               !!this._options.canStoreAsGlobal &&
+               value &&
+               typeof value === 'object'
             );
       }
    }
@@ -132,6 +163,7 @@ class Pane extends Control<IOptions> {
          caption: descriptor(String).required(),
          data: descriptor(Object).required(),
          expanded: descriptor(Boolean).required(),
+         changedData: descriptor(Object, null),
          canStoreAsGlobal: descriptor(Boolean),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)

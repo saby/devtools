@@ -14,18 +14,20 @@
    </div>
    <ws:if data="{{ __hasData(_options.options) }}">
       <Elements.Details.Pane.Pane caption="Options"
-                             data="{{_options.options}}"
-                             on:viewFunctionSource="__viewFunctionSource()"
-                             on:storeAsGlobal="__storeAsGlobal()"
-                             bind:expanded="_optionsExpanded"/>
+                                  data="{{ _options.options }}"
+                                  changedData="{{ _options.changedOptions }}"
+                                  on:viewFunctionSource="__viewFunctionSource()"
+                                  on:storeAsGlobal="__storeAsGlobal()"
+                                  bind:expanded="_optionsExpanded"/>
    </ws:if>
    <ws:if data="{{_options.isControl}}">
       <ws:if data="{{ __hasData(_options.state) }}">
          <Elements.Details.Pane.Pane caption="State"
-                                data="{{_options.state}}"
-                                on:viewFunctionSource="__viewFunctionSource()"
-                                on:storeAsGlobal="__storeAsGlobal()"
-                                bind:expanded="_stateExpanded"/>
+                                     data="{{ _options.state }}"
+                                     changedData="{{ _options.changedState }}"
+                                     on:viewFunctionSource="__viewFunctionSource()"
+                                     on:storeAsGlobal="__storeAsGlobal()"
+                                     bind:expanded="_stateExpanded"/>
       </ws:if>
       <ws:if data="{{ __hasData(_options.events) }}">
          <Elements.Details.Pane.Pane caption="Events"
