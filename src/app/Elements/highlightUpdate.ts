@@ -4,9 +4,6 @@ export function highlightUpdate(
    baseColor: string = 'transparent',
    duration: number = 1
 ): void {
-   /**
-    * Подс
-    */
    node.style.transition = 'none';
    node.style.backgroundColor = flashColor;
    // force recalc
