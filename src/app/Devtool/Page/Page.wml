@@ -9,7 +9,6 @@
            attr:class="Devtool_Page__tabButton"
         />
 
-        <Controls.Popup.Compatible.ManagerWrapper/>
         <Controls.switchableArea:View bind:selectedKey="_activeTab">
             <ws:items>
                 <ws:Array>

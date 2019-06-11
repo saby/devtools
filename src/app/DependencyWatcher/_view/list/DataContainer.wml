@@ -12,7 +12,7 @@
                 attr:class="DependencyWatcher_Page__head"
             >
                 <Controls.search:InputContainer>
-                    <Controls.Input.Search/>
+                    <Controls.search:Input/>
                 </Controls.search:InputContainer>
                 <ws:if data="{{ _options.modeController }}">
                     <ws:partial template="{{ _options.modeController }}" />

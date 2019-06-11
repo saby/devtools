@@ -98,7 +98,7 @@ module.exports = {
   "sources": false,
   "symlinks": false,
   "minimize": false,
-  "wml": false,
+  "wml": true,
   "customPack": false,
   "dependenciesGraph": false,
   "resourcesUrl": false,
