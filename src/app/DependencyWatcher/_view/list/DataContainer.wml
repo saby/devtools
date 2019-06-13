@@ -28,11 +28,13 @@
                         nodeProperty="child"
                         columns="{{ __column }}"
                         columnScroll="{{ true }}"
+                        bind:sorting="__sorting"
+
                     >
                         <ws:header>
                             <ws:Array>
-                                <ws:Object title="module" sortingProperty="name"/>
-                                <ws:Object title="size" sortingProperty="size"/>
+                                <ws:Object title="module" sortingProperty="name" align="left"/>
+                                <ws:Object title="size" sortingProperty="size" align="right"/>
                             </ws:Array>
                         </ws:header>
                     </Controls.explorer:View>

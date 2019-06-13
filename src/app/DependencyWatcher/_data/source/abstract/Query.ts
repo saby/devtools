@@ -3,8 +3,6 @@ import { applyWhere } from "./query/applyWhere";
 import { orderBy } from "../list/orderBy";
 import { applyPaging } from "./query/applyPaging";
 import { IFilterData, ListItem } from "../../types";
-import { SortFunction } from "../list/Sort";
-import { sortFunctions } from "../list/sortFunctions";
 import { getSize } from "../util/getSize";
 import { queue } from "Extension/Utils/queue";
 
@@ -24,11 +22,15 @@ let getName = (module: string): string => {
     return name + ext;
 };
 
+interface IDataSetConfig <TTreeData extends ListItem = ListItem> {
+    data: TTreeData[],
+    hasMore: boolean;
+}
+
 export abstract class QuerySource<
     TTreeData extends ListItem = ListItem,
     TFilter extends IFilterData = IFilterData
 > {
-    protected _sortFunctions: SortFunction<TTreeData>[] = sortFunctions;
     constructor(config: IQueryConfig) {
     
     }
@@ -42,14 +44,14 @@ export abstract class QuerySource<
         // }
         
         let filter = this.__getFilter(query);
-        return filter(this._query(where)).then(({ data, hasMore}) => {
+        return filter(this._query(where)).then(({ data, hasMore }) => {
             return queue(this.__mapData(data)).then((newData: TTreeData[]) => {
                 return {
                     data: newData,
                     hasMore
                 }
             });
-        }).then(({ data, hasMore }) => {
+        }).then(({ data, hasMore }: IDataSetConfig) => {
             return new DataSet({
                 rawData: {
                     data,
@@ -71,13 +73,13 @@ export abstract class QuerySource<
             return queryPromise.
             // @ts-ignore
             then(applyWhere<TTreeData, TFilter>(query.getWhere(), query.getLimit())).
-            then((set) => {
+            then((set: TTreeData[]) => {
                 countAfterFilter = set.length;
                 return set;
             }).
-            then(orderBy<TTreeData>(query.getOrderBy(), this._sortFunctions)).
+            then(orderBy<TTreeData>(query.getOrderBy())).
             then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).
-            then((data) => {
+            then((data: TTreeData[]) => {
                 return {
                     data,
                     hasMore: countAfterFilter > query.getOffset() + data.length

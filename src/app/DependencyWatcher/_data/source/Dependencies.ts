@@ -2,8 +2,6 @@ import { GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
 import { Abstract } from "./Abstract";
 import { deserialize, serialize } from "./util/id";
 import { dependency, LeafType } from "../types";
-import { SortFunction } from "./list/Sort";
-import { sortFunctions } from "./dependencies/sortFunctions";
 import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
 
 let hasChild = (module?: Module): boolean => {
@@ -51,8 +49,6 @@ export class Dependencies<
     TFilter extends dependency.IFilterData = dependency.IFilterData
 > extends Abstract<dependency.Item, TFilter> {
     private readonly _fileModuleUsing: Map<string, Set<string>> = new Map();
-    // @ts-ignore
-    protected _sortFunctions: SortFunction<dependency.Item>[] = sortFunctions;
     protected _query(where: TFilter): Promise<dependency.Item[]> {
         // console.log('Dependencies => _query:', query);
         const { parent } = where;

@@ -31,6 +31,7 @@ export default class Main extends Control {
     protected _template = template;
     protected _children: Children;
     private __column: Columns;
+    private __sorting: {[key: string]: 'desc' | 'asc'}[] = [];
     private __navigation: object;
     private __source: source.Abstract;
     constructor(cfg: IConfig) {
@@ -39,15 +40,14 @@ export default class Main extends Control {
         this.__navigation = cfg.navigation;
         this.__column = [
             {
-                title: 'module',
                 displayProperty: 'name',
                 // template: ColumnTemplate
                 template: cfg.itemTemplate || nameTemplate
             },
             {
-                title: 'size',
                 displayProperty: 'size',
                 width: '100px',
+                align: 'right',
                 template: sizeTemplate
             }
         ];
