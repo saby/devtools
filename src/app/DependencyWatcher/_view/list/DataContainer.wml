@@ -23,17 +23,17 @@
                 <Controls.operations:Container>
                     <Controls.explorer:View
                         name="listView"
-                        root="{{ null }}"
+                        bind:root="_root"
                         displayProperty="name"
                         nodeProperty="child"
                         columns="{{ __column }}"
                         columnScroll="{{ true }}"
                         bind:sorting="__sorting"
-
                     >
                         <ws:header>
                             <ws:Array>
                                 <ws:Object title="module" sortingProperty="name" align="left"/>
+                                <ws:Object title="file" sortingProperty="fileName" align="left"/>
                                 <ws:Object title="size" sortingProperty="size" align="right"/>
                             </ws:Array>
                         </ws:header>

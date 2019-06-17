@@ -45,6 +45,9 @@ export default class Main extends Control {
                 template: cfg.itemTemplate || nameTemplate
             },
             {
+                displayProperty: 'fileName'
+            },
+            {
                 displayProperty: 'size',
                 width: '100px',
                 align: 'right',

@@ -8,6 +8,7 @@ import { notUsed } from "../sort/notUsed";
 import { name } from "../sort/name";
 import { type } from "../sort/type";
 import { size } from "../sort/size";
+import { fileName } from "../sort/fileName";
 
 const ALL_SORTING_FUNCTIONS: Record<string, SortFunction> = {
     name,
@@ -16,7 +17,8 @@ const ALL_SORTING_FUNCTIONS: Record<string, SortFunction> = {
     isDynamic,
     // @ts-ignore
     type,
-    size
+    size,
+    fileName
 };
 
 let getDefaultSorting = <T extends ListItem>(): SortFunction<T>[] => {
