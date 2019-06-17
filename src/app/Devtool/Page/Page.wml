@@ -1,3 +1,4 @@
+<Devtool.Page.Application>
 <div
     class="Devtool_Page"
 >
@@ -30,3 +31,4 @@
         Connecting to Wasaby...
     </ws:else>
 </div>
+</Devtool.Page.Application>

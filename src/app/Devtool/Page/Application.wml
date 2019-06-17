@@ -1,0 +1,29 @@
+<Controls.event:Register name="scrollDetect" register="scroll" attr:fixCompatible="1">
+<Controls.event:Register name="resizeDetect" register="controlResize" attr:fixCompatible="1">
+<Controls.event:Register name="mousemoveDetect" register="mousemove" attr:fixCompatible="1">
+<Controls.event:Register name="mouseupDetect" register="mouseup" attr:fixCompatible="1">
+<Controls.event:Register name="touchmoveDetect" register="touchmove" attr:fixCompatible="1">
+<Controls.event:Register name="touchendDetect" register="touchend" attr:fixCompatible="1">
+<Controls.event:Register name="mousedownDetect" register="mousedown" attr:fixCompatible="1">
+    <Controls.popup:Global>
+        <Controls.popup:Manager >
+            <Controls.Application.TouchDetector name="touchDetector">
+                <Controls.dragnDrop:Controller name="dragNDropContainer">
+                    <UI.HotKeys:Dispatcher>
+                        <ws:partial
+                            template="{{ _options.content }}"
+                            scope="{{ _options }}"
+                        />
+                        <Controls.popup:Container attr:id="popup" eventHandler="{{content._managerEventHandler}}"/>
+                    </UI.HotKeys:Dispatcher>
+                </Controls.dragnDrop:Controller>
+            </Controls.Application.TouchDetector>
+        </Controls.popup:Manager>
+    </Controls.popup:Global>
+</Controls.event:Register>
+</Controls.event:Register>
+</Controls.event:Register>
+</Controls.event:Register>
+</Controls.event:Register>
+</Controls.event:Register>
+</Controls.event:Register>
