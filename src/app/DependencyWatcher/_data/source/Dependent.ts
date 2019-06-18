@@ -1,120 +1,103 @@
-import { DependencyType, GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
+import { GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
 import { Abstract } from "./Abstract";
-import { deserialize, serialize } from "./util/id";
+import { createId, getId } from "./util/id";
 import { dependent } from "../types";
-// @ts-ignore
-import { Query } from 'Types/source';
-import { ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
+import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
+import { findModule } from "./util/findModule";
 
 let isGlobal = (module: string): boolean => {
     return module === GLOBAL_MODULE_NAME;
 };
 
-let getAllModules = (record: ModulesRecord<TransferModule>): dependent.Item[] => {
-    let results = [];
-    for (let name in record) {
+let getAllModules = (map: ModulesMap): dependent.Item[] => {
+    let results: dependent.Item[] = [];
+    
+    map.forEach((module: Module, name: string) => {
         if (isGlobal(name)) {
-            continue;
+            return;
         }
+        let { fileName, bundle, size, id } = module;
         results.push({
-            name,
+            name, fileName, bundle, size,
             isDynamic: false,
-            id: serialize(name),
+            id: createId(id),
             parent: undefined,
-            child: true,
-            size: record[name].size
+            child: true
         });
-    }
+    });
     return results;
 };
 
-let getCreator = (isDynamic: boolean) => {
-    return (name: string, parent: string): dependent.Item => {
-        return {
-            name,
+let getEachHandler = (results: dependent.Item[], isDynamic: boolean, parentItemId?: string) => {
+    return (module: Module) => {
+        let { name, size, fileName, bundle, id } = module;
+        results.push({
+            name, size, fileName, bundle,
             isDynamic,
-            id: serialize(name),
-            parent,
-            child: true,
-        }
-    };
+            id: createId(id, parentItemId),
+            parent: <string> parentItemId,
+            child: !isGlobal(name) || null,
+        });
+    }
 };
 
 let getDependentModules = (
-    record: ModulesRecord<TransferModule>,
-    parentModuleName: string | void,
-    parentId: string | void,
+    map: ModulesMap,
+    parentModuleId: string | void,
+    parentItemId: string | void,
     pageName: string
 ): dependent.Item[] => {
     let result: dependent.Item[] = [];
-    if (!parentModuleName || !record[parentModuleName ]) {
+    if (!parentModuleId) {
         return result;
     }
-    let parentModule = record[parentModuleName ];
-    
-    let dependent = Object.values(record).forEach((module: TransferModule) => {
-        if (parentModule.dependent.static.includes(module.id)) {
-            result.push({
-                name: module.name,
-                isDynamic: false,
-                id: serialize(name),
-                parent: <string> parentId,
-                child: true,
-                size: module.size
-            });
-            return ;
-        }
-        if (parentModule.dependent.dynamic.includes(module.id)) {
-            result.push({
-                name: module.name,
-                isDynamic: true,
-                id: serialize(name),
-                parent: <string> parentId,
-                child: true,
-                size: module.size
-            });
-            return ;
-        }
-    });
+
+    let parentModule = findModule(map, parentModuleId);
+
+    if (!parentModule) {
+        return result;
+    }
+
+    parentModule.dependent.static.forEach(getEachHandler(result, false, <string> parentItemId));
+    parentModule.dependent.dynamic.forEach(getEachHandler(result, true, <string> parentItemId));
 
     if (!result.length) {
         return [{
             name: <string> parentModule.bundle,
-            child: false,
+            child: null,
             isDynamic: false,
-            parent: <string> parentId,
-            id: serialize(<string> parentModule.bundle)
+            parent: <string> parentItemId,
+            id: createId(<string> parentModule.bundle)
         }]
     }
     return result;
 };
 
 let getModules = (
-    record: ModulesRecord<TransferModule>,
-    parentModule: string | void,
-    parentId: string | void,
+    record: ModulesMap,
+    parentModuleId: string | void,
+    parentItemId: string | void,
     pageName: string
 ): dependent.Item[] => {
-    if (!parentModule) {
+    if (!parentModuleId) {
         return getAllModules(record);
     }
-    return getDependentModules(record, parentModule, parentId, pageName);
+    return getDependentModules(record, parentModuleId, parentItemId, pageName);
 };
 
 export class Dependent<
     TFilter extends dependent.IFilterData = dependent.IFilterData
 > extends Abstract<dependent.Item, TFilter> {
-    protected _query(query: Query): Promise<dependent.Item[]> {
-        console.log('Dependent => _query:', query);
-        // @ts-ignore
-        const { parent } = <TFilter> query.getWhere();
+    protected _query(map: ModulesMap, where: TFilter): Promise<dependent.Item[]> {
+        console.log('Dependent => _query:', where);
+        const { parent } = where;
 
-        let parentModule = parent? deserialize(parent)[0]: undefined;
+        let parentModuleId = parent? getId(parent): undefined;
         return Promise.all([
-            this._getModules(),
+            Promise.resolve(map),
             this.__getPageName()
-        ]).then(([ modules, pageName ]: [ModulesRecord<TransferModule>, string]) => {
-            return getModules(modules, parentModule, parent, pageName);
+        ]).then(([ modules, pageName ]: [ModulesMap, string]) => {
+            return getModules(modules, parentModuleId, parent, pageName);
         });
     }
     private __pageName: string;

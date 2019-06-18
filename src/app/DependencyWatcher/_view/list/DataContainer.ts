@@ -3,12 +3,15 @@ import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
 // @ts-ignore
-import * as itemTemplate from 'wml!DependencyWatcher/_view/list/itemTemplate';
+import * as nameTemplate from 'wml!DependencyWatcher/_view/list/column/name';
+// @ts-ignore
+import * as sizeTemplate from 'wml!DependencyWatcher/_view/list/column/size';
 import { source } from "../../data";
 import { Columns } from "./column";
 
 type Children = {
-    list: Control;
+    listView: Control;
+    notificationOpener: Control;
 }
 
 interface SourceConstructor {
@@ -28,6 +31,7 @@ export default class Main extends Control {
     protected _template = template;
     protected _children: Children;
     private __column: Columns;
+    private __sorting: {[key: string]: 'desc' | 'asc'}[] = [];
     private __navigation: object;
     private __source: source.Abstract;
     constructor(cfg: IConfig) {
@@ -36,15 +40,18 @@ export default class Main extends Control {
         this.__navigation = cfg.navigation;
         this.__column = [
             {
-                title: 'module',
                 displayProperty: 'name',
                 // template: ColumnTemplate
-                template: cfg.itemTemplate || itemTemplate
+                template: cfg.itemTemplate || nameTemplate
             },
             {
-                title: 'size',
+                displayProperty: 'fileName'
+            },
+            {
                 displayProperty: 'size',
-                width: '100px'
+                width: '100px',
+                align: 'right',
+                template: sizeTemplate
             }
         ];
     }
@@ -61,5 +68,9 @@ export default class Main extends Control {
     };
     private set __filter(value) {
         this.__filterObject = value;
+    }
+    update(...args: unknown[]): void {
+        
+        // this._children.listView.reload();
     }
 }

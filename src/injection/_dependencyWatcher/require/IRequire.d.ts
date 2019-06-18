@@ -18,5 +18,6 @@ export interface IRequire extends ILocalRequire {
 }
 
 export interface IRequireInitObject {
-    bundles: Record<string, string[]>
+    bundles: Record<string, string[]>;
+    buildMode: string;
 }

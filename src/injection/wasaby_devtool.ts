@@ -4,10 +4,12 @@ import { InjectHook } from './InjectHook';
 import { DevtoolChannel } from './_devtool/Channel';
 import { GlobalMessages } from 'Extension/const';
 import { globalChannel } from './_devtool/globalChannel';
-import { logger } from './_devtool/logger';
+import { ConsoleLogger } from "Extension/Logger/Console";
+// import { logger } from './_devtool/logger';
 
 const ALL_PLUGINS: IPluginConstructor[] = [ DependencyWatcher, InjectHook ];
 
+const logger = new ConsoleLogger('Wasaby devtool');
 const PLUGINS: Map<string, IPlugin> = new Map();
 
 ALL_PLUGINS.forEach((Plugin: IPluginConstructor) => {
@@ -22,9 +24,11 @@ ALL_PLUGINS.forEach((Plugin: IPluginConstructor) => {
 
 function onDocumentLoad(): void {
    globalChannel.addListener(GlobalMessages.devtoolsInitialized, () => {
+      logger.log('Обнаружили оживление вкладки wasaby, сообщаем о том что страница живая');
       globalChannel.dispatch(GlobalMessages.wasabyInitialized);
    });
    globalChannel.dispatch(GlobalMessages.wasabyInitialized);
+   logger.log('Страница построена, сообщаем о том что страница живая');
    document.removeEventListener('DOMContentLoaded', onDocumentLoad);
 }
 

@@ -1,0 +1,4 @@
+<DependencyWatcher._view.list.decorator.Size
+    attr:style="width: 100%"
+    size="{{ itemData.item['size'] }}"
+/>

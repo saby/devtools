@@ -1,235 +1,89 @@
-import { DependencyType, GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
+import { GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
 import { Abstract } from "./Abstract";
-import { deserialize, serialize } from "./util/id";
-// @ts-ignore
-import { Query } from 'Types/source';
-import { dependency, LeafType } from "../types";
-import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
-import { findFile } from "./util/findFile";
-import { SortFunction } from "./list/Sort";
-import { sortFunctions } from "./dependencies/sortFunctions";
-import { IModuleDependency, ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
+import { createId, getId } from "./util/id";
+import { dependency } from "../types";
+import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
+import { findModule } from "./util/findModule";
 
-let hasChild = (module?: TransferModule): boolean => {
+let isGlobal = (module: string): boolean => {
+    return module === GLOBAL_MODULE_NAME;
+};
+
+let hasChild = (module?: Module): true | null => {
     if (!module) {
-        return false;
+        return null;
     }
-    return (module.dependencies.dynamic && module.dependencies.dynamic.length > 0) ||
-        (module.dependencies.static && module.dependencies.static.length > 0);
+    let { dependencies } = module;
+    return (dependencies.dynamic && dependencies.dynamic.size > 0) ||
+        (dependencies.static && dependencies.static.size > 0) || null;
 };
 
-let createItem = (
-    name: string,
-    type: LeafType,
-    parent: string | undefined,
-    child: boolean,
-    isDynamic?: boolean
-): dependency.Item => {
-    
-    return {
-        name,
-        id: serialize(name, type),
-        parent,
-        child: child || null,
-        type: type,
-        isDynamic,
+let getEachHandler = (results: dependency.Item[], isDynamic: boolean, parentItemId?: string) => {
+    return (module: Module) => {
+        let { name, size, fileName, bundle, id } = module;
+        results.push({
+            name, size, fileName, bundle,
+            isDynamic,
+            id: createId(id, parentItemId),
+            parent: parentItemId,
+            child: hasChild(module)
+        });
     }
 };
 
-let createFile = (
-    name: string,
-    parent: string | undefined,
-    isDynamic?: boolean
-): dependency.ItemFile => {
-    let file = <dependency.ItemFile> createItem(name, LeafType.file, parent, true, isDynamic);
-    return {
-        ...file
-    }
-};
-let createModule = (
-    name: string,
-    parent: string | undefined,
-    child: boolean,
-    isDynamic: boolean = false,
-    notUsed: boolean = false
-): dependency.ItemModule => {
-    let module = <dependency.ItemModule> createItem(name, LeafType.module, parent, child, isDynamic);
-    return {
-        ...module,
-        notUsed
-    }
+let getAllModules = (map: ModulesMap): dependency.Item[] => {
+    let results: dependency.Item[] = [];
+    map.forEach(getEachHandler(results, false));
+    return results.filter(({ name }: dependency.Item) => {
+        return !isGlobal(name);
+    });
 };
 
-let getFileName = (
-    bundles: Bundles,
-    moduleName: string,
-    parent?: string
+let getFromModule = (
+    parentModule?: Module,
+    parentItemId?: string
 ) => {
-    let fileName = findFile(bundles, moduleName);
-    if (!fileName) {
-        return '';
+    if (!parentModule) {
+        return <dependency.Item[]> [];
     }
-    if (!parent) {
-        return fileName;
-    }
-    let [ parentName ] = deserialize(parent);
-    // нет смысла показывать бандл, если модуль расположен в одном бандле с родителем
-    return fileName !== findFile(bundles, parentName)? fileName: '';
+    let result: dependency.Item[] = [];
+    parentModule.dependencies.static.forEach(getEachHandler(result, false, parentItemId));
+    parentModule.dependencies.dynamic.forEach(getEachHandler(result, true, parentItemId));
+    return result;
 };
 
-let eachDependencies = (
-    modules: ModulesRecord<TransferModule>,
-    module: TransferModule,
-    callback: (type: DependencyType, moduleName: string) => void
-) => {
-    for (let type in module.dependencies) {
-        let dependencies = Object.values(modules).filter((dependency: TransferModule) => {
-            return module.dependencies[<DependencyType>type].includes(dependency.id);
-        }).map(module => module.name);
-        let cb = callback.bind(null, <DependencyType> type);
-        dependencies.forEach(cb);
+let getById = (
+    map: ModulesMap,
+    parentModuleId: string | void,
+    parentItemId?: string
+): dependency.Item[] => {
+    if (!parentModuleId) {
+        return <dependency.Item[]> [];
     }
+    return getFromModule(findModule(map, parentModuleId), parentItemId);
+};
+
+let getRootChild = (map: ModulesMap): dependency.Item[] => {
+    const root = map.get(GLOBAL_MODULE_NAME);
+    return getFromModule(root);
 };
 
 export class Dependencies<
     TFilter extends dependency.IFilterData = dependency.IFilterData
 > extends Abstract<dependency.Item, TFilter> {
-    private readonly _fileModuleUsing: Map<string, Set<string>> = new Map();
-    // @ts-ignore
-    protected _sortFunctions: SortFunction<dependency.Item>[] = sortFunctions;
-    protected _query(query: Query): Promise<dependency.Item[]> {
-        // console.log('Dependencies => _query:', query);
-        // @ts-ignore
-        const { parent } = <TFilter> query.getWhere();
-    
-        if (!parent) {
-            return  this.__queryModule(GLOBAL_MODULE_NAME);
-        }
+    protected _query(map: ModulesMap, where: TFilter): Promise<dependency.Item[]> {
+        console.log('Dependencies => _query:', where);
+        const { parent, fromRoot } = where;
         
-        let [ module, type ] = <[string, LeafType]> deserialize(parent);
-    
-        if (type == LeafType.file) {
-            return this.__queryFile(module, parent);
-        }
-    
-        return  this.__queryModule(module, parent);
-    }
-    
-    /**
-     * Получение модулей в бандле
-     * @param {string} fileName - имя бандла
-     * @param {string} id - полный id родительского узла (файла)
-     */
-    private __queryFile(fileName: string, id: string): Promise<dependency.Item[]> {
-        // console.log('Dependencies => _queryFile:', fileName);
-        return Promise.all([
-            this.__getBundleModules(fileName),
-            this._getModules()
-        ]).then(([bundle, modules]) => {
-            return bundle.map((moduleName) => {
-                let subDependencies = modules[moduleName];
-                return createModule(
-                    moduleName,
-                    id,
-                    hasChild(subDependencies),
-                    false,
-                    !this.__isUsingInFile(id, moduleName)
-                );
-            });
-        });
-    }
-    
-    private __queryModule(module: string, id?: string): Promise<dependency.Item[]> {
-        return this._getModules().then((modules: ModulesRecord<TransferModule>) => {
-            let dependencies = modules[module];
-            if (!dependencies) {
-                return [];
-            }
-            return this.__mapDependencies(modules, dependencies, id);
-        });
-    }
-    
-    /**
-     *
-     * @param modules
-     * @param dependencies
-     * @param id
-     * @private
-     */
-    private __mapDependencies(
-        modules: ModulesRecord<TransferModule>,
-        dependencies: TransferModule,
-        id?: string
-    ): Promise<dependency.Item[]> {
-        return this._getBundles().then((bundles) => {
-            let items: dependency.Item[] = [];
-            let files: Map<string, dependency.ItemFile> = new Map();
-            eachDependencies(modules, dependencies, (type, moduleName) => {
-                let fileName = getFileName(bundles, moduleName, id);
-                let isDynamic = type === DependencyType.dynamic;
-                if (!fileName) {
-                    let subDependencies = modules[moduleName];
-                    items.push(
-                        createModule(
-                            moduleName,
-                            id,
-                            hasChild(subDependencies),
-                            isDynamic
-                        )
-                    );
-                    return;
+        let parentModuleId = parent? getId(parent): undefined;
+        return Promise.resolve(map).then((modules: ModulesMap) => {
+            if (!parentModuleId) {
+                if (fromRoot) {
+                    return getRootChild(modules);
                 }
-                this.__addFile(files, fileName, moduleName, isDynamic, id);
-            });
-    
-            files.forEach((file) => {
-                items.push(file);
-            });
-            return items;
+                return getAllModules(modules);
+            }
+            return getById(modules, parentModuleId, parent);
         });
-    }
-    
-    private __addFile(
-        files: Map<string, dependency.ItemFile>,
-        fileName: string,
-        moduleName: string,
-        isDynamic: boolean,
-        id?: string,
-    ) {
-        let file = <dependency.ItemFile> files.get(fileName) || createFile(
-            fileName,
-            id,
-            isDynamic
-        );
-    
-        // файл является динамической зависимостью только тогда, когда все модули от которых мы зависим в нём тоже динамические
-        if (!isDynamic && file.isDynamic) {
-            file.isDynamic = false;
-        }
-    
-        this.__addUsingFile(file.id, moduleName);
-    
-        files.set(fileName, file);
-    }
-
-    private __addUsingFile(fileId: string, moduleName: string) {
-        let set = this._fileModuleUsing.get(fileId) || new Set();
-        set.add(moduleName);
-        this._fileModuleUsing.set(fileId, set);
-    }
-    private __isUsingInFile(fileId: string, moduleName: string) {
-        let fileModuleUsing = this._fileModuleUsing.get(fileId);
-        if (!fileModuleUsing) {
-            // когда в кэше почему-то нету данных какие модули из файла используются на конкретном уровне
-            // возвращаемся чтобы не помечть модули неиспользуемыми
-            return true;
-        }
-        return fileModuleUsing.has(moduleName);
-    }
-
-    private __getBundleModules(fileName: string): Promise<string[]> {
-        return this._getBundles().then((bundles) => {
-            return bundles[fileName];
-        })
     }
 }

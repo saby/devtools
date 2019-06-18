@@ -1,7 +1,8 @@
 import { RPCMethods } from "Extension/Plugins/DependencyWatcher/const";
-import { ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
+import { ModulesMap, ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { RPC } from "Extension/Event/RPC";
+import { convertToMap } from "Extension/Plugins/DependencyWatcher/Module";
 
 export interface IRPCSourceConfig {
     rpc: RPC;
@@ -15,7 +16,7 @@ export class RPCSource {
         this._rpc = rpc;
     }
 
-    protected _getModules(): Promise<ModulesRecord<TransferModule>> {
+    protected _getModules(): Promise<ModulesMap> {
         return Promise.resolve().then(() => {
             if (!this.__lastQueryResult || !Object.keys(this.__lastQueryResult).length) {
                 return this.__getModules();
@@ -23,7 +24,7 @@ export class RPCSource {
             return this.__getNewModules();
         }).then((modulesRecord: ModulesRecord<TransferModule>) => {
             this.__lastQueryResult = Object.assign(this.__lastQueryResult, modulesRecord);
-            return this.__lastQueryResult;
+            return convertToMap(this.__lastQueryResult);
         });
     }
     

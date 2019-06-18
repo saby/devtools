@@ -19,8 +19,9 @@ let regDepsFunction = (storage: ModuleStorage, logger: ILogger) => {
 
 export let wrapDefineStatic = (_realDefine: IDefine, storage: ModuleStorage, logger: ILogger): IDefine => {
     let regDeps = regDepsFunction(storage, logger);
-    return (...args: Array<Args>) => {
+    let proxy = (...args: Array<Args>) => {
         regDeps(args);
         return _realDefine(...args);
-    }
+    };
+    return Object.assign(proxy, { amd: {} });
 };

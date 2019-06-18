@@ -1,5 +1,5 @@
-export interface IRequirePlugin {
-    (module: string): string;
+export interface IRequirePlugin<T = string> {
+    (module: string): T;
 }
 
 let removePrefix = (prefix: string): IRequirePlugin => {
@@ -8,25 +8,38 @@ let removePrefix = (prefix: string): IRequirePlugin => {
     };
 };
 
-let fileFormat = (format: string): IRequirePlugin => {
+interface Format {
+    ext?: string;
+    module: string
+}
+let fileFormat = (format: string): IRequirePlugin<Format> => {
     let pluginPrefix = `${ format }!`;
-    return (module: string) => {
+    return (module: string): Format => {
         if (module.includes(pluginPrefix)) {
-            return module.replace(pluginPrefix, '') + `.${ format }`;
+            return {
+                ext: '.' + format,
+                module: module.replace(pluginPrefix, '')
+            }
         }
-        return module;
+        return {
+            module
+        };
     };
 };
 
-export let browser: IRequirePlugin = removePrefix('browser!');
+export let browser: IRequirePlugin<string> = removePrefix('browser!');
 
-export let optional: IRequirePlugin = removePrefix('optional!');
+export let optional: IRequirePlugin<string> = removePrefix('optional!');
 
-export let preload: IRequirePlugin = removePrefix('preload!');
+export let preload: IRequirePlugin<string> = removePrefix('preload!');
 
-export let json: IRequirePlugin = fileFormat('json');
+export let json: IRequirePlugin<Format> = fileFormat('json');
 
-export let css: IRequirePlugin = fileFormat('css');
+export let css: IRequirePlugin<Format> = fileFormat('css');
+
+export let wml: IRequirePlugin<Format> = fileFormat('wml');
+
+export let tmpl: IRequirePlugin<Format> = fileFormat('tmpl');
 
 
 /*
@@ -54,6 +67,16 @@ let allPlugins = {
 };
 */
 
-export let ignoredPlugin = [
+/**
+ * Плагины, которые можно игнорировать
+ */
+export let ignoredPlugins: IRequirePlugin<string>[] = [
     browser, optional, preload
+];
+
+/**
+ * Плагины, влияющие на расширение файла
+ */
+export let extensionPlugins: IRequirePlugin<Format>[] = [
+    json, css, wml, tmpl
 ];

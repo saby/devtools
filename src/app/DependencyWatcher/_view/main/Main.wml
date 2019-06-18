@@ -9,12 +9,10 @@
         >
             <ws:modeController>
                 <Controls.buttons:Button
-                    icon="icon-medium icon-AddButtonNew"
                     caption="Dependency"
                     on:click="__changeView('dependency')"
                 />
                 <Controls.buttons:Button
-                    icon="icon-medium icon-Unfavourite"
                     caption="Dependent"
                     on:click="__changeView('dependent')"
                 />

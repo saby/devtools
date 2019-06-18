@@ -3,13 +3,13 @@ import {
     Module,
     ModulesMap
 } from "Extension/Plugins/DependencyWatcher/IModule";
-import { ignoredPlugin, IRequirePlugin } from "./require/plugins";
+import { ignoredPlugins, IRequirePlugin } from "./require/plugins";
 
 let filterHelpers = (module: string): boolean => {
     return !TYPESCRIPT_HELPERS_MODULE.includes(module);
 };
 let mapIgnoredPlugins = (module: string): string => {
-  ignoredPlugin.forEach((plugin: IRequirePlugin) => {
+  ignoredPlugins.forEach((plugin: IRequirePlugin) => {
       module = plugin(module);
   });
   return module;

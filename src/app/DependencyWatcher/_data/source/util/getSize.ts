@@ -17,6 +17,16 @@ interface HAREntry {
 interface HAR {
     entries: HAREntry[]
 }
+interface Sizes  extends Record<string, number> {
+
+}
+let mapHARToSizesRecord = (har: HAR): Sizes => {
+    let result: Sizes = Object.create(null);
+    for (let { request, response } of har.entries) {
+        result[request.url] = response._transferSize;
+    }
+    return result;
+};
 
 let getHAR = (): Promise<HAR> => {
     return new Promise<HAR>((resolve, reject) => {
@@ -27,34 +37,29 @@ let getHAR = (): Promise<HAR> => {
     });
 };
 
-let findResponse = (module: string, har: HAR): HARResponse | undefined => {
-    for (let { request, response } of har.entries) {
-        if (request.url.includes(module)) {
-            return response;
+let findSize = (module: string, sizes: Sizes): HARResponse | undefined => {
+    for (let url in sizes) {
+        if (Object.prototype.hasOwnProperty.call(sizes, url) && url.includes(module)) {
+            return sizes[url];
         }
     }
     return;
 };
-
-let lastHar: HAR | void;
-let findResponseCached = (module: string): Promise<HARResponse | undefined> => {
-    if (lastHar) {
-        let response = findResponse(module, lastHar);
-        if (response) {
-            return  Promise.resolve(response);
-        }
+let lastSizes: Sizes = Object.create(null);
+let findSizeCached = (module: string): Promise<HARResponse | undefined> => {
+    let size = findSize(module, lastSizes);
+    if (size) {
+        return  Promise.resolve(size);
     }
     return getHAR().then((har) => {
-        lastHar = har;
-        return findResponse(module, har);
+        lastSizes = {
+            ...lastSizes,
+            ...mapHARToSizesRecord(har)
+        };
+        return findSize(module, lastSizes);
     })
 };
 
 export let getSize = (module: string): Promise<number | undefined> => {
-    return findResponseCached(module).then((response?: HARResponse) => {
-        if (!response) {
-            return;
-        }
-        return response._transferSize;
-    })
+    return findSizeCached(module);
 };

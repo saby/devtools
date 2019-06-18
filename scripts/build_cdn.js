@@ -7,6 +7,7 @@ const NODE_MODULES = resolve(root, "node_modules");
 const CDN_ROOT = resolve(NODE_MODULES, 'cdn');
 
 const WHITE_FOLDER_LIST = [
+    'LoaderIndicator',
     'EmojiFont',
     'TensorFont'
 ].map(str => resolve(CDN_ROOT, str));

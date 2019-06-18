@@ -1,39 +1,95 @@
 import { DataSet, Query } from "Types/source";
-import { applyWhere } from "./query/applyWhere";
+import { RecordSet } from "Types/collection";
+import { applyWhere } from "../list/applyWhere";
 import { orderBy } from "../list/orderBy";
 import { applyPaging } from "./query/applyPaging";
 import { IFilterData, ListItem } from "../../types";
-import { SortFunction } from "../list/Sort";
-import { sortFunctions } from "../list/sortFunctions";
 import { getSize } from "../util/getSize";
 import { queue } from "Extension/Utils/queue";
+import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
+import { RPCSource } from "./RPC";
+import { getParentId, getPath } from "../util/id";
+import { findModule } from "../util/findModule";
 
 export interface IQueryConfig {
 
+}
+let getName = (module: string): string => {
+    let [ ext, name ] = module.split('!');
+    if (!name) {
+        name = ext;
+        ext = 'js';
+    }
+    ext = '.' + ext;
+    if (name.endsWith(ext)) {
+        return name;
+    }
+    return name + ext;
+};
+
+interface IDataSetConfig <TTreeData extends ListItem = ListItem> {
+    data: TTreeData[],
+    hasMore: boolean;
+    path?: RecordSet
 }
 
 export abstract class QuerySource<
     TTreeData extends ListItem = ListItem,
     TFilter extends IFilterData = IFilterData
-> {
-    protected _sortFunctions: SortFunction<TTreeData>[] = sortFunctions;
-    constructor(config: IQueryConfig) {
-    
-    }
+>  extends RPCSource {
     query(query: Query): Promise<DataSet> {
+        // @ts-ignore
+        let where = <TFilter> query.getWhere();
+        // if (Array.isArray(parent)) {
+        //     return queue(parent.map((_parent) => {
+        //         return this.qu
+        //     }));
+        // }
+        
         let filter = this.__getFilter(query);
-        return filter(this._query(query)).then(({ data, hasMore}) => {
+        let allModules: ModulesMap;
+        return this._getModules().then((map: ModulesMap) => {
+            allModules = map;
+            return filter(this._query(map, where));
+        }).
+        then(({ data, hasMore }) => {
             return queue(this.__mapData(data)).then((newData: TTreeData[]) => {
                 return {
                     data: newData,
                     hasMore
                 }
             });
-        }).then(({ data, hasMore }) => {
+        }).
+        then(({ data, hasMore }: IDataSetConfig) => {
+            if (!where.parent) {
+                return { data, hasMore };
+            }
+            const path = getPath(where.parent);
+            let pathData = path.map<{ module: Module; itemId: string } | undefined>(({ id, itemId }) => {
+                let module = findModule(allModules, id);
+                if (!module) {
+                    return ;
+                }
+                return { module, itemId };
+            }).filter<{ module: Module; itemId: string }>((module: { module: Module; itemId: string } | undefined) => {
+                return !!module;
+            }).map<TTreeData[]>(({ module, itemId }: { module: Module; itemId: string }) => {
+                const { name } = module;
+                return {
+                    name,
+                    parent: getParentId(itemId),
+                    id: itemId,
+                }
+            });
+            let ds = new RecordSet({ rawData: pathData });
+            
+            return { data, hasMore, path: ds };
+        }).
+        then(({ data, hasMore, path }: IDataSetConfig) => {
             return new DataSet({
                 rawData: {
                     data,
-                    meta: { more: hasMore }
+                    meta: { more: hasMore, path }
                 },
                 itemsProperty: 'data',
                 metaProperty: 'meta'
@@ -43,7 +99,7 @@ export abstract class QuerySource<
             return error;
         });
     }
-    protected abstract _query(query: Query): Promise<TTreeData[]>;
+    protected abstract _query(map: ModulesMap, where: TFilter): Promise<TTreeData[]>;
 
     private __getFilter(query: Query) {
         let countAfterFilter: number;
@@ -51,13 +107,13 @@ export abstract class QuerySource<
             return queryPromise.
             // @ts-ignore
             then(applyWhere<TTreeData, TFilter>(query.getWhere(), query.getLimit())).
-            then((set) => {
+            then((set: TTreeData[]) => {
                 countAfterFilter = set.length;
                 return set;
             }).
-            then(orderBy<TTreeData>(query.getOrderBy(), this._sortFunctions)).
+            then(orderBy<TTreeData>(query.getOrderBy())).
             then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).
-            then((data) => {
+            then((data: TTreeData[]) => {
                 return {
                     data,
                     hasMore: countAfterFilter > query.getOffset() + data.length
@@ -67,13 +123,17 @@ export abstract class QuerySource<
     }
 
     private readonly __sizes: Record<string, number> = Object.create(null);
-    private __getSize(module: string): Promise<number | void> {
-        if (this.__sizes[module]) {
-            return Promise.resolve(this.__sizes[module]);
+    private __getSize(module: TTreeData): Promise<number | void> {
+        if (this.__sizes[module.name]) {
+            return Promise.resolve(this.__sizes[module.name]);
         }
-        return getSize(module).then((size?: number) => {
+        return getSize(
+            module.fileName ||
+            module.bundle ||
+            getName(module.name)
+        ).then((size?: number) => {
             if (size) {
-                this.__sizes[module] = size;
+                this.__sizes[module.name] = size;
             }
             return size;
         })
@@ -84,7 +144,7 @@ export abstract class QuerySource<
                 if (item.size) {
                     return  Promise.resolve(item);
                 }
-                return this.__getSize(item.name).then((size: number | void) => {
+                return this.__getSize(item).then((size: number | void) => {
                     if (!size) {
                         return item;
                     }
