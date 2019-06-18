@@ -5,4 +5,5 @@ export interface Item extends ModuleInfo {
     child: boolean | null;
     id: string;
     isDynamic?: boolean;
+    notUsed?: boolean;
 }
