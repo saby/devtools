@@ -1,6 +1,6 @@
-import { DependencyType, GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
+import { GLOBAL_MODULE_NAME, } from 'Extension/Plugins/DependencyWatcher/const';
 import { Abstract } from "./Abstract";
-import { deserialize, serialize } from "./util/id";
+import { createId, getId } from "./util/id";
 import { dependent } from "../types";
 import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
 import { findModule } from "./util/findModule";
@@ -16,11 +16,11 @@ let getAllModules = (map: ModulesMap): dependent.Item[] => {
         if (isGlobal(name)) {
             return;
         }
-        let { fileName, bundle, size } = module;
+        let { fileName, bundle, size, id } = module;
         results.push({
             name, fileName, bundle, size,
             isDynamic: false,
-            id: serialize(name),
+            id: createId(id),
             parent: undefined,
             child: true
         });
@@ -28,41 +28,46 @@ let getAllModules = (map: ModulesMap): dependent.Item[] => {
     return results;
 };
 
+let getEachHandler = (results: dependent.Item[], isDynamic: boolean, parentItemId?: string) => {
+    return (module: Module) => {
+        let { name, size, fileName, bundle, id } = module;
+        results.push({
+            name, size, fileName, bundle,
+            isDynamic,
+            id: createId(id, parentItemId),
+            parent: <string> parentItemId,
+            child: !isGlobal(name) || null,
+        });
+    }
+};
+
 let getDependentModules = (
     map: ModulesMap,
-    parentModuleName: string | void,
-    parentId: string | void,
+    parentModuleId: string | void,
+    parentItemId: string | void,
     pageName: string
 ): dependent.Item[] => {
     let result: dependent.Item[] = [];
-    if (!parentModuleName || !map.has(parentModuleName)) {
+    if (!parentModuleId) {
         return result;
     }
-    let parentModule = <Module> map.get(parentModuleName);
-    
-    let getEachHandler = (results: dependent.Item[], isDynamic: boolean) => {
-        return (module: Module) => {
-            let { name, size, fileName, bundle } = module;
-            results.push({
-                name, size, fileName, bundle,
-                isDynamic,
-                id: serialize(name),
-                parent: <string> parentId,
-                child: !isGlobal(name) || null,
-            });
-        }
-    };
 
-    parentModule.dependent.static.forEach(getEachHandler(result, false));
-    parentModule.dependent.dynamic.forEach(getEachHandler(result, true));
+    let parentModule = findModule(map, parentModuleId);
+
+    if (!parentModule) {
+        return result;
+    }
+
+    parentModule.dependent.static.forEach(getEachHandler(result, false, <string> parentItemId));
+    parentModule.dependent.dynamic.forEach(getEachHandler(result, true, <string> parentItemId));
 
     if (!result.length) {
         return [{
             name: <string> parentModule.bundle,
             child: null,
             isDynamic: false,
-            parent: <string> parentId,
-            id: serialize(<string> parentModule.bundle)
+            parent: <string> parentItemId,
+            id: createId(<string> parentModule.bundle)
         }]
     }
     return result;
@@ -70,29 +75,29 @@ let getDependentModules = (
 
 let getModules = (
     record: ModulesMap,
-    parentModule: string | void,
-    parentId: string | void,
+    parentModuleId: string | void,
+    parentItemId: string | void,
     pageName: string
 ): dependent.Item[] => {
-    if (!parentModule) {
+    if (!parentModuleId) {
         return getAllModules(record);
     }
-    return getDependentModules(record, parentModule, parentId, pageName);
+    return getDependentModules(record, parentModuleId, parentItemId, pageName);
 };
 
 export class Dependent<
     TFilter extends dependent.IFilterData = dependent.IFilterData
 > extends Abstract<dependent.Item, TFilter> {
-    protected _query(where: TFilter): Promise<dependent.Item[]> {
+    protected _query(map: ModulesMap, where: TFilter): Promise<dependent.Item[]> {
         console.log('Dependent => _query:', where);
         const { parent } = where;
 
-        let parentModule = parent? deserialize(parent)[0]: undefined;
+        let parentModuleId = parent? getId(parent): undefined;
         return Promise.all([
-            this._getModules(),
+            Promise.resolve(map),
             this.__getPageName()
         ]).then(([ modules, pageName ]: [ModulesMap, string]) => {
-            return getModules(modules, parentModule, parent, pageName);
+            return getModules(modules, parentModuleId, parent, pageName);
         });
     }
     private __pageName: string;

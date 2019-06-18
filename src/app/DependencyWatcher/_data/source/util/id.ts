@@ -1,28 +1,39 @@
-let getId = (() => {
-    let id = 0;
-    return () => {
-        id++;
-        return id;
+const ID_SEPARATOR = ';';
+
+export let createId = (moduleId: string | number, parentId?: string) => {
+    return [
+        moduleId,
+        parentId
+    ].join(ID_SEPARATOR);
+};
+
+export let getId = (itemId: string) => {
+    return itemId.split(ID_SEPARATOR)[0];
+};
+
+interface PathItem {
+    id: string;
+    itemId: string
+}
+export let getPath = (itemId: string): PathItem[] => {
+    const path = itemId.split(ID_SEPARATOR).filter(p => !!p);
+    let result: PathItem[] = [];
+    while (path.length) {
+        let itemId = createId(path.join(ID_SEPARATOR));
+        let id = <string> path.pop();
+        result.push({ id, itemId });
     }
-})();
-
-export let add = (module: string): string => {
-    return `{${ getId() }}${ module }`
+    return result;
 };
 
-export let remove = (module: string): string => {
-    return module.replace(/\{\d*\}/, '');
-};
-
-const SPLITTER = ';';
-
-type StringOrNumber = string | number;
-export let serialize = <T extends StringOrNumber[] = StringOrNumber[]>(...args: T): string => {
-    return [...args, getId()].join(SPLITTER);
-};
-
-export let deserialize = <T extends string[] = string[]>(item: string): T => {
-    let result = item.split(SPLITTER);
-    result.pop();
-    return <T> result;
+export let getParentId = (itemId: string): string | undefined => {
+    let path = itemId.split(ID_SEPARATOR);
+    if (path.length <= 2) {
+        return ;
+    }
+    path.shift();
+    if (path.length == 2) {
+        return path[0] + ID_SEPARATOR;
+    }
+    return path.join(ID_SEPARATOR);
 };

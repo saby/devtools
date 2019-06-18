@@ -1,10 +1,15 @@
 import { DataSet, Query } from "Types/source";
-import { applyWhere } from "./query/applyWhere";
+import { RecordSet } from "Types/collection";
+import { applyWhere } from "../list/applyWhere";
 import { orderBy } from "../list/orderBy";
 import { applyPaging } from "./query/applyPaging";
 import { IFilterData, ListItem } from "../../types";
 import { getSize } from "../util/getSize";
 import { queue } from "Extension/Utils/queue";
+import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
+import { RPCSource } from "./RPC";
+import { getParentId, getPath } from "../util/id";
+import { findModule } from "../util/findModule";
 
 export interface IQueryConfig {
 
@@ -25,15 +30,13 @@ let getName = (module: string): string => {
 interface IDataSetConfig <TTreeData extends ListItem = ListItem> {
     data: TTreeData[],
     hasMore: boolean;
+    path?: RecordSet
 }
 
 export abstract class QuerySource<
     TTreeData extends ListItem = ListItem,
     TFilter extends IFilterData = IFilterData
-> {
-    constructor(config: IQueryConfig) {
-    
-    }
+>  extends RPCSource {
     query(query: Query): Promise<DataSet> {
         // @ts-ignore
         let where = <TFilter> query.getWhere();
@@ -44,18 +47,49 @@ export abstract class QuerySource<
         // }
         
         let filter = this.__getFilter(query);
-        return filter(this._query(where)).then(({ data, hasMore }) => {
+        let allModules: ModulesMap;
+        return this._getModules().then((map: ModulesMap) => {
+            allModules = map;
+            return filter(this._query(map, where));
+        }).
+        then(({ data, hasMore }) => {
             return queue(this.__mapData(data)).then((newData: TTreeData[]) => {
                 return {
                     data: newData,
                     hasMore
                 }
             });
-        }).then(({ data, hasMore }: IDataSetConfig) => {
+        }).
+        then(({ data, hasMore }: IDataSetConfig) => {
+            if (!where.parent) {
+                return { data, hasMore };
+            }
+            const path = getPath(where.parent);
+            let pathData = path.map<{ module: Module; itemId: string } | undefined>(({ id, itemId }) => {
+                let module = findModule(allModules, id);
+                if (!module) {
+                    return ;
+                }
+                return { module, itemId };
+            }).filter<{ module: Module; itemId: string }>((module: { module: Module; itemId: string } | undefined) => {
+                return !!module;
+            }).map<TTreeData[]>(({ module, itemId }: { module: Module; itemId: string }) => {
+                const { name } = module;
+                return {
+                    name,
+                    parent: getParentId(itemId),
+                    id: itemId,
+                }
+            });
+            let ds = new RecordSet({ rawData: pathData });
+            
+            return { data, hasMore, path: ds };
+        }).
+        then(({ data, hasMore, path }: IDataSetConfig) => {
             return new DataSet({
                 rawData: {
                     data,
-                    meta: { more: hasMore }
+                    meta: { more: hasMore, path }
                 },
                 itemsProperty: 'data',
                 metaProperty: 'meta'
@@ -65,7 +99,7 @@ export abstract class QuerySource<
             return error;
         });
     }
-    protected abstract _query(where: TFilter): Promise<TTreeData[]>;
+    protected abstract _query(map: ModulesMap, where: TFilter): Promise<TTreeData[]>;
 
     private __getFilter(query: Query) {
         let countAfterFilter: number;
