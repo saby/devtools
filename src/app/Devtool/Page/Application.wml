@@ -6,15 +6,17 @@
 <Controls.event:Register name="touchendDetect" register="touchend" attr:fixCompatible="1">
 <Controls.event:Register name="mousedownDetect" register="mousedown" attr:fixCompatible="1">
     <Controls.popup:Global>
-        <Controls.popup:Manager >
+        <Controls.popup:Manager>
             <Controls.Application.TouchDetector name="touchDetector">
                 <Controls.dragnDrop:Controller name="dragNDropContainer">
                     <UI.HotKeys:Dispatcher>
-                        <ws:partial
-                            template="{{ _options.content }}"
-                            scope="{{ _options }}"
-                        />
-                        <Controls.popup:Container attr:id="popup" eventHandler="{{content._managerEventHandler}}"/>
+                        <div>
+                            <ws:partial
+                                    template="{{ _options.content }}"
+                                    scope="{{ _options }}"
+                            />
+                            <Controls.popup:Container attr:id="popup" eventHandler="{{content._managerEventHandler}}"/>
+                        </div>
                     </UI.HotKeys:Dispatcher>
                 </Controls.dragnDrop:Controller>
             </Controls.Application.TouchDetector>
