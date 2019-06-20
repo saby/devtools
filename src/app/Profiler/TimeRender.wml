@@ -1,0 +1,1 @@
+<span>{{ _formattedValue }}</span>

@@ -1,6 +1,6 @@
-import { Control, IControlOptions } from 'UI/Base';
+import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
-import template = require('wml!Elements/BreadCrumbs/BreadCrumbs');
+import template = require('wml!Elements/Breadcrumbs/Breadcrumbs');
 import { IControlNode } from 'shared/Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import 'css!Elements/BreadCrumbs/BreadCrumbs';
@@ -15,7 +15,7 @@ interface IOptions extends IControlOptions {
 }
 
 class Breadcrumbs extends Control<IOptions> {
-   protected _template: Function = template;
+   protected _template: TemplateFunction = template;
    protected _shouldScrollToElement: boolean = false;
 
    protected _afterMount(): void {

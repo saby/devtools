@@ -78,6 +78,10 @@ const EXTENSION_MODULES = [
     "path": resolve(input.app, "Elements")
   },
   {
+    "name": "Profiler",
+    "path": resolve(input.app, "Profiler")
+  },
+  {
     "name": "Devtool",
     "path": resolve(input.app, "Devtool")
   },

@@ -5,26 +5,43 @@ import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import Overlay from './Overlay';
+import { guid } from 'Extension/Utils/guid';
+
+interface IChangedNode {
+   node: IControlNode;
+   operation: OperationType;
+   selfStartTime: number;
+   selfDuration: number;
+}
 
 class Agent {
    private elements: Map<IControlNode['id'], IControlNode> = new Map();
-   private isDevtoolsOpened: boolean = false;
-   private channel: DevtoolChannel = new DevtoolChannel('elements');
-   private overlay: Overlay;
-   private previousSelectedItemId: IControlNode['id'] | undefined;
-   private mouseMoveHandler?: (e: MouseEvent) => void;
+
    private changedRoots: Map<
       IControlNode['id'],
-      Map<
-         IControlNode['id'],
-         {
-            node: IControlNode;
-            operation: OperationType;
-         }
-      >
+      Map<IControlNode['id'], IChangedNode>
    > = new Map();
+
+   private changedNodesBySynchronization: Map<
+      string,
+      Map<IControlNode['id'], IChangedNode>
+   > = new Map();
+
    private rootStack: Array<IControlNode['id']> = [];
+
+   private isDevtoolsOpened: boolean = false;
+
+   private isProfiling: boolean = false;
+
+   private channel: DevtoolChannel = new DevtoolChannel('elements');
+
+   private overlay: Overlay;
+
+   private previousSelectedItemId: IControlNode['id'] | undefined;
+
    private currentModuleName: string = '';
+
+   private mouseMoveHandler?: (e: MouseEvent) => void;
 
    constructor() {
       this.channel.addListener(
@@ -63,6 +80,22 @@ class Agent {
       this.channel.addListener('hideOverlay', () => {
          this.__toggleSelectFromPage(false);
       });
+      this.channel.addListener(
+         'getSynchronizationsList',
+         this.__getSyncList.bind(this)
+      );
+      this.channel.addListener(
+         'getSynchronization',
+         this.__getSynchronization.bind(this)
+      );
+      this.channel.addListener(
+         'toggleProfiling',
+         this.__toggleProfiling.bind(this)
+      );
+      this.channel.addListener(
+         'getControlChangesOnSynchronization',
+         this.__getControlChangesOnSynchronization.bind(this)
+      );
    }
 
    private __onDevtoolsOpened(): void {
@@ -99,7 +132,9 @@ class Agent {
       this.currentModuleName = node.name;
       currentRoot.set(node.id + currentRootId, {
          node,
-         operation
+         operation,
+         selfStartTime: performance.now(),
+         selfDuration: NaN
       });
    }
 
@@ -124,16 +159,17 @@ class Agent {
             parentId: changedNode.node.parentId
                ? changedNode.node.parentId + currentRootId
                : undefined
-         }
+         },
+         selfDuration: performance.now() - changedNode.selfStartTime
       });
    }
 
    onEndSync(rootId: IControlNode['id']): void {
-      const changedNodes = this.changedRoots.get(rootId);
-      if (!changedNodes) {
+      const changes = this.changedRoots.get(rootId);
+      if (!changes) {
          throw new Error('Trying to change nonexistent root');
       }
-      changedNodes.forEach(({ operation, node }) => {
+      changes.forEach(({ operation, node }) => {
          switch (operation) {
             case OperationType.DELETE:
                this.__handleRemove(node);
@@ -148,12 +184,34 @@ class Agent {
                break;
          }
       });
+      if (this.isProfiling) {
+         /**
+          * To provide the best experience we'd be storing snapshot of the application's state for each synchronization.
+          * Unfortunately, this is very expensive and makes exporting to JSON impossible.
+          * A lot of things can't be stringified and properly recreated after (DOM-elements, functions, etc.).
+          * Also, application's state can contain some confidential information which should never be exported.
+          *
+          * But in most cases, knowing what's changed is enough to fix the problem.
+          * This is a lot cheaper, because we need to store only a couple of string arrays for each changed control.
+          */
+         const id = guid();
+         this.changedNodesBySynchronization.set(id, changes);
+         this.channel.dispatch('endSynchronization', id);
+      }
       this.changedRoots.delete(rootId);
       this.rootStack.pop();
    }
 
    getCurrentModuleName(): string {
       return this.currentModuleName;
+   }
+
+   __toggleProfiling(state: boolean = !this.isProfiling): void {
+      this.isProfiling = state;
+      if (state) {
+         this.changedNodesBySynchronization.clear();
+      }
+      this.channel.dispatch('profilingStatusChanged', this.isProfiling);
    }
 
    private __handleAdd(node: IControlNode): void {
@@ -452,6 +510,83 @@ class Agent {
          );
       }
       return events;
+   }
+
+   private __getSyncList(): void {
+      this.channel.dispatch(
+         'synchronizationsList',
+         Array.from(this.changedNodesBySynchronization.entries()).map(
+            ([key, value]) => {
+               return {
+                  id: key,
+                  //TODO: на самом деле это неправильная цифра, т.к. сейчас тут теряется вся работа инферно + время между построением компонентов
+                  selfDuration: Array.from(value.values()).reduce(
+                     (acc, node) => {
+                        return acc + node.selfDuration;
+                     },
+                     0
+                  )
+               };
+            }
+         )
+      );
+   }
+
+   private __getSynchronization(id: string): void {
+      const synchronization = this.changedNodesBySynchronization.get(id);
+      if (!synchronization) {
+         throw new Error('Trying to get nonexistent synchronization');
+      }
+      this.channel.dispatch('synchronization', {
+         changes: Array.from(synchronization.entries()).map(([key, value]) => {
+            return {
+               id: key,
+               selfDuration: value.selfDuration
+            };
+         }),
+         id
+      });
+   }
+
+   private __getControlChangesOnSynchronization({
+      synchronizationId,
+      commitId
+   }: {
+      synchronizationId: string;
+      commitId: string;
+   }): void {
+      const synchronization = this.changedNodesBySynchronization.get(
+         synchronizationId
+      );
+      if (!synchronization) {
+         throw new Error('Trying to get nonexistent synchronization');
+      }
+      const changedNode = synchronization.get(commitId);
+
+      function processChanges(value?: object): string | undefined {
+         let result;
+         if (value) {
+            result = Object.keys(value).map((key) => {
+               return key.replace('attr:', '');
+            }).join(', ');
+         }
+         return result;
+      }
+
+      if (changedNode) {
+         this.channel.dispatch(
+            'controlChanges',
+            {
+               changedOptions: processChanges(changedNode.node.changedOptions),
+               changedAttributes: processChanges(changedNode.node.changedAttributes),
+               isFirstRender: changedNode.operation === OperationType.CREATE,
+               commitId,
+               synchronizationId
+            }
+         );
+      } else {
+         this.channel.dispatch('controlChanges');
+      }
    }
 }
 

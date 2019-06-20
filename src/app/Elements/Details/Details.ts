@@ -2,12 +2,12 @@ import Control = require('Core/Control');
 import template = require('wml!Elements/Details/Details');
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
-import { ContentChannel } from 'Devtool/Event/ContentChannel';
+import Store from 'Elements/Store';
 
 import 'css!Elements/Details/Details';
 
 interface IOptions extends IControlNode {
-   channel: ContentChannel;
+   store: Store;
 }
 
 class Details extends Control {
@@ -18,7 +18,7 @@ class Details extends Control {
    protected _eventsExpanded: boolean = false;
 
    private __viewFunctionSource(e: Event, path: Array<string | number>): void {
-      this._options.channel.dispatch('viewFunctionSource', {
+      this._options.store.dispatch('viewFunctionSource', {
          id: this._options.id,
          path
       });
@@ -30,7 +30,7 @@ class Details extends Control {
    }
 
    private __viewConstructor(): void {
-      this._options.channel.dispatch('viewConstructor', this._options.id);
+      this._options.store.dispatch('viewConstructor', this._options.id);
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
             'inspect(window.__WASABY_DEV_HOOK__.__constructor)'
@@ -39,7 +39,7 @@ class Details extends Control {
    }
 
    private __viewContainer(): void {
-      this._options.channel.dispatch('viewContainer', this._options.id);
+      this._options.store.dispatch('viewContainer', this._options.id);
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
             'inspect(window.__WASABY_DEV_HOOK__.__container)'
@@ -48,14 +48,14 @@ class Details extends Control {
    }
 
    private __storeAsGlobal(e: Event, path: Array<string | number>): void {
-      this._options.channel.dispatch('storeAsGlobal', {
+      this._options.store.dispatch('storeAsGlobal', {
          id: this._options.id,
          path
       });
    }
 
    private __viewTemplate(): void {
-      this._options.channel.dispatch('viewTemplate', this._options.id);
+      this._options.store.dispatch('viewTemplate', this._options.id);
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
             'inspect(window.__WASABY_DEV_HOOK__.__template)'

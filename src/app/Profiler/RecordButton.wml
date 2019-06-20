@@ -1,0 +1,3 @@
+<div class="RecordButton {{ !_options.isProfiling ? 'RecordButton_notProfiling' }}">
+    <span class="RecordButton__button {{ _options.isProfiling ? 'RecordButton__button_profiling' : 'RecordButton__button_notProfiling' }}"></span>
+</div>

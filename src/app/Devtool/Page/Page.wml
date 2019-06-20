@@ -20,7 +20,12 @@
                     </ws:Object>
                     <ws:Object id="Elements">
                         <ws:itemTemplate>
-                            <Elements.Elements/>
+                            <Elements.Elements store="{{_store}}"/>
+                        </ws:itemTemplate>
+                    </ws:Object>
+                    <ws:Object id="Profiler">
+                        <ws:itemTemplate>
+                            <Profiler.Profiler store="{{_store}}"/>
                         </ws:itemTemplate>
                     </ws:Object>
                 </ws:Array>

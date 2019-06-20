@@ -1,4 +1,4 @@
-type PrimitiveType = number | string | undefined | null;
+type PrimitiveType = number | string | undefined | null | boolean;
 //TODO: пока непонятно как правильно описать этот тип
 // interface ISerializableObject {
 //     [propName: string]: ISerializable;

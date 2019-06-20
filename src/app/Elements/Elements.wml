@@ -32,7 +32,7 @@
       <ws:if data="{{_inspectedItem}}">
          <Elements.Details.Details scope="{{_inspectedItem}}"
                                    attr:key="{{_inspectedItem.id}}"
-                                   channel="{{_channel}}" />
+                                   store="{{_options.store}}" />
       </ws:if>
    </ws:if>
    <ws:else>

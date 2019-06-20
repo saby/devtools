@@ -1,7 +1,9 @@
 define('Devtool/Page/Application', [
     'Core/Control',
+    'Controls/scroll',
     'wml!Devtool/Page/Application'
 ], function (Base,
+      scrollLib,
       template,
 ) {
     /*
@@ -11,6 +13,16 @@ define('Devtool/Page/Application', [
      *  https://online.sbis.ru/opendoc.html?guid=156aa5b7-286b-4885-9088-56c835816229
      */
     return Base.extend({
-        _template: template
+        _template: template,
+        _beforeMount() {
+            this._scrollContext = new scrollLib._scrollContext({
+                pagingVisible: false
+            });
+        },
+        _getChildContext() {
+            return {
+                ScrollData: this._scrollContext
+            };
+        },
     });
 });
