@@ -1,4 +1,4 @@
-<div attr:class="Pane">
+<div attr:class="Pane{{ _options.expanded ? ' Pane_expanded' : ' Pane_closed' }}">
    <div attr:class="Pane__header"
         on:click="__toggleExpanded()">
       <Controls.buttons:Button icon="{{_options.expanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small"
