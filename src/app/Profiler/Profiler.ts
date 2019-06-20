@@ -148,6 +148,7 @@ class Profiler extends Control<IOptions> {
          idProperty: 'id',
          data: syncList.map(({ id, selfDuration }) => {
             return {
+               screenshotURL: this._screenshotsBySynchronization.get(id),
                id,
                selfDuration
             };

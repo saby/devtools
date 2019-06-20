@@ -1,5 +1,25 @@
 <ws:partial template="Controls/list:ItemTemplate" scope="{{ _options }}">
    <ws:contentTemplate>
-      <Profiler.TimeRender value="{{itemData.item.selfDuration}}"/>
+      <ws:if data="{{ itemData.item.screenshotURL }}">
+         <Controls.popup:PreviewerTarget
+                 trigger="hover"
+         >
+            <ws:content>
+               <Profiler.TimeRender value="{{ itemData.item.selfDuration }}"/>
+            </ws:content>
+            <ws:template>
+               <Controls.popupTemplate:Dialog closeButtonVisibility="{{ false }}">
+                  <ws:bodyContentTemplate>
+                     <img src="{{ itemData.item.screenshotURL }}"
+                          alt="Screenshot of the page right after synchronization."
+                          attr:class="Profiler__synchronizationPreview" />
+                  </ws:bodyContentTemplate>
+               </Controls.popupTemplate:Dialog>
+            </ws:template>
+         </Controls.popup:PreviewerTarget>
+      </ws:if>
+      <ws:else>
+         <Profiler.TimeRender value="{{itemData.item.selfDuration}}"/>
+      </ws:else>
    </ws:contentTemplate>
 </ws:partial>
