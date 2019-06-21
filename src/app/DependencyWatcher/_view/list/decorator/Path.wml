@@ -1,0 +1,13 @@
+<ws:if data="{{ _options.path }}">
+    <Controls.popup:InfoboxTarget>
+        <ws:content>
+            <span>{{ _path }}</span>
+        </ws:content>
+        <ws:template>
+            <span>{{ _options.path }}</span>
+        </ws:template>
+    </Controls.popup:InfoboxTarget>
+</ws:if>
+<ws:else>
+    <invisible-node/>
+</ws:else>
