@@ -15,6 +15,9 @@ export let getFileName = (
     bundle: string = '',
     buildMode: string = RELEASE_MODE,
 ) => {
+    if (buildMode == RELEASE_MODE && bundle) {
+        return bundle + '.js';
+    }
     if (moduleName == GLOBAL_MODULE_NAME) {
         return location.href;
     }
@@ -23,17 +26,19 @@ export let getFileName = (
         return path;
     }
     let name: string = moduleName;
-    let extension: string = '';
+    let extension: string;
     for (let plugin of extensionPlugins) {
-        let { module, ext } = plugin(moduleName);
-        if (ext) {
-            name = module;
-            extension = ext;
-            break;
+        const pluginData = plugin(moduleName);
+        if (!pluginData) {
+            continue;
         }
+        const { module, ext } = pluginData;
+        name = module;
+        extension = ext;
+        break;
     }
-    if (!extension) {
-        name = moduleName;
+    // @ts-ignore
+    if (typeof extension == 'undefined') {
         extension = '.js';
     }
     

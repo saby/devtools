@@ -62,7 +62,12 @@ export class RPCResponse {
         return this.__storage.getNewModules();
     }
     private __getFileName(name: string, bundle?: string) {
-        return getFileName(name, this.__require.getRequire(), bundle, this.__require.getConfig().buildMode );
+        return getFileName(
+            name,
+            this.__require.getRequire(),
+            bundle,
+            this.__require.getConfig().buildMode
+        );
     }
     private setSize({ name, size }: { name: string, size: number }): boolean {
         let module = this.__storage.getModule(name);

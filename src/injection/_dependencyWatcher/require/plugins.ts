@@ -9,22 +9,18 @@ let removePrefix = (prefix: string): IRequirePlugin => {
 };
 
 interface Format {
-    ext?: string;
+    ext: string;
     module: string
 }
-let fileFormat = (format: string): IRequirePlugin<Format> => {
-    let pluginPrefix = `${ format }!`;
-    let extension = `.${ format }`;
-    return (module: string): Format => {
-        if (module.includes(pluginPrefix) || module.includes(extension)) {
+let fileFormat = (prefix: string, ext: string = `.${ prefix }`): IRequirePlugin<void | Format> => {
+    let pluginPrefix = `${ prefix }!`;
+    return (module: string): void | Format => {
+        if (module.includes(pluginPrefix)) {
             return {
-                ext: extension,
-                module: module.replace(pluginPrefix, '').replace(extension, '')
+                ext,
+                module: module.replace(pluginPrefix, '').replace(ext, '')
             }
         }
-        return {
-            module
-        };
     };
 };
 
@@ -36,15 +32,17 @@ export let optional: IRequirePlugin<string> = removePrefix('optional!');
 
 export let preload: IRequirePlugin<string> = removePrefix('preload!');
 
-export let js: IRequirePlugin<Format> = fileFormat('js');
+export let js: IRequirePlugin<void | Format> = fileFormat('js');
 
-export let json: IRequirePlugin<Format> = fileFormat('json');
+export let json: IRequirePlugin<void | Format> = fileFormat('json');
 
-export let css: IRequirePlugin<Format> = fileFormat('css');
+export let css: IRequirePlugin<void | Format> = fileFormat('css');
 
-export let wml: IRequirePlugin<Format> = fileFormat('wml');
+export let wml: IRequirePlugin<void | Format> = fileFormat('wml');
 
-export let tmpl: IRequirePlugin<Format> = fileFormat('tmpl');
+export let tmpl: IRequirePlugin<void | Format> = fileFormat('tmpl');
+
+export let text: IRequirePlugin<void | Format> = fileFormat('text', '');
 
 // export let i18n: IRequirePlugin<Format> = (module: string): Format => {
 //     if (module.includes('i18n')) {
@@ -94,6 +92,6 @@ export let ignoredPlugins: IRequirePlugin<string>[] = [
 /**
  * Плагины, влияющие на расширение файла
  */
-export let extensionPlugins: IRequirePlugin<Format>[] = [
-    json, css, wml, tmpl, js
+export let extensionPlugins: IRequirePlugin<void | Format>[] = [
+    json, css, wml, tmpl, js, text
 ];
