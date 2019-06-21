@@ -129,16 +129,17 @@ class Profiler extends Control<IOptions> {
          this.__onEndSynchronization.bind(this)
       );
       options.store.addListener(
-         'profilingStatusChanged',
+         'profilingStatus',
          this.__onProfilingStatusChanged.bind(this)
       );
       options.store.addListener(
          'controlChanges',
          this.__setControlChangesOnSynchronization.bind(this)
       );
+      options.store.dispatch('getProfilingStatus');
    }
 
-   protected _beforeMount(): Promise<void>  {
+   protected _beforeMount(): Promise<void> {
       return new Promise((resolve) => {
          chrome.storage.sync.get(['saveScreenshots'], (result) => {
             this._saveScreenshots = !!result.saveScreenshots;
@@ -363,6 +364,12 @@ class Profiler extends Control<IOptions> {
    private __toggleSaveScreenshots(e: Event, saveScreenshots: boolean): void {
       chrome.storage.sync.set({
          saveScreenshots
+      });
+   }
+
+   private __reloadAndProfile(): void {
+      chrome.devtools.inspectedWindow.reload({
+         injectedScript: 'this.__WASABY_START_PROFILING = true'
       });
    }
 }

@@ -1,7 +1,10 @@
 <div class="Profiler">
    <div class="Profiler__head">
       <Profiler.RecordButton isProfiling="{{ _isProfiling }}"
-                             on:click="__toggleProfiling()"/>
+                             on:click="__toggleProfiling()" />
+      <Controls.buttons:Button icon="icon-Refresh icon-small"
+                               viewMode="link"
+                               on:click="__reloadAndProfile()" />
       <Controls.toggle:Checkbox caption="Screenshots"
                                 readOnly="{{ _isProfiling }}"
                                 on:valueChanged="__toggleSaveScreenshots()"
