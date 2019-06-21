@@ -1,8 +1,12 @@
+@height-tab-button-panel: 31px;
+@height-search-panel: 48px;
+@height-head-panels: @height-tab-button-panel + @height-search-panel;
+
 .DependencyWatcher_Page {
 
 }
 .DependencyWatcher_Page__scroll {
-  max-height: calc(100vh - 31px)
+  max-height: calc(100vh - @height-head-panels)
 }
 
 .DependencyWatcher_Page__head {

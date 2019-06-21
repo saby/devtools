@@ -11,6 +11,7 @@ import { IEventEmitter } from "Extension/Event/IEventEmitter";
 import { EventNames, PLUGIN_NAME } from "Extension/Plugins/DependencyWatcher/const";
 import { List } from "./list/List";
 import { ContentChannel } from "../../Devtool/Event/ContentChannel";
+import { Memory } from 'Types/source';
 
 let getList = (viewMode: ViewMode) => {
     switch (viewMode) {
@@ -43,6 +44,23 @@ export default class Main extends Control {
     private __viewMode: ViewMode = ViewMode.dependency;
     private __list: Control = getList(this.__viewMode);
     private __channel: IEventEmitter = new ContentChannel(PLUGIN_NAME);
+    private _caption: string = 'Dependency';
+    private _title: string = 'Зависимости модулей';
+    private _modeSource = new Memory({
+        data: [
+            {
+                id: ViewMode.dependency,
+                caption: 'Dependency',
+                title: 'Зависимости модулей',
+            }, {
+                id: ViewMode.dependent,
+                caption: 'Dependent',
+                title: 'Зависимые модули',
+            }
+        ],
+        idProperty: 'id'
+    });
+    
     constructor(...args: unknown[]) {
         super(...args);
         this.__addListener();

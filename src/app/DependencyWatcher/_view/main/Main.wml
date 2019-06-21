@@ -1,22 +1,18 @@
-<div class="DependencyWatcher_Page">
-    <Controls.scroll:Container
-        attr:class="DependencyWatcher_Page__scroll"
-    >
-        <ws:partial
-            name="listContainer"
-            template="{{ __list }}"
-            sourceConfig="{{ __sourceConfig }}"
-        >
-            <ws:modeController>
-                <Controls.buttons:Button
-                    caption="Dependency"
-                    on:click="__changeView('dependency')"
-                />
-                <Controls.buttons:Button
-                    caption="Dependent"
-                    on:click="__changeView('dependent')"
-                />
-            </ws:modeController>
-        </ws:partial>
-    </Controls.scroll:Container>
-</div>
+<ws:partial
+    name="listContainer"
+    template="{{ __list }}"
+    sourceConfig="{{ __sourceConfig }}"
+>
+    <ws:modeController>
+        <Controls.dropdown:Button
+            displayProperty="caption"
+            viewMode="link"
+            caption="{{ _caption }}"
+            tooltip="{[Режим отображения]}: {{ _title }}"
+            source="{{ _modeSource }}"
+            keyProperty="id"
+            navigation="{{ null }}"
+            on:menuItemActivate="__changeView()"
+        />
+    </ws:modeController>
+</ws:partial>
