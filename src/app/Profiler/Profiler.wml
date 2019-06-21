@@ -4,6 +4,7 @@
                              on:click="__toggleProfiling()"/>
       <Controls.toggle:Checkbox caption="Screenshots"
                                 readOnly="{{ _isProfiling }}"
+                                on:valueChanged="__toggleSaveScreenshots()"
                                 bind:value="_saveScreenshots" />
    </div>
    <div class="Profiler__content">

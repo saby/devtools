@@ -138,6 +138,15 @@ class Profiler extends Control<IOptions> {
       );
    }
 
+   protected _beforeMount(): Promise<void>  {
+      return new Promise((resolve) => {
+         chrome.storage.sync.get(['saveScreenshots'], (result) => {
+            this._saveScreenshots = !!result.saveScreenshots;
+            resolve();
+         });
+      });
+   }
+
    private __setSyncList(
       syncList: Array<{
          id: ISynchronization['id'];
@@ -200,9 +209,11 @@ class Profiler extends Control<IOptions> {
           * Если она удалена, то выбирать первую, причем с учетом сортировки и фильтрации.
           */
          if (changedData.length) {
-            this._selectedCommitId = changedData.slice().sort((first, second) => {
-               return second.selfDuration - first.selfDuration;
-            })[0].id;
+            this._selectedCommitId = changedData
+               .slice()
+               .sort((first, second) => {
+                  return second.selfDuration - first.selfDuration;
+               })[0].id;
             this._options.store.dispatch('getControlChangesOnSynchronization', {
                synchronizationId: this._selectedSynchronizationId,
                commitId: this._selectedCommitId
@@ -347,6 +358,12 @@ class Profiler extends Control<IOptions> {
             this._options.store.dispatch('getSynchronizationsList');
          }
       }
+   }
+
+   private __toggleSaveScreenshots(e: Event, saveScreenshots: boolean): void {
+      chrome.storage.sync.set({
+         saveScreenshots
+      });
    }
 }
 
