@@ -38,4 +38,10 @@
                                 bind:expanded="_eventsExpanded"/>
       </ws:if>
    </ws:if>
+   <ws:if data="{{ __hasData(_options.attributes) }}">
+      <Elements.Details.Pane.Pane caption="Attributes"
+                                  data="{{ _options.attributes }}"
+                                  changedData="{{ _options.changedAttributes }}"
+                                  bind:expanded="_attributesExpanded"/>
+   </ws:if>
 </div>
