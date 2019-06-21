@@ -1,3 +1,14 @@
+interface IJQueryElement {
+   0: Element;
+   length: number;
+}
+
+function isJQueryElement(
+   element: Element | IJQueryElement
+): element is IJQueryElement {
+   return element.hasOwnProperty('length');
+}
+
 class Overlay {
    private overlay: HTMLDivElement;
    private caption: HTMLSpanElement;
@@ -20,10 +31,16 @@ class Overlay {
    }
 
    inspect(
-      container: HTMLElement,
-      tooltipText: string = container.tagName
+      container: Element | IJQueryElement,
+      tooltipText: string = isJQueryElement(container)
+         ? container[0].tagName
+         : container.tagName
    ): void {
-      const { top, left, height, width }: ClientRect = container.getBoundingClientRect();
+      const { top, left, height, width }: ClientRect = isJQueryElement(
+         container
+      )
+         ? container[0].getBoundingClientRect()
+         : container.getBoundingClientRect();
       this.caption.textContent = tooltipText;
       this.overlay.style.top = `${top}px`;
       this.overlay.style.height = `${height}px`;
