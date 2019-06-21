@@ -12,6 +12,7 @@ import { EventNames, PLUGIN_NAME } from "Extension/Plugins/DependencyWatcher/con
 import { List } from "./list/List";
 import { ContentChannel } from "../../Devtool/Event/ContentChannel";
 import { Memory } from 'Types/source';
+import { Model } from 'Types/entity';
 
 let getList = (viewMode: ViewMode) => {
     switch (viewMode) {
@@ -66,10 +67,13 @@ export default class Main extends Control {
         this.__addListener();
     }
     private __sourceConfig = getSourceConfig(this.__channel);
-    private __changeView(event: unknown, mode: ViewMode) {
+    private __changeView(event: unknown, model: Model) {
+        const mode: ViewMode = model.getId();
         if (this.__viewMode == mode) {
             return;
         }
+        this._caption = model.get('caption');
+        this._title = model.get('title');
         this.__viewMode = mode;
         this.__list = getList(mode);
     }

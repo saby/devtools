@@ -67,7 +67,7 @@ let getDependentModules = (
             child: null,
             isDynamic: false,
             parent: <string> parentItemId,
-            id: createId(<string> parentModule.bundle)
+            id: createId(<string> parentModule.bundle, <string> parentItemId)
         }]
     }
     return result;
