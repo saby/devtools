@@ -16,6 +16,7 @@ class Details extends Control {
    protected _optionsExpanded: boolean = true;
    protected _stateExpanded: boolean = true;
    protected _eventsExpanded: boolean = false;
+   protected _attributesExpanded: boolean = false;
 
    private __viewFunctionSource(e: Event, path: Array<string | number>): void {
       this._options.store.dispatch('viewFunctionSource', {

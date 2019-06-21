@@ -1,9 +1,21 @@
 <div class="Profiler">
    <div class="Profiler__head">
-      <Profiler.RecordButton isProfiling="{{ _isProfiling }}"
-                             on:click="__toggleProfiling()"/>
+      <Controls.buttons:Button icon="icon-Rec icon-small"
+                               iconStyle="{{ _isProfiling ? 'danger' : 'secondary' }}"
+                               viewMode="link"
+                               tooltip="{{ _isProfiling ? 'Stop recording' : 'Start recording' }}"
+                               attr:class="Profiler__headButton"
+                               on:click="__toggleProfiling()" />
+      <Controls.buttons:Button icon="icon-Refresh icon-small"
+                               viewMode="link"
+                               readOnly="{{ _isProfiling }}"
+                               tooltip="Reload the page and start recording"
+                               attr:class="Profiler__headButton"
+                               on:click="__reloadAndProfile()" />
       <Controls.toggle:Checkbox caption="Screenshots"
                                 readOnly="{{ _isProfiling }}"
+                                tooltip="Save screenshots during recording"
+                                on:valueChanged="__toggleSaveScreenshots()"
                                 bind:value="_saveScreenshots" />
    </div>
    <div class="Profiler__content">
@@ -55,8 +67,21 @@
                </div>
             </ws:if>
             <ws:else>
-               Click the record button <Profiler.RecordButton isProfiling="{{ _isProfiling }}"
-                                                              on:click="__toggleProfiling()"/> to start recording.
+               <div class="Profiler__status">
+                  <div>
+                     Click the record button <Controls.buttons:Button icon="icon-Rec icon-small"
+                                                                      iconStyle="secondary"
+                                                                      viewMode="toolButton"
+                                                                      tooltip="Start recording"
+                                                                      on:click="__toggleProfiling()" /> to start recording.
+                  </div>
+                  <div>
+                     Click the reload button <Controls.buttons:Button icon="icon-Refresh icon-small"
+                                                                      viewMode="toolButton"
+                                                                      tooltip="Reload the page and start recording"
+                                                                      on:click="__reloadAndProfile()" /> to reload the page and start recording.
+                  </div>
+               </div>
             </ws:else>
          </div>
       </ws:else>

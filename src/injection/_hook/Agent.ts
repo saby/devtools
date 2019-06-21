@@ -96,6 +96,14 @@ class Agent {
          'getControlChangesOnSynchronization',
          this.__getControlChangesOnSynchronization.bind(this)
       );
+      this.channel.addListener(
+         'getProfilingStatus',
+         this.__getProfilingStatus.bind(this)
+      );
+      if (window.__WASABY_START_PROFILING) {
+         this.__toggleProfiling(!!window.__WASABY_START_PROFILING);
+         this.isDevtoolsOpened = true;
+      }
    }
 
    private __onDevtoolsOpened(): void {
@@ -204,14 +212,6 @@ class Agent {
 
    getCurrentModuleName(): string {
       return this.currentModuleName;
-   }
-
-   __toggleProfiling(state: boolean = !this.isProfiling): void {
-      this.isProfiling = state;
-      if (state) {
-         this.changedNodesBySynchronization.clear();
-      }
-      this.channel.dispatch('profilingStatusChanged', this.isProfiling);
    }
 
    private __handleAdd(node: IControlNode): void {
@@ -422,7 +422,9 @@ class Agent {
       }
    }
 
-   private __findControlByDomNode(element: HTMLElement): IControlNode | undefined {
+   private __findControlByDomNode(
+      element: HTMLElement
+   ): IControlNode | undefined {
       let currentElement = element;
 
       /*
@@ -432,8 +434,16 @@ class Agent {
       function getRootId(elem: HTMLElement): string {
          let currentRoot = elem;
          while (currentRoot) {
-            if (currentRoot.controlNodes && currentRoot.controlNodes[currentRoot.controlNodes.length - 1].key === '_') {
-               return '_' + currentRoot.controlNodes[currentRoot.controlNodes.length - 1].id;
+            if (
+               currentRoot.controlNodes &&
+               currentRoot.controlNodes[currentRoot.controlNodes.length - 1]
+                  .key === '_'
+            ) {
+               return (
+                  '_' +
+                  currentRoot.controlNodes[currentRoot.controlNodes.length - 1]
+                     .id
+               );
             }
             currentRoot = currentRoot.parentElement;
          }
@@ -566,27 +576,40 @@ class Agent {
       function processChanges(value?: object): string | undefined {
          let result;
          if (value) {
-            result = Object.keys(value).map((key) => {
-               return key.replace('attr:', '');
-            }).join(', ');
+            result = Object.keys(value)
+               .map((key) => {
+                  return key.replace('attr:', '');
+               })
+               .join(', ');
          }
          return result;
       }
 
       if (changedNode) {
-         this.channel.dispatch(
-            'controlChanges',
-            {
-               changedOptions: processChanges(changedNode.node.changedOptions),
-               changedAttributes: processChanges(changedNode.node.changedAttributes),
-               isFirstRender: changedNode.operation === OperationType.CREATE,
-               commitId,
-               synchronizationId
-            }
-         );
+         this.channel.dispatch('controlChanges', {
+            changedOptions: processChanges(changedNode.node.changedOptions),
+            changedAttributes: processChanges(
+               changedNode.node.changedAttributes
+            ),
+            isFirstRender: changedNode.operation === OperationType.CREATE,
+            commitId,
+            synchronizationId
+         });
       } else {
          this.channel.dispatch('controlChanges');
       }
+   }
+
+   private __toggleProfiling(state: boolean = !this.isProfiling): void {
+      this.isProfiling = state;
+      if (state) {
+         this.changedNodesBySynchronization.clear();
+      }
+      this.channel.dispatch('profilingStatus', this.isProfiling);
+   }
+
+   private __getProfilingStatus(): void {
+      this.channel.dispatch('profilingStatus', this.isProfiling);
    }
 }
 

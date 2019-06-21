@@ -129,13 +129,23 @@ class Profiler extends Control<IOptions> {
          this.__onEndSynchronization.bind(this)
       );
       options.store.addListener(
-         'profilingStatusChanged',
+         'profilingStatus',
          this.__onProfilingStatusChanged.bind(this)
       );
       options.store.addListener(
          'controlChanges',
          this.__setControlChangesOnSynchronization.bind(this)
       );
+      options.store.dispatch('getProfilingStatus');
+   }
+
+   protected _beforeMount(): Promise<void> {
+      return new Promise((resolve) => {
+         chrome.storage.sync.get(['saveScreenshots'], (result) => {
+            this._saveScreenshots = !!result.saveScreenshots;
+            resolve();
+         });
+      });
    }
 
    private __setSyncList(
@@ -148,6 +158,7 @@ class Profiler extends Control<IOptions> {
          idProperty: 'id',
          data: syncList.map(({ id, selfDuration }) => {
             return {
+               screenshotURL: this._screenshotsBySynchronization.get(id),
                id,
                selfDuration
             };
@@ -199,9 +210,11 @@ class Profiler extends Control<IOptions> {
           * Если она удалена, то выбирать первую, причем с учетом сортировки и фильтрации.
           */
          if (changedData.length) {
-            this._selectedCommitId = changedData.slice().sort((first, second) => {
-               return second.selfDuration - first.selfDuration;
-            })[0].id;
+            this._selectedCommitId = changedData
+               .slice()
+               .sort((first, second) => {
+                  return second.selfDuration - first.selfDuration;
+               })[0].id;
             this._options.store.dispatch('getControlChangesOnSynchronization', {
                synchronizationId: this._selectedSynchronizationId,
                commitId: this._selectedCommitId
@@ -346,6 +359,18 @@ class Profiler extends Control<IOptions> {
             this._options.store.dispatch('getSynchronizationsList');
          }
       }
+   }
+
+   private __toggleSaveScreenshots(e: Event, saveScreenshots: boolean): void {
+      chrome.storage.sync.set({
+         saveScreenshots
+      });
+   }
+
+   private __reloadAndProfile(): void {
+      chrome.devtools.inspectedWindow.reload({
+         injectedScript: 'this.__WASABY_START_PROFILING = true'
+      });
    }
 }
 

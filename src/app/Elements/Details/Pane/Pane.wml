@@ -8,7 +8,7 @@
                               style="secondary" />
    </div>
    <ws:if data="{{ _options.expanded }}">
-      <Controls.scroll:Container attr:class="Pane__tabContent">
+      <Controls.scroll:Container>
          <Controls.explorer:View name="list"
                                  keyProperty="key"
                                  parentProperty="parent"
@@ -24,7 +24,7 @@
                <ws:partial template="Controls/treeGrid:ItemTemplate"
                            expanderSize="s" />
             </ws:itemTemplate>
-            <ws:itemPadding left="xs" right="xs" top="s" bottom="s" />
+            <ws:itemPadding left="s" right="s" top="s" bottom="s" />
          </Controls.explorer:View>
       </Controls.scroll:Container>
    </ws:if>

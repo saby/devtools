@@ -1,7 +1,7 @@
 <div attr:class="Elements">
    <ws:if data="{{_elements.length > 0}}">
-      <div attr:class="Elements__tree">
-         <Controls.scroll:Container>
+      <div attr:class="Elements__treeContainer">
+         <Controls.scroll:Container attr:class="Elements__tree">
             <ws:for data="index, element in _elements">
                <ws:if data="{{ __isVisible(index, element.depth) }}">
                   <div attr:key="{{element.id}}"
@@ -31,7 +31,6 @@
       </div>
       <ws:if data="{{_inspectedItem}}">
          <Elements.Details.Details scope="{{_inspectedItem}}"
-                                   attr:key="{{_inspectedItem.id}}"
                                    store="{{_options.store}}" />
       </ws:if>
    </ws:if>

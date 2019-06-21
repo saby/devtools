@@ -4,6 +4,15 @@ import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
 import Agent from './Agent';
 
+/**
+ * Rethrows error asynchronously to avoid breaking the calling code.
+ */
+function rethrowError(e: Error): void {
+   setTimeout(() => {
+      throw e;
+   }, 0);
+}
+
 export class Hook implements IWasabyDevHook {
    private _agent: Agent;
    private _messageQueue: Array<[string, ISerializable?]> = [];
@@ -13,19 +22,35 @@ export class Hook implements IWasabyDevHook {
    }
 
    onStartCommit(node: IControlNode, typeOfOperation: OperationType): void {
-      this._agent.onStartCommit(node, typeOfOperation);
+      try {
+         this._agent.onStartCommit(node, typeOfOperation);
+      } catch (e) {
+         rethrowError(e);
+      }
    }
 
    onEndCommit(node: IControlNode): void {
-      this._agent.onEndCommit(node);
+      try {
+         this._agent.onEndCommit(node);
+      } catch (e) {
+         rethrowError(e);
+      }
    }
 
    onStartSync(rootId: IControlNode['id'], instanceId: string): void {
-      this._agent.onStartSync(rootId + instanceId);
+      try {
+         this._agent.onStartSync(rootId + instanceId);
+      } catch (e) {
+         rethrowError(e);
+      }
    }
 
    onEndSync(rootId: IControlNode['id'], instanceId: string): void {
-      this._agent.onEndSync(rootId + instanceId);
+      try {
+         this._agent.onEndSync(rootId + instanceId);
+      } catch (e) {
+         rethrowError(e);
+      }
    }
 
    init(): void {
