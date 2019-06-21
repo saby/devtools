@@ -34,6 +34,9 @@ function createPanelIfNeeded(): void {
                if (elementsPanel) {
                   elementsPanel.hideOverlay();
                }
+               if (loadInterval) {
+                  window.clearInterval(loadInterval);
+               }
             });
          }
       );
