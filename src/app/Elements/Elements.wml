@@ -31,7 +31,6 @@
       </div>
       <ws:if data="{{_inspectedItem}}">
          <Elements.Details.Details scope="{{_inspectedItem}}"
-                                   attr:key="{{_inspectedItem.id}}"
                                    store="{{_options.store}}" />
       </ws:if>
    </ws:if>
