@@ -60,6 +60,7 @@ class Pane extends Control<IOptions> {
    protected _columns: object[];
    protected _itemActions: IItemAction[];
    protected _visibilityCallback: (action: IItemAction, item: Model) => boolean;
+   protected _listVersion: number = 0;
 
    protected _beforeMount(options: IOptions): void {
       this._source = getSource(options.data);
@@ -80,9 +81,10 @@ class Pane extends Control<IOptions> {
       this._visibilityCallback = this._itemActionVisibilityCallback.bind(this);
    }
 
-   protected _beforeUpdate(options: IOptions): void {
-      if (this._options.data !== options.data) {
-         this._source = getSource(options.data);
+   protected _beforeUpdate(newOptions: IOptions): void {
+      if (this._options.data !== newOptions.data) {
+         this._source = getSource(newOptions.data);
+         this._listVersion++;
       }
    }
 
