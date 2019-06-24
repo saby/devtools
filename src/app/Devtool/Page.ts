@@ -22,15 +22,18 @@ class Extension extends Control {
       data: [
          {
             id: 'Dependencies',
-            title: 'Dependencies'
+            title: 'Dependencies',
+            align: 'left'
          },
          {
             id: 'Elements',
-            title: 'Elements'
+            title: 'Elements',
+            align: 'left'
          },
          {
             id: 'Profiler',
-            title: 'Profiler'
+            title: 'Profiler',
+            align: 'left'
          }
       ]
    });
@@ -51,6 +54,10 @@ class Extension extends Control {
          this._hasWasabyOnPage = false;
          this._store.destructor();
       });
+   }
+
+   private __openOptionsPage(): void {
+      chrome.runtime.openOptionsPage();
    }
 }
 
