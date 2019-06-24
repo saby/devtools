@@ -1,6 +1,7 @@
 import { ICrud, Query, DataSet } from 'Types/source';
 import { Record as EntityRecord } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
+import { decycle } from 'Extension/Utils/decycle';
 
 interface IOptions {
    idProperty: string;
@@ -121,14 +122,23 @@ export class Source implements ICrud {
             }
          } else {
             result = this._data;
+
+            if (filter.name) {
+               // TODO: нужно научиться нормально применять фильтр
+               result = result.filter((item) => item.name.toLowerCase().indexOf(filter.name.toLowerCase()) !== -1);
+            }
          }
       }
       return Promise.resolve(
          new DataSet({
             rawData: {
-               data: result
+               data: result.map((item) => decycle(item)), // TODO: потенциальный источник больших тормозов, нужно потом попробовать делать decycle только
+               meta: {
+                  more: false
+               }
             },
-            itemsProperty: 'data'
+            itemsProperty: 'data',
+            metaProperty: 'meta'
          })
       );
    }

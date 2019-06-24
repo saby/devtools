@@ -60,7 +60,12 @@ class Pane extends Control<IOptions> {
    protected _columns: object[];
    protected _itemActions: IItemAction[];
    protected _visibilityCallback: (action: IItemAction, item: Model) => boolean;
-   protected _listVersion: number = 0;
+   protected _expandedItems: Array<string | null> = [];
+   protected _filter: {
+      name?: string;
+      parent?: string | Array<string | null>
+   } = {};
+   private _justReloaded: boolean = false;
 
    protected _beforeMount(options: IOptions): void {
       this._source = getSource(options.data);
@@ -84,7 +89,7 @@ class Pane extends Control<IOptions> {
    protected _beforeUpdate(newOptions: IOptions): void {
       if (this._options.data !== newOptions.data) {
          this._source = getSource(newOptions.data);
-         this._listVersion++;
+         this._justReloaded = true;
       }
    }
 
@@ -159,6 +164,18 @@ class Pane extends Control<IOptions> {
          this._notify('storeAsGlobal', [
             path.concat(this._options.caption.toLowerCase())
          ]);
+      }
+   }
+
+   private __onExpandedItemsChanged(e: Event, expandedItems: Pane['_expandedItems']): void {
+      /**
+       * When list gets deep reloaded, it resets expandedItems.
+       * This is not the expected behaviour for the user, so we ignore this event once after reload.
+       */
+      if (this._justReloaded) {
+         this._justReloaded = false;
+      } else {
+         this._expandedItems = expandedItems;
       }
    }
 
