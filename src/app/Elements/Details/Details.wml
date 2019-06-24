@@ -16,6 +16,7 @@
       <Elements.Details.Pane.Pane caption="Options"
                                   data="{{ _options.options }}"
                                   changedData="{{ _options.changedOptions }}"
+                                  controlId="{{ _options.id }}"
                                   on:viewFunctionSource="__viewFunctionSource()"
                                   on:storeAsGlobal="__storeAsGlobal()"
                                   bind:expanded="_optionsExpanded"/>
@@ -25,6 +26,7 @@
          <Elements.Details.Pane.Pane caption="State"
                                      data="{{ _options.state }}"
                                      changedData="{{ _options.changedState }}"
+                                     controlId="{{ _options.id }}"
                                      on:viewFunctionSource="__viewFunctionSource()"
                                      on:storeAsGlobal="__storeAsGlobal()"
                                      bind:expanded="_stateExpanded"/>
@@ -33,6 +35,7 @@
          <Elements.Details.Pane.Pane caption="Events"
                                 data="{{_options.events}}"
                                 canStoreAsGlobal="{{false}}"
+                                controlId="{{ _options.id }}"
                                 on:viewFunctionSource="__viewFunctionSource()"
                                 on:storeAsGlobal="__storeAsGlobal()"
                                 bind:expanded="_eventsExpanded"/>
@@ -42,6 +45,7 @@
       <Elements.Details.Pane.Pane caption="Attributes"
                                   data="{{ _options.attributes }}"
                                   changedData="{{ _options.changedAttributes }}"
+                                  controlId="{{ _options.id }}"
                                   bind:expanded="_attributesExpanded"/>
    </ws:if>
 </div>

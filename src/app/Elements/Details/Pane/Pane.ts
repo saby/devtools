@@ -13,6 +13,7 @@ interface IOptions extends IControlOptions {
    caption: string;
    data: object;
    expanded: boolean;
+   controlId: string;
    changedData?: object;
    canStoreAsGlobal?: boolean;
 }
@@ -88,7 +89,8 @@ class Pane extends Control<IOptions> {
    protected _afterUpdate(oldOptions: IOptions): void {
       if (
          this._options.changedData &&
-         this._options.changedData !== oldOptions.changedData
+         this._options.changedData !== oldOptions.changedData &&
+         this._options.controlId === oldOptions.controlId
       ) {
          /**
           * TODO: Подсветка изменившихся опций. Пока без учёта сортировки, фильтрации, виртуальный скролл и т.д.
@@ -163,6 +165,7 @@ class Pane extends Control<IOptions> {
          caption: descriptor(String).required(),
          data: descriptor(Object).required(),
          expanded: descriptor(Boolean).required(),
+         controlId: descriptor(String).required(),
          changedData: descriptor(Object, null),
          canStoreAsGlobal: descriptor(Boolean),
          readOnly: descriptor(Boolean),
