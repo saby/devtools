@@ -14,6 +14,48 @@ interface IChangedNode {
    selfDuration: number;
 }
 
+function operationToString(
+   operation: OperationType
+): 'mount' | 'update' | 'unmount' | 'reorder' {
+   switch (operation) {
+      case OperationType.DELETE:
+         return 'unmount';
+      case OperationType.CREATE:
+         return 'mount';
+      case OperationType.REORDER:
+         return 'reorder';
+      case OperationType.UPDATE:
+         return 'update';
+   }
+}
+
+function startMark(name: string, operation: OperationType): void {
+   if (
+      window.wasabyDevtoolsOptions &&
+      window.wasabyDevtoolsOptions.useUserTimingAPI
+   ) {
+      performance.mark(`${name} (${operationToString(operation)} start)`);
+   }
+}
+
+function endMark(name: string, operation: OperationType): void {
+   if (
+      window.wasabyDevtoolsOptions &&
+      window.wasabyDevtoolsOptions.useUserTimingAPI
+   ) {
+      const prettifiedOperation = operationToString(operation);
+      performance.mark(`${name} (${prettifiedOperation} end)`);
+      performance.measure(
+         `${name} (${prettifiedOperation})`,
+         `${name} (${prettifiedOperation} start)`,
+         `${name} (${prettifiedOperation} end)`
+      );
+      performance.clearMarks(`${name} (${prettifiedOperation} start)`);
+      performance.clearMarks(`${name} (${prettifiedOperation} end)`);
+      performance.clearMeasures(`${name} (${prettifiedOperation})`);
+   }
+}
+
 class Agent {
    private elements: Map<IControlNode['id'], IControlNode> = new Map();
 
@@ -137,7 +179,11 @@ class Agent {
       if (!currentRoot) {
          throw new Error('Trying to change nonexistent root');
       }
+
+      startMark(node.name, operation);
+
       this.currentModuleName = node.name;
+
       currentRoot.set(node.id + currentRootId, {
          node,
          operation,
@@ -158,6 +204,8 @@ class Agent {
          throw new Error('Trying to change nonexistent node');
       }
 
+      endMark(changedNode.node.name, changedNode.operation);
+
       currentRoot.set(id, {
          ...changedNode,
          node: {
@@ -168,7 +216,7 @@ class Agent {
                ? changedNode.node.parentId + currentRootId
                : undefined
          },
-         selfDuration: performance.now() - changedNode.selfStartTime
+         selfDuration: performance.now() - changedNode.selfStartTime // TODO: неправильное время, оно иногда учитывает детей
       });
    }
 
@@ -256,7 +304,7 @@ class Agent {
       this.elements.delete(node.id);
       this.__removeChildren(node.id);
 
-      //TODO: удалить после того как ключи будут браться из инферно
+      // TODO: удалить после того как ключи будут браться из инферно
       if (node.id.indexOf('popup') !== -1) {
          this.elements.forEach((element, key) => {
             if (element.instance && element.instance._destroyed) {
@@ -529,7 +577,7 @@ class Agent {
             ([key, value]) => {
                return {
                   id: key,
-                  //TODO: на самом деле это неправильная цифра, т.к. сейчас тут теряется вся работа инферно + время между построением компонентов
+                  // TODO: на самом деле это неправильная цифра, т.к. сейчас тут теряется вся работа инферно + время между построением компонентов
                   selfDuration: Array.from(value.values()).reduce(
                      (acc, node) => {
                         return acc + node.selfDuration;

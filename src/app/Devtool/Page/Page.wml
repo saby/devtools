@@ -4,11 +4,19 @@
 >
     <ws:if data="{{ _hasWasabyOnPage }}">
         <Controls.tabs:Buttons
-           bind:selectedKey="_activeTab"
-           keyProperty="id"
-           source="{{ _tabsSource }}"
-           attr:class="Devtool_Page__tabButton"
-        />
+                bind:selectedKey="_activeTab"
+                keyProperty="id"
+                source="{{ _tabsSource }}"
+                attr:class="Devtool_Page__tabButtons"
+        >
+            <ws:tabSpaceTemplate>
+                <Controls.buttons:Button icon="icon-Settings icon-small"
+                                         tooltip="Options"
+                                         viewMode="link"
+                                         attr:class="Devtool_Page__settings"
+                                         on:click="__openOptionsPage()" />
+            </ws:tabSpaceTemplate>
+        </Controls.tabs:Buttons>
 
         <Controls.switchableArea:View bind:selectedKey="_activeTab">
             <ws:items>
