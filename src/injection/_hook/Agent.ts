@@ -6,54 +6,13 @@ import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import Overlay from './Overlay';
 import { guid } from 'Extension/Utils/guid';
+import { endMark, startMark, updateSelfDurations } from './Utils';
 
-interface IChangedNode {
+export interface IChangedNode {
    node: IControlNode;
    operation: OperationType;
    selfStartTime: number;
    selfDuration: number;
-}
-
-function operationToString(
-   operation: OperationType
-): 'mount' | 'update' | 'unmount' | 'reorder' {
-   switch (operation) {
-      case OperationType.DELETE:
-         return 'unmount';
-      case OperationType.CREATE:
-         return 'mount';
-      case OperationType.REORDER:
-         return 'reorder';
-      case OperationType.UPDATE:
-         return 'update';
-   }
-}
-
-function startMark(name: string, operation: OperationType): void {
-   if (
-      window.wasabyDevtoolsOptions &&
-      window.wasabyDevtoolsOptions.useUserTimingAPI
-   ) {
-      performance.mark(`${name} (${operationToString(operation)} start)`);
-   }
-}
-
-function endMark(name: string, operation: OperationType): void {
-   if (
-      window.wasabyDevtoolsOptions &&
-      window.wasabyDevtoolsOptions.useUserTimingAPI
-   ) {
-      const prettifiedOperation = operationToString(operation);
-      performance.mark(`${name} (${prettifiedOperation} end)`);
-      performance.measure(
-         `${name} (${prettifiedOperation})`,
-         `${name} (${prettifiedOperation} start)`,
-         `${name} (${prettifiedOperation} end)`
-      );
-      performance.clearMarks(`${name} (${prettifiedOperation} start)`);
-      performance.clearMarks(`${name} (${prettifiedOperation} end)`);
-      performance.clearMeasures(`${name} (${prettifiedOperation})`);
-   }
 }
 
 class Agent {
@@ -70,6 +29,8 @@ class Agent {
    > = new Map();
 
    private rootStack: Array<IControlNode['id']> = [];
+
+   private unfinishedNodes: Set<IChangedNode> = new Set();
 
    private isDevtoolsOpened: boolean = false;
 
@@ -183,13 +144,15 @@ class Agent {
       startMark(node.name, operation);
 
       this.currentModuleName = node.name;
+      const id = node.id + currentRootId;
 
-      currentRoot.set(node.id + currentRootId, {
+      currentRoot.set(id, {
          node,
          operation,
          selfStartTime: performance.now(),
-         selfDuration: NaN
+         selfDuration: 0
       });
+      this.unfinishedNodes.add(currentRoot.get(id) as IChangedNode);
    }
 
    onEndCommit(node: IControlNode): void {
@@ -204,8 +167,25 @@ class Agent {
          throw new Error('Trying to change nonexistent node');
       }
 
+      /**
+       * Sometimes, commit finishes only after children of the node were committed.
+       * In order to get correct duration, we have to subtract children durations.
+       *
+       * So, we're doing this:
+       * 1) When commit starts, we initialize duration with 0 and add node to a set of unfinished nodes.
+       * 2) When commit ends, we calculate selfDuration of a node.
+       * 3) Then, we subtract duration of the current node from every unfinished node.
+       *
+       * This way, some nodes are going to have negative duration at the end of their commit.
+       * This is a sum of durations of their children.
+       *
+       * So, the formula to calculate selfDuration is:
+       */
+      const selfDuration = changedNode.selfDuration + performance.now() - changedNode.selfStartTime;
+
       endMark(changedNode.node.name, changedNode.operation);
 
+      this.unfinishedNodes.delete(changedNode);
       currentRoot.set(id, {
          ...changedNode,
          node: {
@@ -216,8 +196,12 @@ class Agent {
                ? changedNode.node.parentId + currentRootId
                : undefined
          },
-         selfDuration: performance.now() - changedNode.selfStartTime // TODO: неправильное время, оно иногда учитывает детей
+         selfDuration
       });
+
+      if (this.isProfiling) {
+         updateSelfDurations(this.unfinishedNodes, selfDuration);
+      }
    }
 
    onEndSync(rootId: IControlNode['id']): void {
