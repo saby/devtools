@@ -5,13 +5,13 @@ import {
 } from 'Extension/const';
 import { injectScript } from './injectScript';
 import { createProxy } from './MessageProxy';
-import { loadOptions } from './loadOptions';
+import { loadOptions, loadOptionsSync } from './loadOptions';
 
 createProxy({
     portName: DEVTOOL_CONTENT_PORT,
     source: POST_MESSAGE_SOURCE
 });
-loadOptions().then((options) => {
+loadOptionsSync((options) => {
     injectScript({
         textContent: `this.wasabyDevtoolsOptions = ${JSON.stringify(options)}`
     });
