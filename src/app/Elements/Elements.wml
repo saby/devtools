@@ -1,40 +1,42 @@
-<div attr:class="Elements">
-   <ws:if data="{{_elements.length > 0}}">
-      <div attr:class="Elements__treeContainer">
-         <Controls.scroll:Container attr:class="Elements__tree">
-            <ws:for data="index, element in _elements">
-               <ws:if data="{{ __isVisible(index, element.depth) }}">
-                  <div attr:key="{{element.id}}"
-                       on:mouseenter="__highlightElement(element.id)"
-                       on:mouseleave="__highlightElement()"
-                       on:click="_onItemClick(element.id)"
-                       name="{{element.id}}">
-                     <div attr:class="Elements__node {{_selectedItemId === element.id ? 'Elements__node_selected'}}"
-                          attr:style="padding-left: {{10 * element.depth}}px;">
-                        <ws:if data="{{ _elements[index + 1] && _elements[index + 1].depth > element.depth }}">
-                           <i attr:class="{{_collapsedNodes.has(element.id) ? 'icon-DayForward' : 'icon-ArrowDown'}} icon-small icon-primary"
-                              on:click="__toggleCollapsed(element.id)" />
-                        </ws:if>
-                        <span attr:class="{{element.class}}">{{element.name}}</span>
+<Devtool.Layout.Browser>
+   <ws:content>
+      <ws:if data="{{_elements.length > 0}}">
+         <div attr:class="Elements__treeContainer">
+            <Controls.scroll:Container attr:class="Elements__tree">
+               <ws:for data="index, element in _elements">
+                  <ws:if data="{{ __isVisible(index, element.depth) }}">
+                     <div attr:key="{{element.id}}"
+                          on:mouseenter="__highlightElement(element.id)"
+                          on:mouseleave="__highlightElement()"
+                          on:click="_onItemClick(element.id)"
+                          name="{{element.id}}">
+                        <div attr:class="Elements__node {{_selectedItemId === element.id ? 'Elements__node_selected'}}"
+                             attr:style="padding-left: {{10 * element.depth}}px;">
+                           <ws:if data="{{ _elements[index + 1] && _elements[index + 1].depth > element.depth }}">
+                              <i attr:class="{{_collapsedNodes.has(element.id) ? 'icon-DayForward' : 'icon-ArrowDown'}} icon-small icon-primary"
+                                 on:click="__toggleCollapsed(element.id)" />
+                           </ws:if>
+                           <span attr:class="{{element.class}}">{{element.name}}</span>
+                        </div>
                      </div>
-                  </div>
-               </ws:if>
-            </ws:for>
-         </Controls.scroll:Container>
-         <ws:if data="{{_path}}">
-            <Elements.Breadcrumbs.Breadcrumbs items="{{_path}}"
-                                              selectedItemId="{{_selectedItemId}}"
-                                              on:itemMouseEnter="__highlightElement()"
-                                              on:itemMouseLeave="__highlightElement()"
-                                              on:itemClick="_onItemClick()"/>
+                  </ws:if>
+               </ws:for>
+            </Controls.scroll:Container>
+            <ws:if data="{{_path}}">
+               <Elements.Breadcrumbs.Breadcrumbs items="{{_path}}"
+                                                 selectedItemId="{{_selectedItemId}}"
+                                                 on:itemMouseEnter="__highlightElement()"
+                                                 on:itemMouseLeave="__highlightElement()"
+                                                 on:itemClick="_onItemClick()"/>
+            </ws:if>
+         </div>
+         <ws:if data="{{_inspectedItem}}">
+            <Elements.Details.Details scope="{{_inspectedItem}}"
+                                      store="{{_options.store}}" />
          </ws:if>
-      </div>
-      <ws:if data="{{_inspectedItem}}">
-         <Elements.Details.Details scope="{{_inspectedItem}}"
-                                   store="{{_options.store}}" />
       </ws:if>
-   </ws:if>
-   <ws:else>
-      <div>Connecting to Wasaby...</div>
-   </ws:else>
-</div>
+      <ws:else>
+         <div>Connecting to Wasaby...</div>
+      </ws:else>
+   </ws:content>
+</Devtool.Layout.Browser>

@@ -1,5 +1,5 @@
-<div class="Profiler">
-   <div class="Profiler__head">
+<Devtool.Layout.Browser>
+   <ws:headTemplate>
       <Controls.buttons:Button icon="icon-Rec icon-small"
                                iconStyle="{{ _isProfiling ? 'danger' : 'secondary' }}"
                                viewMode="link"
@@ -17,8 +17,8 @@
                                 tooltip="Save screenshots during recording"
                                 on:valueChanged="__toggleSaveScreenshots()"
                                 bind:value="_saveScreenshots" />
-   </div>
-   <div class="Profiler__content">
+   </ws:headTemplate>
+   <ws:content>
       <ws:if data="{{ !_isProfiling && _masterSource && _detailSource }}">
          <Controls.masterDetail:Base attr:class="Profiler__masterDetail">
             <ws:master>
@@ -85,5 +85,5 @@
             </ws:else>
          </div>
       </ws:else>
-   </div>
-</div>
+   </ws:content>
+</Devtool.Layout.Browser>

@@ -1,0 +1,10 @@
+<div class="Browser">
+    <ws:if data="{{ _options.headTemplate }}">
+        <div class="Browser__head">
+            <ws:partial template="{{ _options.headTemplate }}" />
+        </div>
+    </ws:if>
+    <div class="Browser__content">
+        <ws:partial template="{{ _options.content }}" />
+    </div>
+</div>
