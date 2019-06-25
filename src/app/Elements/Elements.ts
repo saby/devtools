@@ -24,6 +24,7 @@ class Elements extends Control {
    protected _elementsChanged: boolean = false;
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
+   protected _selectingFromPage: boolean = false;
 
    constructor(options: IOptions) {
       super();
@@ -32,6 +33,7 @@ class Elements extends Control {
       });
       options.store.addListener('setSelectedItem', this.__selectElement.bind(this));
       options.store.addListener('operation', this._operationHandler.bind(this));
+      options.store.addListener('stopSelectFromPage', this.__toggleSelectElementFromPage.bind(this));
       window.elementsPanel = this;
    }
 
@@ -63,10 +65,11 @@ class Elements extends Control {
    }
 
    hideOverlay(): void {
-      this._options.store.dispatch('hideOverlay');
+      this._options.store.dispatch('toggleSelectFromPage', false);
    }
 
    protected _beforeUnmount(): void {
+      this._options.store.dispatch('toggleSelectFromPage', false);
       this._inspectedItem = undefined;
       this._collapsedNodes.clear();
       window.elementsPanel = undefined;
@@ -101,6 +104,7 @@ class Elements extends Control {
    }
 
    private __selectElement(id: IControlNode['id']): void {
+      this._selectingFromPage = false;
       this._path = this.__getPath(id);
       this._selectedItemId = id;
       this._options.store.dispatch('inspectElement', this._selectedItemId);
@@ -171,6 +175,11 @@ class Elements extends Control {
          }).reverse();
       }
       throw new Error('Trying to find nonexistent item');
+   }
+
+   private __toggleSelectElementFromPage(): void {
+      this._options.store.dispatch('toggleSelectFromPage', !this._selectingFromPage);
+      this._selectingFromPage = !this._selectingFromPage;
    }
 }
 

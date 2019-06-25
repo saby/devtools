@@ -1,12 +1,11 @@
 import prepareForSerialization from './prepareForSerialization';
-import debounce from 'Extension/Utils/debounce';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
-import Overlay from './Overlay';
 import { guid } from 'Extension/Utils/guid';
 import { endMark, startMark, updateSelfDurations } from './Utils';
+import Highlighter from './Highlighter';
 
 export interface IChangedNode {
    node: IControlNode;
@@ -38,13 +37,13 @@ class Agent {
 
    private channel: DevtoolChannel = new DevtoolChannel('elements');
 
-   private overlay: Overlay;
+   private highlighter: Highlighter = new Highlighter({
+      onSelect: this.__selectByDomNode.bind(this)
+   });
 
    private previousSelectedItemId: IControlNode['id'] | undefined;
 
    private currentModuleName: string = '';
-
-   private mouseMoveHandler?: (e: MouseEvent) => void;
 
    constructor() {
       this.channel.addListener(
@@ -80,9 +79,10 @@ class Agent {
          'highlightElement',
          this.__highlightElement.bind(this)
       );
-      this.channel.addListener('hideOverlay', () => {
-         this.__toggleSelectFromPage(false);
-      });
+      this.channel.addListener(
+         'toggleSelectFromPage',
+         this.__toggleSelectFromPage.bind(this)
+      );
       this.channel.addListener(
          'getSynchronizationsList',
          this.__getSyncList.bind(this)
@@ -181,7 +181,10 @@ class Agent {
        *
        * So, the formula to calculate selfDuration is:
        */
-      const selfDuration = changedNode.selfDuration + performance.now() - changedNode.selfStartTime;
+      const selfDuration =
+         changedNode.selfDuration +
+         performance.now() -
+         changedNode.selfStartTime;
 
       endMark(changedNode.node.name, changedNode.operation);
 
@@ -413,49 +416,35 @@ class Agent {
    }
 
    private __highlightElement(id?: IControlNode['id']): void {
-      if (!this.overlay) {
-         this.overlay = new Overlay();
+      if (id) {
+         const node = this.elements.get(id);
+         if (node && node.instance && node.instance._container) {
+            this.highlighter.highlightElement(node.instance._container, node.name);
+            return;
+         }
       }
-
-      if (!id) {
-         this.overlay.remove();
-         return;
-      }
-
-      const node = this.elements.get(id);
-      if (node && node.instance && node.instance._container) {
-         this.overlay.inspect(node.instance._container, node.name);
-      } else {
-         this.overlay.remove();
-      }
+      this.highlighter.highlightElement();
    }
 
    private __toggleSelectFromPage(state: boolean): void {
       if (state) {
-         if (!this.overlay) {
-            this.overlay = new Overlay();
-         }
-
-         this.mouseMoveHandler = debounce((e: MouseEvent) => {
-            const element = document.elementFromPoint(e.x, e.y);
-            if (element) {
-               this.overlay.inspect(element);
-            }
-         }, 50);
-
-         window.addEventListener('mousemove', this.mouseMoveHandler);
+         this.highlighter.startSelectingFromPage();
       } else {
-         if (this.overlay) {
-            this.overlay.remove();
-         }
-         if (this.mouseMoveHandler) {
-            window.removeEventListener('mousemove', this.mouseMoveHandler);
-         }
+         this.highlighter.stopSelectingFromPage();
+      }
+   }
+
+   private __selectByDomNode(elem: Element): void {
+      const control = this.__findControlByDomNode(elem);
+      if (control) {
+         this.channel.dispatch('setSelectedItem', control.id);
+      } else {
+         this.channel.dispatch('stopSelectFromPage');
       }
    }
 
    private __findControlByDomNode(
-      element: HTMLElement
+      element: Element
    ): IControlNode | undefined {
       let currentElement = element;
 
@@ -463,7 +452,7 @@ class Agent {
       TODO: сейчас на странице могут быть элементы с одинаковыми ключами, для этого я к ключу каждого элемента добавляю id корня, в котором он находится
       Потом ключи будут браться из инферно и будут уникальными, и все костыли с приклеиванием rootId можно будет убрать
        */
-      function getRootId(elem: HTMLElement): string {
+      function getRootId(elem: Element): string {
          let currentRoot = elem;
          while (currentRoot) {
             if (

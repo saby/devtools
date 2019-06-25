@@ -1,4 +1,11 @@
 <Devtool.Layout.Browser>
+    <ws:headTemplate>
+        <Controls.buttons:Button icon="icon-small icon-Handwrite1"
+                                 iconStyle="{{ _selectingFromPage ? 'primary' : 'secondary' }}"
+                                 tooltip="Select element from page"
+                                 viewMode="link"
+                                 on:click="__toggleSelectElementFromPage()" />
+    </ws:headTemplate>
    <ws:content>
       <ws:if data="{{_elements.length > 0}}">
          <div attr:class="Elements__treeContainer">
