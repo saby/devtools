@@ -13,6 +13,7 @@ import Store from './Store';
 
 interface IOptions {
    store: Store;
+   selected: boolean;
 }
 
 class Elements extends Control {
@@ -26,6 +27,7 @@ class Elements extends Control {
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
+   protected _tabShown: boolean = false;
 
    constructor(options: IOptions) {
       super();
@@ -59,13 +61,15 @@ class Elements extends Control {
       this._options.store.dispatch('devtoolsInitialized');
    }
 
-   getSelectedItem(): void {
+   panelShownCallback(): void {
+      this._tabShown = true;
       chrome.devtools.inspectedWindow.eval('window.__WASABY_DEV_HOOK__.$0 = $0', () => {
          this._options.store.dispatch('getSelectedItem');
       });
    }
 
-   hideOverlay(): void {
+   panelHiddenCallback(): void {
+      this._tabShown = false;
       this._options.store.dispatch('toggleSelectFromPage', false);
    }
 
@@ -94,6 +98,7 @@ class Elements extends Control {
    }
 
    private __updateNode(id: IControlNode['id']): void {
+      // TODO: если вкладка закрыта, то делать это не надо, но пока сложно отказаться
       if (this._selectedItemId === id) {
          this._options.store.dispatch('inspectElement', this._selectedItemId);
       }
@@ -118,13 +123,14 @@ class Elements extends Control {
    }
 
    private __highlightNode(id: IControlNode['id']): void {
-      const elements = this._options.store.getElements();
-      const elementIndex = elements.findIndex((element) => element.id === id);
-      if (elementIndex !== -1 && this.__isVisible(elementIndex, elements[elementIndex].depth)) {
-         if (this._children[id]) {
-            highlightUpdate(this._children[id]);
+      if (this._tabShown && this._options.selected) {
+         const elements = this._options.store.getElements();
+         const elementIndex = elements.findIndex((element) => element.id === id);
+         if (elementIndex !== -1 && this.__isVisible(elementIndex, elements[elementIndex].depth)) {
+            if (this._children[id]) {
+               highlightUpdate(this._children[id]);
+            }
          }
-         this._forceUpdate();
       }
    }
 
