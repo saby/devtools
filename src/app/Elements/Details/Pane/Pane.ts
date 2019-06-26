@@ -87,19 +87,21 @@ class Pane extends Control<IOptions> {
 
    protected _beforeUpdate(newOptions: IOptions): void {
       if (this._options.data !== newOptions.data) {
-         if (this._options.controlId === newOptions.controlId && newOptions.changedData) {
-            const rawData = Object.entries(newOptions.changedData).map(([key, value]) => {
-               return {
-                  key,
-                  value,
-                  name: key,
-                  parent: null
-               };
-            });
-            this._source.update(new RecordSet({
-               rawData
-            }));
-            this._children.list.reload();
+         if (this._options.controlId === newOptions.controlId) {
+            if (newOptions.changedData) {
+               const rawData = Object.entries(newOptions.changedData).map(([key, value]) => {
+                  return {
+                     key,
+                     value,
+                     name: key,
+                     parent: null
+                  };
+               });
+               this._source.update(new RecordSet({
+                  rawData
+               }));
+               this._children.list.reload();
+            }
          } else {
             this._source = getSource(newOptions.data);
          }
