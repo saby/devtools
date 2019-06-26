@@ -27,8 +27,6 @@
                                                    itemActions="{{ _itemActions }}"
                                                    itemActionVisibilityCallback="{{ _visibilityCallback }}"
                                                    markerVisibility="hidden"
-                                                   expandedItems="{{ _expandedItems }}"
-                                                   on:expandedItemsChanged="__onExpandedItemsChanged()"
                                                    on:viewFunctionSource="__viewFunctionSource()">
                                <ws:itemTemplate>
                                    <ws:partial template="Controls/treeGrid:ItemTemplate"

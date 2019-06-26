@@ -16,6 +16,7 @@ interface IOptions {
 }
 
 class Elements extends Control {
+   protected _elements: Store['_elements'] = [];
    protected _template: Function = template;
    protected _selectedItemId: IControlNode['id'] | undefined;
    protected _inspectedItem: IControlNode | undefined;

@@ -2,6 +2,7 @@ import { Control, IControlOptions } from 'UI/Base';
 // @ts-ignore
 import template = require('wml!Elements/Details/Pane/Pane');
 import { descriptor, Model } from 'Types/entity';
+import { RecordSet } from 'Types/collection';
 import { TEMPLATES } from './const';
 import { Source } from './Source';
 import columnTemplate = require('wml!Elements/Details/Pane/columnTemplate');
@@ -60,12 +61,10 @@ class Pane extends Control<IOptions> {
    protected _columns: object[];
    protected _itemActions: IItemAction[];
    protected _visibilityCallback: (action: IItemAction, item: Model) => boolean;
-   protected _expandedItems: Array<string | null> = [];
    protected _filter: {
       name?: string;
-      parent?: string | Array<string | null>
+      parent?: string | Array<string | null>;
    } = {};
-   private _justReloaded: boolean = false;
 
    protected _beforeMount(options: IOptions): void {
       this._source = getSource(options.data);
@@ -88,8 +87,22 @@ class Pane extends Control<IOptions> {
 
    protected _beforeUpdate(newOptions: IOptions): void {
       if (this._options.data !== newOptions.data) {
-         this._source = getSource(newOptions.data);
-         this._justReloaded = true;
+         if (this._options.controlId === newOptions.controlId && newOptions.changedData) {
+            const rawData = Object.entries(newOptions.changedData).map(([key, value]) => {
+               return {
+                  key,
+                  value,
+                  name: key,
+                  parent: null
+               };
+            });
+            this._source.update(new RecordSet({
+               rawData
+            }));
+            this._children.list.reload();
+         } else {
+            this._source = getSource(newOptions.data);
+         }
       }
    }
 
@@ -113,7 +126,7 @@ class Pane extends Control<IOptions> {
          );
          const keys = Object.keys(this._options.data);
          Object.keys(this._options.changedData).forEach((key) => {
-            let index = keys.indexOf(key);
+            const index = keys.indexOf(key);
             if (index !== -1 && items[index]) {
                highlightUpdate(items[index]);
             }
@@ -164,18 +177,6 @@ class Pane extends Control<IOptions> {
          this._notify('storeAsGlobal', [
             path.concat(this._options.caption.toLowerCase())
          ]);
-      }
-   }
-
-   private __onExpandedItemsChanged(e: Event, expandedItems: Pane['_expandedItems']): void {
-      /**
-       * When list gets deep reloaded, it resets expandedItems.
-       * This is not the expected behaviour for the user, so we ignore this event once after reload.
-       */
-      if (this._justReloaded) {
-         this._justReloaded = false;
-      } else {
-         this._expandedItems = expandedItems;
       }
    }
 
