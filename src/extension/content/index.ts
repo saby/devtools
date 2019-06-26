@@ -7,10 +7,6 @@ import { injectScript } from './injectScript';
 import { createProxy } from './MessageProxy';
 import { loadOptions } from './loadOptions';
 
-createProxy({
-    portName: DEVTOOL_CONTENT_PORT,
-    source: POST_MESSAGE_SOURCE
-});
 loadOptions().then((options) => {
     injectScript({
         textContent: `this.wasabyDevtoolsOptions = ${JSON.stringify(options)}`
@@ -28,4 +24,9 @@ loadOptions().then((options) => {
            });
        }
     });
+});
+
+createProxy({
+    portName: DEVTOOL_CONTENT_PORT,
+    source: POST_MESSAGE_SOURCE
 });
