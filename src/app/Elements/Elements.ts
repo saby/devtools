@@ -17,6 +17,8 @@ interface IOptions {
    selected: boolean;
 }
 
+const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
+
 class Elements extends Control {
    protected _template: Function = template;
    protected _selectedItemId: IControlNode['id'] | undefined;
@@ -99,6 +101,54 @@ class Elements extends Control {
 
    protected _onItemClick(e: Event, id: IControlNode['id']): void {
       this.__selectElement(id);
+   }
+
+   protected _onListKeyDown(
+      e: {
+         nativeEvent: KeyboardEvent;
+         stopPropagation: Event['stopPropagation'];
+      }
+   ): void {
+      e.stopPropagation();
+      const key = e.nativeEvent.key;
+      if (ARROWS.indexOf(key) !== -1 && this._selectedItemId) {
+         const visibleItems = this._model.getVisibleItems();
+         const index = visibleItems.findIndex((item) => item.id === this._selectedItemId);
+         if (index !== -1) {
+            const originalItem = visibleItems[index];
+            switch (key) {
+               case 'ArrowDown':
+                  if (index !== visibleItems.length - 1) {
+                     this.__selectElement(visibleItems[index + 1].id);
+                  }
+                  break;
+               case 'ArrowLeft':
+                  if (originalItem.isExpanded) {
+                     this._model.toggleExpanded(originalItem.id, false);
+                  } else if (originalItem.parentId) {
+                     const parent = visibleItems.find((item) => item.id === originalItem.parentId);
+                     if (parent) {
+                        this.__selectElement(parent.id);
+                     }
+                  }
+                  break;
+               case 'ArrowRight':
+                  if (originalItem.hasChildren) {
+                     if (originalItem.isExpanded) {
+                        this.__selectElement(visibleItems[index + 1].id);
+                     } else {
+                        this._model.toggleExpanded(originalItem.id, true);
+                     }
+                  }
+                  break;
+               case 'ArrowUp':
+                  if (index !== 0) {
+                     this.__selectElement(visibleItems[index - 1].id);
+                  }
+                  break;
+            }
+         }
+      }
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {

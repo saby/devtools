@@ -10,7 +10,7 @@ interface IModelItem {
    depth: number;
    class: string;
    isExpanded: boolean;
-   hasExpander: boolean;
+   hasChildren: boolean;
    parentId?: string;
 }
 
@@ -170,7 +170,7 @@ class Model {
             class: originalElement.class,
             parentId: originalElement.parentId,
             isExpanded: this._expandedItems.has(originalElement.id),
-            hasExpander:
+            hasChildren:
                this.__getImmediateChildren(originalElement.id).length > 0
          };
       }
