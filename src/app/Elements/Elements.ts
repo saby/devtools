@@ -127,7 +127,7 @@ class Elements extends Control {
    private __selectElement(id: IControlNode['id']): void {
       this._selectingFromPage = false;
       if (this._model.getVisibleItems().length > 0) {
-         this._model.toggleExpanded(id, true);
+         this._model.expandParents(id);
          this._path = this._model.getPath(id);
          this._selectedItemId = id;
          this._scrollToId = id;

@@ -117,6 +117,16 @@ class Model {
       return this._visibleItemsArray;
    }
 
+   expandParents(id: IControlNode['id']): void {
+      const item = this._items.find((element) => element.id === id);
+      if (item && item.parentId) {
+         const parent = this._items.find((element) => element.id === item.parentId);
+         if (parent) {
+            this.toggleExpanded(parent.id, true);
+         }
+      }
+   }
+
    destructor(): void {
       this._items = [];
       this._visibleItems.clear();
