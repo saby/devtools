@@ -10,6 +10,7 @@ import { highlightUpdate } from './highlightUpdate';
 import retrocycle from './retrocycle';
 import 'css!Elements/Elements';
 import Store from './Store';
+import Model from './Model';
 
 interface IOptions {
    store: Store;
@@ -17,17 +18,17 @@ interface IOptions {
 }
 
 class Elements extends Control {
-   protected _elements: Store['_elements'] = [];
    protected _template: Function = template;
    protected _selectedItemId: IControlNode['id'] | undefined;
    protected _inspectedItem: IControlNode | undefined;
    protected _collapsedNodes: Set<IControlNode['id']> = new Set();
    protected _children: Record<IControlNode['id'], HTMLElement>;
-   protected _elementsChanged: boolean = false;
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
    protected _tabShown: boolean = false;
+   private _scrollToId: IControlNode['id'];
+   protected _model: Model = new Model();
 
    constructor(options: IOptions) {
       super();
@@ -43,12 +44,35 @@ class Elements extends Control {
          this.__onEndSynchronization.bind(this)
       );
       options.store.addListener('operation', this._operationHandler.bind(this));
-      options.store.addListener('stopSelectFromPage', this.__toggleSelectElementFromPage.bind(this));
+      options.store.addListener(
+         'stopSelectFromPage',
+         this.__toggleSelectElementFromPage.bind(this)
+      );
       window.elementsPanel = this;
    }
 
    _afterMount(): void {
       this._options.store.dispatch('devtoolsInitialized');
+      /**
+       * TODO: обычно данные синхронизируются с каждой синхронизацией. Но при первом открытии это не работает
+       * Тут я дожидаюсь пока прилетят элементы и потом забираю текущее состояние. Это очень плохое решение, стор сам
+       * должен говорить когда нужно забирать элементы.
+       */
+      setTimeout(() => {
+         this._model.setItems(this._options.store.getElements());
+      }, 100);
+   }
+
+   _afterUpdate(): void {
+      if (this._scrollToId) {
+         if (this._children[this._scrollToId]) {
+            this._children[this._scrollToId].scrollIntoView({
+               block: 'nearest',
+               inline: 'nearest'
+            });
+         }
+         this._scrollToId = '';
+      }
    }
 
    panelShownCallback(): void {
@@ -102,91 +126,30 @@ class Elements extends Control {
 
    private __selectElement(id: IControlNode['id']): void {
       this._selectingFromPage = false;
-      this._path = this.__getPath(id);
-      this._selectedItemId = id;
-      this._options.store.dispatch('inspectElement', this._selectedItemId);
-      if (this._children[id]) {
-         this._children[id].scrollIntoView({
-            block: 'nearest',
-            inline: 'nearest'
-         });
+      if (this._model.getVisibleItems().length > 0) {
+         this._model.toggleExpanded(id, true);
+         this._path = this._model.getPath(id);
+         this._selectedItemId = id;
+         this._scrollToId = id;
+         this._options.store.dispatch('inspectElement', this._selectedItemId);
       }
    }
 
    private __highlightNode(id: IControlNode['id']): void {
       if (this._tabShown && this._options.selected) {
-         const elements = this._options.store.getElements();
-         const elementIndex = elements.findIndex(
-            (element) => element.id === id
-         );
-         if (
-            elementIndex !== -1 &&
-            this.__isVisible(elementIndex, elements[elementIndex].depth)
-         ) {
-            if (this._children[id]) {
-               highlightUpdate(this._children[id]);
-            }
+         if (this._children[id]) {
+            highlightUpdate(this._children[id]);
          }
       }
    }
 
-   private __isVisible(index: number, startDepth: number): boolean {
-      const elements = this._options.store.getElements();
-      if (this._collapsedNodes.size > 0) {
-         let currentDepth = startDepth;
-         for (let i = index - 1; i >= 0; i--) {
-            if (elements[i].depth < currentDepth) {
-               currentDepth--;
-               if (this._collapsedNodes.has(elements[i].id)) {
-                  return false;
-               }
-            }
-         }
-      }
-      return true;
-   }
-
-   private __toggleCollapsed(e: Event, id: IControlNode['id']): void {
+   private __toggleExpanded(e: Event, id: IControlNode['id']): void {
       e.stopPropagation();
-      if (this._collapsedNodes.has(id)) {
-         this._collapsedNodes.delete(id);
-      } else {
-         this._collapsedNodes.add(id);
-      }
-      this._forceUpdate();
-   }
-
-   private __getPath(id: IControlNode['id']): BreadcrumbsOptions['items'] {
-      const elements = this._options.store.getElements();
-      const index = elements.findIndex((node) => node.id === id);
-      if (index !== -1) {
-         const node = elements[index];
-         const path = [node];
-         let currentDepth = node.depth;
-         for (let i = index; i >= 0; i--) {
-            if (elements[i].depth < currentDepth) {
-               currentDepth--;
-               path.push(elements[i]);
-            }
-         }
-         return path
-            .map((node) => {
-               return {
-                  id: node.id,
-                  name: node.name,
-                  class: node.class
-               };
-            })
-            .reverse();
-      }
-      throw new Error('Trying to find nonexistent item');
+      this._model.toggleExpanded(id);
    }
 
    private __onEndSynchronization(): void {
-      this._elements = this._options.store.getElements();
-      if (this._tabShown && this._options.selected) {
-         this._forceUpdate();
-      }
+      this._model.setItems(this._options.store.getElements());
    }
 
    private __toggleSelectElementFromPage(): void {

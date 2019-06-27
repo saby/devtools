@@ -73,7 +73,7 @@ export class Source implements ICrud {
       const itemIndex = this._data.findIndex(
          (element) => element[this._idProperty] === key
       );
-      const rawData = item.getRawData();
+      const rawData = item.getRawData(true);
       const newItem = {
          ...rawData,
          hasChildren: hasChildren(rawData.value)
