@@ -1,6 +1,8 @@
 import Store, { IElement } from './Store';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
+// @ts-ignore
+import * as ArraySimpleValuesUtil from 'Controls/Utils/ArraySimpleValuesUtil';
 
 interface IModelItem {
    id: string;
@@ -21,23 +23,28 @@ class Model {
    private _itemsChanged: boolean = false;
 
    setItems(items: Model['_items']): void {
-      this._items = items.slice();
-      if (this._visibleItems.size) {
-         this._visibleItems.forEach((value, key) => {
-            const item = this._items.find((element) => element.id === key);
-            if (!item) {
-               this._visibleItems.delete(key);
-               this._expandedItems.delete(key);
-            }
-         });
-      } else if (this._items.length > 0) {
-         const roots = this._items.filter((element) => element.depth === 0);
-         roots.forEach((element) =>
-            this._visibleItems.set(element.id, this.__getElement(element))
-         );
+      const diff = ArraySimpleValuesUtil.getArrayDifference(this._items, items);
+      if (diff.added.length > 0 || diff.removed.length > 0) {
+         this._items = items.slice();
+         this.__nextVersion();
+         this._itemsChanged = true;
+         if (this._visibleItems.size) {
+            diff.added.forEach((item) => {
+               if (item.depth === 0) {
+                  this._visibleItems.set(item.id, this.__getElement(item));
+               }
+            });
+            diff.removed.forEach((item) => {
+               this._visibleItems.delete(item.id);
+               this._expandedItems.delete(item.id);
+            });
+         } else if (this._items.length > 0) {
+            const roots = this._items.filter((element) => element.depth === 0);
+            roots.forEach((element) =>
+               this._visibleItems.set(element.id, this.__getElement(element))
+            );
+         }
       }
-      this.__nextVersion();
-      this._itemsChanged = true;
    }
 
    toggleExpanded(
@@ -102,7 +109,7 @@ class Model {
       throw new Error('Trying to find nonexistent item');
    }
 
-   getVisibleItems(): unknown[] {
+   getVisibleItems(): IModelItem[] {
       if (this._itemsChanged) {
          this._itemsChanged = false;
          this._visibleItemsArray = this.__visibleItemsToArray();
