@@ -34,27 +34,17 @@ class Elements extends Control {
       options.store.addListener('inspectedElement', (node: IControlNode) => {
          this._inspectedItem = retrocycle(node);
       });
-      options.store.addListener('setSelectedItem', this.__selectElement.bind(this));
+      options.store.addListener(
+         'setSelectedItem',
+         this.__selectElement.bind(this)
+      );
+      options.store.addListener(
+         'endSynchronization',
+         this.__onEndSynchronization.bind(this)
+      );
       options.store.addListener('operation', this._operationHandler.bind(this));
       options.store.addListener('stopSelectFromPage', this.__toggleSelectElementFromPage.bind(this));
       window.elementsPanel = this;
-   }
-
-   _beforeUpdate(newOptions: IOptions): void {
-      //TODO: удалить после того как ключи будут браться из инферно
-      if (this._elementsChanged) {
-         const uniqueIds: Set<IControlNode['id']> = new Set();
-         const elements = newOptions.store.getElements();
-         const uniqueElements = elements.filter((element) => {
-            if (uniqueIds.has(element.id)) {
-               return false;
-            }
-            uniqueIds.add(element.id);
-            return true;
-         });
-         newOptions.store.setElements(uniqueElements);
-         this._elements = newOptions.store.getElements();
-      }
    }
 
    _afterMount(): void {
@@ -63,9 +53,12 @@ class Elements extends Control {
 
    panelShownCallback(): void {
       this._tabShown = true;
-      chrome.devtools.inspectedWindow.eval('window.__WASABY_DEV_HOOK__.$0 = $0', () => {
-         this._options.store.dispatch('getSelectedItem');
-      });
+      chrome.devtools.inspectedWindow.eval(
+         'window.__WASABY_DEV_HOOK__.$0 = $0',
+         () => {
+            this._options.store.dispatch('getSelectedItem');
+         }
+      );
    }
 
    panelHiddenCallback(): void {
@@ -85,8 +78,6 @@ class Elements extends Control {
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
-      this._elementsChanged = true;
-      this._forceUpdate();
       switch (args[0]) {
          case OperationType.UPDATE:
             this.__updateNode(args[1]);
@@ -125,8 +116,13 @@ class Elements extends Control {
    private __highlightNode(id: IControlNode['id']): void {
       if (this._tabShown && this._options.selected) {
          const elements = this._options.store.getElements();
-         const elementIndex = elements.findIndex((element) => element.id === id);
-         if (elementIndex !== -1 && this.__isVisible(elementIndex, elements[elementIndex].depth)) {
+         const elementIndex = elements.findIndex(
+            (element) => element.id === id
+         );
+         if (
+            elementIndex !== -1 &&
+            this.__isVisible(elementIndex, elements[elementIndex].depth)
+         ) {
             if (this._children[id]) {
                highlightUpdate(this._children[id]);
             }
@@ -173,19 +169,31 @@ class Elements extends Control {
                path.push(elements[i]);
             }
          }
-         return path.map((node) => {
-            return {
-               id: node.id,
-               name: node.name,
-               class: node.class
-            };
-         }).reverse();
+         return path
+            .map((node) => {
+               return {
+                  id: node.id,
+                  name: node.name,
+                  class: node.class
+               };
+            })
+            .reverse();
       }
       throw new Error('Trying to find nonexistent item');
    }
 
+   private __onEndSynchronization(): void {
+      this._elements = this._options.store.getElements();
+      if (this._tabShown && this._options.selected) {
+         this._forceUpdate();
+      }
+   }
+
    private __toggleSelectElementFromPage(): void {
-      this._options.store.dispatch('toggleSelectFromPage', !this._selectingFromPage);
+      this._options.store.dispatch(
+         'toggleSelectFromPage',
+         !this._selectingFromPage
+      );
       this._selectingFromPage = !this._selectingFromPage;
    }
 }

@@ -9,7 +9,7 @@ interface IOptions extends IControlOptions {
    items: Array<{
       id: IControlNode['id'];
       name: IControlNode['name'];
-      class: string;
+      class?: string;
    }>;
    selectedItemId: IControlNode['id'];
 }

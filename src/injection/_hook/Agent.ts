@@ -227,6 +227,7 @@ class Agent {
                break;
          }
       });
+      const id = guid();
       if (this.isProfiling) {
          /**
           * To provide the best experience we'd be storing snapshot of the application's state for each synchronization.
@@ -237,10 +238,9 @@ class Agent {
           * But in most cases, knowing what's changed is enough to fix the problem.
           * This is a lot cheaper, because we need to store only a couple of string arrays for each changed control.
           */
-         const id = guid();
          this.changedNodesBySynchronization.set(id, changes);
-         this.channel.dispatch('endSynchronization', id);
       }
+      this.channel.dispatch('endSynchronization', id);
       this.changedRoots.delete(rootId);
       this.rootStack.pop();
    }

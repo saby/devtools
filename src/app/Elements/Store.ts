@@ -18,6 +18,10 @@ class Store {
 
    constructor() {
       this._channel.addListener('operation', this.__operationHandler.bind(this));
+      this._channel.addListener(
+         'endSynchronization',
+         this.__onEndSynchronization.bind(this)
+      );
    }
 
    dispatch(eventName: string, args?: ISerializable): void {
@@ -37,9 +41,15 @@ class Store {
       return this._elements;
    }
 
-   setElements(newElements: Store['_elements']): void {
-      //TODO: удалить после того как ключи будут браться из инферно
-      this._elements = newElements;
+   private __onEndSynchronization(): void {
+      const uniqueIds: Set<IControlNode['id']> = new Set();
+      this._elements = this._elements.filter((element) => {
+         if (uniqueIds.has(element.id)) {
+            return false;
+         }
+         uniqueIds.add(element.id);
+         return true;
+      });
    }
 
    private __operationHandler(args: IOperationEvent['args']): void {
