@@ -6,7 +6,7 @@ import commitTimeTemplate = require('wml!Profiler/commitTimeTemplate');
 // @ts-ignore
 import synchronizationTemplate = require('wml!Profiler/synchronizationTemplate');
 import { Memory } from 'Types/source';
-import { Model } from 'Types/entity';
+import { Model, adapter } from 'Types/entity';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import Store from 'Elements/Store';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
@@ -162,7 +162,8 @@ class Profiler extends Control<IOptions> {
                id,
                selfDuration
             };
-         })
+         }),
+         filter: this.__masterFilter.bind(this)
       });
       this._selectedSynchronizationId = syncList[0].id;
       this._options.store.dispatch(
@@ -371,6 +372,11 @@ class Profiler extends Control<IOptions> {
       chrome.devtools.inspectedWindow.reload({
          injectedScript: 'this.__WASABY_START_PROFILING = true'
       });
+   }
+
+   private __masterFilter(item: adapter.IRecord): boolean {
+      const duration: number = item.get('selfDuration');
+      return duration !== 0;
    }
 }
 
