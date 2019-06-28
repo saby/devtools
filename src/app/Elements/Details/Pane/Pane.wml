@@ -16,7 +16,7 @@
            <Controls.search:Controller searchParam="name">
                <div class="Pane__listWrapper">
                    <Controls.search:InputContainer>
-                       <Controls.search:Input />
+                       <Controls.search:Input attr:class="Pane__searchInput" />
                    </Controls.search:InputContainer>
 
                    <Controls.list:Container>
