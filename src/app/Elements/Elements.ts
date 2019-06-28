@@ -11,6 +11,7 @@ import retrocycle from './retrocycle';
 import 'css!Elements/Elements';
 import Store from './Store';
 import Model from './Model';
+import { throttle } from 'Types/function';
 
 interface IOptions {
    store: Store;
@@ -23,14 +24,23 @@ class Elements extends Control {
    protected _template: Function = template;
    protected _selectedItemId: IControlNode['id'] | undefined;
    protected _inspectedItem: IControlNode | undefined;
-   protected _collapsedNodes: Set<IControlNode['id']> = new Set();
    protected _children: Record<IControlNode['id'], HTMLElement>;
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
    protected _tabShown: boolean = false;
-   private _scrollToId: IControlNode['id'];
+   protected _scrollToId: IControlNode['id'];
    protected _model: Model = new Model();
+
+   protected _searchValue: string = '';
+
+   protected _lastFoundItemIndex: number = 0;
+
+   protected _searchResults: Store['_elements'] = [];
+
+   protected _throttledUpdateSearch: Function;
+
+   protected _itemsChanged: boolean = false;
 
    constructor(options: IOptions) {
       super();
@@ -50,6 +60,9 @@ class Elements extends Control {
          'stopSelectFromPage',
          this.__toggleSelectElementFromPage.bind(this)
       );
+      this._throttledUpdateSearch = throttle(() => {
+         this.__updateSearch(this._searchValue);
+      }, 200);
       window.elementsPanel = this;
    }
 
@@ -95,7 +108,7 @@ class Elements extends Control {
    protected _beforeUnmount(): void {
       this._options.store.dispatch('toggleSelectFromPage', false);
       this._inspectedItem = undefined;
-      this._collapsedNodes.clear();
+      this._model.destructor();
       window.elementsPanel = undefined;
    }
 
@@ -109,9 +122,9 @@ class Elements extends Control {
          stopPropagation: Event['stopPropagation'];
       }
    ): void {
-      e.stopPropagation();
       const key = e.nativeEvent.key;
       if (ARROWS.indexOf(key) !== -1 && this._selectedItemId) {
+         e.stopPropagation();
          const visibleItems = this._model.getVisibleItems();
          const index = visibleItems.findIndex((item) => item.id === this._selectedItemId);
          if (index !== -1) {
@@ -158,6 +171,10 @@ class Elements extends Control {
             break;
          case OperationType.CREATE:
             this.__highlightNode(args[1]);
+            this._itemsChanged = true;
+            break;
+         case OperationType.DELETE:
+            this._itemsChanged = true;
             break;
       }
    }
@@ -200,6 +217,11 @@ class Elements extends Control {
 
    private __onEndSynchronization(): void {
       this._model.setItems(this._options.store.getElements());
+
+      if (this._itemsChanged) {
+         this._throttledUpdateSearch();
+      }
+      this._itemsChanged = false;
    }
 
    private __toggleSelectElementFromPage(): void {
@@ -208,6 +230,55 @@ class Elements extends Control {
          !this._selectingFromPage
       );
       this._selectingFromPage = !this._selectingFromPage;
+   }
+
+   private __onSearchValueChanged(e: Event, value: string): void {
+      this.__updateSearch(value);
+   }
+
+   private __updateSearch(value: string): void {
+      if (value) {
+         this._searchResults = this._options.store.getElements().filter(
+            (element) =>
+               element.name.toLowerCase().indexOf(value.toLowerCase()) !== -1
+         );
+         if (this._searchResults.length > 0 && !this._searchResults.find((element) => element.id === this._selectedItemId)) {
+            this.__selectElement(this._searchResults[0].id);
+            this._lastFoundItemIndex = 0;
+         }
+      } else {
+         this._searchResults = [];
+         this._lastFoundItemIndex = 0;
+      }
+   }
+
+   private __onSearchKeydown(e: { nativeEvent: KeyboardEvent }): void {
+      if (e.nativeEvent.key === 'Enter') {
+         if (this._searchValue && this._searchResults.length > 0) {
+            if (e.nativeEvent.shiftKey) {
+               if (this._lastFoundItemIndex === 0) {
+                  this._lastFoundItemIndex = this._searchResults.length - 1;
+               } else {
+                  this._lastFoundItemIndex--;
+               }
+            } else {
+               if (
+                  this._lastFoundItemIndex ===
+                  this._searchResults.length - 1
+               ) {
+                  this._lastFoundItemIndex = 0;
+               } else {
+                  this._lastFoundItemIndex++;
+               }
+            }
+
+            const id = this._searchResults[this._lastFoundItemIndex].id;
+
+            if (id) {
+               this.__selectElement(id);
+            }
+         }
+      }
    }
 }
 

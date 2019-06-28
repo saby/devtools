@@ -4,7 +4,15 @@
                                  iconStyle="{{ _selectingFromPage ? 'primary' : 'secondary' }}"
                                  tooltip="Select an element from the page"
                                  viewMode="link"
-                                 on:click="__toggleSelectElementFromPage()" />
+                                 on:click="__toggleSelectElementFromPage()"
+                                 attr:class="Elements__headElement" />
+        <Controls.search:Input bind:value="_searchValue"
+                               on:valueChanged="__onSearchValueChanged()"
+                               on:keydown="__onSearchKeydown()"
+                               attr:class="Elements__headElement" />
+        <ws:if data="{{ _searchResults.length > 0 }}">
+            <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchResults.length }}</span>
+        </ws:if>
     </ws:headTemplate>
    <ws:content>
       <ws:if data="{{_model.getVisibleItems().length > 0}}">
@@ -23,7 +31,8 @@
                            <i attr:class="{{element.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small icon-primary"
                               on:click="__toggleExpanded(element.id)" />
                         </ws:if>
-                        <span attr:class="{{element.class}}">{{element.name}}</span>
+                        <span attr:class="{{element.class}}"><Controls.decorator:Highlight text="{{element.name}}"
+                                                                                           highlight="{{ _searchValue }}" /></span>
                      </div>
                   </div>
                </ws:for>
