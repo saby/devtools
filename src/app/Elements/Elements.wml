@@ -31,8 +31,15 @@
                            <i attr:class="{{element.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small icon-primary"
                               on:click="__toggleExpanded(element.id)" />
                         </ws:if>
-                        <span attr:class="{{element.class}}"><Controls.decorator:Highlight text="{{element.name}}"
-                                                                                           highlight="{{ _searchValue }}" /></span>
+                        <span attr:class="{{element.class}}">
+                            <ws:if data="{{ element.name.toLowerCase().indexOf(_searchValue.toLowerCase()) }}">
+                                <Controls.decorator:Highlight text="{{ element.name }}"
+                                                              highlight="{{ _searchValue }}" />
+                            </ws:if>
+                            <ws:else>
+                                {{element.name}}
+                            </ws:else>
+                        </span>
                      </div>
                   </div>
                </ws:for>
