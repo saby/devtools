@@ -9,6 +9,15 @@ let isGlobal = (module: string): boolean => {
     return module === GLOBAL_MODULE_NAME;
 };
 
+let hasChild = (module?: Module): true | null => {
+    if (!module) {
+        return null;
+    }
+    let { dependent } = module;
+    return (dependent.dynamic && dependent.dynamic.size > 0) ||
+        (dependent.static && dependent.static.size > 0) || null;
+};
+
 let getAllModules = (map: ModulesMap): dependent.Item[] => {
     let results: dependent.Item[] = [];
     
@@ -16,13 +25,15 @@ let getAllModules = (map: ModulesMap): dependent.Item[] => {
         if (isGlobal(name)) {
             return;
         }
-        let { fileName, bundle, size, id } = module;
+        let { fileId, id } = module;
+        const child = hasChild(module);
         results.push({
-            name, fileName, bundle, size,
+            name, fileId,
             isDynamic: false,
             id: createId(id),
             parent: undefined,
-            child: true
+            child,
+            notUsed: !child
         });
     });
     return results;
@@ -30,13 +41,15 @@ let getAllModules = (map: ModulesMap): dependent.Item[] => {
 
 let getEachHandler = (results: dependent.Item[], isDynamic: boolean, parentItemId?: string) => {
     return (module: Module) => {
-        let { name, size, fileName, bundle, id } = module;
+        let { name, fileId, id } = module;
+        const child = hasChild(module);
         results.push({
-            name, size, fileName, bundle,
+            name, fileId,
             isDynamic,
             id: createId(id, parentItemId),
             parent: <string> parentItemId,
-            child: !isGlobal(name) || null,
+            child,
+            notUsed: !child
         });
     }
 };
@@ -60,16 +73,6 @@ let getDependentModules = (
 
     parentModule.dependent.static.forEach(getEachHandler(result, false, <string> parentItemId));
     parentModule.dependent.dynamic.forEach(getEachHandler(result, true, <string> parentItemId));
-
-    if (!result.length) {
-        return [{
-            name: <string> parentModule.bundle,
-            child: null,
-            isDynamic: false,
-            parent: <string> parentItemId,
-            id: createId(<string> parentModule.bundle, <string> parentItemId)
-        }]
-    }
     return result;
 };
 

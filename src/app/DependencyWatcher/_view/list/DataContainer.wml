@@ -35,7 +35,7 @@
                                 <ws:Array>
                                     <ws:Object title="module" sortingProperty="name" align="left"/>
                                     <ws:Object title="file" sortingProperty="fileName" align="left"/>
-                                    <ws:Object title="size" align="right"/>
+                                    <ws:Object title="size" sortingProperty="size" align="right"/>
                                 </ws:Array>
                             </ws:header>
                         </Controls.explorer:View>
