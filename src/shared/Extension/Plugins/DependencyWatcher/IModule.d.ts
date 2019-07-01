@@ -2,18 +2,6 @@ import { DependencyType } from './const'
 
 export type Dependencies = Record<string, Array<string>>;
 
-interface IFileInfo {
-    size: number;
-    path: string;
-}
-export interface IFile extends IFileInfo {
-    module: string;
-}
-export interface Bundle extends IFileInfo {
-    modules: string[]
-}
-
-// Module
 interface IDependencies <TCollection> extends Record<DependencyType, TCollection> {
 
 }
@@ -29,9 +17,7 @@ export interface ModuleId {
 
 export interface ModuleInfo {
     name: string
-    size?: number;
-    fileName?: string;
-    bundle?: string;
+    fileId?: number;
 }
 
 interface ModuleData<TCollection> extends ModuleInfo, ModuleId, ModuleDependencies<TCollection> {

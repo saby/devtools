@@ -12,6 +12,7 @@ export enum RPCMethods {
     getModules = 'getModules',
     getNewModules = 'getNewModules',
     setSize = 'setSize',
+    getFiles = 'getFiles',
 }
 
 export const GLOBAL_MODULE_NAME = '~> page <~';
