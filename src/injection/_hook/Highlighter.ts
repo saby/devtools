@@ -57,6 +57,8 @@ class Highlighter {
       if (element && this.overlay) {
          this.overlay.inspect(element);
       }
+      e.stopPropagation();
+      e.preventDefault();
    }
 
    private __mouseDownHandler(e: MouseEvent): void {
@@ -68,8 +70,8 @@ class Highlighter {
       eventName: K,
       callback: (this: Window, ev: WindowEventMap[K]) => void
    ): () => void {
-      window.addEventListener(eventName, callback);
-      return () => window.removeEventListener(eventName, callback);
+      window.addEventListener(eventName, callback, true);
+      return () => window.removeEventListener(eventName, callback, true);
    }
 }
 
