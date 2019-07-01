@@ -1,24 +1,32 @@
-<div attr:class="CommitDetails">
+<div class="CommitDetails">
    <ws:if data="{{ _options.changesDescription }}">
-      <ws:if data="{{ _options.changesDescription.isFirstRender }}">
-         <div>This was the first time this control was rendered.</div>
-      </ws:if>
-      <ws:else>
-         <ws:if data="{{ _options.changesDescription.changedOptions }}">
-            <div>Changed options: {{_options.changesDescription.changedOptions}}.</div>
+      <Controls.heading:Title caption="Why did this render:"
+                              size="s"
+                              style="secondary" />
+      <div class="CommitDetails__changesContainer">
+         <ws:if data="{{ _options.changesDescription.isFirstRender }}">
+            <div>This was the first time this control was rendered.</div>
          </ws:if>
-         <ws:if data="{{ _options.changesDescription.changedAttributes }}">
-            <div>Changed attributes: {{_options.changesDescription.changedAttributes}}.</div>
-         </ws:if>
-         <ws:if data="{{ !_options.changesDescription.changedOptions && !_options.changesDescription.changedAttributes }}">
-            <div>The parent control re-rendered.</div>
-         </ws:if>
-      </ws:else>
+         <ws:else>
+            <ws:if data="{{ _options.changesDescription.changedOptions }}">
+               <div>Changed options: {{_options.changesDescription.changedOptions}}.</div>
+            </ws:if>
+            <ws:if data="{{ _options.changesDescription.changedAttributes }}">
+               <div>Changed attributes: {{_options.changesDescription.changedAttributes}}.</div>
+            </ws:if>
+            <ws:if data="{{ !_options.changesDescription.changedOptions && !_options.changesDescription.changedAttributes }}">
+               <div>The parent control re-rendered.</div>
+            </ws:if>
+         </ws:else>
+      </div>
    </ws:if>
    <ws:else>
       <div>This control didn't re-render during this synchronization.</div>
    </ws:else>
    <ws:if data="{{ _options.changesDescription.screenshotURL }}">
+      <Controls.heading:Title caption="Screenshot of the page at the end of synchronization:"
+                              size="s"
+                              style="secondary" />
       <img src="{{ _options.changesDescription.screenshotURL }}"
            alt="Screenshot of the page right after synchronization."
            on:click="__zoomImage()"

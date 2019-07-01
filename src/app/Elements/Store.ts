@@ -4,20 +4,25 @@ import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
 
+export interface IElement {
+   id: IControlNode['id'];
+   name: IControlNode['name'];
+   depth: number;
+   class: string;
+   parentId?: IControlNode['parentId'];
+}
+
 class Store {
    protected _channel: ContentChannel = new ContentChannel('elements');
    // TODO: хранить в каком-то более адекватном виде
-   protected _elements:
-      | Array<{
-      id: IControlNode['id'];
-      name: IControlNode['name'];
-      parentId?: IControlNode['parentId'];
-      class?: string;
-      depth?: number;
-   }> = [];
+   protected _elements: IElement[] = [];
 
    constructor() {
       this._channel.addListener('operation', this.__operationHandler.bind(this));
+      this._channel.addListener(
+         'endSynchronization',
+         this.__onEndSynchronization.bind(this)
+      );
    }
 
    dispatch(eventName: string, args?: ISerializable): void {
@@ -37,9 +42,15 @@ class Store {
       return this._elements;
    }
 
-   setElements(newElements: Store['_elements']): void {
-      //TODO: удалить после того как ключи будут браться из инферно
-      this._elements = newElements;
+   private __onEndSynchronization(): void {
+      const uniqueIds: Set<IControlNode['id']> = new Set();
+      this._elements = this._elements.filter((element) => {
+         if (uniqueIds.has(element.id)) {
+            return false;
+         }
+         uniqueIds.add(element.id);
+         return true;
+      });
    }
 
    private __operationHandler(args: IOperationEvent['args']): void {

@@ -1,59 +1,17 @@
 import prepareForSerialization from './prepareForSerialization';
-import debounce from 'Extension/Utils/debounce';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
-import Overlay from './Overlay';
 import { guid } from 'Extension/Utils/guid';
+import { endMark, startMark, updateSelfDurations } from './Utils';
+import Highlighter from './Highlighter';
 
-interface IChangedNode {
+export interface IChangedNode {
    node: IControlNode;
    operation: OperationType;
    selfStartTime: number;
    selfDuration: number;
-}
-
-function operationToString(
-   operation: OperationType
-): 'mount' | 'update' | 'unmount' | 'reorder' {
-   switch (operation) {
-      case OperationType.DELETE:
-         return 'unmount';
-      case OperationType.CREATE:
-         return 'mount';
-      case OperationType.REORDER:
-         return 'reorder';
-      case OperationType.UPDATE:
-         return 'update';
-   }
-}
-
-function startMark(name: string, operation: OperationType): void {
-   if (
-      window.wasabyDevtoolsOptions &&
-      window.wasabyDevtoolsOptions.useUserTimingAPI
-   ) {
-      performance.mark(`${name} (${operationToString(operation)} start)`);
-   }
-}
-
-function endMark(name: string, operation: OperationType): void {
-   if (
-      window.wasabyDevtoolsOptions &&
-      window.wasabyDevtoolsOptions.useUserTimingAPI
-   ) {
-      const prettifiedOperation = operationToString(operation);
-      performance.mark(`${name} (${prettifiedOperation} end)`);
-      performance.measure(
-         `${name} (${prettifiedOperation})`,
-         `${name} (${prettifiedOperation} start)`,
-         `${name} (${prettifiedOperation} end)`
-      );
-      performance.clearMarks(`${name} (${prettifiedOperation} start)`);
-      performance.clearMarks(`${name} (${prettifiedOperation} end)`);
-      performance.clearMeasures(`${name} (${prettifiedOperation})`);
-   }
 }
 
 class Agent {
@@ -71,19 +29,21 @@ class Agent {
 
    private rootStack: Array<IControlNode['id']> = [];
 
+   private unfinishedNodes: Set<IChangedNode> = new Set();
+
    private isDevtoolsOpened: boolean = false;
 
    private isProfiling: boolean = false;
 
    private channel: DevtoolChannel = new DevtoolChannel('elements');
 
-   private overlay: Overlay;
+   private highlighter: Highlighter = new Highlighter({
+      onSelect: this.__selectByDomNode.bind(this)
+   });
 
    private previousSelectedItemId: IControlNode['id'] | undefined;
 
    private currentModuleName: string = '';
-
-   private mouseMoveHandler?: (e: MouseEvent) => void;
 
    constructor() {
       this.channel.addListener(
@@ -119,9 +79,10 @@ class Agent {
          'highlightElement',
          this.__highlightElement.bind(this)
       );
-      this.channel.addListener('hideOverlay', () => {
-         this.__toggleSelectFromPage(false);
-      });
+      this.channel.addListener(
+         'toggleSelectFromPage',
+         this.__toggleSelectFromPage.bind(this)
+      );
       this.channel.addListener(
          'getSynchronizationsList',
          this.__getSyncList.bind(this)
@@ -183,13 +144,15 @@ class Agent {
       startMark(node.name, operation);
 
       this.currentModuleName = node.name;
+      const id = node.id + currentRootId;
 
-      currentRoot.set(node.id + currentRootId, {
+      currentRoot.set(id, {
          node,
          operation,
          selfStartTime: performance.now(),
-         selfDuration: NaN
+         selfDuration: 0
       });
+      this.unfinishedNodes.add(currentRoot.get(id) as IChangedNode);
    }
 
    onEndCommit(node: IControlNode): void {
@@ -204,8 +167,28 @@ class Agent {
          throw new Error('Trying to change nonexistent node');
       }
 
+      /**
+       * Sometimes, commit finishes only after children of the node were committed.
+       * In order to get correct duration, we have to subtract children durations.
+       *
+       * So, we're doing this:
+       * 1) When commit starts, we initialize duration with 0 and add node to a set of unfinished nodes.
+       * 2) When commit ends, we calculate selfDuration of a node.
+       * 3) Then, we subtract duration of the current node from every unfinished node.
+       *
+       * This way, some nodes are going to have negative duration at the end of their commit.
+       * This is a sum of durations of their children.
+       *
+       * So, the formula to calculate selfDuration is:
+       */
+      const selfDuration =
+         changedNode.selfDuration +
+         performance.now() -
+         changedNode.selfStartTime;
+
       endMark(changedNode.node.name, changedNode.operation);
 
+      this.unfinishedNodes.delete(changedNode);
       currentRoot.set(id, {
          ...changedNode,
          node: {
@@ -216,8 +199,12 @@ class Agent {
                ? changedNode.node.parentId + currentRootId
                : undefined
          },
-         selfDuration: performance.now() - changedNode.selfStartTime // TODO: неправильное время, оно иногда учитывает детей
+         selfDuration
       });
+
+      if (this.isProfiling) {
+         updateSelfDurations(this.unfinishedNodes, selfDuration);
+      }
    }
 
    onEndSync(rootId: IControlNode['id']): void {
@@ -240,6 +227,7 @@ class Agent {
                break;
          }
       });
+      const id = guid();
       if (this.isProfiling) {
          /**
           * To provide the best experience we'd be storing snapshot of the application's state for each synchronization.
@@ -250,10 +238,9 @@ class Agent {
           * But in most cases, knowing what's changed is enough to fix the problem.
           * This is a lot cheaper, because we need to store only a couple of string arrays for each changed control.
           */
-         const id = guid();
          this.changedNodesBySynchronization.set(id, changes);
-         this.channel.dispatch('endSynchronization', id);
       }
+      this.channel.dispatch('endSynchronization', id);
       this.changedRoots.delete(rootId);
       this.rootStack.pop();
    }
@@ -429,49 +416,35 @@ class Agent {
    }
 
    private __highlightElement(id?: IControlNode['id']): void {
-      if (!this.overlay) {
-         this.overlay = new Overlay();
+      if (id) {
+         const node = this.elements.get(id);
+         if (node && node.instance && node.instance._container) {
+            this.highlighter.highlightElement(node.instance._container, node.name);
+            return;
+         }
       }
-
-      if (!id) {
-         this.overlay.remove();
-         return;
-      }
-
-      const node = this.elements.get(id);
-      if (node && node.instance && node.instance._container) {
-         this.overlay.inspect(node.instance._container, node.name);
-      } else {
-         this.overlay.remove();
-      }
+      this.highlighter.highlightElement();
    }
 
    private __toggleSelectFromPage(state: boolean): void {
       if (state) {
-         if (!this.overlay) {
-            this.overlay = new Overlay();
-         }
-
-         this.mouseMoveHandler = debounce((e: MouseEvent) => {
-            const element = document.elementFromPoint(e.x, e.y);
-            if (element) {
-               this.overlay.inspect(element);
-            }
-         }, 50);
-
-         window.addEventListener('mousemove', this.mouseMoveHandler);
+         this.highlighter.startSelectingFromPage();
       } else {
-         if (this.overlay) {
-            this.overlay.remove();
-         }
-         if (this.mouseMoveHandler) {
-            window.removeEventListener('mousemove', this.mouseMoveHandler);
-         }
+         this.highlighter.stopSelectingFromPage();
+      }
+   }
+
+   private __selectByDomNode(elem: Element): void {
+      const control = this.__findControlByDomNode(elem);
+      if (control) {
+         this.channel.dispatch('setSelectedItem', control.id);
+      } else {
+         this.channel.dispatch('stopSelectFromPage');
       }
    }
 
    private __findControlByDomNode(
-      element: HTMLElement
+      element: Element
    ): IControlNode | undefined {
       let currentElement = element;
 
@@ -479,7 +452,7 @@ class Agent {
       TODO: сейчас на странице могут быть элементы с одинаковыми ключами, для этого я к ключу каждого элемента добавляю id корня, в котором он находится
       Потом ключи будут браться из инферно и будут уникальными, и все костыли с приклеиванием rootId можно будет убрать
        */
-      function getRootId(elem: HTMLElement): string {
+      function getRootId(elem: Element): string {
          let currentRoot = elem;
          while (currentRoot) {
             if (

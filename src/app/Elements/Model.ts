@@ -1,0 +1,203 @@
+import Store, { IElement } from './Store';
+import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
+// @ts-ignore
+import * as ArraySimpleValuesUtil from 'Controls/Utils/ArraySimpleValuesUtil';
+
+interface IModelItem {
+   id: string;
+   name: string;
+   depth: number;
+   class: string;
+   isExpanded: boolean;
+   hasChildren: boolean;
+   parentId?: string;
+}
+
+class Model {
+   private _items: Store['_elements'] = [];
+   private _visibleItems: Map<string, IModelItem> = new Map();
+   private _visibleItemsArray: IModelItem[] = [];
+   private _expandedItems: Set<string> = new Set();
+   private _version: number = 0;
+   private _itemsChanged: boolean = false;
+
+   setItems(items: Model['_items']): void {
+      const diff = ArraySimpleValuesUtil.getArrayDifference(this._items, items);
+      if (diff.added.length > 0 || diff.removed.length > 0) {
+         this._items = items.slice();
+         this.__nextVersion();
+         this._itemsChanged = true;
+         if (this._visibleItems.size) {
+            diff.added.forEach((item) => {
+               if (item.depth === 0) {
+                  this._visibleItems.set(item.id, this.__getElement(item));
+               }
+            });
+            diff.removed.forEach((item) => {
+               this._visibleItems.delete(item.id);
+               this._expandedItems.delete(item.id);
+            });
+         } else if (this._items.length > 0) {
+            const roots = this._items.filter((element) => element.depth === 0);
+            roots.forEach((element) =>
+               this._visibleItems.set(element.id, this.__getElement(element))
+            );
+         }
+      }
+   }
+
+   toggleExpanded(
+      key: string,
+      newStatus: boolean = !this._expandedItems.has(key)
+   ): void {
+      if (newStatus) {
+         this._expandedItems.add(key);
+         this.__updateElement(key, {
+            isExpanded: true
+         });
+         this.__getImmediateChildren(key).forEach((child) => {
+            this._visibleItems.set(child.id, this.__getElement(child));
+         });
+         this.getPath(key).forEach((pathItem) => {
+            if (pathItem.id !== key) {
+               this._expandedItems.add(pathItem.id);
+               this.__updateElement(pathItem.id, {
+                  isExpanded: true
+               });
+               this.__getImmediateChildren(pathItem.id).forEach((child) => {
+                  this._visibleItems.set(child.id, this.__getElement(child));
+               });
+            }
+         });
+      } else {
+         this._expandedItems.delete(key);
+         this.__updateElement(key, {
+            isExpanded: false
+         });
+         this.__getChildren(key).forEach((child) => {
+            this._expandedItems.delete(child.id);
+            this._visibleItems.delete(child.id);
+         });
+      }
+      this.__nextVersion();
+      this._itemsChanged = true;
+   }
+
+   getPath(id: IControlNode['id']): BreadcrumbsOptions['items'] {
+      const index = this._items.findIndex((node) => node.id === id);
+      if (index !== -1) {
+         const node = this._items[index];
+         const path = [node];
+         let currentDepth = node.depth;
+         for (let i = index; i >= 0; i--) {
+            if (this._items[i].depth < currentDepth) {
+               currentDepth--;
+               path.push(this._items[i]);
+            }
+         }
+         return path
+            .map((node) => {
+               return {
+                  id: node.id,
+                  name: node.name,
+                  class: node.class
+               };
+            })
+            .reverse();
+      }
+      throw new Error('Trying to find nonexistent item');
+   }
+
+   getVisibleItems(): IModelItem[] {
+      if (this._itemsChanged) {
+         this._itemsChanged = false;
+         this._visibleItemsArray = this.__visibleItemsToArray();
+      }
+      return this._visibleItemsArray;
+   }
+
+   expandParents(id: IControlNode['id']): void {
+      const item = this._items.find((element) => element.id === id);
+      if (item && item.parentId) {
+         const parent = this._items.find((element) => element.id === item.parentId);
+         if (parent) {
+            this.toggleExpanded(parent.id, true);
+         }
+      }
+   }
+
+   destructor(): void {
+      this._items = [];
+      this._visibleItems.clear();
+      this._expandedItems.clear();
+   }
+
+   private __nextVersion(): void {
+      this._version++;
+   }
+
+   private __getChildren(parentId: string): IModelItem[] {
+      const parents = new Set();
+      parents.add(parentId);
+      const result: IModelItem[] = [];
+
+      this._items.forEach((element) => {
+         if (
+            typeof element.parentId !== 'undefined' &&
+            parents.has(element.parentId)
+         ) {
+            parents.add(element.id);
+            result.push(this.__getElement(element));
+         }
+      });
+
+      return result;
+   }
+
+   private __getImmediateChildren(parentId: string): Store['_elements'] {
+      return this._items.filter((element) => element.parentId === parentId);
+   }
+
+   private __getElement(originalElement: IElement): IModelItem {
+      if (this._visibleItems.has(originalElement.id)) {
+         return this._visibleItems.get(originalElement.id) as IModelItem;
+      } else {
+         return {
+            id: originalElement.id,
+            name: originalElement.name,
+            depth: originalElement.depth,
+            class: originalElement.class,
+            parentId: originalElement.parentId,
+            isExpanded: this._expandedItems.has(originalElement.id),
+            hasChildren:
+               this.__getImmediateChildren(originalElement.id).length > 0
+         };
+      }
+   }
+
+   private __updateElement<K extends keyof IModelItem>(
+      key: IModelItem['id'],
+      newState: Record<K, IModelItem[K]>
+   ): IModelItem {
+      const oldItem =
+         this._visibleItems.get(key) ||
+         this.__getElement(this._items.find(
+            (element) => element.id === key
+         ) as IElement);
+      const newItem = {
+         ...oldItem,
+         ...newState
+      };
+      this._visibleItems.set(key, newItem);
+      return newItem;
+   }
+
+   private __visibleItemsToArray(): IModelItem[] {
+      return this._items
+         .filter((element) => this._visibleItems.has(element.id))
+         .map((element) => this._visibleItems.get(element.id) as IModelItem);
+   }
+}
+
+export default Model;

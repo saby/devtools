@@ -33,8 +33,8 @@ class Overlay {
    inspect(
       container: Element | IJQueryElement,
       tooltipText: string = isJQueryElement(container)
-         ? container[0].tagName
-         : container.tagName
+         ? container[0].tagName.toLowerCase()
+         : container.tagName.toLowerCase()
    ): void {
       const { top, left, height, width }: ClientRect = isJQueryElement(
          container
@@ -50,9 +50,7 @@ class Overlay {
    }
 
    remove(): void {
-      if (this.overlay.parentNode) {
-         this.overlay.parentNode.removeChild(this.overlay);
-      }
+      this.overlay.remove();
    }
 }
 

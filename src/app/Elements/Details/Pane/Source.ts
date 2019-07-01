@@ -1,6 +1,7 @@
 import { ICrud, Query, DataSet } from 'Types/source';
 import { Record as EntityRecord } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
+import { decycle } from 'Extension/Utils/decycle';
 
 interface IOptions {
    idProperty: string;
@@ -72,10 +73,15 @@ export class Source implements ICrud {
       const itemIndex = this._data.findIndex(
          (element) => element[this._idProperty] === key
       );
+      const rawData = item.getRawData(true);
+      const newItem = {
+         ...rawData,
+         hasChildren: hasChildren(rawData.value)
+      };
       if (itemIndex !== -1) {
-         this._data[itemIndex] = item;
+         this._data[itemIndex] = newItem;
       } else {
-         this._data.push(item);
+         this._data.push(newItem);
       }
    }
 
@@ -107,38 +113,37 @@ export class Source implements ICrud {
          result = this._data;
       } else {
          if (filter[this._parentProperty]) {
-            const parentId = filter[this._parentProperty];
-            const parent = this._data.find(
-               (item) => item[this._idProperty] === parentId
-            );
-
-            if (!parent) {
-               throw new Error('Trying to get contents of nonexistent item');
+            if (filter[this._parentProperty] instanceof Array) {
+               result = [];
+               filter[this._parentProperty].forEach((key) => {
+                  if (key === null) {
+                     result = this._data;
+                  } else {
+                     result = result.concat(this.__getImmediateChildren(key));
+                  }
+               });
+            } else {
+               result = this.__getImmediateChildren(filter[this._parentProperty]);
             }
-
-            result = [];
-
-            Object.entries(parent.value).forEach(([key, value]) => {
-               const newItem = {
-                  [this._idProperty]: parentId + SEPARATOR + key,
-                  [this._parentProperty]: parentId,
-                  hasChildren: hasChildren(value),
-                  name: key,
-                  value
-               };
-               result.push(newItem);
-               this._data.push(newItem);
-            });
          } else {
             result = this._data;
+
+            if (filter.name) {
+               // TODO: нужно научиться нормально применять фильтр
+               result = result.filter((item) => item.name.toLowerCase().indexOf(filter.name.toLowerCase()) !== -1);
+            }
          }
       }
       return Promise.resolve(
          new DataSet({
             rawData: {
-               data: result
+               data: result.map((item) => decycle(item)), // TODO: потенциальный источник больших тормозов, нужно потом попробовать делать decycle только
+               meta: {
+                  more: false
+               }
             },
-            itemsProperty: 'data'
+            itemsProperty: 'data',
+            metaProperty: 'meta'
          })
       );
    }
@@ -158,5 +163,39 @@ export class Source implements ICrud {
          }
       }
       return value;
+   }
+
+   private __getImmediateChildren(parentId: string): object[] {
+      const parent = this._data.find(
+         (item) => item[this._idProperty] === parentId
+      );
+      const result = [];
+
+      if (!parent) {
+         throw new Error('Trying to get contents of nonexistent item');
+      }
+
+      Object.entries(parent.value).forEach(([key, value]) => {
+         const itemId = parentId + SEPARATOR + key;
+         const item = this._data.find((element) => {
+            return element[this._idProperty] === itemId;
+         });
+
+         if (item) {
+            result.push(item);
+         } else {
+            const newItem = {
+               [this._idProperty]: itemId,
+               [this._parentProperty]: parentId,
+               hasChildren: hasChildren(value),
+               name: key,
+               value
+            };
+            result.push(newItem);
+            this._data.push(newItem);
+         }
+      });
+
+      return result;
    }
 }

@@ -10,65 +10,105 @@ import { highlightUpdate } from './highlightUpdate';
 import retrocycle from './retrocycle';
 import 'css!Elements/Elements';
 import Store from './Store';
+import Model from './Model';
+import { throttle } from 'Types/function';
 
 interface IOptions {
    store: Store;
+   selected: boolean;
 }
+
+const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
 class Elements extends Control {
    protected _template: Function = template;
    protected _selectedItemId: IControlNode['id'] | undefined;
    protected _inspectedItem: IControlNode | undefined;
-   protected _collapsedNodes: Set<IControlNode['id']> = new Set();
    protected _children: Record<IControlNode['id'], HTMLElement>;
-   protected _elementsChanged: boolean = false;
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
+   protected _selectingFromPage: boolean = false;
+   protected _tabShown: boolean = false;
+   protected _scrollToId: IControlNode['id'];
+   protected _model: Model = new Model();
+
+   protected _searchValue: string = '';
+
+   protected _lastFoundItemIndex: number = 0;
+
+   protected _searchResults: Store['_elements'] = [];
+
+   protected _throttledUpdateSearch: Function;
+
+   protected _itemsChanged: boolean = false;
 
    constructor(options: IOptions) {
       super();
       options.store.addListener('inspectedElement', (node: IControlNode) => {
          this._inspectedItem = retrocycle(node);
       });
-      options.store.addListener('setSelectedItem', this.__selectElement.bind(this));
+      options.store.addListener(
+         'setSelectedItem',
+         this.__selectElement.bind(this)
+      );
+      options.store.addListener(
+         'endSynchronization',
+         this.__onEndSynchronization.bind(this)
+      );
       options.store.addListener('operation', this._operationHandler.bind(this));
+      options.store.addListener(
+         'stopSelectFromPage',
+         this.__toggleSelectElementFromPage.bind(this)
+      );
+      this._throttledUpdateSearch = throttle(() => {
+         this.__updateSearch(this._searchValue);
+      }, 200);
       window.elementsPanel = this;
-   }
-
-   _beforeUpdate(newOptions: IOptions): void {
-      //TODO: удалить после того как ключи будут браться из инферно
-      if (this._elementsChanged) {
-         const uniqueIds: Set<IControlNode['id']> = new Set();
-         const elements = newOptions.store.getElements();
-         const uniqueElements = elements.filter((element) => {
-            if (uniqueIds.has(element.id)) {
-               return false;
-            }
-            uniqueIds.add(element.id);
-            return true;
-         });
-         newOptions.store.setElements(uniqueElements);
-         this._elements = newOptions.store.getElements();
-      }
    }
 
    _afterMount(): void {
       this._options.store.dispatch('devtoolsInitialized');
+      /**
+       * TODO: обычно данные синхронизируются с каждой синхронизацией. Но при первом открытии это не работает
+       * Тут я дожидаюсь пока прилетят элементы и потом забираю текущее состояние. Это очень плохое решение, стор сам
+       * должен говорить когда нужно забирать элементы.
+       */
+      setTimeout(() => {
+         this._model.setItems(this._options.store.getElements());
+      }, 100);
    }
 
-   getSelectedItem(): void {
-      chrome.devtools.inspectedWindow.eval('window.__WASABY_DEV_HOOK__.$0 = $0', () => {
-         this._options.store.dispatch('getSelectedItem');
-      });
+   _afterUpdate(): void {
+      if (this._scrollToId) {
+         if (this._children[this._scrollToId]) {
+            this._children[this._scrollToId].scrollIntoView({
+               block: 'nearest',
+               inline: 'nearest'
+            });
+         }
+         this._scrollToId = '';
+      }
    }
 
-   hideOverlay(): void {
-      this._options.store.dispatch('hideOverlay');
+   panelShownCallback(): void {
+      this._tabShown = true;
+      chrome.devtools.inspectedWindow.eval(
+         'window.__WASABY_DEV_HOOK__.$0 = $0',
+         () => {
+            this._options.store.dispatch('getSelectedItem');
+         }
+      );
+   }
+
+   panelHiddenCallback(): void {
+      this._tabShown = false;
+      this._options.store.dispatch('toggleSelectFromPage', false);
    }
 
    protected _beforeUnmount(): void {
+      this._options.store.dispatch('toggleSelectFromPage', false);
       this._inspectedItem = undefined;
-      this._collapsedNodes.clear();
+      this._model.destructor();
       window.elementsPanel = undefined;
    }
 
@@ -76,20 +116,71 @@ class Elements extends Control {
       this.__selectElement(id);
    }
 
+   protected _onListKeyDown(
+      e: {
+         nativeEvent: KeyboardEvent;
+         stopPropagation: Event['stopPropagation'];
+      }
+   ): void {
+      const key = e.nativeEvent.key;
+      if (ARROWS.indexOf(key) !== -1 && this._selectedItemId) {
+         e.stopPropagation();
+         const visibleItems = this._model.getVisibleItems();
+         const index = visibleItems.findIndex((item) => item.id === this._selectedItemId);
+         if (index !== -1) {
+            const originalItem = visibleItems[index];
+            switch (key) {
+               case 'ArrowDown':
+                  if (index !== visibleItems.length - 1) {
+                     this.__selectElement(visibleItems[index + 1].id);
+                  }
+                  break;
+               case 'ArrowLeft':
+                  if (originalItem.isExpanded) {
+                     this._model.toggleExpanded(originalItem.id, false);
+                  } else if (originalItem.parentId) {
+                     const parent = visibleItems.find((item) => item.id === originalItem.parentId);
+                     if (parent) {
+                        this.__selectElement(parent.id);
+                     }
+                  }
+                  break;
+               case 'ArrowRight':
+                  if (originalItem.hasChildren) {
+                     if (originalItem.isExpanded) {
+                        this.__selectElement(visibleItems[index + 1].id);
+                     } else {
+                        this._model.toggleExpanded(originalItem.id, true);
+                     }
+                  }
+                  break;
+               case 'ArrowUp':
+                  if (index !== 0) {
+                     this.__selectElement(visibleItems[index - 1].id);
+                  }
+                  break;
+            }
+         }
+      }
+   }
+
    protected _operationHandler(args: IOperationEvent['args']): void {
-      this._elementsChanged = true;
-      this._forceUpdate();
       switch (args[0]) {
          case OperationType.UPDATE:
             this.__updateNode(args[1]);
             break;
          case OperationType.CREATE:
             this.__highlightNode(args[1]);
+            this._itemsChanged = true;
+            break;
+         case OperationType.DELETE:
+            this._itemsChanged = true;
             break;
       }
    }
 
    private __updateNode(id: IControlNode['id']): void {
+      // TODO: если вкладка закрыта, то делать это не надо, но пока сложно отказаться
       if (this._selectedItemId === id) {
          this._options.store.dispatch('inspectElement', this._selectedItemId);
       }
@@ -101,76 +192,93 @@ class Elements extends Control {
    }
 
    private __selectElement(id: IControlNode['id']): void {
-      this._path = this.__getPath(id);
-      this._selectedItemId = id;
-      this._options.store.dispatch('inspectElement', this._selectedItemId);
-      if (this._children[id]) {
-         this._children[id].scrollIntoView({
-            block: 'nearest',
-            inline: 'nearest'
-         });
+      this._selectingFromPage = false;
+      if (this._model.getVisibleItems().length > 0) {
+         this._model.expandParents(id);
+         this._path = this._model.getPath(id);
+         this._selectedItemId = id;
+         this._scrollToId = id;
+         this._options.store.dispatch('inspectElement', this._selectedItemId);
       }
    }
 
    private __highlightNode(id: IControlNode['id']): void {
-      const elements = this._options.store.getElements();
-      const elementIndex = elements.findIndex((element) => element.id === id);
-      if (elementIndex !== -1 && this.__isVisible(elementIndex, elements[elementIndex].depth)) {
+      if (this._tabShown && this._options.selected) {
          if (this._children[id]) {
             highlightUpdate(this._children[id]);
          }
-         this._forceUpdate();
       }
    }
 
-   private __isVisible(index: number, startDepth: number): boolean {
-      const elements = this._options.store.getElements();
-      if (this._collapsedNodes.size > 0) {
-         let currentDepth = startDepth;
-         for (let i = index - 1; i >= 0; i--) {
-            if (elements[i].depth < currentDepth) {
-               currentDepth--;
-               if (this._collapsedNodes.has(elements[i].id)) {
-                  return false;
+   private __toggleExpanded(e: Event, id: IControlNode['id']): void {
+      e.stopPropagation();
+      this._model.toggleExpanded(id);
+   }
+
+   private __onEndSynchronization(): void {
+      this._model.setItems(this._options.store.getElements());
+
+      if (this._itemsChanged) {
+         this._throttledUpdateSearch();
+      }
+      this._itemsChanged = false;
+   }
+
+   private __toggleSelectElementFromPage(): void {
+      this._options.store.dispatch(
+         'toggleSelectFromPage',
+         !this._selectingFromPage
+      );
+      this._selectingFromPage = !this._selectingFromPage;
+   }
+
+   private __onSearchValueChanged(e: Event, value: string): void {
+      this.__updateSearch(value);
+   }
+
+   private __updateSearch(value: string): void {
+      if (value) {
+         this._searchResults = this._options.store.getElements().filter(
+            (element) =>
+               element.name.toLowerCase().indexOf(value.toLowerCase()) !== -1
+         );
+         if (this._searchResults.length > 0 && !this._searchResults.find((element) => element.id === this._selectedItemId)) {
+            this.__selectElement(this._searchResults[0].id);
+            this._lastFoundItemIndex = 0;
+         }
+      } else {
+         this._searchResults = [];
+         this._lastFoundItemIndex = 0;
+      }
+   }
+
+   private __onSearchKeydown(e: { nativeEvent: KeyboardEvent }): void {
+      if (e.nativeEvent.key === 'Enter') {
+         if (this._searchValue && this._searchResults.length > 0) {
+            if (e.nativeEvent.shiftKey) {
+               if (this._lastFoundItemIndex === 0) {
+                  this._lastFoundItemIndex = this._searchResults.length - 1;
+               } else {
+                  this._lastFoundItemIndex--;
+               }
+            } else {
+               if (
+                  this._lastFoundItemIndex ===
+                  this._searchResults.length - 1
+               ) {
+                  this._lastFoundItemIndex = 0;
+               } else {
+                  this._lastFoundItemIndex++;
                }
             }
-         }
-      }
-      return true;
-   }
 
-   private __toggleCollapsed(e: Event, id: IControlNode['id']): void {
-      e.stopPropagation();
-      if (this._collapsedNodes.has(id)) {
-         this._collapsedNodes.delete(id);
-      } else {
-         this._collapsedNodes.add(id);
-      }
-      this._forceUpdate();
-   }
+            const id = this._searchResults[this._lastFoundItemIndex].id;
 
-   private __getPath(id: IControlNode['id']): BreadcrumbsOptions['items'] {
-      const elements = this._options.store.getElements();
-      const index = elements.findIndex((node) => node.id === id);
-      if (index !== -1) {
-         const node = elements[index];
-         const path = [node];
-         let currentDepth = node.depth;
-         for (let i = index; i >= 0; i--) {
-            if (elements[i].depth < currentDepth) {
-               currentDepth--;
-               path.push(elements[i]);
+            if (id) {
+               this.__selectElement(id);
             }
          }
-         return path.map((node) => {
-            return {
-               id: node.id,
-               name: node.name,
-               class: node.class
-            };
-         }).reverse();
       }
-      throw new Error('Trying to find nonexistent item');
    }
 }
 

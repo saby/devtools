@@ -2,6 +2,7 @@ import { Control, IControlOptions } from 'UI/Base';
 // @ts-ignore
 import template = require('wml!Elements/Details/Pane/Pane');
 import { descriptor, Model } from 'Types/entity';
+import { RecordSet } from 'Types/collection';
 import { TEMPLATES } from './const';
 import { Source } from './Source';
 import columnTemplate = require('wml!Elements/Details/Pane/columnTemplate');
@@ -13,6 +14,7 @@ interface IOptions extends IControlOptions {
    caption: string;
    data: object;
    expanded: boolean;
+   controlId: string;
    changedData?: object;
    canStoreAsGlobal?: boolean;
 }
@@ -59,6 +61,10 @@ class Pane extends Control<IOptions> {
    protected _columns: object[];
    protected _itemActions: IItemAction[];
    protected _visibilityCallback: (action: IItemAction, item: Model) => boolean;
+   protected _filter: {
+      name?: string;
+      parent?: string | Array<string | null>;
+   } = {};
 
    protected _beforeMount(options: IOptions): void {
       this._source = getSource(options.data);
@@ -79,16 +85,37 @@ class Pane extends Control<IOptions> {
       this._visibilityCallback = this._itemActionVisibilityCallback.bind(this);
    }
 
-   protected _beforeUpdate(options: IOptions): void {
-      if (this._options.data !== options.data) {
-         this._source = getSource(options.data);
+   protected _beforeUpdate(newOptions: IOptions): void {
+      if (this._options.data !== newOptions.data) {
+         if (this._options.controlId === newOptions.controlId) {
+            if (newOptions.changedData) {
+               const rawData = Object.entries(newOptions.changedData).map(([key, value]) => {
+                  return {
+                     key,
+                     value,
+                     name: key,
+                     parent: null
+                  };
+               });
+               this._source.update(new RecordSet({
+                  rawData
+               }));
+               // TODO: подумать почему это вообще может упасть
+               if (this._children.list) {
+                  this._children.list.reload();
+               }
+            }
+         } else {
+            this._source = getSource(newOptions.data);
+         }
       }
    }
 
    protected _afterUpdate(oldOptions: IOptions): void {
       if (
          this._options.changedData &&
-         this._options.changedData !== oldOptions.changedData
+         this._options.changedData !== oldOptions.changedData &&
+         this._options.controlId === oldOptions.controlId
       ) {
          /**
           * TODO: Подсветка изменившихся опций. Пока без учёта сортировки, фильтрации, виртуальный скролл и т.д.
@@ -104,7 +131,7 @@ class Pane extends Control<IOptions> {
          );
          const keys = Object.keys(this._options.data);
          Object.keys(this._options.changedData).forEach((key) => {
-            let index = keys.indexOf(key);
+            const index = keys.indexOf(key);
             if (index !== -1 && items[index]) {
                highlightUpdate(items[index]);
             }
@@ -163,6 +190,7 @@ class Pane extends Control<IOptions> {
          caption: descriptor(String).required(),
          data: descriptor(Object).required(),
          expanded: descriptor(Boolean).required(),
+         controlId: descriptor(String).required(),
          changedData: descriptor(Object, null),
          canStoreAsGlobal: descriptor(Boolean),
          readOnly: descriptor(Boolean),

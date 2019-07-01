@@ -19,12 +19,12 @@ function createPanelIfNeeded(): void {
             panel.onShown.addListener((window) => {
                if (window.elementsPanel) {
                   elementsPanel = window.elementsPanel;
-                  elementsPanel.getSelectedItem();
+                  elementsPanel.panelShownCallback();
                } else {
                   loadInterval = window.setInterval(() => {
                      if (window.elementsPanel) {
                         elementsPanel = window.elementsPanel;
-                        elementsPanel.getSelectedItem();
+                        elementsPanel.panelShownCallback();
                         window.clearInterval(loadInterval);
                      }
                   }, 1000);
@@ -32,7 +32,7 @@ function createPanelIfNeeded(): void {
             });
             panel.onHidden.addListener(() => {
                if (elementsPanel) {
-                  elementsPanel.hideOverlay();
+                  elementsPanel.panelHiddenCallback();
                }
                if (loadInterval) {
                   window.clearInterval(loadInterval);

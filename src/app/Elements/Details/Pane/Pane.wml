@@ -8,24 +8,36 @@
                               style="secondary" />
    </div>
    <ws:if data="{{ _options.expanded }}">
-      <Controls.scroll:Container>
-         <Controls.explorer:View name="list"
-                                 keyProperty="key"
-                                 parentProperty="parent"
-                                 nodeProperty="hasChildren"
-                                 root="{{ null }}"
-                                 source="{{ _source }}"
-                                 columns="{{ _columns }}"
-                                 itemActions="{{ _itemActions }}"
-                                 itemActionVisibilityCallback="{{ _visibilityCallback }}"
-                                 markerVisibility="hidden"
-                                 on:viewFunctionSource="__viewFunctionSource()">
-            <ws:itemTemplate>
-               <ws:partial template="Controls/treeGrid:ItemTemplate"
-                           expanderSize="s" />
-            </ws:itemTemplate>
-            <ws:itemPadding left="s" right="s" top="s" bottom="s" />
-         </Controls.explorer:View>
-      </Controls.scroll:Container>
+       <Controls.list:DataContainer source="{{ _source }}"
+                                    keyProperty="key"
+                                    parentProperty="parent"
+                                    nodeProperty="hasChildren"
+                                    bind:filter="_filter">
+           <Controls.search:Controller searchParam="name">
+               <div class="Pane__listWrapper">
+                   <Controls.search:InputContainer>
+                       <Controls.search:Input attr:class="Pane__searchInput" />
+                   </Controls.search:InputContainer>
+
+                   <Controls.list:Container>
+                       <Controls.scroll:Container>
+                           <Controls.treeGrid:View name="list"
+                                                   root="{{ null }}"
+                                                   columns="{{ _columns }}"
+                                                   itemActions="{{ _itemActions }}"
+                                                   itemActionVisibilityCallback="{{ _visibilityCallback }}"
+                                                   markerVisibility="hidden"
+                                                   on:viewFunctionSource="__viewFunctionSource()">
+                               <ws:itemTemplate>
+                                   <ws:partial template="Controls/treeGrid:ItemTemplate"
+                                               expanderSize="s" />
+                               </ws:itemTemplate>
+                               <ws:itemPadding left="s" right="s" top="s" bottom="s" />
+                           </Controls.treeGrid:View>
+                       </Controls.scroll:Container>
+                   </Controls.list:Container>
+               </div>
+           </Controls.search:Controller>
+       </Controls.list:DataContainer>
    </ws:if>
 </div>
