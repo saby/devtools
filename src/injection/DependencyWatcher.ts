@@ -10,6 +10,7 @@ import { ModuleStorage } from './_dependencyWatcher/storage/Module';
 import debounce from "Extension/Utils/debounce";
 import { INamedLogger } from "Extension/Logger/ILogger";
 import { RPCResponse} from "./_dependencyWatcher/RPCResponse";
+import { FileStorage } from "./_dependencyWatcher/storage/File";
 
 const SEC = 1000;
 
@@ -36,6 +37,7 @@ export class DependencyWatcher implements IPlugin {
             rpc: new RPC({ channel: this.__channel }),
             require,
             logger,
+            fileStorage: new FileStorage(),
             moduleStorage: this.__storage
         });
         
