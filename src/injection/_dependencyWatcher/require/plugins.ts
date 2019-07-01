@@ -2,9 +2,9 @@ export interface IRequirePlugin<T = string> {
     (module: string): T;
 }
 
-let removePrefix = (prefix: string): IRequirePlugin => {
+let replacePrefix = (prefix: string, newPrefix: string = ''): IRequirePlugin => {
     return (module: string) => {
-        return module.replace(prefix, '');
+        return module.replace(prefix, newPrefix);
     };
 };
 
@@ -24,13 +24,15 @@ let fileFormat = (prefix: string, ext: string = `.${ prefix }`): IRequirePlugin<
     };
 };
 
-export let browser: IRequirePlugin<string> = removePrefix('browser!');
+export let cdn: IRequirePlugin<string> = replacePrefix('cdn!', '/cdn/');
 
-export let isBrowser: IRequirePlugin<string> = removePrefix('is!browser?');
+export let browser: IRequirePlugin<string> = replacePrefix('browser!');
 
-export let optional: IRequirePlugin<string> = removePrefix('optional!');
+export let isBrowser: IRequirePlugin<string> = replacePrefix('is!browser?');
 
-export let preload: IRequirePlugin<string> = removePrefix('preload!');
+export let optional: IRequirePlugin<string> = replacePrefix('optional!');
+
+export let preload: IRequirePlugin<string> = replacePrefix('preload!');
 
 export let js: IRequirePlugin<void | Format> = fileFormat('js');
 
@@ -86,7 +88,7 @@ let allPlugins = {
  * Плагины, которые можно игнорировать
  */
 export let ignoredPlugins: IRequirePlugin<string>[] = [
-    browser, optional, preload, isBrowser
+    browser, optional, preload, isBrowser, cdn
 ];
 
 /**

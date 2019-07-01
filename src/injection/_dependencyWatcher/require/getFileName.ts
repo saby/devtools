@@ -15,7 +15,7 @@ export let getFileName = (
     bundle: string = '',
     buildMode: string = RELEASE_MODE,
 ) => {
-    if (buildMode == RELEASE_MODE && bundle) {
+    if (buildMode == RELEASE_MODE && bundle && !IS_DEBUG) {
         return bundle + '.js';
     }
     if (moduleName == GLOBAL_MODULE_NAME) {
@@ -41,6 +41,9 @@ export let getFileName = (
     if (typeof extension == 'undefined') {
         extension = '.js';
     }
-    
+    path = clearPath(require.toUrl(name));
+    if (path.endsWith(extension)) {
+        return path;
+    }
     return clearPath(require.toUrl(name)) + getSuffix(buildMode) + extension;
 };

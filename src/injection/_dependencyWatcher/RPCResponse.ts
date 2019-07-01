@@ -73,15 +73,17 @@ export class RPCResponse {
             bundle,
             this.__require.getConfig().buildMode
         );
-        const file = this.__files.find(name);
-        if (!file) {
-            return;
-        }
+        const file: IFile = this.__files.find(name) || this.__files.create(name, 0);
         file.modules.add(module.id);
         module.fileId = file.id;
     }
-    private setSize({ size, fileId }: RPCMethodsArgs[RPCMethods.setSize]): RPCMethodsResult[RPCMethods.setSize] {
-        let file = this.__files.getItemById(fileId);
+    private setSize({ size, fileId, fileName }: RPCMethodsArgs[RPCMethods.setSize]): RPCMethodsResult[RPCMethods.setSize] {
+        let file: IFile | void;
+        if (fileId) {
+            file = this.__files.getItemById(fileId);
+        } else if (fileName) {
+            file = this.__files.getItemByName(fileName);
+        }
         if (!file) {
             return false;
         }

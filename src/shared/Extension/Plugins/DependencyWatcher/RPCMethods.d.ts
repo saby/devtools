@@ -5,7 +5,8 @@ export interface RPCMethodsArgs extends Record<RPCMethods, unknown> {
     [RPCMethods.getModules]: string[];
     [RPCMethods.setSize]: {
         size: number;
-        fileId: number;
+        fileId?: number;
+        fileName?: string;
     }
 }
 

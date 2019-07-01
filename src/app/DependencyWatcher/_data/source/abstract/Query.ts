@@ -4,7 +4,7 @@ import { applyWhere } from "../list/applyWhere";
 import { orderBy } from "../list/orderBy";
 import { applyPaging } from "./query/applyPaging";
 import { IFilterData, ListItem } from "../../types";
-import { getSize } from "../util/getSize";
+import { getSizes } from "../util/getSizes";
 import { queue } from "Extension/Utils/queue";
 import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
 import { RPCSource } from "./RPC";
@@ -61,6 +61,8 @@ export abstract class QuerySource<
     TTreeData extends ListItem = ListItem,
     TFilter extends IFilterData = IFilterData
 >  extends RPCSource {
+    private __sizes: Record<string, number> = {};
+    private __notFoundSizes: Record<string, true> = {};
     query(query: Query): Promise<DataSet> {
         // if (Array.isArray(parent)) {
         //     return queue(parent.map((_parent) => {
@@ -89,8 +91,7 @@ export abstract class QuerySource<
         let allModules: ModulesMap;
         return this._getModules().then((map: ModulesMap) => {
             allModules = map;
-            return filter(this._query(map, where).then(this.__setFileData.bind(this))).
-            then(getPathCreator(where, map));
+            return filter(this._query(map, where)).then(getPathCreator(where, map));
         })
     }
     private __setFileData(data: TTreeData[]): TTreeData[] | Promise<TTreeData[]> {
@@ -117,6 +118,30 @@ export abstract class QuerySource<
             return _data;
         });
     }
+    private __setSize(data: TTreeData[]): Promise<TTreeData[]> {
+        const needReadSizes = !data.every((item: TTreeData) => {
+            return !!(item.size || (!item.fileName && item.size))
+        });
+        if (!needReadSizes) {
+            return Promise.resolve(data);
+        }
+        return getSizes().then((sizes: Record<string, number>) => {
+            data.forEach((item: TTreeData) => {
+                if (!item.fileName) {
+                    return;
+                }
+                for (const url in sizes) {
+                    if (url.includes(item.fileName)) {
+                        item.size = sizes[url];
+                        this._setSize(item.fileName, sizes[url]);
+                        delete sizes[url];
+                        return;
+                    }
+                }
+            });
+            return data;
+        });
+    }
     protected abstract _query(map: ModulesMap, where: TFilter): Promise<TTreeData[]>;
 
     private __getFilter(query: Query) {
@@ -129,6 +154,8 @@ export abstract class QuerySource<
                 countAfterFilter = set.length;
                 return set;
             }).
+            then(this.__setFileData.bind(this)).
+            then(this.__setSize.bind(this)).
             then(orderBy<TTreeData>(query.getOrderBy())).
             then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).
             then((data: TTreeData[]) => {

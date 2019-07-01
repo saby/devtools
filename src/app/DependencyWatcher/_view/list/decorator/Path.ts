@@ -14,7 +14,7 @@ export default class Path extends Control {
         if (!path) {
             return;
         }
-        this._path = <string> path.split(/\\|\//).pop();
+        this._path = (path.split(/\\|\//).pop() || '').replace(/\?.+/, '');
     }
     
 }

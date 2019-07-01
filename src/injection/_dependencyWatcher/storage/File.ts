@@ -33,24 +33,26 @@ const findByName = (name: string, files: Set<IFile>): IFile | void => {
 
 export class FileStorage extends Storage<IFile> {
     private __getNew(): Set<IFile> {
-        const newFiles = getResourceTiming().filter(({ name }) => {
+        return new Set(getResourceTiming().filter(({ name }) => {
             return !this.hasName(name);
         }).map<IFile>(({ name, transferSize, decodedBodySize, encodedBodySize }) => {
-            return {
-                name,
-                id: getId(),
-                size: transferSize | decodedBodySize,
-                modules: new Set<number>()
-            }
-        });
-        newFiles.forEach((file: IFile) => {
-            this.add(file);
-        });
-        return new Set(newFiles);
+            return this.create(name, transferSize | decodedBodySize);
+        }));
     }
     find(partOfName: string): IFile | void {
         return findByName(partOfName, this.getItems()) ||
             findByName(partOfName, this.__getNew());
+    }
+    create(name: string, size: number, isBundle?: boolean): IFile {
+        const file = {
+            name,
+            size,
+            isBundle,
+            id: getId(),
+            modules: new Set<number>()
+        };
+        this.add(file);
+        return file;
     }
     
 }

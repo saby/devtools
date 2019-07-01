@@ -101,11 +101,21 @@ export class RPCSource {
         }).then(getArrayFromSet);
     }
     
-    protected _setSize(name: string, size: number): Promise<boolean> {
+    protected _setSize(fileName: string, size: number): Promise<boolean> {
+        let founded: boolean = false;
+        this.__files.forEach((file: IFile) => {
+            if (founded) {
+                return;
+            }
+            if (file.name == fileName) {
+                founded = true;
+                file.size = size;
+            }
+        });
         return this._rpc.execute({
             methodName: RPCMethods.setSize,
             args: {
-                name, size
+                fileName, size
             }
         })
     }
