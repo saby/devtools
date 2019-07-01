@@ -1,5 +1,5 @@
 import { IRequire } from "./IRequire";
-import { ModuleStorage, moduleStorage } from "../moduleStorage";
+import { ModuleStorage } from "../storage/Module";
 import { GLOBAL_MODULE_NAME } from "Extension/Plugins/DependencyWatcher/const";
 import { ILogger } from "Extension/Logger/ILogger";
 

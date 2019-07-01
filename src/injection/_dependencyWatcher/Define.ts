@@ -2,7 +2,7 @@ import { wrapDefineDynamic } from './define/dynamic';
 import { IConfigWithStorage } from "./IConfig";
 import { IDefine } from "./define/IDefine";
 import { IDescriptor } from "./IDescriptor";
-import { ModuleStorage } from "./ModuleStorage";
+import { ModuleStorage } from "./storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 
 export class Define implements IDescriptor {

@@ -1,7 +1,7 @@
 import { IConfigWithStorage } from "./IConfig";
 import { RPC } from "Extension/Event/RPC";
 import { RPCMethods } from "Extension/Plugins/DependencyWatcher/const";
-import { ModuleStorage } from "./ModuleStorage";
+import { ModuleStorage } from "./storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 import { convertToRecord } from "Extension/Plugins/DependencyWatcher/Module";
 import { ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";

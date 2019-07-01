@@ -6,7 +6,7 @@ import { IEventEmitter } from "Extension/Event/IEventEmitter";
 import { RPC } from "Extension/Event/RPC";
 import { EventNames, PLUGIN_NAME } from "Extension/Plugins/DependencyWatcher/const";
 import { GLOBAL } from "./const";
-import { ModuleStorage } from './_dependencyWatcher/ModuleStorage';
+import { ModuleStorage } from './_dependencyWatcher/storage/Module';
 import debounce from "Extension/Utils/debounce";
 import { INamedLogger } from "Extension/Logger/ILogger";
 import { RPCResponse} from "./_dependencyWatcher/RPCResponse";

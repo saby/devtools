@@ -3,7 +3,7 @@ import { prepareArgs } from "./prepareArgs";
 import { wrapDefineStatic } from './static';
 import { getProxyModules } from './proxyModules';
 import { replaceDependencies } from './replaceDependency';
-import { ModuleStorage } from "../ModuleStorage";
+import { ModuleStorage } from "../storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 
 let isNeedDynamicWrapper = (
