@@ -1,1 +1,10 @@
-<span>{{ _formattedValue }}</span>
+<div class="TimeRender">
+    <span class="TimeRender__value">{{ _formattedValue }}</span>
+    <ws:if data="{{ _options.length }}">
+        <div class="TimeRender__barWrapper">
+            <div title="{{ _formattedValue }}"
+                 class="TimeRender__bar"
+                 attr:style="width: {{_options.length}}%;"></div>
+        </div>
+    </ws:if>
+</div>

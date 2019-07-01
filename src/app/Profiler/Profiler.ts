@@ -6,7 +6,7 @@ import commitTimeTemplate = require('wml!Profiler/commitTimeTemplate');
 // @ts-ignore
 import synchronizationTemplate = require('wml!Profiler/synchronizationTemplate');
 import { Memory } from 'Types/source';
-import { Model, adapter } from 'Types/entity';
+import { Model } from 'Types/entity';
 import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import Store from 'Elements/Store';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
@@ -58,6 +58,21 @@ function applyOperations(
    });
 
    return result;
+}
+
+function getDataWithLengths(
+   initialData: Array<{ selfDuration: number }>
+): Array<{ selfDuration: number; length: number }> {
+   const maxDuration = initialData.reduce(
+      (max, { selfDuration }) => Math.max(max, selfDuration),
+      0
+   );
+   return initialData.map((item) => {
+      return {
+         ...item,
+         length: (item.selfDuration / maxDuration) * 100
+      };
+   });
 }
 
 class Profiler extends Control<IOptions> {
@@ -154,16 +169,18 @@ class Profiler extends Control<IOptions> {
          selfDuration: ISynchronization['selfDuration'];
       }>
    ): void {
+      const dataWithLengths = getDataWithLengths(syncList.filter(
+         ({ selfDuration }) => selfDuration
+      ));
       this._masterSource = new Memory({
          idProperty: 'id',
-         data: syncList.map(({ id, selfDuration }) => {
+         data: dataWithLengths.map(({ id, selfDuration, length }) => {
             return {
-               screenshotURL: this._screenshotsBySynchronization.get(id),
                id,
-               selfDuration
+               selfDuration,
+               length
             };
-         }),
-         filter: this.__masterFilter.bind(this)
+         })
       });
       this._selectedSynchronizationId = syncList[0].id;
       this._options.store.dispatch(
@@ -197,7 +214,7 @@ class Profiler extends Control<IOptions> {
          });
          this._detailSource = new Memory({
             idProperty: 'id',
-            data: changedData
+            data: getDataWithLengths(changedData)
          });
 
          /**
@@ -372,11 +389,6 @@ class Profiler extends Control<IOptions> {
       chrome.devtools.inspectedWindow.reload({
          injectedScript: 'this.__WASABY_START_PROFILING = true'
       });
-   }
-
-   private __masterFilter(item: adapter.IRecord): boolean {
-      const duration: number = item.get('selfDuration');
-      return duration !== 0;
    }
 }
 

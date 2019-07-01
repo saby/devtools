@@ -1,5 +1,6 @@
 <ws:partial template="Controls/list:ItemTemplate" scope="{{ _options }}">
    <ws:contentTemplate>
-      <Profiler.TimeRender value="{{itemData.item.selfDuration}}"/>
+      <Profiler.TimeRender value="{{ itemData.item.selfDuration }}"
+                           length="{{ itemData.item.length }}"/>
    </ws:contentTemplate>
 </ws:partial>

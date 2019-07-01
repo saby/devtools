@@ -2,9 +2,11 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
 import template = require('wml!Profiler/TimeRender');
 import { descriptor } from 'Types/entity';
+import 'css!Profiler/TimeRender';
 
 interface IOptions extends IControlOptions {
    value: number;
+   length?: number;
 }
 
 function formatValue(value: number): string {
@@ -32,6 +34,7 @@ class TimeRender extends Control<IOptions> {
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          value: descriptor(Number).required(),
+         length: descriptor(Number),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };
