@@ -8,7 +8,7 @@ import { getSizes } from "../util/getSizes";
 import { queue } from "Extension/Utils/queue";
 import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
 import { RPCSource } from "./RPC";
-import { getParentId, getPath } from "../util/id";
+import { getMinPath, getParentId, getPath } from "../util/id";
 import { findModule } from "../util/findModule";
 import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
 
@@ -28,14 +28,14 @@ interface BreadCrumbsItem {
 }
 
 const getPathCreator = <TTreeData extends ListItem, TFilter extends IFilterData>(
-    where: TFilter,
+    parent: string | undefined,
     map: ModulesMap
 ): ((data: IDataSetConfig<TTreeData>) => IDataSetConfig<TTreeData>) => {
     return ({ data, hasMore }: IDataSetConfig<TTreeData>) => {
-        if (!where.parent) {
+        if (!parent) {
             return { data, hasMore };
         }
-        const path = getPath(where.parent);
+        const path = getPath(parent);
         let pathData = path.map<BreadCrumbsItem | undefined>(({ id, itemId }) => {
             let module = findModule(map, id);
             if (!module) {
@@ -95,7 +95,7 @@ export abstract class QuerySource<
         return this._getModules().then((map: ModulesMap) => {
             allModules = map;
             if (!Array.isArray(where.parent)) {
-                return filter(this._query(map, where)).then(getPathCreator(where, map));
+                return filter(this._query(map, where)).then(getPathCreator(where.parent, map));
             }
             return filter(queue(where.parent.map((parent) => {
                 const _where = {
@@ -108,7 +108,7 @@ export abstract class QuerySource<
             })).then<TTreeData[]>((data: TTreeData[][]) => {
                 // @ts-ignore
                 return data.flat();
-            }));
+            })).then(getPathCreator(where.parent.reduce(getMinPath), map));
         })
     }
     private __setFileData(data: TTreeData[]): TTreeData[] | Promise<TTreeData[]> {
