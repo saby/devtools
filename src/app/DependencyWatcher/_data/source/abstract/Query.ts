@@ -27,8 +27,11 @@ interface BreadCrumbsItem {
     itemId: string;
 }
 
-const getPathCreator = <TTreeData, TFilter extends IFilterData>(where: TFilter, map: ModulesMap) => {
-    return ({ data, hasMore }: IDataSetConfig) => {
+const getPathCreator = <TTreeData extends ListItem, TFilter extends IFilterData>(
+    where: TFilter,
+    map: ModulesMap
+): ((data: IDataSetConfig<TTreeData>) => IDataSetConfig<TTreeData>) => {
+    return ({ data, hasMore }: IDataSetConfig<TTreeData>) => {
         if (!where.parent) {
             return { data, hasMore };
         }
@@ -84,14 +87,28 @@ export abstract class QuerySource<
             return error;
         });
     }
-    private __getItems(query: Query) {
+    private __getItems(query: Query): Promise<IDataSetConfig<TTreeData>> {
         // @ts-ignore
         let where = <TFilter> query.getWhere();
         let filter = this.__getFilter(query);
         let allModules: ModulesMap;
         return this._getModules().then((map: ModulesMap) => {
             allModules = map;
-            return filter(this._query(map, where)).then(getPathCreator(where, map));
+            if (!Array.isArray(where.parent)) {
+                return filter(this._query(map, where)).then(getPathCreator(where, map));
+            }
+            return filter(queue(where.parent.map((parent) => {
+                const _where = {
+                    ...where,
+                    parent
+                };
+                return () => {
+                    return this._query(map, _where);
+                }
+            })).then<TTreeData[]>((data: TTreeData[][]) => {
+                // @ts-ignore
+                return data.flat();
+            }));
         })
     }
     private __setFileData(data: TTreeData[]): TTreeData[] | Promise<TTreeData[]> {
@@ -144,7 +161,7 @@ export abstract class QuerySource<
     }
     protected abstract _query(map: ModulesMap, where: TFilter): Promise<TTreeData[]>;
 
-    private __getFilter(query: Query) {
+    private __getFilter(query: Query): ((queryPromise: Promise<TTreeData[]>) => Promise<IDataSetConfig<TTreeData>>) {
         let countAfterFilter: number;
         return (queryPromise: Promise<TTreeData[]>) => {
             return queryPromise.

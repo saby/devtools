@@ -1,13 +1,12 @@
 import { IRequire } from "./IRequire";
 import { extensionPlugins } from "./plugins";
 import { GLOBAL_MODULE_NAME } from "Extension/Plugins/DependencyWatcher/const";
+import { isRelease } from "./isRelease";
 
-const IS_DEBUG = document.cookie.indexOf('s3debug=true') > -1;
 const RELEASE_MODE = 'release';
-const DEBUG_MODE = 'debug';
 
 let clearPath = (path: string) => path.replace(/^\//, '').replace(/\?.+/, '');
-let getSuffix = (buildMode: string) => IS_DEBUG || buildMode !== RELEASE_MODE ? '' : '.min';
+let getSuffix = (buildMode: string) => isRelease(buildMode) ? '.min' : '';
 
 export let getFileName = (
     moduleName: string,
@@ -15,7 +14,7 @@ export let getFileName = (
     bundle: string = '',
     buildMode: string = RELEASE_MODE,
 ) => {
-    if (buildMode == RELEASE_MODE && bundle && !IS_DEBUG) {
+    if (bundle && isRelease(buildMode)) {
         return bundle + '.js';
     }
     if (moduleName == GLOBAL_MODULE_NAME) {

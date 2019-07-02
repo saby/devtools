@@ -69,6 +69,6 @@ export default class Main extends Control {
     }
     update(...args: unknown[]): void {
         
-        // this._children.listView.reload();
+        this._children.listView.reload();
     }
 }
