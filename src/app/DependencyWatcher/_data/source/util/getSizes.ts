@@ -27,7 +27,7 @@ const mapHARToSizesRecord = (har: HAR): Sizes => {
         if (!request.url.includes('resources') && !request.url.includes('cdn')) {
             continue;
         }
-        result[request.url] = response._transferSize;
+        result[request.url] = response._transferSize || response.content.size;
     }
     return result;
 };
