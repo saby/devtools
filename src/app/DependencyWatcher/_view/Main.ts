@@ -42,11 +42,11 @@ interface IChildren {
 export default class Main extends Control {
     protected readonly _template = template;
     protected readonly _children: IChildren;
-    private __viewMode: ViewMode = ViewMode.dependency;
+    private __viewMode: ViewMode = ViewMode.dependent;
     private __list: Control = getList(this.__viewMode);
     private __channel: IEventEmitter = new ContentChannel(PLUGIN_NAME);
-    private _caption: string = 'Dependency';
-    private _title: string = 'Зависимости модулей';
+    private _caption: string = 'Dependent';
+    private _title: string = 'Зависимые модули';
     private _modeSource = new Memory({
         data: [
             {
