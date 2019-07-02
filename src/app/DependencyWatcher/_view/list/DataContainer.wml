@@ -28,7 +28,7 @@
                             displayProperty="name"
                             nodeProperty="child"
                             columns="{{ __column }}"
-                            columnScroll="{{ true }}"
+                            columnScroll="{{ false }}"
                             bind:sorting="__sorting"
                         >
                             <ws:header>

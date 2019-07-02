@@ -39,5 +39,11 @@ export const getParentId = (itemId: string): string | undefined => {
 };
 
 export const getMinPath = (first: string, second: string): string => {
+    if (!first) {
+        return first;
+    }
+    if (!second) {
+        return second
+    }
     return first.split(ID_SEPARATOR).length < second.split(ID_SEPARATOR).length? first: second;
 };
