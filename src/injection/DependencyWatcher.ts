@@ -11,6 +11,7 @@ import debounce from "Extension/Utils/debounce";
 import { INamedLogger } from "Extension/Logger/ILogger";
 import { RPCResponse} from "./_dependencyWatcher/RPCResponse";
 import { FileStorage } from "./_dependencyWatcher/storage/File";
+import { IDescriptor } from "./_dependencyWatcher/IDescriptor";
 
 const SEC = 1000;
 
@@ -41,7 +42,17 @@ export class DependencyWatcher implements IPlugin {
             moduleStorage: this.__storage
         });
         
-        this.__defineProperty(require, define);
+        this.__defineProperty(require, REQUIRE).catch(() => {
+            try {
+                const defined = { ...GLOBAL[REQUIRE].s.contexts._.defined };
+                this.__logger.log(`Не удалось вовремя переопределить require, возможны проблемы с модулями: ${ Object.keys(defined).toString() }`)
+            } catch (error) {
+                this.__logger.error(error);
+            }
+        });
+        this.__defineProperty(define, DEFINE).catch(() => {
+            // ignore
+        });
     }
 
     private __createStorage(): ModuleStorage {
@@ -49,16 +60,26 @@ export class DependencyWatcher implements IPlugin {
             this.__channel.dispatch(EventNames.update, {});
         }, SEC));
     }
-    private __defineProperty(require: Require, define: Define) {
-        try {
-            Object.defineProperties(GLOBAL, {
-                [DEFINE]: define.getDescriptor(),
-                [REQUIRE]: require.getDescriptor()
-            });
-        } catch (error) {
+    private __defineProperty(desc: IDescriptor, name: string): Promise<void> {
+        const descriptor = desc.getDescriptor();
+        return new Promise((resolve, reject) => {
+            try {
+                Object.defineProperties(GLOBAL, {
+                    [name]: descriptor,
+                });
+                resolve();
+            } catch (e) {
+                reject(e);
+            }
+        }).catch((error) => {
+            // @ts-ignore
+            descriptor.set(GLOBAL[name]);
+            // @ts-ignore
+            GLOBAL[name] = descriptor.get();
             this.__channel.dispatch('error', error.message);
-            this.__logger.error(error);
-        }
+            // this.__logger.error(error);
+            throw error;
+        });
     }
 
     static getName() {
