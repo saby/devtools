@@ -115,7 +115,8 @@ class Profiler extends Control<IOptions> {
 
    protected _detailColumns: object[] = [
       {
-         displayProperty: 'name'
+         displayProperty: 'name',
+         textOverflow: 'ellipsis'
       },
       {
          template: commitTimeTemplate
