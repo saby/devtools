@@ -1,10 +1,18 @@
 import prepareForSerialization from './prepareForSerialization';
-import { IControlNode, IWasabyElement } from 'Extension/Plugins/Elements/IControlNode';
-import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
+import {
+   IControlNode,
+   IWasabyElement
+} from 'Extension/Plugins/Elements/IControlNode';
+import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
-import { endMark, startMark, updateSelfDurations } from './Utils';
+import {
+   endMark,
+   getControlType,
+   startMark,
+   updateSelfDurations
+} from './Utils';
 import Highlighter from './Highlighter';
 import { IWasabyDevHook } from './IHook';
 
@@ -27,15 +35,6 @@ declare global {
          useUserTimingAPI?: boolean;
       };
    }
-}
-
-function getControlType(node: IControlNode): ControlType {
-   if (node.instance) {
-      return typeof node.options === 'object' && node.options.content
-         ? ControlType.HOC
-         : ControlType.CONTROL;
-   }
-   return ControlType.TEMPLATE;
 }
 
 class Agent {
@@ -398,7 +397,10 @@ class Agent {
       id: IControlNode['id'];
       path: Array<string | number>;
    }): void {
-      window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(id, path) as Function;
+      window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(
+         id,
+         path
+      ) as Function;
    }
 
    private __storeAsGlobal({
@@ -422,10 +424,15 @@ class Agent {
       if (currentProperty === 'events') {
          value = this.__getEvents(id);
       } else {
-         value = this.elements.get(id)[currentProperty];
+         const element = this.elements.get(id);
+         if (element) {
+            value = element[currentProperty as keyof IControlNode];
+         }
       }
       while (path.length) {
          currentProperty = path.pop();
+         // tslint:disable-next-line: ban-ts-ignore
+         // @ts-ignore
          value = value[currentProperty];
       }
       return value;
@@ -435,7 +442,10 @@ class Agent {
       if (id) {
          const node = this.elements.get(id);
          if (node && node.instance && node.instance._container) {
-            this.highlighter.highlightElement(node.instance._container, node.name);
+            this.highlighter.highlightElement(
+               node.instance._container,
+               node.name
+            );
             return;
          }
       }
@@ -540,22 +550,25 @@ class Agent {
       ) {
          Object.keys(node.instance._container.eventProperties).forEach(
             (key) => {
-               if (node.instance) { // ts for some reason forgets about previous check
-                  events[key.slice(EVENT_NAME_OFFSET)] = node.instance._container.eventProperties[
-                     key
-                     ].map((handler) => {
-                     if (handler.fn.control[handler.value]) {
-                        return {
-                           function: handler.fn.control[handler.value],
-                           arguments: handler.args
-                        };
-                     } else {
-                        return {
-                           function: handler.fn,
-                           arguments: handler.args
-                        };
+               if (node.instance) {
+                  // ts for some reason forgets about previous check
+                  events[
+                     key.slice(EVENT_NAME_OFFSET)
+                  ] = node.instance._container.eventProperties[key].map(
+                     (handler) => {
+                        if (handler.fn.control[handler.value]) {
+                           return {
+                              function: handler.fn.control[handler.value],
+                              arguments: handler.args
+                           };
+                        } else {
+                           return {
+                              function: handler.fn,
+                              arguments: handler.args
+                           };
+                        }
                      }
-                  });
+                  );
                }
             }
          );

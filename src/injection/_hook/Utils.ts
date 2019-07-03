@@ -1,5 +1,6 @@
-import { OperationType } from 'Extension/Plugins/Elements/const';
+import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IChangedNode } from './Agent';
+import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
 function operationToString(
    operation: OperationType
@@ -50,4 +51,13 @@ export function updateSelfDurations(
    unfinishedNodes.forEach((node) => {
       node.selfDuration -= childDuration;
    });
+}
+
+export function getControlType(node: IControlNode): ControlType {
+   if (node.instance) {
+      return typeof node.options === 'object' && node.options.content
+         ? ControlType.HOC
+         : ControlType.CONTROL;
+   }
+   return ControlType.TEMPLATE;
 }
