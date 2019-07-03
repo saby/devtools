@@ -3,6 +3,7 @@ import { ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatch
 
 export interface RPCMethodsArgs extends Record<RPCMethods, unknown> {
     [RPCMethods.getModules]: string[];
+    [RPCMethods.isRelease]: void;
     [RPCMethods.setSize]: {
         size: number;
         fileId?: number;
@@ -13,4 +14,5 @@ export interface RPCMethodsArgs extends Record<RPCMethods, unknown> {
 export interface RPCMethodsResult extends Record<RPCMethods, unknown> {
     [RPCMethods.getModules]: ModulesRecord<TransferModule>;
     [RPCMethods.setSize]: boolean;
+    [RPCMethods.isRelease]: boolean;
 }

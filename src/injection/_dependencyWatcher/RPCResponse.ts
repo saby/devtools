@@ -12,6 +12,7 @@ import { getFileName } from "./require/getFileName";
 import { FileStorage } from "./storage/File";
 import { RPCMethodsArgs, RPCMethodsResult } from "Extension/Plugins/DependencyWatcher/RPCMethods";
 import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
+import { isRelease } from "./require/isRelease";
 
 interface Config extends IConfigWithStorage{
     rpc: RPC;
@@ -45,6 +46,7 @@ export class RPCResponse {
         rpc.registerMethod(RPCMethods.getNewModules, this.__modules.getNewModules.bind(this.__modules));
         rpc.registerMethod(RPCMethods.setSize, this.setSize.bind(this));
         rpc.registerMethod(RPCMethods.getFiles, this.getFiles.bind(this));
+        rpc.registerMethod(RPCMethods.isRelease, this.isRelease.bind(this));
     }
     private __modules: ModuleStorage;
     private __files: FileStorage;
@@ -92,5 +94,8 @@ export class RPCResponse {
     }
     private getFiles(idList?: number[]): IFile[] {
         return Array.from(this.__files.getItemsById(idList))
+    }
+    private isRelease(): boolean {
+        return isRelease(this.__require.getConfig().buildMode);
     }
 }
