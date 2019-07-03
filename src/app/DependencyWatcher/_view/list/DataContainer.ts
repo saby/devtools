@@ -9,6 +9,7 @@ import * as pathTemplate from 'wml!DependencyWatcher/_view/list/column/path';
 import SizeTemplate from 'DependencyWatcher/_view/list/column/Size';
 import { source } from "../../data";
 import { Columns } from "./column";
+import { source as filterSource } from "../filter";
 
 type Children = {
     listView: Control;
@@ -58,6 +59,7 @@ export default class Main extends Control {
     }
     private __filterObject: object = {};
     protected _filter: object = {};
+    protected _filterItems: object[] = filterSource;
     private get __filter() {
         return {
             ...this.__filterObject,
@@ -68,7 +70,8 @@ export default class Main extends Control {
         this.__filterObject = value;
     }
     update(...args: unknown[]): void {
-        
-        this._children.listView.reload();
+        if (this._children.listView) {
+            this._children.listView.reload();
+        }
     }
 }

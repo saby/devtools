@@ -1,8 +1,8 @@
-import { IFilterData, ListItem } from "../../types";
+import { ListItem } from "../../types";
 
 export type FilterFunction<T extends ListItem = ListItem> = (item: T) => boolean;
 
 export type FilterFunctionGetter<
+    TFilterData,
     TItem extends ListItem = ListItem,
-    TFilter extends IFilterData = IFilterData
-> = (filter: TFilter) => FilterFunction<TItem>;
+> = (filter: TFilterData) => FilterFunction<TItem>;

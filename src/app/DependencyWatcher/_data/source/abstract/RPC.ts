@@ -56,17 +56,6 @@ export class RPCSource {
         });
     }
 
-    protected _getBundles(): Promise<Bundles> {
-        if (this.__lastBundles) {
-            return Promise.resolve(this.__lastBundles);
-        }
-        return this._rpc.execute<Bundles>({
-            methodName: RPCMethods.getBundles
-        }).then((bundles) => {
-            this.__lastBundles = bundles;
-            return  bundles;
-        });
-    }
     protected _getFiles(keys?: number[]): Promise<Map<number, IFile>> {
         if (!keys) {
             return this.__getAllFiles();

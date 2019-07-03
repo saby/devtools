@@ -1,10 +1,10 @@
+<Controls.filter:Controller filterButtonSource="{{ _filterItems }}">
 <Controls.list:DataContainer
     source="{{ __source }}"
     keyProperty="id"
     parentProperty="parent"
     navigation="{{ __navigation }}"
     virtualScrolling="{{ true }}"
-    bind:filter="__filter"
 >
     <Controls.search:Controller searchParam="name" minSearchLength="{{ 3 }}">
         <div class="DependencyWatcher_Page">
@@ -15,31 +15,39 @@
                 <Controls.search:InputContainer>
                     <Controls.search:Input/>
                 </Controls.search:InputContainer>
+                <Controls.filter:ButtonContainer>
+                    <Controls.filter:View
+                        detailPanelTemplateName="DependencyWatcher/view:filter.Panel"
+                    />
+                </Controls.filter:ButtonContainer>
             </div>
 
             <Controls.scroll:Container
                 attr:class="DependencyWatcher_Page__scroll"
             >
                 <Controls.list:Container>
-                    <Controls.operations:Container>
-                        <Controls.explorer:View
-                            name="listView"
-                            bind:root="_root"
-                            displayProperty="name"
-                            nodeProperty="child"
-                            columns="{{ __column }}"
-                            columnScroll="{{ false }}"
-                            bind:sorting="__sorting"
-                        >
-                            <ws:header>
-                                <ws:Array>
-                                    <ws:Object title="module" sortingProperty="name" align="left"/>
-                                    <ws:Object title="file" sortingProperty="fileName" align="left"/>
-                                    <ws:Object title="size" sortingProperty="size" align="right"/>
-                                </ws:Array>
-                            </ws:header>
-                        </Controls.explorer:View>
-                    </Controls.operations:Container>
+                    <Controls.explorer:View
+                        name="listView"
+                        bind:root="_root"
+                        displayProperty="name"
+                        nodeProperty="child"
+                        columns="{{ __column }}"
+                        columnScroll="{{ false }}"
+                        bind:sorting="__sorting"
+                    >
+                        <ws:header>
+                            <ws:Array>
+                                <ws:Object title="module" sortingProperty="name" align="left"/>
+                                <ws:Object title="file" sortingProperty="fileName" align="left"/>
+                                <ws:Object title="size" sortingProperty="size" align="right"/>
+                            </ws:Array>
+                        </ws:header>
+                        <ws:emptyTemplate>
+                            <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xxl" bottomSpacing="m">
+                                <ws:contentTemplate>No data available!</ws:contentTemplate>
+                            </ws:partial>
+                        </ws:emptyTemplate>
+                    </Controls.explorer:View>
                 </Controls.list:Container>
             </Controls.scroll:Container>
 <!--            <Controls.popup:Notification-->
@@ -51,3 +59,4 @@
         </div>
     </Controls.search:Controller>
 </Controls.list:DataContainer>
+</Controls.filter:Controller>
