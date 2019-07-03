@@ -1,21 +1,13 @@
 import { ContentChannel } from '../Devtool/Event/ContentChannel';
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { IControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
 
-export interface IElement {
-   id: IControlNode['id'];
-   name: IControlNode['name'];
-   depth: number;
-   class: string;
-   parentId?: IControlNode['parentId'];
-}
-
 class Store {
    protected _channel: ContentChannel = new ContentChannel('elements');
    // TODO: хранить в каком-то более адекватном виде
-   protected _elements: IElement[] = [];
+   protected _elements: IFrontendControlNode[] = [];
 
    constructor() {
       this._channel.addListener('operation', this.__operationHandler.bind(this));

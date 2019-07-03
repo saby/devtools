@@ -1,6 +1,12 @@
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
-import { IChangedNode } from './Agent';
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import Agent, {
+   IChangedNode} from './Agent';
+import {
+   IChangesDescription,
+   IControlNode,
+   IProfilingData,
+   ISynchronizationDescription
+} from 'Extension/Plugins/Elements/IControlNode';
 
 function operationToString(
    operation: OperationType
@@ -48,7 +54,7 @@ export function updateSelfDurations(
    unfinishedNodes: Set<IChangedNode>,
    childDuration: number
 ): void {
-   unfinishedNodes.forEach((node) => {
+   unfinishedNodes.forEach(({ node }) => {
       node.selfDuration -= childDuration;
    });
 }
@@ -60,4 +66,56 @@ export function getControlType(node: IControlNode): ControlType {
          : ControlType.CONTROL;
    }
    return ControlType.TEMPLATE;
+}
+
+function processChanges(value?: object): string | undefined {
+   let result;
+   if (value) {
+      result = Object.keys(value)
+         .map((key) => {
+            return key.replace('attr:', '');
+         })
+         .join(', ');
+   }
+   return result;
+}
+
+function getChangesDescription({ operation, node }: IChangedNode): IChangesDescription {
+   return {
+      isFirstRender: operation === OperationType.CREATE,
+      changedOptions: processChanges(node.changedOptions),
+      changedAttributes: processChanges(node.changedAttributes),
+      selfDuration: node.selfDuration
+   };
+}
+
+function getChanges(
+   changedNodesEntries: Array<[IControlNode['id'], IChangedNode]>
+): ISynchronizationDescription['changes'] {
+   return changedNodesEntries.map(([commitKey, changedNode]) => {
+      return [commitKey, getChangesDescription(changedNode)];
+   });
+}
+
+function getSynchronizationDuration(
+   changedNodesEntries: Array<[IControlNode['id'], IChangedNode]>
+): number {
+   return changedNodesEntries.reduce((acc, [key, changes]) => {
+      return acc + changes.node.selfDuration;
+   }, 0);
+}
+
+export function getSyncList(
+   changedNodesMap: Agent['changedNodesBySynchronization']
+): IProfilingData['syncList'] {
+   return Array.from(changedNodesMap.entries()).map(([key, value]) => {
+      const entries = Array.from(value.entries());
+      return [
+         key,
+         {
+            selfDuration: getSynchronizationDuration(entries),
+            changes: getChanges(entries)
+         }
+      ];
+   });
 }

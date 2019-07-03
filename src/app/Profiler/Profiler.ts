@@ -6,8 +6,13 @@ import commitTimeTemplate = require('wml!Profiler/commitTimeTemplate');
 // @ts-ignore
 import synchronizationTemplate = require('wml!Profiler/synchronizationTemplate');
 import { Memory } from 'Types/source';
-import { Model } from 'Types/entity';
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { Model, adapter } from 'Types/entity';
+import {
+   IChangesDescription,
+   IControlNode,
+   IProfilingData,
+   ISynchronizationDescription
+} from 'Extension/Plugins/Elements/IControlNode';
 import Store from 'Elements/Store';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
@@ -75,12 +80,24 @@ function getDataWithLengths(
    });
 }
 
+function masterFilter(item: adapter.IRecord): boolean {
+   const duration: number = item.get('selfDuration');
+   return duration !== 0;
+}
+
+function detailFilter(item: adapter.IRecord): boolean {
+   const duration: number = item.get('selfDuration');
+   return duration !== 0;
+}
+
 class Profiler extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 
    protected _synchronizationTemplate: TemplateFunction = synchronizationTemplate;
 
    protected _isProfiling: boolean = false;
+
+   protected _profilingData: IProfilingData;
 
    protected _changesBySynchronization: Map<
       ISynchronization['id'],
@@ -132,12 +149,8 @@ class Profiler extends Control<IOptions> {
    constructor(options: IOptions) {
       super(options);
       options.store.addListener(
-         'synchronizationsList',
-         this.__setSyncList.bind(this)
-      );
-      options.store.addListener(
-         'synchronization',
-         this.__setSynchronization.bind(this)
+         'profilingData',
+         this.__setProfilingData.bind(this)
       );
       options.store.addListener('operation', this.__onOperation.bind(this));
       options.store.addListener(
@@ -164,125 +177,119 @@ class Profiler extends Control<IOptions> {
       });
    }
 
-   private __setSyncList(
-      syncList: Array<{
-         id: ISynchronization['id'];
-         selfDuration: ISynchronization['selfDuration'];
-      }>
-   ): void {
-      const dataWithLengths = getDataWithLengths(syncList.filter(
-         ({ selfDuration }) => selfDuration
-      ));
-      this._masterSource = new Memory({
-         idProperty: 'id',
-         data: dataWithLengths.map(({ id, selfDuration, length }) => {
+   private __setProfilingData(profilingData: IProfilingData): void {
+      this._profilingData = profilingData;
+      const dataWithLengths = getDataWithLengths(
+         profilingData.syncList.map(([id, { selfDuration }]) => {
             return {
                id,
-               selfDuration,
-               length
-            };
-         })
-      });
-      this._selectedSynchronizationId = syncList[0].id;
-      this._options.store.dispatch(
-         'getSynchronization',
-         this._selectedSynchronizationId
-      );
-   }
-
-   private __setSynchronization({ id, changes }: ISynchronization): void {
-      if (id === this._selectedSynchronizationId) {
-         const elements = this.__getElementsBySynchronization(
-            this._selectedSynchronizationId
-         );
-         // TODO: тут ненужные пересчёты частенько, да и вообще медленно написано
-         const data = elements.map((element) => {
-            const changedElement = changes.find((elem) => {
-               return elem.id === element.id;
-            });
-            let selfDuration = 0;
-            if (changedElement) {
-               selfDuration = changedElement.selfDuration;
-            }
-            return {
-               ...element,
                selfDuration
             };
-         });
-         const changedData = data.filter((element) => {
-            // TODO: для ranked view актуальна только эта информация, но для flamegraph это нужно будет поправить. Но там скорее всего вообще не будет сорса
-            return element.selfDuration;
-         });
-         this._detailSource = new Memory({
-            idProperty: 'id',
-            data: getDataWithLengths(changedData)
-         });
+         })
+      );
+      this._masterSource = new Memory({
+         idProperty: 'id',
+         data: dataWithLengths,
+         filter: masterFilter
+      });
+      this._selectedSynchronizationId = profilingData.syncList[0][0];
 
-         /**
-          * TODO: костылище, нужно обсудить с Лёхой нормально
-          * Меняющиеся сорсы и маркеры несовместимы, потому что списки сами себе проставляют markedKey,
-          * а не работают по опциям. Тут 2 проблемы вылезают:
-          * 1) Нельзя синхронно менять ключ и сорс, с точки зрения списка выбранный элемент должен быть загружен.
-          * 2) Из-за этого нет смысла подписываться на markedKeyChanged, иначе затирается правильный ключ.
-          *
-          * По-хорошему, нужно по возможности сохранять выбранную запись при смене синхронизации.
-          * Если она удалена, то выбирать первую, причем с учетом сортировки и фильтрации.
-          */
-         if (changedData.length) {
-            this._selectedCommitId = changedData
-               .slice()
-               .sort((first, second) => {
-                  return second.selfDuration - first.selfDuration;
-               })[0].id;
-            this._options.store.dispatch('getControlChangesOnSynchronization', {
-               synchronizationId: this._selectedSynchronizationId,
-               commitId: this._selectedCommitId
-            });
-         } else {
-            this._selectedCommitId = '';
+      this.__setSynchronization(profilingData.syncList[0][1].changes);
+   }
+
+   private __setSynchronization(
+      changes: Array<[IControlNode['id'], IChangesDescription]>
+   ): void {
+      const elements = this.__getElementsBySynchronization(
+         this._selectedSynchronizationId
+      );
+      const dataWithDurations = elements.map((element) => {
+         // TODO: можно changes переделать в Map и тогда тут будет значительно проще
+         const changedElement = changes.find((elem) => elem[0] === element.id);
+         let selfDuration = 0; // TODO: на самом деле нужно искать время, вся информация теперь есть
+         if (changedElement) {
+            selfDuration = changedElement[1].selfDuration;
          }
+         return {
+            ...element,
+            selfDuration
+         };
+      });
+
+      this._detailSource = new Memory({
+         idProperty: 'id',
+         data: getDataWithLengths(dataWithDurations),
+         filter: detailFilter
+      });
+
+      /**
+       * TODO: костылище, нужно обсудить с Лёхой нормально
+       * Меняющиеся сорсы и маркеры несовместимы, потому что списки сами себе проставляют markedKey,
+       * а не работают по опциям. Тут 2 проблемы вылезают:
+       * 1) Нельзя синхронно менять ключ и сорс, с точки зрения списка выбранный элемент должен быть загружен.
+       * 2) Из-за этого нет смысла подписываться на markedKeyChanged, иначе затирается правильный ключ.
+       *
+       * По-хорошему, нужно по возможности сохранять выбранную запись при смене синхронизации.
+       * Если она удалена, то выбирать первую, причем с учетом сортировки и фильтрации.
+       */
+      if (dataWithDurations.length) {
+         this._selectedCommitId = dataWithDurations
+            .slice()
+            .sort((first, second) => {
+               return second.selfDuration - first.selfDuration;
+            })[0].id;
+         const selectedNodeIndex = changes.findIndex(
+            (element) => element[0] === this._selectedCommitId
+         );
+         this.__setControlChangesOnSynchronization(
+            changes[selectedNodeIndex][1]
+         );
+      } else {
+         this._selectedCommitId = '';
       }
    }
 
-   private __masterMarkedKeyChanged(e: Event, item: Model): void {
-      this._selectedSynchronizationId = item.getId();
-      this._options.store.dispatch(
-         'getSynchronization',
-         this._selectedSynchronizationId
-      );
-   }
-
-   private __detailsMarkedKeyChanged(e: Event, item: Model): void {
-      this._selectedCommitId = item.getId();
-      this._options.store.dispatch('getControlChangesOnSynchronization', {
-         synchronizationId: this._selectedSynchronizationId,
-         commitId: this._selectedCommitId
-      });
-   }
-
    private __setControlChangesOnSynchronization(changes?: {
-      synchronizationId: string;
-      commitId: string;
       isFirstRender: boolean;
       changedOptions?: string;
       changedAttributes?: string;
    }): void {
-      if (
-         changes &&
-         this._selectedSynchronizationId === changes.synchronizationId &&
-         this._selectedCommitId === changes.commitId
-      ) {
+      if (changes) {
          this._selectedCommitChanges = {
             isFirstRender: changes.isFirstRender,
             changedOptions: changes.changedOptions,
             changedAttributes: changes.changedAttributes,
             screenshotURL: this._screenshotsBySynchronization.get(
-               changes.synchronizationId
+               this._selectedSynchronizationId
             )
          };
       } else {
          this._selectedCommitChanges = undefined;
       }
+   }
+
+   private __masterMarkedKeyChanged(e: Event, item: Model): void {
+      this._selectedSynchronizationId = item.getId();
+
+      // TODO: можно syncList переделать в Map и тогда тут будет значительно проще
+      const synchronization = this._profilingData.syncList.find(
+         ([key]) => key === this._selectedSynchronizationId
+      ) as [string, ISynchronizationDescription];
+
+      this.__setSynchronization(synchronization[1].changes);
+   }
+
+   private __detailsMarkedKeyChanged(e: Event, item: Model): void {
+      this._selectedCommitId = item.getId();
+
+      // TODO: можно syncList переделать в Map и тогда тут будет значительно проще
+      const synchronization = this._profilingData.syncList.find(
+         ([key]) => key === this._selectedSynchronizationId
+      ) as [string, ISynchronizationDescription];
+      const description = synchronization[1].changes.find(
+         ([key]) => key === this._selectedCommitId
+      ) as [IControlNode['id'], IChangesDescription];
+      this.__setControlChangesOnSynchronization(description[1]);
    }
 
    private __getElementsBySynchronization(
@@ -301,7 +308,8 @@ class Profiler extends Control<IOptions> {
                elements = applyOperations(previousElements, operations);
                this._elementsBySynchronization.set(currentId, elements);
 
-               // TODO: хотелось бы эту строку вернуть, но тогда я теряю все посчитанные синхронизации и вычисляю неправильные деревья
+               // TODO: хотелось бы эту строку вернуть, но тогда я теряю все посчитанные
+               //  синхронизации и вычисляю неправильные деревья
                // нужно for с 0 до changes.length+elementsBySynchronization.length
                // this._changesBySynchronization.delete(currentId);
             }
@@ -376,6 +384,7 @@ class Profiler extends Control<IOptions> {
             this._elementsSnapshot = this._options.store.getElements().slice();
          } else {
             this._options.store.dispatch('getSynchronizationsList');
+            this._options.store.dispatch('getProfilingData');
          }
       }
    }

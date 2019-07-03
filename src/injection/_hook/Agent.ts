@@ -1,26 +1,21 @@
 import prepareForSerialization from './prepareForSerialization';
 import {
+   IBackendControlNode,
    IControlNode,
+   IProfilingData,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
-import {
-   endMark,
-   getControlType,
-   startMark,
-   updateSelfDurations
-} from './Utils';
+import { endMark, getControlType, getSyncList, startMark, updateSelfDurations } from './Utils';
 import Highlighter from './Highlighter';
 import { IWasabyDevHook } from './IHook';
 
 export interface IChangedNode {
-   node: IControlNode;
+   node: IBackendControlNode;
    operation: OperationType;
-   selfStartTime: number;
-   selfDuration: number;
 }
 
 // TODO: утащить в нормальное место
@@ -38,7 +33,7 @@ declare global {
 }
 
 class Agent {
-   private elements: Map<IControlNode['id'], IControlNode> = new Map();
+   private elements: Map<IControlNode['id'], IBackendControlNode> = new Map();
 
    private changedRoots: Map<
       IControlNode['id'],
@@ -67,6 +62,8 @@ class Agent {
    private previousSelectedItemId: IControlNode['id'] | undefined;
 
    private currentModuleName: string = '';
+
+   private initialIdToDuration: Map<IControlNode['id'], number> = new Map();
 
    constructor() {
       this.channel.addListener(
@@ -107,20 +104,12 @@ class Agent {
          this.__toggleSelectFromPage.bind(this)
       );
       this.channel.addListener(
-         'getSynchronizationsList',
-         this.__getSyncList.bind(this)
-      );
-      this.channel.addListener(
-         'getSynchronization',
-         this.__getSynchronization.bind(this)
-      );
-      this.channel.addListener(
          'toggleProfiling',
          this.__toggleProfiling.bind(this)
       );
       this.channel.addListener(
-         'getControlChangesOnSynchronization',
-         this.__getControlChangesOnSynchronization.bind(this)
+         'getProfilingData',
+         this.__getProfilingData.bind(this)
       );
       this.channel.addListener(
          'getProfilingStatus',
@@ -170,10 +159,12 @@ class Agent {
       const id = node.id + currentRootId;
 
       currentRoot.set(id, {
-         node,
-         operation,
-         selfStartTime: performance.now(),
-         selfDuration: 0
+         node: {
+            ...node,
+            selfStartTime: performance.now(),
+            selfDuration: 0
+         },
+         operation
       });
       this.unfinishedNodes.add(currentRoot.get(id) as IChangedNode);
    }
@@ -205,29 +196,24 @@ class Agent {
        * So, the formula to calculate selfDuration is:
        */
       const selfDuration =
-         changedNode.selfDuration +
+         changedNode.node.selfDuration +
          performance.now() -
-         changedNode.selfStartTime;
+         changedNode.node.selfStartTime;
 
       endMark(changedNode.node.name, changedNode.operation);
 
       this.unfinishedNodes.delete(changedNode);
-      currentRoot.set(id, {
-         ...changedNode,
-         node: {
-            ...changedNode.node,
-            ...node,
-            id,
-            parentId: changedNode.node.parentId
-               ? changedNode.node.parentId + currentRootId
-               : undefined
-         },
-         selfDuration
-      });
+      changedNode.node = {
+         ...changedNode.node,
+         ...node,
+         id,
+         selfDuration,
+         parentId: changedNode.node.parentId
+            ? changedNode.node.parentId + currentRootId
+            : undefined
+      };
 
-      if (this.isProfiling) {
-         updateSelfDurations(this.unfinishedNodes, selfDuration);
-      }
+      updateSelfDurations(this.unfinishedNodes, selfDuration);
    }
 
    onEndSync(rootId: IControlNode['id']): void {
@@ -272,7 +258,7 @@ class Agent {
       return this.currentModuleName;
    }
 
-   private __handleAdd(node: IControlNode): void {
+   private __handleAdd(node: IBackendControlNode): void {
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -289,7 +275,7 @@ class Agent {
       }
    }
 
-   private __handleUpdate(node: IControlNode): void {
+   private __handleUpdate(node: IBackendControlNode): void {
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -301,7 +287,7 @@ class Agent {
       }
    }
 
-   private __handleRemove(node: IControlNode): void {
+   private __handleRemove(node: IBackendControlNode): void {
       this.elements.delete(node.id);
       this.__removeChildren(node.id);
 
@@ -576,94 +562,30 @@ class Agent {
       return events;
    }
 
-   private __getSyncList(): void {
-      this.channel.dispatch(
-         'synchronizationsList',
-         Array.from(this.changedNodesBySynchronization.entries()).map(
-            ([key, value]) => {
-               return {
-                  id: key,
-                  // TODO: сейчас тут теряется вся работа инферно + время между построением компонентов
-                  selfDuration: Array.from(value.values()).reduce(
-                     (acc, node) => {
-                        return acc + node.selfDuration;
-                     },
-                     0
-                  )
-               };
-            }
-         )
-      );
-   }
-
-   private __getSynchronization(id: string): void {
-      const synchronization = this.changedNodesBySynchronization.get(id);
-      if (!synchronization) {
-         throw new Error('Trying to get nonexistent synchronization');
-      }
-      this.channel.dispatch('synchronization', {
-         changes: Array.from(synchronization.entries()).map(([key, value]) => {
-            return {
-               id: key,
-               selfDuration: value.selfDuration
-            };
-         }),
-         id
-      });
-   }
-
-   private __getControlChangesOnSynchronization({
-      synchronizationId,
-      commitId
-   }: {
-      synchronizationId: string;
-      commitId: string;
-   }): void {
-      const synchronization = this.changedNodesBySynchronization.get(
-         synchronizationId
-      );
-      if (!synchronization) {
-         throw new Error('Trying to get nonexistent synchronization');
-      }
-      const changedNode = synchronization.get(commitId);
-
-      function processChanges(value?: object): string | undefined {
-         let result;
-         if (value) {
-            result = Object.keys(value)
-               .map((key) => {
-                  return key.replace('attr:', '');
-               })
-               .join(', ');
-         }
-         return result;
-      }
-
-      if (changedNode) {
-         this.channel.dispatch('controlChanges', {
-            changedOptions: processChanges(changedNode.node.changedOptions),
-            changedAttributes: processChanges(
-               changedNode.node.changedAttributes
-            ),
-            isFirstRender: changedNode.operation === OperationType.CREATE,
-            commitId,
-            synchronizationId
-         });
-      } else {
-         this.channel.dispatch('controlChanges');
-      }
-   }
-
    private __toggleProfiling(state: boolean = !this.isProfiling): void {
       this.isProfiling = state;
       if (state) {
          this.changedNodesBySynchronization.clear();
+         this.initialIdToDuration.clear();
+         this.elements.forEach(({ id, selfDuration }) => {
+            this.initialIdToDuration.set(id, selfDuration);
+         });
       }
       this.channel.dispatch('profilingStatus', this.isProfiling);
    }
 
    private __getProfilingStatus(): void {
       this.channel.dispatch('profilingStatus', this.isProfiling);
+   }
+
+   private __getProfilingData(): void {
+      const profilingData: IProfilingData = {
+         initialIdToDuration: Array.from(this.initialIdToDuration.entries()),
+         syncList: getSyncList(this.changedNodesBySynchronization)
+      };
+      this.initialIdToDuration.clear();
+      this.changedNodesBySynchronization.clear();
+      this.channel.dispatch('profilingData', profilingData);
    }
 }
 

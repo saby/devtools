@@ -1,5 +1,5 @@
-import Store, { IElement } from './Store';
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import Store from './Store';
+import { IControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
 // @ts-ignore
 import * as ArraySimpleValuesUtil from 'Controls/Utils/ArraySimpleValuesUtil';
@@ -159,7 +159,7 @@ class Model {
       return this._items.filter((element) => element.parentId === parentId);
    }
 
-   private __getElement(originalElement: IElement): IModelItem {
+   private __getElement(originalElement: IFrontendControlNode): IModelItem {
       if (this._visibleItems.has(originalElement.id)) {
          return this._visibleItems.get(originalElement.id) as IModelItem;
       } else {
@@ -184,7 +184,7 @@ class Model {
          this._visibleItems.get(key) ||
          this.__getElement(this._items.find(
             (element) => element.id === key
-         ) as IElement);
+         ) as IFrontendControlNode);
       const newItem = {
          ...oldItem,
          ...newState

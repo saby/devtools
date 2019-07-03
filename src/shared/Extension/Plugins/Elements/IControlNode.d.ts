@@ -43,3 +43,34 @@ export interface IControlNode extends ITemplateNode {
    };
    state?: object;
 }
+
+export interface IBackendControlNode extends IControlNode {
+   selfDuration: number;
+   selfStartTime: number;
+}
+
+export interface IFrontendControlNode {
+   id: IControlNode['id'];
+   name: IControlNode['name'];
+   depth: number;
+   class: string;
+   parentId?: IControlNode['parentId'];
+}
+
+// TODO: перекинуть в отдельный файл или переименовать этот
+export interface IChangesDescription {
+   selfDuration: number;
+   isFirstRender: boolean;
+   changedOptions?: string;
+   changedAttributes?: string;
+}
+
+export interface ISynchronizationDescription {
+   selfDuration: number;
+   changes: Array<[IControlNode['id'], IChangesDescription]>;
+}
+
+export interface IProfilingData {
+   initialIdToDuration: Array<[IControlNode['id'], number]>;
+   syncList: Array<[string, ISynchronizationDescription]>;
+}
