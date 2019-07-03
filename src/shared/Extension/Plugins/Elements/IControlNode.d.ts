@@ -4,7 +4,10 @@ export interface ITemplateNode {
    name: string;
    template: Function;
    container?: HTMLElement;
-   options?: object;
+   options?: {
+      [key: string]: unknown;
+      content?: object;
+   };
    changedOptions?: ITemplateNode['options'];
    attributes?: Record<string, string>;
    changedAttributes: ITemplateNode['attributes'];
@@ -15,7 +18,28 @@ export interface ITemplateNode {
    parentId?: ITemplateNode['id'];
 }
 
+interface IWasabyHandlerFn extends Function {
+   control: Record<string, Function>;
+}
+
+interface IWasabyEventHandler {
+   fn: IWasabyHandlerFn;
+   args: unknown[];
+   value: string;
+}
+
+export interface IWasabyElement extends HTMLElement {
+   eventProperties: Record<string, IWasabyEventHandler[]>;
+   controlNodes?: Array<{
+      key: IControlNode['id'];
+      id: string;
+   }>;
+}
+
 export interface IControlNode extends ITemplateNode {
-   instance?: object;
+   instance?: {
+      _container: IWasabyElement;
+      _destroyed: boolean;
+   };
    state?: object;
 }

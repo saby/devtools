@@ -1,17 +1,41 @@
 import prepareForSerialization from './prepareForSerialization';
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { IControlNode, IWasabyElement } from 'Extension/Plugins/Elements/IControlNode';
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
 import { endMark, startMark, updateSelfDurations } from './Utils';
 import Highlighter from './Highlighter';
+import { IWasabyDevHook } from './IHook';
 
 export interface IChangedNode {
    node: IControlNode;
    operation: OperationType;
    selfStartTime: number;
    selfDuration: number;
+}
+
+// TODO: утащить в нормальное место
+declare global {
+   // tslint:disable-next-line: interface-name
+   interface Window {
+      __WASABY_DEV_HOOK__: IWasabyDevHook;
+      __WASABY_START_PROFILING?: boolean;
+      $wasaby?: IControlNode;
+      $tmp?: unknown;
+      wasabyDevtoolsOptions?: {
+         useUserTimingAPI?: boolean;
+      };
+   }
+}
+
+function getControlType(node: IControlNode): ControlType {
+   if (node.instance) {
+      return typeof node.options === 'object' && node.options.content
+         ? ControlType.HOC
+         : ControlType.CONTROL;
+   }
+   return ControlType.TEMPLATE;
 }
 
 class Agent {
@@ -104,7 +128,7 @@ class Agent {
          this.__getProfilingStatus.bind(this)
       );
       if (window.__WASABY_START_PROFILING) {
-         this.__toggleProfiling(!!window.__WASABY_START_PROFILING);
+         this.__toggleProfiling(window.__WASABY_START_PROFILING);
          this.isDevtoolsOpened = true;
       }
    }
@@ -117,7 +141,7 @@ class Agent {
             OperationType.CREATE,
             node.id,
             node.name,
-            this.__getControlType(node)
+            getControlType(node)
          ];
          if (node.parentId) {
             message.push(node.parentId);
@@ -257,22 +281,13 @@ class Agent {
             OperationType.CREATE,
             node.id,
             node.name,
-            this.__getControlType(node)
+            getControlType(node)
          ];
          if (node.parentId) {
             message.push(node.parentId);
          }
          this.channel.dispatch('operation', message);
       }
-   }
-
-   private __getControlType(node: IControlNode): ControlType {
-      if (node.instance) {
-         return typeof node.options === 'object' && node.options.content
-            ? ControlType.HOC
-            : ControlType.CONTROL;
-      }
-      return ControlType.TEMPLATE;
    }
 
    private __handleUpdate(node: IControlNode): void {
@@ -383,7 +398,7 @@ class Agent {
       id: IControlNode['id'];
       path: Array<string | number>;
    }): void {
-      window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(id, path);
+      window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(id, path) as Function;
    }
 
    private __storeAsGlobal({
@@ -394,6 +409,7 @@ class Agent {
       path: Array<string | number>;
    }): void {
       window.$tmp = this.__getValueByPath(id, path);
+      // tslint:disable-next-line: no-console
       console.log('$tmp = ', window.$tmp);
    }
 
@@ -434,7 +450,7 @@ class Agent {
       }
    }
 
-   private __selectByDomNode(elem: Element): void {
+   private __selectByDomNode(elem: IWasabyElement): void {
       const control = this.__findControlByDomNode(elem);
       if (control) {
          this.channel.dispatch('setSelectedItem', control.id);
@@ -444,16 +460,17 @@ class Agent {
    }
 
    private __findControlByDomNode(
-      element: Element
+      element: IWasabyElement
    ): IControlNode | undefined {
       let currentElement = element;
 
       /*
-      TODO: сейчас на странице могут быть элементы с одинаковыми ключами, для этого я к ключу каждого элемента добавляю id корня, в котором он находится
+      TODO: сейчас на странице могут быть элементы с одинаковыми ключами,
+      для этого я к ключу каждого элемента добавляю id корня, в котором он находится
       Потом ключи будут браться из инферно и будут уникальными, и все костыли с приклеиванием rootId можно будет убрать
        */
-      function getRootId(elem: Element): string {
-         let currentRoot = elem;
+      function getRootId(elem: IWasabyElement): string {
+         let currentRoot: IWasabyElement | null = elem;
          while (currentRoot) {
             if (
                currentRoot.controlNodes &&
@@ -466,7 +483,7 @@ class Agent {
                      .id
                );
             }
-            currentRoot = currentRoot.parentElement;
+            currentRoot = currentRoot.parentElement as IWasabyElement;
          }
          return '_inst_1';
       }
@@ -488,7 +505,7 @@ class Agent {
                ].key + rootId
             );
          }
-         currentElement = currentElement.parentElement;
+         currentElement = currentElement.parentElement as IWasabyElement;
       }
       return;
    }
@@ -509,6 +526,7 @@ class Agent {
       /*
       TODO: пока только для контролов, потому что я не имею доступа к контейнерам шаблонов
        */
+      const EVENT_NAME_OFFSET = 3;
       const node = this.elements.get(id);
       const events: Record<
          string,
@@ -522,21 +540,23 @@ class Agent {
       ) {
          Object.keys(node.instance._container.eventProperties).forEach(
             (key) => {
-               events[key.slice(3)] = node.instance._container.eventProperties[
-                  key
-               ].map((handler) => {
-                  if (handler.fn.control[handler.value]) {
-                     return {
-                        function: handler.fn.control[handler.value],
-                        arguments: handler.args
-                     };
-                  } else {
-                     return {
-                        function: handler.fn,
-                        arguments: handler.args
-                     };
-                  }
-               });
+               if (node.instance) { // ts for some reason forgets about previous check
+                  events[key.slice(EVENT_NAME_OFFSET)] = node.instance._container.eventProperties[
+                     key
+                     ].map((handler) => {
+                     if (handler.fn.control[handler.value]) {
+                        return {
+                           function: handler.fn.control[handler.value],
+                           arguments: handler.args
+                        };
+                     } else {
+                        return {
+                           function: handler.fn,
+                           arguments: handler.args
+                        };
+                     }
+                  });
+               }
             }
          );
       }
@@ -550,7 +570,7 @@ class Agent {
             ([key, value]) => {
                return {
                   id: key,
-                  // TODO: на самом деле это неправильная цифра, т.к. сейчас тут теряется вся работа инферно + время между построением компонентов
+                  // TODO: сейчас тут теряется вся работа инферно + время между построением компонентов
                   selfDuration: Array.from(value.values()).reduce(
                      (acc, node) => {
                         return acc + node.selfDuration;
