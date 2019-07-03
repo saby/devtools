@@ -12,7 +12,9 @@
             source="{{ _modeSource }}"
             keyProperty="id"
             navigation="{{ null }}"
+            filter="{{ null }}"
             on:menuItemActivate="__changeView()"
         />
+<!--        filter и navigation == null для того чтобы компонент не подсасывал эти значения из контейнера, в который мы его встраиваем-->
     </ws:modeController>
 </ws:partial>
