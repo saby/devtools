@@ -62,7 +62,7 @@ export class DependencyWatcher implements IPlugin {
     }
     private __defineProperty(desc: IDescriptor, name: string): Promise<void> {
         const descriptor = desc.getDescriptor();
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             try {
                 Object.defineProperties(GLOBAL, {
                     [name]: descriptor,
@@ -71,7 +71,7 @@ export class DependencyWatcher implements IPlugin {
             } catch (e) {
                 reject(e);
             }
-        }).catch((error) => {
+        }).catch<void>((error: Error) => {
             // @ts-ignore
             descriptor.set(GLOBAL[name]);
             // @ts-ignore

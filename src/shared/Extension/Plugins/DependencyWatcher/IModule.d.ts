@@ -17,6 +17,7 @@ export interface ModuleId {
 
 export interface ModuleInfo {
     name: string
+    initiator?: number;
     fileId?: number;
 }
 

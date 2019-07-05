@@ -1,4 +1,4 @@
-let id: number = 0;
+let id: number = 1;
 
 export let getId = (): number => {
     id++;

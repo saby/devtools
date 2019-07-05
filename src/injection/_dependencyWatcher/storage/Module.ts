@@ -1,6 +1,10 @@
 import { Storage } from "./Storage";
 import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
-import { DependencyType, TYPESCRIPT_HELPERS_MODULE, } from "Extension/Plugins/DependencyWatcher/const";
+import {
+    DependencyType,
+    GLOBAL_MODULE_NAME,
+    TYPESCRIPT_HELPERS_MODULE,
+} from "Extension/Plugins/DependencyWatcher/const";
 import { ignoredPlugins, IRequirePlugin } from "../require/plugins";
 import { getId } from "./getId";
 
@@ -54,27 +58,47 @@ const addStatic = (module: Module, dependencies: Module[]): Module[] => {
     return withoutExisting;
 };
 
+const setInitiator = (module: Module, initiator?: number): void => {
+    const set = (submodule: Module) => {
+        if (!initiator || submodule.initiator) {
+            return;
+        }
+        submodule.initiator = initiator;
+        setInitiator(submodule, submodule.id);
+    };
+    module.dependencies.static.forEach(set);
+    module.dependencies.dynamic.forEach(set);
+};
+
 export class ModuleStorage extends Storage<Module> {
     constructor(private __onupdate: UpdateHandler = (() => {})) {
         super();
     }
     private readonly __newModules: Set<string> = new Set();
-    
+
     define(name: string, dependencies?: string[]): void {
         let module = this.__get(name);
         this.__addDeps(module, dependencies || [], DependencyType.static);
+        if (module.initiator) {
+            setInitiator(module, module.id);
+        }
     }
-    
+
     require(name: string, dependencies: string | string[], type: DependencyType = DependencyType.dynamic) {
         let module = this.__get(name);
+        if (name == GLOBAL_MODULE_NAME) {
+            module.initiator = module.id;
+        }
         this.__addDeps(
             module,
             Array.isArray(dependencies)?
                 dependencies:
                 [dependencies],
-            type);
+            type
+        );
+        setInitiator(module, module.id);
     }
-    
+
     getModules(dependencies?: string[]): ModulesMap {
         if (!dependencies || !dependencies.length) {
             this.__newModules.clear();
@@ -93,14 +117,18 @@ export class ModuleStorage extends Storage<Module> {
     getNewModules(): string[] {
         return  [...this.__newModules];
     }
-    
+
     private __get(name: string): Module {
         this.__newModules.add(name);
         let module = super.getItemByName(name);
         if (module) {
             return module;
         }
-        module = {
+        return  this.__create(name);
+    }
+
+    private __create(name: string): Module {
+        const module = {
             name,
             id: getId(),
             dependencies: {
@@ -113,16 +141,16 @@ export class ModuleStorage extends Storage<Module> {
             }
         };
         super.add(module);
-        return  module;
+        return module;
     }
-    
+
     private __addDeps(module: Module, dependencies: string[], type: DependencyType) {
-        let _dependencies = dependencies.
+        const _dependencies = dependencies.
         filter(filterHelpers).
         filter(dependency => !!dependency).
         map(mapIgnoredPlugins).
         map((dependency: string): Module => {
-            return  this.__get(dependency);
+            return this.__get(dependency);
         });
         
         if (!_dependencies.length) {
