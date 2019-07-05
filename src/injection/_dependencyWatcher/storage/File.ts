@@ -31,6 +31,17 @@ const findByName = (name: string, files: Set<IFile>): IFile | void => {
     }
 };
 
+const getFileName = (path?: string): string => {
+    if (!path) {
+        return '';
+    }
+    return path.
+        replace(/\?.+/, ''). // remove query
+        replace(/#.+/, ''). // remove hash
+        split(/\/|\\/).pop() // get last part of path
+        || '';
+};
+
 export class FileStorage extends Storage<IFile> {
     private __getNew(): Set<IFile> {
         return new Set(getResourceTiming().filter(({ name }) => {
@@ -43,11 +54,12 @@ export class FileStorage extends Storage<IFile> {
         return findByName(partOfName, this.getItems()) ||
             findByName(partOfName, this.__getNew());
     }
-    create(name: string, size: number, isBundle?: boolean): IFile {
+    create(path: string, size: number, isBundle?: boolean): IFile {
         const file = {
-            name,
+            path,
             size,
             isBundle,
+            name: getFileName(path),
             id: getId(),
             modules: new Set<number>()
         };
