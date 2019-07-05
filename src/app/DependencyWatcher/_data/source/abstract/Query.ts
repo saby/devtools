@@ -7,13 +7,14 @@ import { IFilterData, ListItem } from "../../types";
 import { getSizes } from "../util/getSizes";
 import { queue } from "Extension/Utils/queue";
 import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
-import { RPCSource } from "./RPC";
+import { RPC } from "Extension/Event/RPC";
+import { RPCMethods } from "../../RPCMethods";
 import { getMinPath, getParentId, getPath } from "../util/id";
 import { findModule } from "../util/findModule";
 import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
 
 export interface IQueryConfig {
-
+    rpc: RPC
 }
 
 interface IDataSetConfig <TTreeData extends ListItem = ListItem> {
@@ -63,7 +64,11 @@ const getPathCreator = <TTreeData extends ListItem, TFilter extends IFilterData>
 export abstract class QuerySource<
     TTreeData extends ListItem = ListItem,
     TFilter extends IFilterData = IFilterData
->  extends RPCSource {
+> {
+    private _rpc: RPCMethods;
+    constructor({ rpc }: IQueryConfig) {
+        this._rpc = new RPCMethods(rpc);
+    }
     private __sizes: Record<string, number> = {};
     private __notFoundSizes: Record<string, true> = {};
     query(query: Query): Promise<DataSet> {
@@ -92,7 +97,7 @@ export abstract class QuerySource<
         let where = <TFilter> query.getWhere();
         let filter = this.__getFilter(query);
         let allModules: ModulesMap;
-        return this._getModules().then((map: ModulesMap) => {
+        return this._rpc.getModules().then((map: ModulesMap) => {
             allModules = map;
             if (!Array.isArray(where.parent)) {
                 return filter(this._query(map, where)).then(getPathCreator(where.parent, map));
@@ -120,7 +125,7 @@ export abstract class QuerySource<
         if (!neededFiles.length) {
             return data;
         }
-        return this._getFiles(neededFiles).then((files: Map<number, IFile>) => {
+        return this._rpc.getFiles(neededFiles).then((files: Map<number, IFile>) => {
             const _data: TTreeData[] = data.map((item) => {
                 if (item.fileName || !item.fileId) {
                     return item;
@@ -151,7 +156,7 @@ export abstract class QuerySource<
                     if (url.includes(item.fileName)) {
                         const size = sizes[url];
                         if (size) {
-                            this._setSize(item.fileName, sizes[url]);
+                            this._rpc.setSize(item.fileName, sizes[url]);
                         }
                         item.size = size;
                         delete sizes[url];
@@ -185,5 +190,8 @@ export abstract class QuerySource<
                 }
             });
         }
+    }
+    destroy() {
+        delete this._rpc;
     }
 }

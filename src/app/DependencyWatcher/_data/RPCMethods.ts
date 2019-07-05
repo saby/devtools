@@ -1,13 +1,8 @@
 import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
 import { ModulesMap, ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
-import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { RPC } from "Extension/Event/RPC";
 import { convertToMap } from "Extension/Plugins/DependencyWatcher/Module";
 import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
-
-export interface IRPCSourceConfig {
-    rpc: RPC;
-}
 
 const getArrayFromSet = (set: IFile[]): Map<number, IFile> => {
     const map: Map<number, IFile> = new Map();
@@ -17,16 +12,12 @@ const getArrayFromSet = (set: IFile[]): Map<number, IFile> => {
     return map;
 };
 
-export class RPCSource {
-    protected _rpc: RPC;
+export class RPCMethods {
     private __lastQueryResult: ModulesRecord<TransferModule> = Object.create(null);
-    private __lastBundles: Bundles;
     private __files: Map<number, IFile> = new Map();
-    constructor({ rpc }: IRPCSourceConfig) {
-        this._rpc = rpc;
-    }
+    constructor(private _rpc: RPC) {}
 
-    protected _getModules(): Promise<ModulesMap> {
+    getModules(): Promise<ModulesMap> {
         return Promise.resolve().then(() => {
             if (!this.__lastQueryResult || !Object.keys(this.__lastQueryResult).length) {
                 return this.__getModules();
@@ -51,12 +42,12 @@ export class RPCSource {
     
     private __getModules(dependecies?: string[]): Promise<ModulesRecord<TransferModule>> {
         return this._rpc.execute<ModulesRecord<TransferModule>, string[] | void>({
-            methodName: RPCMethods.getModules,
-            args: dependecies
+            methodName: RPCMethodNames.getModules,
+            args:       dependecies
         });
     }
 
-    protected _getFiles(keys?: number[]): Promise<Map<number, IFile>> {
+    getFiles(keys?: number[]): Promise<Map<number, IFile>> {
         if (!keys) {
             return this.__getAllFiles();
         }
@@ -74,7 +65,7 @@ export class RPCSource {
             return Promise.resolve(result);
         }
         return this._rpc.execute<IFile[], number[]>({
-            methodName: RPCMethods.getFiles,
+            methodName: RPCMethodNames.getFiles,
             args: needFindKeys
         }).then((files: IFile[]) => {
             files.forEach((file: IFile) => {
@@ -86,11 +77,11 @@ export class RPCSource {
     }
     private __getAllFiles(): Promise<Map<number, IFile>> {
         return this._rpc.execute<IFile[], number[]>({
-            methodName: RPCMethods.getFiles
+            methodName: RPCMethodNames.getFiles
         }).then(getArrayFromSet);
     }
     
-    protected _setSize(fileName: string, size: number): Promise<boolean> {
+    setSize(fileName: string, size: number): Promise<boolean> {
         let founded: boolean = false;
         this.__files.forEach((file: IFile) => {
             if (founded) {
@@ -102,7 +93,7 @@ export class RPCSource {
             }
         });
         return this._rpc.execute({
-            methodName: RPCMethods.setSize,
+            methodName: RPCMethodNames.setSize,
             args: {
                 fileName, size
             }
