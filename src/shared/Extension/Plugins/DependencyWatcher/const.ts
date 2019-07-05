@@ -7,7 +7,7 @@ export enum EventNames {
     update = "update"
 }
 
-export enum RPCMethods {
+export enum RPCMethodNames {
     getBundles = 'getBundles',
     getModules = 'getModules',
     getNewModules = 'getNewModules',

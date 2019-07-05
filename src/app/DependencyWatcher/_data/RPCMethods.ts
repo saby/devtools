@@ -1,4 +1,4 @@
-import { RPCMethods } from "Extension/Plugins/DependencyWatcher/const";
+import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
 import { ModulesMap, ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { RPC } from "Extension/Event/RPC";
@@ -40,7 +40,7 @@ export class RPCSource {
     
     private __getNewModules(): Promise<ModulesRecord<TransferModule>> {
         return this._rpc.execute<string[]>({
-            methodName: RPCMethods.getNewModules
+            methodName: RPCMethodNames.getNewModules
         }).then((dependecies: string[]) => {
             if (!dependecies.length) {
                 return Promise.resolve({});

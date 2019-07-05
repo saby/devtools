@@ -1,6 +1,6 @@
 import { IConfigWithStorage } from "./IConfig";
 import { RPC } from "Extension/Event/RPC";
-import { RPCMethods } from "Extension/Plugins/DependencyWatcher/const";
+import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
 import { ModuleStorage } from "./storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 import { convertToRecord } from "Extension/Plugins/DependencyWatcher/Module";
@@ -41,12 +41,12 @@ export class RPCResponse {
         this.__logger = logger;
         this.__require = require;
 
-        rpc.registerMethod(RPCMethods.getBundles, this.getBundles.bind(this));
-        rpc.registerMethod(RPCMethods.getModules, this.getModules.bind(this));
-        rpc.registerMethod(RPCMethods.getNewModules, this.__modules.getNewModules.bind(this.__modules));
-        rpc.registerMethod(RPCMethods.setSize, this.setSize.bind(this));
-        rpc.registerMethod(RPCMethods.getFiles, this.getFiles.bind(this));
-        rpc.registerMethod(RPCMethods.isRelease, this.isRelease.bind(this));
+        rpc.registerMethod(RPCMethodNames.getBundles, this.getBundles.bind(this));
+        rpc.registerMethod(RPCMethodNames.getModules, this.getModules.bind(this));
+        rpc.registerMethod(RPCMethodNames.getNewModules, this.__modules.getNewModules.bind(this.__modules));
+        rpc.registerMethod(RPCMethodNames.setSize, this.setSize.bind(this));
+        rpc.registerMethod(RPCMethodNames.getFiles, this.getFiles.bind(this));
+        rpc.registerMethod(RPCMethodNames.isRelease, this.isRelease.bind(this));
     }
     private __modules: ModuleStorage;
     private __files: FileStorage;
@@ -79,7 +79,7 @@ export class RPCResponse {
         file.modules.add(module.id);
         module.fileId = file.id;
     }
-    private setSize({ size, fileId, fileName }: RPCMethodsArgs[RPCMethods.setSize]): RPCMethodsResult[RPCMethods.setSize] {
+    private setSize({ size, fileId, fileName }: RPCMethodsArgs[RPCMethodNames.setSize]): RPCMethodsResult[RPCMethodNames.setSize] {
         let file: IFile | void;
         if (fileId) {
             file = this.__files.getItemById(fileId);
