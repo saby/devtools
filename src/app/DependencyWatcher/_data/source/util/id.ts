@@ -7,7 +7,7 @@ export const createId = (moduleId: string | number, parentId?: string) => {
     ].join(ID_SEPARATOR);
 };
 
-export let getId = (itemId: string) => {
+export let getId = (itemId: string): string | undefined => {
     return itemId.split(ID_SEPARATOR)[0];
 };
 
@@ -15,6 +15,7 @@ interface PathItem {
     id: string;
     itemId: string
 }
+
 export const getPath = (itemId: string): PathItem[] => {
     const path = itemId.split(ID_SEPARATOR).filter(p => !!p);
     const result: PathItem[] = [];

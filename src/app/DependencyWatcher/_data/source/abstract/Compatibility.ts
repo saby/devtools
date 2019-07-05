@@ -1,12 +1,14 @@
 import { adapter, Model } from "Types/entity";
-import { deserialize } from "../util/id";
 
 export interface ICompatibilityConfig {
     idProperty: string;
 }
 
+const ERROR_TEXT = 'Not implemented';
+
 export class Compatibility {
     readonly '[Types/_source/ICrud]': boolean = true;
+    static '[Types/_source/ICrud]': boolean = true;
     protected _idProperty: string;
     private __opt: unknown;
     protected _adapter = new adapter.Json;
@@ -28,35 +30,17 @@ export class Compatibility {
     
     
     read<TKey extends string, TMeta = unknown>(id: TKey, meta?: TMeta): Promise<Model> {
-        // return Promise.resolve(module);
-        // try {
-        //     return Promise.resolve(this._read(id, meta));
-        // }
-        // catch (e) {
-        //     console.log(e);
-        let [ name ] = deserialize(id);
-        return Promise.resolve(new Model({
-            rawData: {
-                name,
-                child: false,
-                id
-            }
-        }));
-        // }
-        
+        return Promise.reject(new Error(ERROR_TEXT));
     }
     
     create(): Promise<any> {
-        console.log('create', arguments);
-        return Promise.reject(new Error('noup'))
+        return Promise.reject(new Error(ERROR_TEXT));
     }
     
-    update(): Promise<any>{
-        console.log('update', arguments);
-        return Promise.reject(new Error('noup'))
+    update(): Promise<any> {
+        return Promise.reject(new Error(ERROR_TEXT));
     }
-    delete(): Promise<any>{
-        console.log('delete', arguments);
-        return Promise.reject(new Error('noup'))
+    delete(): Promise<any> {
+        return Promise.reject(new Error(ERROR_TEXT));
     }
 }
