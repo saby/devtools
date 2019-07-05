@@ -25,15 +25,15 @@ let getAllModules = (map: ModulesMap): dependent.Item[] => {
         if (isGlobal(name)) {
             return;
         }
-        let { fileId, id } = module;
+        let { fileId, id, initiator } = module;
         const child = hasChild(module);
         results.push({
-            name, fileId,
+            name, fileId, initiator,
             isDynamic: false,
             id: createId(id),
             parent: undefined,
             child,
-            notUsed: !child
+            notUsed: !initiator
         });
     });
     return results;
@@ -41,15 +41,15 @@ let getAllModules = (map: ModulesMap): dependent.Item[] => {
 
 let getEachHandler = (results: dependent.Item[], isDynamic: boolean, parentItemId?: string) => {
     return (module: Module) => {
-        let { name, fileId, id } = module;
+        let { name, fileId, id, initiator } = module;
         const child = hasChild(module);
         results.push({
-            name, fileId,
+            name, fileId, initiator,
             isDynamic,
             id: createId(id, parentItemId),
             parent: <string> parentItemId,
             child,
-            notUsed: !child
+            notUsed: !initiator
         });
     }
 };
