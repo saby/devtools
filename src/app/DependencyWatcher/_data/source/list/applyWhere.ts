@@ -5,6 +5,7 @@ import { getForName } from "../filter/getForName";
 import { css } from "../filter/css";
 import { json } from "../filter/json";
 import { i18n } from "../filter/i18n";
+import { getForFileId } from "../filter/getForFileId";
 
 let ignoreWrap = (f: FilterFunction): FilterFunctionGetter<boolean> => {
     return (ignoreFilter: boolean) => {
@@ -17,6 +18,7 @@ let ignoreWrap = (f: FilterFunction): FilterFunctionGetter<boolean> => {
 
 const ALL_FILTER_GETTER: Record<string, FilterFunctionGetter<any>> = {
     name: <FilterFunctionGetter<string>> getForName,
+    fileId: <FilterFunctionGetter<number>> getForFileId,
     css: <FilterFunctionGetter<boolean>> ignoreWrap(css),
     json: <FilterFunctionGetter<boolean>> ignoreWrap(json),
     i18n: <FilterFunctionGetter<boolean>> ignoreWrap(i18n),
