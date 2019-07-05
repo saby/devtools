@@ -9,7 +9,7 @@ import * as pathTemplate from 'wml!DependencyWatcher/_view/list/column/path';
 import SizeTemplate from 'DependencyWatcher/_view/list/column/Size';
 import { source } from "../../data";
 import { Columns } from "./column";
-import { source as filterSource } from "../filter";
+import { getFilterItems } from "../filter";
 
 type Children = {
     listView: Control;
@@ -35,6 +35,7 @@ export default class Main extends Control {
     private __sorting: {[key: string]: 'desc' | 'asc'}[] = [];
     private __navigation: object;
     private __source: source.Abstract;
+    protected _filterItems: object[];
     constructor(cfg: IConfig) {
         super(cfg);
         this.__source = new cfg.Source(cfg.sourceConfig);
@@ -56,18 +57,11 @@ export default class Main extends Control {
                 template: SizeTemplate
             }
         ];
-    }
-    private __filterObject: object = {};
-    protected _filter: object = {};
-    protected _filterItems: object[] = filterSource;
-    private get __filter() {
-        return {
-            ...this.__filterObject,
-            ...this._filter
-        }
-    };
-    private set __filter(value) {
-        this.__filterObject = value;
+        this._filterItems = getFilterItems({
+            /*fileSource: new source.File({
+                rpc: cfg.sourceConfig.rpc
+            })*/
+        });
     }
     update(...args: unknown[]): void {
         if (this._children.listView) {

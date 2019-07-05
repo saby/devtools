@@ -1,0 +1,3 @@
+<Controls.suggestPopup:ListContainer>
+    <Controls.list:View displayProperty="name" idProperty="id"/>
+</Controls.suggestPopup:ListContainer>

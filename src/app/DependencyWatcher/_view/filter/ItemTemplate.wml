@@ -1,19 +1,45 @@
-<ws:template name="css">
+<ws:template name="filterPopup">
     <Controls.filterPopup:Text
         bind:value="item.value"
-        caption="{{ item.itemText }}"/>/>
+        caption="{{ item.itemText }}"
+    />
+</ws:template>
+
+<ws:template name="css">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
 </ws:template>
 
 <ws:template name="json">
-    <Controls.filterPopup:Text
-        bind:value="item.value"
-        caption="{{ item.itemText }}"/>/>
+    <ws:partial template="filterPopup" item="{{ item }}"/>
 </ws:template>
 
 <ws:template name="i18n">
-    <Controls.filterPopup:Text
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
+<ws:template name="fileId">
+    <Controls.lookup:Input
+        name="suggest"
         bind:value="item.value"
-        caption="{{ item.itemText }}"/>/>
+        displayProperty="name"
+        keyProperty="id"
+        searchParam="path"
+        source="{{ item.source }}"
+        trim="{{ true }}"
+        searchDelay="{{ 0 }}"
+        placeholder="file"
+        multiSelect="{{ false }}"
+    >
+<!--        <ws:selectorTemplate templateName="Engine-demo/Selector/FlatListSelector/FlatListSelector">-->
+<!--            <ws:templateOptions searchValue="{{_valueSimple}}"/>-->
+<!--        </ws:selectorTemplate>-->
+        <ws:suggestTemplate templateName="wml!DependencyWatcher/template/filter/suggest"/>
+<!--        <ws:itemTemplate>-->
+<!--            <ws:partial template="Controls/lookup:ItemTemplate" style="{{_selectedKeyStyle}}"-->
+<!--                        size="{{_selectedKeySize}}"-->
+<!--                        displayProperty="title"></ws:partial>-->
+<!--        </ws:itemTemplate>-->
+    </Controls.lookup:Input>
 </ws:template>
 
 <ws:partial template="{{ _options.item.id }}" item="{{ _options.item }}"/>
