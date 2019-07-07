@@ -11,7 +11,7 @@ import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { getFileName } from "./require/getFileName";
 import { FileStorage } from "./storage/File";
 import { RPCMethodsArgs, RPCMethodsResult } from "Extension/Plugins/DependencyWatcher/RPCMethods";
-import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
+import { IFile, Stack } from "Extension/Plugins/DependencyWatcher/IFile";
 import { isRelease } from "./require/isRelease";
 
 interface Config extends IConfigWithStorage{
@@ -26,6 +26,9 @@ let findFile = (bundles: Bundles, module: string): string | void => {
             return fileName;
         }
     }
+};
+const sortByInitTime = (first: Module, second: Module) => {
+    return first.initTime - second.initTime
 };
 
 export class RPCResponse {
@@ -47,6 +50,7 @@ export class RPCResponse {
         rpc.registerMethod(RPCMethodNames.setSize, this.setSize.bind(this));
         rpc.registerMethod(RPCMethodNames.getFiles, this.getFiles.bind(this));
         rpc.registerMethod(RPCMethodNames.isRelease, this.isRelease.bind(this));
+        rpc.registerMethod(RPCMethodNames.getStacks, this.getStacks.bind(this));
     }
     private __modules: ModuleStorage;
     private __files: FileStorage;
@@ -97,5 +101,59 @@ export class RPCResponse {
     }
     private isRelease(): boolean {
         return isRelease(this.__require.getConfig().buildMode);
+    }
+    
+    private getStacks(keys: number[]): Record<number, Stack> {
+        const result: Record<number, Stack> = {};
+
+        keys.forEach((id: number) => {
+            result[id] = this.__getStack(id);
+        });
+
+        return result;
+    }
+    private __getStack(fileId: number): Stack {
+        const file = this.__files.getItemById(fileId);
+        if (!file || !file.modules.size) {
+            return [];
+        }
+        if (file.stack.length) {
+            return file.stack;
+        }
+        const firstModule = this.__getFirstInFile(file.modules);
+        const firstDependent = this.__getFirstInDependent(new Set([
+            ...firstModule.dependent.static,
+            ...firstModule.dependent.dynamic
+        ]));
+        if (!firstDependent ||
+            !firstDependent.fileId
+        ) {
+            return [];
+        }
+        return [
+            ...this.__getStack(firstDependent.fileId),
+            [firstDependent.fileId, firstDependent.id]
+        ];
+    }
+    private __getFirstInFile(set: Set<number>): Module {
+        if (set.size == 1) {
+            return <Module>this.__modules.getItemById([...set][0]);
+        }
+        return [
+            ...this.__modules.getItemsById([...set])
+        ].sort(sortByInitTime)[0];
+        
+    }
+    private __getFirstInDependent(set: Set<Module>): Module | undefined {
+        if (!set.size) {
+            return ;
+        }
+        if (set.size == 1) {
+            return <Module>[...set][0];
+        }
+        return [
+            ...set
+        ].sort(sortByInitTime)[0];
+        
     }
 }

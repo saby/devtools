@@ -55,17 +55,17 @@ export class FileStorage extends Storage<IFile> {
             findByName(partOfName, this.__getNew());
     }
     create(path: string, size: number, isBundle?: boolean): IFile {
-        const file = {
+        const file: IFile = {
             path,
             size,
             isBundle,
             name: getFileName(path),
             id: getId(),
-            modules: new Set<number>()
+            modules: new Set<number>(),
+            stack: []
         };
         this.add(file);
         return file;
     }
-    
 }
 

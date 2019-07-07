@@ -5,7 +5,7 @@ import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
 // @ts-ignore
 import * as nameTemplate from 'wml!DependencyWatcher/_view/list/column/name';
 // @ts-ignore
-import * as pathTemplate from 'wml!DependencyWatcher/_view/list/column/path';
+import * as pathTemplate from 'wml!DependencyWatcher/template/column/file';
 import SizeTemplate from 'DependencyWatcher/_view/list/column/Size';
 import { source } from "../../data";
 import { Columns } from "./column";

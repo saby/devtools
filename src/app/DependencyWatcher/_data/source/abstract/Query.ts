@@ -11,7 +11,8 @@ import { RPC } from "Extension/Event/RPC";
 import { RPCMethods } from "../../RPCMethods";
 import { getMinPath, getParentId, getPath } from "../util/id";
 import { findModule } from "../util/findModule";
-import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
+import { IFile, Stack, StackStep } from "Extension/Plugins/DependencyWatcher/IFile";
+import { ItemStack } from "../../types/List";
 
 export interface IQueryConfig {
     rpc: RPC
@@ -64,7 +65,7 @@ const getPathCreator = <TTreeData extends ListItem, TFilter extends IFilterData>
 export abstract class QuerySource<
     TTreeData extends ListItem = ListItem,
     TFilter extends IFilterData = IFilterData
-> {
+    > {
     private _rpc: RPCMethods;
     constructor({ rpc }: IQueryConfig) {
         this._rpc = new RPCMethods(rpc);
@@ -95,10 +96,8 @@ export abstract class QuerySource<
     private __getItems(query: Query): Promise<IDataSetConfig<TTreeData>> {
         // @ts-ignore
         let where = <TFilter> query.getWhere();
-        let filter = this.__getFilter(query);
-        let allModules: ModulesMap;
         return this._rpc.getModules().then((map: ModulesMap) => {
-            allModules = map;
+            let filter = this.__getFilter(map, query);
             if (!Array.isArray(where.parent)) {
                 return filter(this._query(map, where)).then(getPathCreator(where.parent, map));
             }
@@ -116,28 +115,53 @@ export abstract class QuerySource<
             })).then(getPathCreator(where.parent.reduce(getMinPath), map));
         })
     }
-    private __setFileData(data: TTreeData[]): TTreeData[] | Promise<TTreeData[]> {
-        const neededFiles: number[] = data.filter((item) => {
-            return !item.fileName && item.fileId;
-        }).map((item) => {
-            return <number> item.fileId;
-        });
-        if (!neededFiles.length) {
-            return data;
-        }
-        return this._rpc.getFiles(neededFiles).then((files: Map<number, IFile>) => {
-            const _data: TTreeData[] = data.map((item) => {
-                if (item.fileName || !item.fileId) {
-                    return item;
-                }
-                let file = <IFile> files.get(item.fileId);
-                return {
-                    ...item,
-                    size: file.size,
-                    fileName: file.name
-                }
+    private __setFileData(map: ModulesMap, data: TTreeData[]): TTreeData[] | Promise<TTreeData[]> {
+        // const neededFiles: number[] = data.filter((item) => {
+        //     return !item.fileName && item.fileId;
+        // }).map((item) => {
+        //     return <number> item.fileId;
+        // });
+        // if (!neededFiles.length) {
+        //     return data;
+        // }
+        return this._rpc.getFiles(/*neededFiles*/).then((files: Map<number, IFile>) => {
+            return this._rpc.getStacks(
+                data.map<number | undefined>((item) => { return item.fileId }).
+                //@ts-ignore
+                filter<number>((key: number | undefined) => { return typeof key !== 'undefined'})
+            ).then((stackRecord: Record<number, Stack>) => {
+                const _data: TTreeData[] = data.map((item) => {
+                    if (item.fileName || !item.fileId) {
+                        return item;
+                    }
+                    let file = <IFile> files.get(item.fileId);
+                    let stack: ItemStack;
+                    if (item.fileId && stackRecord[item.fileId]) {
+                        const _map: Map<number, Module> = new Map(Array.from(map, ([name, module]) => {
+                            return [module.id, module]
+                        }));
+                        stack = stackRecord[item.fileId].map<[IFile, Module]>(([fileId, moduleId]: StackStep) => {
+                            return [<IFile> files.get(fileId), <Module> _map.get(moduleId)];
+                        }).map(([file, module]) => {
+                            return {
+                                fileName: file.name,
+                                path: file.path,
+                                moduleName: module.name
+                            };
+                        });
+                    } else {
+                        stack = [];
+                    }
+                    return {
+                        ...item,
+                        size: file.size,
+                        fileName: file.name,
+                        path: file.path,
+                        stack
+                    }
+                });
+                return _data;
             });
-            return _data;
         });
     }
     private __setSize(data: TTreeData[]): Promise<TTreeData[]> {
@@ -169,7 +193,7 @@ export abstract class QuerySource<
     }
     protected abstract _query(map: ModulesMap, where: TFilter): Promise<TTreeData[]>;
 
-    private __getFilter(query: Query): ((queryPromise: Promise<TTreeData[]>) => Promise<IDataSetConfig<TTreeData>>) {
+    private __getFilter(map: ModulesMap, query: Query): ((queryPromise: Promise<TTreeData[]>) => Promise<IDataSetConfig<TTreeData>>) {
         let countAfterFilter: number;
         return (queryPromise: Promise<TTreeData[]>) => {
             return queryPromise.
@@ -179,7 +203,7 @@ export abstract class QuerySource<
                 countAfterFilter = set.length;
                 return set;
             }).
-            then(this.__setFileData.bind(this)).
+            then(this.__setFileData.bind(this, map)).
             then(this.__setSize.bind(this)).
             then(orderBy<TTreeData>(query.getOrderBy())).
             then(applyPaging<TTreeData>(query.getOffset(), query.getLimit())).

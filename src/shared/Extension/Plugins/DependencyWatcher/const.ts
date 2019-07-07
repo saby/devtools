@@ -14,6 +14,7 @@ export enum RPCMethodNames {
     setSize = 'setSize',
     getFiles = 'getFiles',
     isRelease = 'isRelease',
+    getStacks = 'getStacks',
 }
 
 export const GLOBAL_MODULE_NAME = '~> page <~';

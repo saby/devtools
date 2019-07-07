@@ -64,6 +64,7 @@ const setInitiator = (module: Module, initiator?: number): void => {
             return;
         }
         submodule.initiator = initiator;
+        submodule.initTime = Date.now();
         setInitiator(submodule, submodule.id);
     };
     module.dependencies.static.forEach(set);
@@ -128,8 +129,9 @@ export class ModuleStorage extends Storage<Module> {
     }
 
     private __create(name: string): Module {
-        const module = {
+        const module: Module = {
             name,
+            initTime: Number.MAX_SAFE_INTEGER,
             id: getId(),
             dependencies: {
                 static: new Set(),

@@ -2,7 +2,8 @@ import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
 import { ModulesMap, ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
 import { RPC } from "Extension/Event/RPC";
 import { convertToMap } from "Extension/Plugins/DependencyWatcher/Module";
-import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
+import { IFile, Stack } from "Extension/Plugins/DependencyWatcher/IFile";
+import { RPCMethodsArgs, RPCMethodsResult } from "Extension/Plugins/DependencyWatcher/RPCMethods";
 
 const getArrayFromSet = (set: IFile[]): Map<number, IFile> => {
     const map: Map<number, IFile> = new Map();
@@ -12,6 +13,9 @@ const getArrayFromSet = (set: IFile[]): Map<number, IFile> => {
     return map;
 };
 
+/**
+ * Класс вызова rpc методов, кеширующий результат
+ */
 export class RPCMethods {
     private __lastQueryResult: ModulesRecord<TransferModule> = Object.create(null);
     private __files: Map<number, IFile> = new Map();
@@ -97,6 +101,32 @@ export class RPCMethods {
             args: {
                 fileName, size
             }
+        })
+    }
+    private _stacks: Map<number, Stack> = new Map();
+    getStacks(keys: RPCMethodsArgs[RPCMethodNames.getStacks]): Promise<RPCMethodsResult[RPCMethodNames.getStacks]> {
+        const result: Record<number, Stack> = [];
+        const _keys = keys.filter((id) => {
+            if (!this._stacks.has(id)) {
+                return true;
+            }
+            result[id] = <Stack> this._stacks.get(id);
+            return false;
+        });
+        if (!_keys.length) {
+            return Promise.resolve(result);
+        }
+        return this._rpc.execute<RPCMethodsResult[RPCMethodNames.getStacks], RPCMethodsArgs[RPCMethodNames.getStacks]>({
+            methodName: RPCMethodNames.getStacks,
+            args: _keys
+        }).then((record: Record<number, Stack>) => {
+            for (const id in record) {
+                this._stacks.set(+id, record[id]);
+            }
+            return {
+                ...record,
+                ...result
+            };
         })
     }
 }

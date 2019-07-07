@@ -10,9 +10,9 @@ export interface ModuleDependencies<TCollection> {
     dependencies: IDependencies<TCollection>;
     dependent: IDependencies<TCollection>;
 }
-
+export type Id = number;
 export interface ModuleId {
-    id: number;
+    id: Id;
 }
 
 export interface ModuleInfo {
@@ -22,7 +22,7 @@ export interface ModuleInfo {
 }
 
 interface ModuleData<TCollection> extends ModuleInfo, ModuleId, ModuleDependencies<TCollection> {
-
+    initTime: number;
 }
 
 interface Module extends ModuleData<Set<Module>> {

@@ -18,9 +18,14 @@ export class Storage<TItem extends Item = Item> implements IStorage<TItem> {
         if (!idList) {
             return this.getItems();
         }
-        return new Set([...this._allItems].filter(({ id }) => {
-            return idList.includes(id);
-        }));
+        const set = new Set<TItem>();
+        idList.forEach((id: number) => {
+            let item = this.getItemById(id);
+            if (item) {
+                set.add(item);
+            }
+        });
+        return set;
     }
     getItemsByName(nameList?: string[]): Set<TItem> {
         if (!nameList) {
