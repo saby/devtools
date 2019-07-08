@@ -1,6 +1,5 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { Memory } from 'Types/source';
-import { adapter } from 'Types/entity';
 import {
    IBackendProfilingData,
    IChangesDescription,
@@ -42,15 +41,17 @@ export interface IProfilingData {
    >;
 }
 
-function masterFilter(item: adapter.IRecord): boolean {
-   const duration: number = item.get('selfDuration');
-   return duration !== 0;
+function masterFilter(item: {
+   selfDuration: number;
+}): boolean {
+   return item.selfDuration !== 0;
 }
 
-function detailFilter(item: adapter.IRecord): boolean {
-   const duration: number = item.get('selfDuration');
-   const didRender: boolean = item.get('didRender');
-   return duration !== 0 && didRender;
+function detailFilter(item: {
+   selfDuration: number;
+   didRender?: boolean;
+}): boolean {
+   return item.selfDuration !== 0 && !!item.didRender;
 }
 
 class Profiler extends Control<IOptions> {

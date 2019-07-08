@@ -4,7 +4,7 @@
         <div class="TimeRender__barWrapper">
             <div title="{{ _formattedValue }}"
                  class="TimeRender__bar"
-                 attr:style="width: {{_options.length}}%;"></div>
+                 attr:style="width: {{_options.length}}%; background: {{ _options.barColor }}"></div>
         </div>
     </ws:if>
 </div>

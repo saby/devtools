@@ -3,9 +3,10 @@ import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { Memory } from 'Types/source';
 // @ts-ignore
 import template = require('wml!Profiler/RankedView/RankedView');
-import { adapter, descriptor } from 'Types/entity';
+import { descriptor } from 'Types/entity';
 // @ts-ignore
 import commitTimeTemplate = require('wml!Profiler/RankedView/commitTimeTemplate');
+import { getBackgroundColor } from '../Utils';
 
 interface IRankedViewControlNode extends IFrontendControlNode {
    selfDuration: number;
@@ -14,11 +15,10 @@ interface IRankedViewControlNode extends IFrontendControlNode {
 interface IOptions extends IControlOptions {
    snapshot: IRankedViewControlNode[];
    markedKey: string;
-   filter: (item: adapter.IRecord) => boolean;
+   filter: (item: IRankedViewControlNode) => boolean;
 }
 
 // TODO: копипаста в SynchronizationsList
-// TODO: нужно сначала применять фильтр, а потом уже эту функцию
 function getDataWithLengths(
    initialData: Array<{ selfDuration: number }>
 ): Array<{ selfDuration: number; length: number }> {
@@ -29,6 +29,7 @@ function getDataWithLengths(
    return initialData.map((item) => {
       return {
          ...item,
+         barColor: getBackgroundColor(item.selfDuration / maxDuration, true),
          length: (item.selfDuration / maxDuration) * 100
       };
    });
@@ -59,8 +60,7 @@ class RankedView extends  Control<IOptions> {
       super(options);
       this._source = new Memory({
          idProperty: 'id',
-         data: getDataWithLengths(options.snapshot),
-         filter: options.filter
+         data: getDataWithLengths(options.snapshot.filter(options.filter))
       });
    }
 
@@ -68,8 +68,7 @@ class RankedView extends  Control<IOptions> {
       if (this._options.filter !== newOptions.filter || this._options.snapshot !== newOptions.snapshot) {
          this._source = new Memory({
             idProperty: 'id',
-            data: getDataWithLengths(newOptions.snapshot),
-            filter: newOptions.filter
+            data: getDataWithLengths(newOptions.snapshot.filter(newOptions.filter))
          });
       }
    }

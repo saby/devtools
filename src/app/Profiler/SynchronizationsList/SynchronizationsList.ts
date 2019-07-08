@@ -1,10 +1,11 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-import { adapter, descriptor } from 'Types/entity';
+import { descriptor } from 'Types/entity';
 import { Memory } from 'Types/source';
 // @ts-ignore
 import synchronizationTemplate = require('wml!Profiler/SynchronizationsList/synchronizationTemplate');
 // @ts-ignore
 import template = require('wml!Profiler/SynchronizationsList/SynchronizationsList');
+import { getBackgroundColor } from '../Utils';
 
 interface ISynchronizationsList {
    id: string;
@@ -14,7 +15,7 @@ interface ISynchronizationsList {
 interface IOptions extends IControlOptions {
    synchronizations: ISynchronizationsList[];
    markedKey: string;
-   filter: (item: adapter.IRecord) => boolean;
+   filter: (item: ISynchronizationsList) => boolean;
 }
 
 // TODO: копипаста в RankedView
@@ -28,6 +29,7 @@ function getDataWithLengths(
    return initialData.map((item) => {
       return {
          ...item,
+         barColor: getBackgroundColor(item.selfDuration / maxDuration, true),
          length: (item.selfDuration / maxDuration) * 100
       };
    });
@@ -42,8 +44,7 @@ class SynchronizationsList extends Control<IOptions> {
       super(options);
       this._source = new Memory({
          idProperty: 'id',
-         data: getDataWithLengths(options.synchronizations),
-         filter: options.filter
+         data: getDataWithLengths(options.synchronizations.filter(options.filter))
       });
    }
 
@@ -54,8 +55,7 @@ class SynchronizationsList extends Control<IOptions> {
       ) {
          this._source = new Memory({
             idProperty: 'id',
-            data: getDataWithLengths(newOptions.synchronizations),
-            filter: newOptions.filter
+            data: getDataWithLengths(newOptions.synchronizations.filter(newOptions.filter))
          });
       }
    }

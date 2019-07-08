@@ -1,11 +1,9 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
-import {
-   IControlNode,
-   IFrontendControlNode
-} from 'Extension/Plugins/Elements/IControlNode';
+import { IControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import 'css!Profiler/Flamegraph/Flamegraph';
-import { getBackgroundColor, getWidth } from './Utils';
+import { getWidth } from './Utils';
+import { formatTime, getBackgroundColor } from '../Utils';
 // @ts-ignore
 import template = require('wml!Profiler/Flamegraph/Flamegraph');
 
@@ -111,14 +109,6 @@ function getSubtreeWithSelectedNode(
    } else {
       return snapshot;
    }
-}
-
-// TODO: то же самое есть в TimeRender
-function formatTime(value: number): string {
-   const SECOND = 1000;
-   const PRECISION = 2;
-   const roundedValue = value.toFixed(PRECISION);
-   return value >= SECOND ? `${roundedValue}s` : `${roundedValue}ms`;
 }
 
 // TODO: тут actualDuration это совсем не то, она учитывает время не только обновившихся компонентов, а вообще всех

@@ -1,14 +1,7 @@
 import Store from '../Elements/Store';
-import {
-   IBackendProfilingData,
-   IChangesDescription,
-   IControlNode
-} from 'Extension/Plugins/Elements/IControlNode';
+import { IBackendProfilingData, IChangesDescription, IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
-import Profiler, {
-   IFrontendSynchronizationDescription,
-   IProfilingData
-} from './Profiler';
+import Profiler, { IFrontendSynchronizationDescription, IProfilingData } from './Profiler';
 
 // TODO: почти копипаста из Store
 function getDepth(
@@ -192,4 +185,50 @@ export function getActualDuration(
    }
 
    return result;
+}
+
+type BACKGROUND_COLOR =
+   | '#e2e2e2'
+   | '#baf7c8'
+   | '#c4f1ba'
+   | '#cdeaac'
+   | '#d5e49e'
+   | '#dbde90'
+   | '#e1d782'
+   | '#e6d174'
+   | '#ebca66'
+   | '#efc457';
+
+const colors: Array<Exclude<BACKGROUND_COLOR, '#e2e2e2'>> = [
+   '#baf7c8',
+   '#c4f1ba',
+   '#cdeaac',
+   '#d5e49e',
+   '#dbde90',
+   '#e1d782',
+   '#e6d174',
+   '#ebca66',
+   '#efc457'
+];
+
+export function getBackgroundColor(
+   value: number,
+   didRender: boolean
+): BACKGROUND_COLOR {
+   let result: BACKGROUND_COLOR = '#e2e2e2';
+
+   if (didRender) {
+      const index =
+         Math.max(0, Math.min(colors.length - 1, value)) * (colors.length - 1);
+      result = colors[Math.round(index)];
+   }
+
+   return result;
+}
+
+export function formatTime(value: number): string {
+   const SECOND = 1000;
+   const PRECISION = 2;
+   const roundedValue = value.toFixed(PRECISION);
+   return value >= SECOND ? `${roundedValue}s` : `${roundedValue}ms`;
 }
