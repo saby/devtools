@@ -291,24 +291,30 @@ class Flamegraph extends Control<IOptions> {
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
-      // TODO: нормально реагировать на изменение ширины
-      const currentWidth = this._container.clientWidth;
       const snapshotChanged = this._options.snapshot !== newOptions.snapshot;
-      const widthChanged = this._containerWidth !== currentWidth;
       const markedKeyChanged = this._options.markedKey !== newOptions.markedKey;
-      const shouldRedrawGraph =
-         snapshotChanged || widthChanged || markedKeyChanged;
-
-      if (widthChanged) {
-         this._containerWidth = currentWidth;
-      }
+      const shouldRedrawGraph = snapshotChanged || markedKeyChanged;
 
       if (shouldRedrawGraph) {
          this._updateGraph(newOptions);
       }
    }
 
-   // TODO: реагировать на снятие выделения
+   protected _afterUpdate(): void {
+      if (this._options.markedKey && this._children[this._options.markedKey]) {
+         // @ts-ignore
+         this._children[this._options.markedKey].focus();
+      }
+
+      // TODO: попробовать перейти на схему с controlResize
+      const currentWidth = this._container.clientWidth;
+
+      if (this._containerWidth !== currentWidth) {
+         this._containerWidth = currentWidth;
+         this._updateGraph(this._options);
+      }
+   }
+
    protected _onMarkedKeyChanged(e: Event, id?: string): void {
       e.stopPropagation();
       this._notify('markedKeyChanged', [id]);

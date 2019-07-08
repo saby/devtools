@@ -37,7 +37,8 @@
                     </Controls.scroll:Container>
                 </ws:master>
                 <ws:detail>
-                    <Controls.scroll:Container attr:class="Profiler__detail">
+                    <Controls.scroll:Container attr:class="Profiler__detail"
+                                               on:click="__detailMarkedKeyChanged()">
                         <ws:if data="{{ _selectedTab === 'Flamegraph' }}">
                             <Profiler.Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
                                                             markedKey="{{ _selectedCommitId }}"

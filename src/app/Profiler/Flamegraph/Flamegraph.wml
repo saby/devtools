@@ -5,6 +5,7 @@
                 <ws:partial template="wml!Profiler/Flamegraph/Node"
                             itemData="{{ itemData }}"
                             attr:key="{{ itemData.id }}"
+                            attr:name="{{ itemData.id }}"
                             on:click="_onMarkedKeyChanged(itemData.id)" />
             </ws:for>
         </div>
