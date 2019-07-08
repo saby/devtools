@@ -364,7 +364,7 @@ class Flamegraph extends Control<IOptions> {
    }
 
    private __handleArrowDown(selectedItem: IFlamegraphControlNode): void {
-      const firstChild = this._depthToItemData[selectedItem.depth + 1].find(
+      const firstChild = this._options.snapshot.find(
          ({ parentId }) => parentId === selectedItem.id
       );
       if (firstChild) {
@@ -373,11 +373,13 @@ class Flamegraph extends Control<IOptions> {
    }
 
    private __handleArrowUp(selectedItem: IFlamegraphControlNode): void {
-      const parent = this._depthToItemData[selectedItem.depth - 1].find(
-         ({ id }) => id === selectedItem.parentId
-      );
-      if (parent) {
-         this._notify('markedKeyChanged', [parent.id]);
+      if (selectedItem.depth !== 0) {
+         const parent = this._depthToItemData[selectedItem.depth - 1].find(
+            ({ id }) => id === selectedItem.parentId
+         );
+         if (parent) {
+            this._notify('markedKeyChanged', [parent.id]);
+         }
       }
    }
 
