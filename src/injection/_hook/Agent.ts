@@ -2,7 +2,7 @@ import prepareForSerialization from './prepareForSerialization';
 import {
    IBackendControlNode,
    IControlNode,
-   IProfilingData,
+   IBackendProfilingData,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
@@ -579,7 +579,7 @@ class Agent {
    }
 
    private __getProfilingData(): void {
-      const profilingData: IProfilingData = {
+      const profilingData: IBackendProfilingData = {
          initialIdToDuration: Array.from(this.initialIdToDuration.entries()),
          syncList: getSyncList(this.changedNodesBySynchronization)
       };

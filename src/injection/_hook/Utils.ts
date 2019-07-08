@@ -4,8 +4,8 @@ import Agent, {
 import {
    IChangesDescription,
    IControlNode,
-   IProfilingData,
-   ISynchronizationDescription
+   IBackendProfilingData,
+   IBackendSynchronizationDescription
 } from 'Extension/Plugins/Elements/IControlNode';
 
 function operationToString(
@@ -91,7 +91,7 @@ function getChangesDescription({ operation, node }: IChangedNode): IChangesDescr
 
 function getChanges(
    changedNodesEntries: Array<[IControlNode['id'], IChangedNode]>
-): ISynchronizationDescription['changes'] {
+): IBackendSynchronizationDescription['changes'] {
    return changedNodesEntries.map(([commitKey, changedNode]) => {
       return [commitKey, getChangesDescription(changedNode)];
    });
@@ -107,7 +107,7 @@ function getSynchronizationDuration(
 
 export function getSyncList(
    changedNodesMap: Agent['changedNodesBySynchronization']
-): IProfilingData['syncList'] {
+): IBackendProfilingData['syncList'] {
    return Array.from(changedNodesMap.entries()).map(([key, value]) => {
       const entries = Array.from(value.entries());
       return [

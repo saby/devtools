@@ -65,12 +65,12 @@ export interface IChangesDescription {
    changedAttributes?: string;
 }
 
-export interface ISynchronizationDescription {
+export interface IBackendSynchronizationDescription {
    selfDuration: number;
    changes: Array<[IControlNode['id'], IChangesDescription]>;
 }
 
-export interface IProfilingData {
+export interface IBackendProfilingData {
    initialIdToDuration: Array<[IControlNode['id'], number]>;
-   syncList: Array<[string, ISynchronizationDescription]>;
+   syncList: Array<[string, IBackendSynchronizationDescription]>;
 }
