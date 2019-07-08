@@ -37,6 +37,7 @@ const MARGIN_OF_ERROR = 20;
 const LETTER_WIDTH = 6;
 const ROW_HEIGHT = 20;
 const MIN_WIDTH = 5;
+const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
 function getMaxTreeDuration(
    snapshot: IOptions['snapshot'],
@@ -330,6 +331,45 @@ class Flamegraph extends Control<IOptions> {
          this._containerWidth,
          options.markedKey
       );
+   }
+
+   protected _onKeyDown(e: {
+      nativeEvent: KeyboardEvent;
+      stopPropagation: Event['stopPropagation'];
+   }): void {
+      const key = e.nativeEvent.key;
+      if (ARROWS.indexOf(key) !== -1 && this._options.markedKey) {
+         const selectedItem = this._options.snapshot.find(
+            ({ id }) => id === this._options.markedKey
+         );
+         if (selectedItem) {
+            e.stopPropagation();
+            switch (key) {
+               case 'ArrowDown':
+                  const firstChild = this._depthToItemData[
+                     selectedItem.depth + 1
+                  ].find(({ parentId }) => parentId === selectedItem.id);
+                  if (firstChild) {
+                     this._notify('markedKeyChanged', [firstChild.id]);
+                  }
+                  break;
+               case 'ArrowLeft':
+                  // TODO: подумать как это должно работать
+                  break;
+               case 'ArrowRight':
+                  // TODO: подумать как это должно работать
+                  break;
+               case 'ArrowUp':
+                  const parent = this._depthToItemData[
+                     selectedItem.depth - 1
+                  ].find(({ id }) => id === selectedItem.parentId);
+                  if (parent) {
+                     this._notify('markedKeyChanged', [parent.id]);
+                  }
+                  break;
+            }
+         }
+      }
    }
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {

@@ -1,4 +1,4 @@
-<div class="Flamegraph">
+<div class="Flamegraph" on:keydown="_onKeyDown()">
     <ws:for data="rowData in _depthToItemData">
         <div class="Flamegraph__row">
             <ws:for data="itemData in rowData">
