@@ -21,5 +21,4 @@ class NumberTemplate extends Control {
    }
 }
 
-// TODO: ws:partial плохо работатает с дефолтными экспортами, надо будет раскопать почему
-export = NumberTemplate;
+export default NumberTemplate;

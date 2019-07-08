@@ -43,5 +43,4 @@ class ObjectTemplate extends Control {
    }
 }
 
-// TODO: ws:partial плохо работатает с дефолтными экспортами, надо будет раскопать почему
-export = ObjectTemplate;
+export default ObjectTemplate;

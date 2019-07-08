@@ -31,5 +31,4 @@ class StringTemplate extends Control {
    }
 }
 
-// TODO: ws:partial плохо работатает с дефолтными экспортами, надо будет раскопать почему
-export = StringTemplate;
+export default StringTemplate;
