@@ -39,6 +39,14 @@ const ROW_HEIGHT = 20;
 const MIN_WIDTH = 5;
 const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
+function getTreeDuration(actualDuration: number, selfDuration: number): number {
+   if (actualDuration === selfDuration) {
+      return actualDuration;
+   } else {
+      return actualDuration - selfDuration;
+   }
+}
+
 function getMaxTreeDuration(
    snapshot: IOptions['snapshot'],
    markedKey?: string
@@ -47,13 +55,16 @@ function getMaxTreeDuration(
       const selectedNode = snapshot.find(({ id }) => id === markedKey);
 
       if (selectedNode) {
-         return selectedNode.actualDuration - selectedNode.selfDuration;
+         return getTreeDuration(
+            selectedNode.actualDuration,
+            selectedNode.selfDuration
+         );
       }
    }
 
    return snapshot.reduce((acc, { depth, actualDuration, selfDuration }) => {
       if (depth === 0) {
-         return acc + actualDuration - selfDuration;
+         return acc + getTreeDuration(actualDuration, selfDuration);
       } else {
          return acc;
       }
@@ -208,7 +219,7 @@ function getItemDataForDepth(
    elementsOnThisDepth.forEach(
       ({ id, selfDuration, actualDuration, name, parentId, didRender }) => {
          const width = getWidth(
-            actualDuration - selfDuration,
+            getTreeDuration(actualDuration, selfDuration),
             maxTreeDuration,
             containerWidth
          );
@@ -346,29 +357,73 @@ class Flamegraph extends Control<IOptions> {
             e.stopPropagation();
             switch (key) {
                case 'ArrowDown':
-                  const firstChild = this._depthToItemData[
-                     selectedItem.depth + 1
-                  ].find(({ parentId }) => parentId === selectedItem.id);
-                  if (firstChild) {
-                     this._notify('markedKeyChanged', [firstChild.id]);
-                  }
+                  this.__handleArrowDown(selectedItem);
                   break;
                case 'ArrowLeft':
-                  // TODO: подумать как это должно работать
+                  this.__handleArrowLeft(selectedItem);
                   break;
                case 'ArrowRight':
-                  // TODO: подумать как это должно работать
+                  this.__handleArrowRight(selectedItem);
                   break;
                case 'ArrowUp':
-                  const parent = this._depthToItemData[
-                     selectedItem.depth - 1
-                  ].find(({ id }) => id === selectedItem.parentId);
-                  if (parent) {
-                     this._notify('markedKeyChanged', [parent.id]);
-                  }
+                  this.__handleArrowUp(selectedItem);
                   break;
             }
          }
+      }
+   }
+
+   private __handleArrowDown(selectedItem: IFlamegraphControlNode): void {
+      const firstChild = this._depthToItemData[selectedItem.depth + 1].find(
+         ({ parentId }) => parentId === selectedItem.id
+      );
+      if (firstChild) {
+         this._notify('markedKeyChanged', [firstChild.id]);
+      }
+   }
+
+   private __handleArrowUp(selectedItem: IFlamegraphControlNode): void {
+      const parent = this._depthToItemData[selectedItem.depth - 1].find(
+         ({ id }) => id === selectedItem.parentId
+      );
+      if (parent) {
+         this._notify('markedKeyChanged', [parent.id]);
+      }
+   }
+
+   private __handleArrowLeft(selectedItem: IFlamegraphControlNode): void {
+      const itemsOnTheSameDepth = this._options.snapshot.filter(
+         ({ depth }) => depth === selectedItem.depth
+      );
+      const selectedItemIndex = itemsOnTheSameDepth.findIndex(
+         ({ id }) => id === selectedItem.id
+      );
+      if (
+         selectedItemIndex !== 0 &&
+         itemsOnTheSameDepth[selectedItemIndex - 1].parentId ===
+            selectedItem.parentId
+      ) {
+         this._notify('markedKeyChanged', [
+            itemsOnTheSameDepth[selectedItemIndex - 1].id
+         ]);
+      }
+   }
+
+   private __handleArrowRight(selectedItem: IFlamegraphControlNode): void {
+      const itemsOnTheSameDepth = this._options.snapshot.filter(
+         ({ depth }) => depth === selectedItem.depth
+      );
+      const selectedItemIndex = itemsOnTheSameDepth.findIndex(
+         ({ id }) => id === selectedItem.id
+      );
+      if (
+         selectedItemIndex !== itemsOnTheSameDepth.length - 1 &&
+         itemsOnTheSameDepth[selectedItemIndex + 1].parentId ===
+            selectedItem.parentId
+      ) {
+         this._notify('markedKeyChanged', [
+            itemsOnTheSameDepth[selectedItemIndex + 1].id
+         ]);
       }
    }
 
