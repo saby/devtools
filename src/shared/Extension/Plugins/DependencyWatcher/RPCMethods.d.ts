@@ -8,8 +8,8 @@ export interface RPCMethodsArgs extends Record<RPCMethodNames, unknown> {
     [RPCMethodNames.isRelease]: void;
     [RPCMethodNames.setSize]: {
         size: number;
-        fileId?: number;
-        fileName?: string;
+        fileId: number;
+        // fileName?: string;
     }
 }
 

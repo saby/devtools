@@ -173,14 +173,14 @@ export abstract class QuerySource<
         }
         return getSizes().then((sizes: Record<string, number>) => {
             data.forEach((item: TTreeData) => {
-                if (!item.fileName || item.size) {
+                if (!item.fileName || !item.fileId || item.size) {
                     return;
                 }
                 for (const url in sizes) {
                     if (url.includes(item.fileName)) {
                         const size = sizes[url];
                         if (size) {
-                            this._rpc.setSize(item.fileName, sizes[url]);
+                            this._rpc.setSize(item.fileId, sizes[url]);
                         }
                         item.size = size;
                         delete sizes[url];

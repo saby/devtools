@@ -85,21 +85,21 @@ export class RPCMethods {
         }).then(getArrayFromSet);
     }
     
-    setSize(fileName: string, size: number): Promise<boolean> {
+    setSize(fileId: number, size: number): Promise<boolean> {
         let founded: boolean = false;
         this.__files.forEach((file: IFile) => {
             if (founded) {
                 return;
             }
-            if (file.name == fileName) {
+            if (file.id == fileId) {
                 founded = true;
                 file.size = size;
             }
         });
-        return this._rpc.execute({
+        return this._rpc.execute<RPCMethodsResult[RPCMethodNames.setSize], RPCMethodsArgs[RPCMethodNames.setSize]>({
             methodName: RPCMethodNames.setSize,
             args: {
-                fileName, size
+                fileId, size
             }
         })
     }

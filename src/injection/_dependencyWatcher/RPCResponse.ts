@@ -83,12 +83,10 @@ export class RPCResponse {
         file.modules.add(module.id);
         module.fileId = file.id;
     }
-    private setSize({ size, fileId, fileName }: RPCMethodsArgs[RPCMethodNames.setSize]): RPCMethodsResult[RPCMethodNames.setSize] {
+    private setSize({ size, fileId }: RPCMethodsArgs[RPCMethodNames.setSize]): RPCMethodsResult[RPCMethodNames.setSize] {
         let file: IFile | void;
         if (fileId) {
             file = this.__files.getItemById(fileId);
-        } else if (fileName) {
-            file = this.__files.getItemByName(fileName);
         }
         if (!file) {
             return false;

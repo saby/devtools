@@ -23,9 +23,9 @@ const getResourceTiming = (): ResourceTiming[] => {
     });
 };
 
-const findByName = (name: string, files: Set<IFile>): IFile | void => {
+const findInPath = (partOfPath: string, files: Set<IFile>): IFile | void => {
     for ( const file of files ) {
-        if (file.name.includes(name)) {
+        if (file.path.includes(partOfPath)) {
             return file;
         }
     }
@@ -51,19 +51,21 @@ export class FileStorage extends Storage<IFile> {
         }));
     }
     find(partOfName: string): IFile | void {
-        return findByName(partOfName, this.getItems()) ||
-            findByName(partOfName, this.__getNew());
+        return findInPath(partOfName, this.getItems()) ||
+            findInPath(partOfName, this.__getNew());
     }
     create(path: string, size: number, isBundle?: boolean): IFile {
         const file: IFile = {
             path,
             size,
-            isBundle,
             name: getFileName(path),
             id: getId(),
             modules: new Set<number>(),
             stack: []
         };
+        if (typeof isBundle != "undefined") {
+            file.isBundle = isBundle;
+        }
         this.add(file);
         return file;
     }
