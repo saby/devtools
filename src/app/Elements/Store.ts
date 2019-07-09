@@ -6,8 +6,8 @@ import { IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
 
 class Store {
    protected _channel: ContentChannel = new ContentChannel('elements');
-   // TODO: хранить в каком-то более адекватном виде
    protected _elements: IFrontendControlNode[] = [];
+   protected _devtoolsOpened: boolean = false;
 
    constructor() {
       this._channel.addListener('operation', this.__operationHandler.bind(this));
@@ -32,6 +32,13 @@ class Store {
 
    getElements(): Store['_elements'] {
       return this._elements;
+   }
+
+   toggleDevtoolsOpened(state: boolean): void {
+      if (state !== this._devtoolsOpened) {
+         this._devtoolsOpened = state;
+         this._channel.dispatch('devtoolsInitialized');
+      }
    }
 
    private __onEndSynchronization(): void {

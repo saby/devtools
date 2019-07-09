@@ -102,7 +102,6 @@ class Profiler extends Control<IOptions> {
       ]
    });
 
-   // TODO: запоминать выбранную вкладку в хромовском хранилище
    protected _selectedTab: string = 'Flamegraph';
 
    protected _selectedSynchronizationId: string = '';
@@ -128,6 +127,7 @@ class Profiler extends Control<IOptions> {
          'profilingStatus',
          this.__onProfilingStatusChanged.bind(this)
       );
+      options.store.toggleDevtoolsOpened(true);
       options.store.dispatch('getProfilingStatus');
    }
 

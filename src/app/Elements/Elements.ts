@@ -64,17 +64,15 @@ class Elements extends Control {
          this.__updateSearch(this._searchValue);
       }, 200);
       window.elementsPanel = this;
-   }
 
-   _afterMount(): void {
-      this._options.store.dispatch('devtoolsInitialized');
+      options.store.toggleDevtoolsOpened(true);
       /**
        * TODO: обычно данные синхронизируются с каждой синхронизацией. Но при первом открытии это не работает
        * Тут я дожидаюсь пока прилетят элементы и потом забираю текущее состояние. Это очень плохое решение, стор сам
        * должен говорить когда нужно забирать элементы.
        */
       setTimeout(() => {
-         this._model.setItems(this._options.store.getElements());
+         this._model.setItems(options.store.getElements());
       }, 100);
    }
 
