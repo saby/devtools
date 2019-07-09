@@ -1,13 +1,15 @@
-<Controls.grid:View keyProperty="id"
-                    source="{{ _source }}"
-                    columns="{{ _columns }}"
-                    markedKey="{{ _options.markedKey }}"
-                    markerVisibility="visible"
-                    sorting="{{ _sorting }}"
-                    on:markedKeyChanged="__markedKeyChanged()">
-    <ws:emptyTemplate>
-        <ws:partial template="Controls/list:EmptyTemplate">
-            <ws:contentTemplate>There is no profiling data available for this synchronization.</ws:contentTemplate>
-        </ws:partial>
-    </ws:emptyTemplate>
-</Controls.grid:View>
+<Controls.scroll:Container>
+    <Controls.grid:View keyProperty="id"
+                        source="{{ _source }}"
+                        columns="{{ _columns }}"
+                        markedKey="{{ _options.markedKey }}"
+                        markerVisibility="visible"
+                        sorting="{{ _sorting }}"
+                        on:markedKeyChanged="__markedKeyChanged()">
+        <ws:emptyTemplate>
+            <ws:partial template="Controls/list:EmptyTemplate">
+                <ws:contentTemplate>There is no profiling data available for this synchronization.</ws:contentTemplate>
+            </ws:partial>
+        </ws:emptyTemplate>
+    </Controls.grid:View>
+</Controls.scroll:Container>

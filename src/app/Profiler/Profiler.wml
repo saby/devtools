@@ -37,20 +37,19 @@
                     </Controls.scroll:Container>
                 </ws:master>
                 <ws:detail>
-                    <Controls.scroll:Container attr:class="Profiler__detail"
-                                               on:click="__detailMarkedKeyChanged()">
-                        <ws:if data="{{ _selectedTab === 'Flamegraph' }}">
-                            <Profiler.Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
-                                                            markedKey="{{ _selectedCommitId }}"
-                                                            on:markedKeyChanged="__detailMarkedKeyChanged()"/>
-                        </ws:if>
-                        <ws:else>
-                            <Profiler.RankedView.RankedView snapshot="{{ _snapshot }}"
-                                                            markedKey="{{ _selectedCommitId }}"
-                                                            filter="{{ _detailFilter }}"
-                                                            on:markedKeyChanged="__detailMarkedKeyChanged()"/>
-                        </ws:else>
-                    </Controls.scroll:Container>
+                    <ws:if data="{{ _selectedTab === 'Flamegraph' }}">
+                        <Profiler.Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
+                                                        markedKey="{{ _selectedCommitId }}"
+                                                        on:markedKeyChanged="__detailMarkedKeyChanged()"
+                                                        attr:class="Profiler__detail"/>
+                    </ws:if>
+                    <ws:else>
+                        <Profiler.RankedView.RankedView snapshot="{{ _snapshot }}"
+                                                        markedKey="{{ _selectedCommitId }}"
+                                                        filter="{{ _detailFilter }}"
+                                                        on:markedKeyChanged="__detailMarkedKeyChanged()"
+                                                        attr:class="Profiler__detail"/>
+                    </ws:else>
                 </ws:detail>
             </Controls.masterDetail:Base>
             <ws:if data="{{ _selectedCommitId }}">

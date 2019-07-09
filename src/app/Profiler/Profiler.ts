@@ -224,8 +224,8 @@ class Profiler extends Control<IOptions> {
       this.__setSynchronization(this._selectedSynchronizationId);
    }
 
-   private __detailMarkedKeyChanged(e: Event, id: string): void {
-      this._selectedCommitId = id;
+   private __detailMarkedKeyChanged(e: Event, id?: string): void {
+      this._selectedCommitId = id || '';
       this.__updateSelectedCommitChanges();
    }
 

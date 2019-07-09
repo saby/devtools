@@ -1,6 +1,9 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
-import { IControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IControlNode,
+   IFrontendControlNode
+} from 'Extension/Plugins/Elements/IControlNode';
 import 'css!Profiler/Flamegraph/Flamegraph';
 import { getWidth } from './Utils';
 import { formatTime, getBackgroundColor } from '../Utils';
@@ -300,8 +303,12 @@ class Flamegraph extends Control<IOptions> {
       }
    }
 
-   protected _afterUpdate(): void {
-      if (this._options.markedKey && this._children[this._options.markedKey]) {
+   protected _afterUpdate(oldOptions: IOptions): void {
+      if (
+         this._options.markedKey &&
+         oldOptions.markedKey !== this._options.markedKey &&
+         this._children[this._options.markedKey]
+      ) {
          // @ts-ignore
          this._children[this._options.markedKey].focus();
       }
