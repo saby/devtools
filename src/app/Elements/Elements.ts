@@ -73,7 +73,7 @@ class Elements extends Control {
        */
       setTimeout(() => {
          this._model.setItems(options.store.getElements());
-      }, 100);
+      }, 1000);
    }
 
    _afterUpdate(): void {
