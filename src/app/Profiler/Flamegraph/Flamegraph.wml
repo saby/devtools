@@ -3,10 +3,11 @@
          on:keydown="_onKeyDown()">
         <ws:for data="rowData in _depthToItemData">
             <div class="Flamegraph__row">
-                <ws:for data="itemData in rowData">
+                <ws:for data="index, itemData in rowData">
+                    <!--TODO: убрать индекс из ключа после того, как фреймворк начнёт делать их уникальными -->
                     <ws:partial template="wml!Profiler/Flamegraph/Node"
                                 itemData="{{ itemData }}"
-                                attr:key="{{ itemData.id }}"
+                                attr:key="{{ itemData.id + index }}"
                                 attr:name="{{ itemData.id }}"
                                 on:click="_onMarkedKeyChanged(itemData.id)" />
                 </ws:for>
