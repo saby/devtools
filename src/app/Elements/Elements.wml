@@ -20,28 +20,15 @@
               on:keydown="_onListKeyDown()">
             <Controls.scroll:Container attr:class="Elements__tree">
                <ws:for data="element in _model.getVisibleItems()">
-                  <div attr:key="{{element.id}}"
-                       on:mouseenter="__highlightElement(element.id)"
-                       on:mouseleave="__highlightElement()"
-                       on:click="_onItemClick(element.id)"
-                       name="{{element.id}}">
-                     <div attr:class="Elements__node {{_selectedItemId === element.id ? 'Elements__node_selected'}}"
-                          attr:style="padding-left: {{10 * element.depth}}px;">
-                        <ws:if data="{{ element.hasChildren }}">
-                           <i attr:class="{{element.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small icon-primary"
-                              on:click="__toggleExpanded(element.id)" />
-                        </ws:if>
-                        <span attr:class="{{element.class}}">
-                            <ws:if data="{{ element.name.toLowerCase().indexOf(_searchValue.toLowerCase()) }}">
-                                <Controls.decorator:Highlight text="{{ element.name }}"
-                                                              highlight="{{ _searchValue }}" />
-                            </ws:if>
-                            <ws:else>
-                                {{element.name}}
-                            </ws:else>
-                        </span>
-                     </div>
-                  </div>
+                  <ws:partial template="wml!Elements/Node"
+                              attr:key="{{element.id}}"
+                              attr:name="{{element.id}}"
+                              on:mouseenter="__highlightElement(element.id)"
+                              on:mouseleave="__highlightElement()"
+                              on:click="_onItemClick(element.id)"
+                              selectedItemId="{{ _selectedItemId }}"
+                              searchValue="{{ _searchValue }}"
+                              scope="{{ element }}" />
                </ws:for>
             </Controls.scroll:Container>
             <ws:if data="{{_path}}">
