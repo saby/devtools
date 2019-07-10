@@ -76,6 +76,16 @@ class Elements extends Control {
       }, 1000);
    }
 
+   _beforeUpdate(newOptions: IOptions): void {
+      // TODO: нужно ещё следить за видимостью панели
+      if (newOptions.selected && !this._options.selected) {
+         this._model.setItems(newOptions.store.getElements());
+         newOptions.store.dispatch('inspectElement', this._selectedItemId);
+         this._throttledUpdateSearch();
+         this._itemsChanged = false;
+      }
+   }
+
    _afterUpdate(): void {
       if (this._scrollToId) {
          if (this._children[this._scrollToId]) {
@@ -163,22 +173,23 @@ class Elements extends Control {
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
-      switch (args[0]) {
-         case OperationType.UPDATE:
-            this.__updateNode(args[1]);
-            break;
-         case OperationType.CREATE:
-            this.__highlightNode(args[1]);
-            this._itemsChanged = true;
-            break;
-         case OperationType.DELETE:
-            this._itemsChanged = true;
-            break;
+      if (this._options.selected) {
+         switch (args[0]) {
+            case OperationType.UPDATE:
+               this.__updateNode(args[1]);
+               break;
+            case OperationType.CREATE:
+               this.__highlightNode(args[1]);
+               this._itemsChanged = true;
+               break;
+            case OperationType.DELETE:
+               this._itemsChanged = true;
+               break;
+         }
       }
    }
 
    private __updateNode(id: IControlNode['id']): void {
-      // TODO: если вкладка закрыта, то делать это не надо, но пока сложно отказаться
       if (this._selectedItemId === id) {
          this._options.store.dispatch('inspectElement', this._selectedItemId);
       }
@@ -201,10 +212,8 @@ class Elements extends Control {
    }
 
    private __highlightNode(id: IControlNode['id']): void {
-      if (this._tabShown && this._options.selected) {
-         if (this._children[id]) {
-            highlightUpdate(this._children[id]);
-         }
+      if (this._children[id]) {
+         highlightUpdate(this._children[id]);
       }
    }
 
@@ -214,12 +223,14 @@ class Elements extends Control {
    }
 
    private __onEndSynchronization(): void {
-      this._model.setItems(this._options.store.getElements());
+      if (this._options.selected) {
+         this._model.setItems(this._options.store.getElements());
 
-      if (this._itemsChanged) {
-         this._throttledUpdateSearch();
+         if (this._itemsChanged) {
+            this._throttledUpdateSearch();
+         }
+         this._itemsChanged = false;
       }
-      this._itemsChanged = false;
    }
 
    private __toggleSelectElementFromPage(): void {
