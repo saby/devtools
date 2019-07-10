@@ -1,7 +1,14 @@
 import Store from '../Elements/Store';
-import { IBackendProfilingData, IChangesDescription, IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IBackendProfilingData,
+   IChangesDescription,
+   IControlNode
+} from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
-import Profiler, { IFrontendSynchronizationDescription, IProfilingData } from './Profiler';
+import Profiler, {
+   IFrontendSynchronizationDescription,
+   IProfilingData
+} from './Profiler';
 
 // TODO: почти копипаста из Store
 function getDepth(
@@ -155,16 +162,23 @@ export function getSelfDuration(
    }
 }
 
-export function getActualDuration(
+export function getActualDurations(
    dataWithSelfDurations: Array<{
       id: string;
       selfDuration: number;
+      didRender: boolean;
       parentId?: string;
    }>,
    startId: IControlNode['id'],
    startIndex: number
-): number {
-   let result = dataWithSelfDurations[startIndex].selfDuration;
+): {
+   actualDuration: number;
+   actualBaseDuration: number;
+} {
+   let actualBaseDuration = dataWithSelfDurations[startIndex].selfDuration;
+   let actualDuration = dataWithSelfDurations[startIndex].didRender
+      ? dataWithSelfDurations[startIndex].selfDuration
+      : 0;
    const parents: Set<string> = new Set();
    parents.add(startId);
 
@@ -172,19 +186,27 @@ export function getActualDuration(
       const {
          id,
          parentId,
+         didRender,
          selfDuration
       }: {
          id: string;
          selfDuration: number;
+         didRender: boolean;
          parentId?: string;
       } = dataWithSelfDurations[i];
       if (parentId && parents.has(parentId)) {
          parents.add(id);
-         result += selfDuration;
+         actualBaseDuration += selfDuration;
+         if (didRender) {
+            actualDuration += selfDuration;
+         }
       }
    }
 
-   return result;
+   return {
+      actualDuration,
+      actualBaseDuration
+   };
 }
 
 type BACKGROUND_COLOR =

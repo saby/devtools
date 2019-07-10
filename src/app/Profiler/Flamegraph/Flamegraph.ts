@@ -13,6 +13,7 @@ import template = require('wml!Profiler/Flamegraph/Flamegraph');
 interface IFlamegraphControlNode extends IFrontendControlNode {
    selfDuration: number;
    actualDuration: number;
+   actualBaseDuration: number;
    didRender: boolean;
 }
 
@@ -40,14 +41,6 @@ const ROW_HEIGHT = 20;
 const MIN_WIDTH = 5;
 const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
-function getTreeDuration(actualDuration: number, selfDuration: number): number {
-   if (actualDuration === selfDuration) {
-      return actualDuration;
-   } else {
-      return actualDuration - selfDuration;
-   }
-}
-
 function getMaxTreeDuration(
    snapshot: IOptions['snapshot'],
    markedKey?: string
@@ -56,16 +49,13 @@ function getMaxTreeDuration(
       const selectedNode = snapshot.find(({ id }) => id === markedKey);
 
       if (selectedNode) {
-         return getTreeDuration(
-            selectedNode.actualDuration,
-            selectedNode.selfDuration
-         );
+         return selectedNode.actualBaseDuration;
       }
    }
 
-   return snapshot.reduce((acc, { depth, actualDuration, selfDuration }) => {
+   return snapshot.reduce((acc, { depth, actualBaseDuration }) => {
       if (depth === 0) {
-         return acc + getTreeDuration(actualDuration, selfDuration);
+         return acc + actualBaseDuration;
       } else {
          return acc;
       }
@@ -114,7 +104,6 @@ function getSubtreeWithSelectedNode(
    }
 }
 
-// TODO: тут actualDuration это совсем не то, она учитывает время не только обновившихся компонентов, а вообще всех
 function getTooltip(
    name: string,
    selfDuration: number,
@@ -134,21 +123,32 @@ function getCaption(
    width: number,
    name: string,
    selfDuration: number,
+   actualDuration: number,
    didRender: boolean
 ): string {
    if (width >= MIN_WIDTH_WITH_CAPTION) {
       if (didRender) {
-         const formattedTime = formatTime(selfDuration);
+         const formattedSelfDuration = formatTime(selfDuration);
+         const formattedActualDuration = formatTime(actualDuration);
+         const fullCaption = `${formattedSelfDuration} of ${formattedActualDuration}`;
 
          // show time in caption only if it can fit without overflowing
          if (
             name.length * LETTER_WIDTH +
-               formattedTime.length * LETTER_WIDTH +
+               fullCaption.length * LETTER_WIDTH +
                PADDING_WIDTH +
                MARGIN_OF_ERROR <
             width
          ) {
-            return `${name} (${formattedTime})`;
+            return `${name} (${fullCaption})`;
+         } else if (
+            name.length * LETTER_WIDTH +
+               formattedSelfDuration.length * LETTER_WIDTH +
+               PADDING_WIDTH +
+               MARGIN_OF_ERROR <
+            width
+         ) {
+            return `${name} (${formattedSelfDuration})`;
          }
       }
       return name;
@@ -210,9 +210,17 @@ function getItemDataForDepth(
    const result: INodeItemData[] = [];
 
    elementsOnThisDepth.forEach(
-      ({ id, selfDuration, actualDuration, name, parentId, didRender }) => {
+      ({
+         id,
+         selfDuration,
+         actualDuration,
+         actualBaseDuration,
+         name,
+         parentId,
+         didRender
+      }) => {
          const width = getWidth(
-            getTreeDuration(actualDuration, selfDuration),
+            actualBaseDuration,
             maxTreeDuration,
             containerWidth
          );
@@ -233,7 +241,13 @@ function getItemDataForDepth(
                didRender
             )}; left: ${leftOffset}px; top: ${topOffset}px;`,
             tooltip: getTooltip(name, selfDuration, actualDuration, didRender),
-            caption: getCaption(width, name, selfDuration, didRender),
+            caption: getCaption(
+               width,
+               name,
+               selfDuration,
+               actualDuration,
+               didRender
+            ),
             isSelected: id === markedKey
          });
       }

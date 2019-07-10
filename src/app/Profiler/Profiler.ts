@@ -15,7 +15,7 @@ import SynchronizationsList from './SynchronizationsList/SynchronizationsList';
 import {
    applyOperations,
    convertProfilingData,
-   getActualDuration,
+   getActualDurations,
    getChanges,
    getChangesDescription,
    getSelfDuration
@@ -181,13 +181,15 @@ class Profiler extends Control<IOptions> {
          });
 
          snapshot = dataWithSelfDurations.map((element, index) => {
+            const actualDurations = getActualDurations(
+               dataWithSelfDurations,
+               element.id,
+               index
+            );
             return {
                ...element,
-               actualDuration: getActualDuration(
-                  dataWithSelfDurations,
-                  element.id,
-                  index
-               )
+               actualBaseDuration: actualDurations.actualBaseDuration,
+               actualDuration: actualDurations.actualDuration
             };
          });
 
