@@ -160,40 +160,53 @@ function getLeftOffset(
    previousNodesOnThisDepth: INodeItemData[],
    depth: number,
    parentId: IControlNode['parentId'],
+   idToIndexMap?: Map<string, number>,
    previousItemData?: INodeItemData[]
 ): number {
    let offset = 0;
 
-   // TODO: это сжирает довольно много времени
-   const elementsWithTheSameParent = previousNodesOnThisDepth.filter(
-      (element) => {
-         /**
-          * TODO: очередные костыли из-за кривых ключей
-          * если глубина 0, то считаем, что все предыдущие элементы имеют того же родителя
-          */
-         if (depth === 0) {
-            return true;
-         }
-         return element.parentId === parentId;
+   let lastElementWithTheSameParent;
+   if (previousNodesOnThisDepth.length > 0) {
+      /**
+       * TODO: очередные костыли из-за кривых ключей
+       * если глубина 0, то считаем, что все предыдущие элементы имеют того же родителя
+       */
+      if (
+         depth === 0 ||
+         previousNodesOnThisDepth[previousNodesOnThisDepth.length - 1]
+            .parentId === parentId
+      ) {
+         lastElementWithTheSameParent =
+            previousNodesOnThisDepth[previousNodesOnThisDepth.length - 1];
       }
-   );
+   }
 
-   if (elementsWithTheSameParent.length > 0) {
-      const lastElement =
-         elementsWithTheSameParent[elementsWithTheSameParent.length - 1];
-      offset = lastElement.leftOffset + lastElement.width;
+   if (lastElementWithTheSameParent) {
+      offset =
+         lastElementWithTheSameParent.leftOffset +
+         lastElementWithTheSameParent.width;
    } else {
-      if (parentId && previousItemData) {
-         const parent = previousItemData.find(
-            (element) => element.id === parentId
-         );
-         if (parent) {
-            offset = parent.leftOffset;
+      if (parentId && previousItemData && idToIndexMap) {
+         const index = idToIndexMap.get(parentId);
+         if (index && previousItemData[index]) {
+            offset = previousItemData[index].leftOffset;
          }
       }
    }
 
    return offset;
+}
+
+function getIdToIndexMap(previousItemData?: INodeItemData[]): Map<string, number> {
+   const result = new Map();
+
+   if (previousItemData) {
+      previousItemData.forEach(({ id }, index) => {
+         result.set(id, index);
+      });
+   }
+
+   return result;
 }
 
 function getItemDataForDepth(
@@ -210,6 +223,7 @@ function getItemDataForDepth(
       (element) => element.depth === depth
    );
    const result: INodeItemData[] = [];
+   const idToIndexMap = getIdToIndexMap(previousItemData);
 
    elementsOnThisDepth.forEach(
       ({
@@ -230,6 +244,7 @@ function getItemDataForDepth(
             result,
             depth,
             parentId,
+            idToIndexMap,
             previousItemData
          );
 
