@@ -240,6 +240,11 @@ function getItemDataForDepth(
             maxTreeDuration,
             containerWidth
          );
+
+         if (width < MIN_WIDTH) {
+            return;
+         }
+
          const leftOffset = getLeftOffset(
             result,
             depth,
@@ -307,9 +312,7 @@ function convertSnapshotToItemData(
       topOffset += ROW_HEIGHT;
    }
 
-   return result.map((itemDataForDepth) =>
-      itemDataForDepth.filter(({ width }) => width > MIN_WIDTH)
-   );
+   return result;
 }
 
 class Flamegraph extends Control<IOptions> {
