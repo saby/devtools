@@ -188,7 +188,7 @@ function getLeftOffset(
    } else {
       if (parentId && previousItemData && idToIndexMap) {
          const index = idToIndexMap.get(parentId);
-         if (index && previousItemData[index]) {
+         if (typeof index === 'number' && previousItemData[index]) {
             offset = previousItemData[index].leftOffset;
          }
       }
