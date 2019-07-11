@@ -186,8 +186,10 @@ function getLeftOffset(
       if (parentId && previousItemData) {
          const parent = previousItemData.find(
             (element) => element.id === parentId
-         ) as INodeItemData;
-         offset = parent.leftOffset;
+         );
+         if (parent) {
+            offset = parent.leftOffset;
+         }
       }
    }
 
