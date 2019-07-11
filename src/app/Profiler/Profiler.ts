@@ -59,6 +59,8 @@ class Profiler extends Control<IOptions> {
 
    protected _isProfiling: boolean = false;
 
+   protected _didProfile: boolean = false;
+
    protected _profilingData: IProfilingData;
 
    protected _changesBySynchronization: Map<
@@ -141,6 +143,8 @@ class Profiler extends Control<IOptions> {
    }
 
    private __setProfilingData(profilingData: IBackendProfilingData): void {
+      this._didProfile = true;
+
       this._profilingData = convertProfilingData(profilingData);
       this._synchronizations = profilingData.syncList.map(
          ([id, { selfDuration }]) => {
@@ -150,9 +154,12 @@ class Profiler extends Control<IOptions> {
             };
          }
       );
-      this._selectedSynchronizationId = profilingData.syncList[0][0];
 
-      this.__setSynchronization(this._selectedSynchronizationId);
+      if (profilingData.syncList[0]) {
+         this._selectedSynchronizationId = profilingData.syncList[0][0];
+
+         this.__setSynchronization(this._selectedSynchronizationId);
+      }
    }
 
    private __setSynchronization(synchronizationKey: IControlNode['id']): void {

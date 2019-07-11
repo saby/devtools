@@ -70,6 +70,9 @@
                 </ws:if>
                 <ws:else>
                     <div class="Profiler__status">
+                        <ws:if data="{{ _didProfile }}">
+                            <div>There were no synchronizations during the last profiling session.</div>
+                        </ws:if>
                         <div>
                             Click the record button <Controls.buttons:Button icon="icon-Rec icon-small"
                                                      iconStyle="secondary"
