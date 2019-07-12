@@ -32,16 +32,10 @@
                         displayProperty="name"
                         nodeProperty="child"
                         columns="{{ __column }}"
-                        columnScroll="{{ false }}"
+                        header="{{ __headers }}"
+                        columnScroll="{{ true }}"
                         bind:sorting="__sorting"
                     >
-                        <ws:header>
-                            <ws:Array>
-                                <ws:Object title="module" sortingProperty="name" align="left"/>
-                                <ws:Object title="file" sortingProperty="fileName" align="left"/>
-                                <ws:Object title="size" sortingProperty="size" align="right"/>
-                            </ws:Array>
-                        </ws:header>
                         <ws:emptyTemplate>
                             <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xxl" bottomSpacing="m">
                                 <ws:contentTemplate>No data available!</ws:contentTemplate>

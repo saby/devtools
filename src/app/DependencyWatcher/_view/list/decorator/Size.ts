@@ -49,5 +49,4 @@ export default class Size extends Control {
         this._unit = _unit;
         this._size = _size.toFixed(fixedTo);
     }
-    
 }

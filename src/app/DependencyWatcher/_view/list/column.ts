@@ -1,4 +1,11 @@
 import { ListItem } from "../../_data/types";
+// @ts-ignore
+import * as pathTemplate from 'wml!DependencyWatcher/template/column/file';
+// @ts-ignore
+import * as definedTemplate from 'wml!DependencyWatcher/template/column/defined';
+// @ts-ignore
+import * as isDynamicTemplate from 'wml!DependencyWatcher/template/column/isDynamic';
+import SizeTemplate from "./column/Size";
 
 /**
  * @typedef {Object} IColumn
@@ -25,3 +32,37 @@ export type Columns<
     TItem extends ListItem = ListItem,
     TColumn extends IColumn<TItem> = IColumn<TItem>
 > = Array<Partial<TColumn>>
+
+export const name: Partial<IColumn> = {
+     displayProperty: 'name',
+     // template: ColumnTemplate
+     // template: cfg.itemTemplate || nameTemplate
+};
+export const fileName: Partial<IColumn> = {
+    displayProperty: 'fileName',
+    template: pathTemplate
+};
+export const isDynamic: Partial<IColumn> = {
+    width: '30px',
+    align: 'center',
+    template: isDynamicTemplate
+};
+export const defined: Partial<IColumn> = {
+    width: '55px',
+    align: 'center',
+    template: definedTemplate
+};
+export const size: Partial<IColumn> = {
+    displayProperty: 'size',
+    width: '100px',
+    align: 'right',
+    template: SizeTemplate
+};
+
+export const columns: Columns = [
+    name,
+    fileName,
+    isDynamic,
+    defined,
+    size
+];

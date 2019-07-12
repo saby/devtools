@@ -2,14 +2,10 @@
 import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
-// @ts-ignore
-import * as nameTemplate from 'wml!DependencyWatcher/_view/list/column/name';
-// @ts-ignore
-import * as pathTemplate from 'wml!DependencyWatcher/template/column/file';
-import SizeTemplate from 'DependencyWatcher/_view/list/column/Size';
 import { source } from "../../data";
-import { Columns } from "./column";
+import { columns, Columns } from "./column";
 import { getFilterItems } from "../filter";
+import { headers, Headers } from "./header";
 
 type Children = {
     listView: Control;
@@ -26,12 +22,15 @@ interface IConfig {
     navigation: object;
     modeController?: Control;
     itemTemplate?: Function;
+    columns?: Columns;
+    headers?: Headers;
 }
 
 export default class Main extends Control {
     protected _template = template;
     protected _children: Children;
     private __column: Columns;
+    private __headers: Headers;
     private __sorting: {[key: string]: 'desc' | 'asc'}[] = [];
     private __navigation: object;
     private __source: source.Abstract;
@@ -40,23 +39,8 @@ export default class Main extends Control {
         super(cfg);
         this.__source = new cfg.Source(cfg.sourceConfig);
         this.__navigation = cfg.navigation;
-        this.__column = [
-            {
-                displayProperty: 'name',
-                // template: ColumnTemplate
-                template: cfg.itemTemplate || nameTemplate
-            },
-            {
-                displayProperty: 'fileName',
-                template: pathTemplate
-            },
-            {
-                displayProperty: 'size',
-                width: '100px',
-                align: 'right',
-                template: SizeTemplate
-            }
-        ];
+        this.__column = cfg.columns || columns;
+        this.__headers = cfg.headers || headers;
         this._filterItems = getFilterItems({
             /*fileSource: new source.File({
                 rpc: cfg.sourceConfig.rpc
