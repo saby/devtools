@@ -14,7 +14,6 @@ export interface Item extends ModuleInfo {
     child: boolean | null;
     id: string;
     isDynamic?: boolean;
-    notUsed?: boolean;
     size?: number;
     fileName?: string;
     stack?: ItemStack

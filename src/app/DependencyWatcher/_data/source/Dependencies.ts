@@ -20,14 +20,13 @@ let hasChild = (module?: Module): true | null => {
 
 let getEachHandler = (results: dependency.Item[], isDynamic: boolean, parentItemId?: string) => {
     return (module: Module) => {
-        let { name, fileId, id, initiator } = module;
+        let { name, fileId, id, defined } = module;
         results.push({
-            name, fileId, initiator,
+            name, fileId, defined: defined,
             isDynamic,
             id: createId(id, parentItemId),
             parent: parentItemId,
-            child: hasChild(module),
-            notUsed: !initiator
+            child: hasChild(module)
         });
     }
 };

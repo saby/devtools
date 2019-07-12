@@ -4,30 +4,23 @@ import { SortFunction, SortResult } from "../sort/Sort";
 // @ts-ignore
 import { Order } from "Types/source";
 import { isDynamic } from "../sort/isDynamic";
-import { notUsed } from "../sort/notUsed";
+import { defined } from "../sort/defined";
 import { name } from "../sort/name";
-import { type } from "../sort/type";
 import { size } from "../sort/size";
 import { fileName } from "../sort/fileName";
 
 const ALL_SORTING_FUNCTIONS: Record<string, SortFunction> = {
     name,
-    // @ts-ignore
-    notUsed,
+    defined,
     isDynamic,
-    // @ts-ignore
-    type,
     size,
     fileName
 };
 
 let getDefaultSorting = <T extends ListItem>(): SortFunction<T>[] => {
     return [
-        // @ts-ignore
-        notUsed,
+        // defined,
         isDynamic,
-        // @ts-ignore
-        type,
         name
     ]
 };
