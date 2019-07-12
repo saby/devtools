@@ -1,4 +1,8 @@
-export interface IFilterData {
-    name?: string;
-    parent?: string;
+export interface IFilterData extends Partial<{
+    name: string;
+    parent: string;
+    fileId: number;
+    dependentOnFile: number;
+}> {
+
 }

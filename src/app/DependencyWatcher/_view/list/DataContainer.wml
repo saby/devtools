@@ -1,4 +1,7 @@
-<Controls.filter:Controller filterButtonSource="{{ _filterItems }}">
+<Controls.filter:Controller
+    filterButtonSource="{{ _filterItems }}"
+    filter="{{ _filter }}"
+>
 <Controls.list:DataContainer
     source="{{ __source }}"
     keyProperty="id"
@@ -34,6 +37,8 @@
                         columns="{{ __column }}"
                         header="{{ __headers }}"
                         columnScroll="{{ true }}"
+                        contextMenuVisibility="{{ true }}"
+                        itemActions="{{ __itemActions }}"
                         bind:sorting="__sorting"
                     >
                         <ws:emptyTemplate>
@@ -44,12 +49,6 @@
                     </Controls.explorer:View>
                 </Controls.list:Container>
             </Controls.scroll:Container>
-<!--            <Controls.popup:Notification-->
-<!--                name="notificationOpener"-->
-<!--                template="wml!Controls/popupTemplate:NotificationSimple"-->
-<!--            >-->
-<!--                <ws:templateOptions style="success" text="HelloWorld!" icon="Admin"></ws:templateOptions>-->
-<!--            </Controls.popup:Notification>-->
         </div>
     </Controls.search:Controller>
 </Controls.list:DataContainer>
