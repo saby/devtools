@@ -17,12 +17,12 @@ export interface ModuleId {
 
 export interface ModuleInfo {
     name: string
-    initiator?: number;
     fileId?: number;
+    defined: boolean;
 }
 
 interface ModuleData<TCollection> extends ModuleInfo, ModuleId, ModuleDependencies<TCollection> {
-    initTime: number;
+
 }
 
 interface Module extends ModuleData<Set<Module>> {

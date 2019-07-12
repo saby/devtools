@@ -15,6 +15,7 @@ export interface IRequire extends ILocalRequire {
     (config: IRequireConfig, deps: IDeps, callback?: Function, errback?: Function): ILocalRequire;
     config<T extends object>(cfg: T): void;
     toUrl(module: string): string;
+    defined(module: string): boolean;
 }
 
 export interface IRequireInitObject {

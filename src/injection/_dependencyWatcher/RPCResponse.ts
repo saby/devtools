@@ -68,6 +68,9 @@ export class RPCResponse {
             if (!module.fileId) {
                 this.__addFileId(module);
             }
+            if (!module.defined) {
+                module.defined = _require.defined(module.name);
+            }
         });
         return convertToRecord(this.__modules.getModules(dependencies));
     }

@@ -58,38 +58,27 @@ const addStatic = (module: Module, dependencies: Module[]): Module[] => {
     return withoutExisting;
 };
 
-const setInitiator = (module: Module, initiator?: number): void => {
-    const set = (submodule: Module) => {
-        if (!initiator || submodule.initiator) {
-            return;
-        }
-        submodule.initiator = initiator;
-        submodule.initTime = Date.now();
-        setInitiator(submodule, submodule.id);
-    };
-    module.dependencies.static.forEach(set);
-    module.dependencies.dynamic.forEach(set);
-};
-
 export class ModuleStorage extends Storage<Module> {
     constructor(private __onupdate: UpdateHandler = (() => {})) {
         super();
     }
     private readonly __newModules: Set<string> = new Set();
+    private readonly __updates: Set<number> = new Set();
 
-    define(name: string, dependencies?: string[]): void {
+    define(name: string, dependencies: string[], moduleData: unknown): void {
         let module = this.__get(name);
-        this.__addDeps(module, dependencies || [], DependencyType.static);
-        if (module.initiator) {
-            setInitiator(module, module.id);
+        if (typeof moduleData !== 'function') {
+            module.defined = true;
         }
+        this.__addDeps(module, dependencies, DependencyType.static);
+    }
+    initModule(name: string): void {
+        let module = this.__get(name);
+        module.defined = true;
     }
 
     require(name: string, dependencies: string | string[], type: DependencyType = DependencyType.dynamic) {
         let module = this.__get(name);
-        if (name == GLOBAL_MODULE_NAME) {
-            module.initiator = module.id;
-        }
         this.__addDeps(
             module,
             Array.isArray(dependencies)?
@@ -97,12 +86,12 @@ export class ModuleStorage extends Storage<Module> {
                 [dependencies],
             type
         );
-        setInitiator(module, module.id);
     }
 
     getModules(dependencies?: string[]): ModulesMap {
         if (!dependencies || !dependencies.length) {
             this.__newModules.clear();
+            this.__updates.clear();
             return this._nameMap;
         }
         let map: ModulesMap = new Map();
@@ -110,6 +99,7 @@ export class ModuleStorage extends Storage<Module> {
             let module = this._nameMap.get(dependency);
             this.__newModules.delete(dependency);
             if (module) {
+                this.__updates.delete(module.id);
                 map.set(dependency, module);
             }
         });
@@ -118,20 +108,21 @@ export class ModuleStorage extends Storage<Module> {
     getNewModules(): string[] {
         return  [...this.__newModules];
     }
+    getUpdates(): number[] {
+        return [...this.__updates]
+    }
 
     private __get(name: string): Module {
+        let module = super.getItemByName(name) || this.__create(name);
         this.__newModules.add(name);
-        let module = super.getItemByName(name);
-        if (module) {
-            return module;
-        }
-        return  this.__create(name);
+        this.__updates.add(module.id);
+        return module;
     }
 
     private __create(name: string): Module {
         const module: Module = {
             name,
-            initTime: Number.MAX_SAFE_INTEGER,
+            defined: false,
             id: getId(),
             dependencies: {
                 static: new Set(),
@@ -142,6 +133,9 @@ export class ModuleStorage extends Storage<Module> {
                 dynamic: new Set()
             }
         };
+        if (name == GLOBAL_MODULE_NAME) {
+            module.defined = true;
+        }
         super.add(module);
         return module;
     }
@@ -154,11 +148,11 @@ export class ModuleStorage extends Storage<Module> {
         map((dependency: string): Module => {
             return this.__get(dependency);
         });
-        
+
         if (!_dependencies.length) {
             return;
         }
-        
+
         let newDeps: Module[];
         if (type == DependencyType.dynamic) {
             newDeps = addDynamic(module, _dependencies);

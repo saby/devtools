@@ -45,7 +45,7 @@ export class DependencyWatcher implements IPlugin {
         this.__defineProperty(require, REQUIRE).catch(() => {
             try {
                 const defined = { ...GLOBAL[REQUIRE].s.contexts._.defined };
-                this.__logger.log(`Не удалось вовремя переопределить require, возможны проблемы с модулями: ${ Object.keys(defined).toString() }`)
+                this.__logger.warn(`Не удалось вовремя переопределить require, возможны проблемы с модулями: ${ Object.keys(defined).toString() }`)
             } catch (error) {
                 this.__logger.error(error);
             }
