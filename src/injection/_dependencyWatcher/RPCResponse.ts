@@ -45,9 +45,8 @@ export class RPCResponse {
         this.__logger = logger;
         this.__require = require;
 
-        rpc.registerMethod(RPCMethodNames.getBundles, this.getBundles.bind(this));
         rpc.registerMethod(RPCMethodNames.getModules, this.getModules.bind(this));
-        rpc.registerMethod(RPCMethodNames.getNewModules, this.__modules.getNewModules.bind(this.__modules));
+        rpc.registerMethod(RPCMethodNames.getUpdates, this.__modules.getUpdates.bind(this.__modules));
         rpc.registerMethod(RPCMethodNames.setSize, this.setSize.bind(this));
         rpc.registerMethod(RPCMethodNames.getFiles, this.getFiles.bind(this));
         rpc.registerMethod(RPCMethodNames.isRelease, this.isRelease.bind(this));
@@ -57,15 +56,9 @@ export class RPCResponse {
     private __files: FileStorage;
     private __logger: ILogger;
     private __require: Require;
-    private getBundles() {
-        if (GLOBAL.bundles) {
-            return GLOBAL.bundles;
-        }
-        return this.__require.getConfig().bundles;
-    }
-    private getModules(dependencies?: string[]): ModulesRecord<TransferModule> {
-        let modules = this.__modules.getModules(dependencies);
+    private getModules(keys: RPCMethodsArgs[RPCMethodNames.getModules]): RPCMethodsResult[RPCMethodNames.getModules] {
         const _require = this.__require.getOrigin();
+        const modules = this.__modules.getModules(keys);
         modules.forEach((module) => {
             if (!module.fileId) {
                 this.__addFileId(module);
@@ -74,7 +67,7 @@ export class RPCResponse {
                 module.defined = _require.defined(module.name);
             }
         });
-        return convertToRecord(this.__modules.getModules(dependencies));
+        return convertToRecord(modules);
     }
     private __addFileId(module: Module) {
         const bundle = findFile(this.__require.getConfig().bundles, module.name) || '';

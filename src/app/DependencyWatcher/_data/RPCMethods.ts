@@ -33,21 +33,24 @@ export class RPCMethods {
         });
     }
     
-    private __getNewModules(): Promise<ModulesRecord<TransferModule>> {
-        return this._rpc.execute<string[]>({
-            methodName: RPCMethodNames.getNewModules
-        }).then((dependecies: string[]) => {
-            if (!dependecies.length) {
+    private __getNewModules(): Promise<RPCMethodsResult[RPCMethodNames.getModules]> {
+        return this._rpc.execute<number[]>({
+            methodName: RPCMethodNames.getUpdates
+        }).then((keys: number[]) => {
+            if (!keys.length) {
                 return Promise.resolve({});
             }
-            return this.__getModules(dependecies);
+            return this.__getModules(keys);
         })
     }
     
-    private __getModules(dependecies?: string[]): Promise<ModulesRecord<TransferModule>> {
-        return this._rpc.execute<ModulesRecord<TransferModule>, string[] | void>({
+    private __getModules(keys?: number[]): Promise<RPCMethodsResult[RPCMethodNames.getModules]> {
+        return this._rpc.execute<
+            RPCMethodsResult[RPCMethodNames.getModules],
+            RPCMethodsArgs[RPCMethodNames.getModules]
+        >({
             methodName: RPCMethodNames.getModules,
-            args:       dependecies
+            args: keys
         });
     }
 

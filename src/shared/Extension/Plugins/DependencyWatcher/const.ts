@@ -8,9 +8,8 @@ export enum EventNames {
 }
 
 export enum RPCMethodNames {
-    getBundles = 'getBundles',
     getModules = 'getModules',
-    getNewModules = 'getNewModules',
+    getUpdates = 'getUpdates',
     setSize = 'setSize',
     getFiles = 'getFiles',
     isRelease = 'isRelease',

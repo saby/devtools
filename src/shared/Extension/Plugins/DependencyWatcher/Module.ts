@@ -25,6 +25,7 @@ export let convertToTransferModule = (
         }
     }
 };
+
 export let convertToRecord = (map: ModulesMap): ModulesRecord<TransferModule> => {
     let record: ModulesRecord<TransferModule> = Object.create(null);
     map.forEach((module: Module, name: string) => {

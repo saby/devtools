@@ -18,17 +18,8 @@ let mapIgnoredPlugins = (module: string): string => {
     return module;
 };
 
-export enum UpdateType {
-    define,
-    require,
-    clear,
-}
-
 interface UpdateHandler {
-    // <TArgs extends unknown[] = unknown[]>(type: UpdateType, ...args: TArgs): void;
-    (updateType: UpdateType.require, module: string, dependencies: string[], type: DependencyType): void;
-    (updateType: UpdateType.define, module: string): void;
-    (updateType: UpdateType.clear): void;
+    (moduleId: number): void;
 }
 
 const addDynamic = (module: Module, dependencies: Module[]): Module[] => {
@@ -62,8 +53,8 @@ export class ModuleStorage extends Storage<Module> {
     constructor(private __onupdate: UpdateHandler = (() => {})) {
         super();
     }
-    private readonly __newModules: Set<string> = new Set();
     private readonly __updates: Set<number> = new Set();
+    private __modulesReaded: boolean = false;
 
     define(name: string, dependencies: string[], moduleData: unknown): void {
         let module = this.__get(name);
@@ -88,25 +79,18 @@ export class ModuleStorage extends Storage<Module> {
         );
     }
 
-    getModules(dependencies?: string[]): ModulesMap {
-        if (!dependencies || !dependencies.length) {
-            this.__newModules.clear();
+    getModules(keys?: number[]): ModulesMap {
+        this.__modulesReaded = true;
+        if (!keys || !keys.length) {
             this.__updates.clear();
             return this._nameMap;
         }
         let map: ModulesMap = new Map();
-        dependencies.forEach((dependency: string) => {
-            let module = this._nameMap.get(dependency);
-            this.__newModules.delete(dependency);
-            if (module) {
-                this.__updates.delete(module.id);
-                map.set(dependency, module);
-            }
+        this.getItemsById(keys).forEach((module: Module) => {
+            map.set(module.name, module);
+            this.__updates.delete(module.id);
         });
         return  map;
-    }
-    getNewModules(): string[] {
-        return  [...this.__newModules];
     }
     getUpdates(): number[] {
         return [...this.__updates]
@@ -114,8 +98,14 @@ export class ModuleStorage extends Storage<Module> {
 
     private __get(name: string): Module {
         let module = super.getItemByName(name) || this.__create(name);
-        this.__newModules.add(name);
         this.__updates.add(module.id);
+        /*
+         * Кидаем собыетие об обновлении только после того как модули будут хоть раз вычитаны
+         * Нет смысла забивать канал сообщениями, если вкладка не открыта
+         */
+        if (this.__modulesReaded) {
+            this.__onupdate(module.id);
+        }
         return module;
     }
 
@@ -152,20 +142,10 @@ export class ModuleStorage extends Storage<Module> {
         if (!_dependencies.length) {
             return;
         }
-
-        let newDeps: Module[];
         if (type == DependencyType.dynamic) {
-            newDeps = addDynamic(module, _dependencies);
+            addDynamic(module, _dependencies);
         } else {
-            newDeps = addStatic(module, _dependencies);
-        }
-        if (newDeps.length) {
-            this.__onupdate(
-                UpdateType.require,
-                module.name,
-                newDeps.map(module => module.name),
-                type
-            );
+            addStatic(module, _dependencies);
         }
     }
 }
