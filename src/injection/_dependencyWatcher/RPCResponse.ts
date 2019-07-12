@@ -27,8 +27,9 @@ let findFile = (bundles: Bundles, module: string): string | void => {
         }
     }
 };
-const sortByInitTime = (first: Module, second: Module) => {
-    return first.initTime - second.initTime
+const sortByInit = (first: Module, second: Module) => {
+    // return first.initNumber - second.initNumber
+    return 0;
 };
 
 export class RPCResponse {
@@ -64,6 +65,7 @@ export class RPCResponse {
     }
     private getModules(dependencies?: string[]): ModulesRecord<TransferModule> {
         let modules = this.__modules.getModules(dependencies);
+        const _require = this.__require.getOrigin();
         modules.forEach((module) => {
             if (!module.fileId) {
                 this.__addFileId(module);
@@ -78,7 +80,7 @@ export class RPCResponse {
         const bundle = findFile(this.__require.getConfig().bundles, module.name) || '';
         const name = getFileName(
             module.name,
-            this.__require.getRequire(),
+            this.__require.getOrigin(),
             bundle,
             this.__require.getConfig().buildMode
         );
@@ -105,6 +107,7 @@ export class RPCResponse {
     }
     
     private getStacks(keys: number[]): Record<number, Stack> {
+        return {};
         const result: Record<number, Stack> = {};
 
         keys.forEach((id: number) => {
@@ -131,10 +134,11 @@ export class RPCResponse {
         ) {
             return [];
         }
-        return [
+        file.stack = [
             ...this.__getStack(firstDependent.fileId),
             [firstDependent.fileId, firstDependent.id]
         ];
+        return file.stack;
     }
     private __getFirstInFile(set: Set<number>): Module {
         if (set.size == 1) {
@@ -142,8 +146,7 @@ export class RPCResponse {
         }
         return [
             ...this.__modules.getItemsById([...set])
-        ].sort(sortByInitTime)[0];
-        
+        ].sort(sortByInit)[0];
     }
     private __getFirstInDependent(set: Set<Module>): Module | undefined {
         if (!set.size) {
@@ -154,7 +157,6 @@ export class RPCResponse {
         }
         return [
             ...set
-        ].sort(sortByInitTime)[0];
-        
+        ].sort(sortByInit)[0];
     }
 }

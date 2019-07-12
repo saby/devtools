@@ -105,6 +105,7 @@ export class RPCMethods {
     }
     private _stacks: Map<number, Stack> = new Map();
     getStacks(keys: RPCMethodsArgs[RPCMethodNames.getStacks]): Promise<RPCMethodsResult[RPCMethodNames.getStacks]> {
+        return Promise.resolve({});
         const result: Record<number, Stack> = [];
         const _keys = keys.filter((id) => {
             if (!this._stacks.has(id)) {
