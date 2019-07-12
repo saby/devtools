@@ -8,8 +8,8 @@ type ReplaceFunction<T = any> = (name: string, origin: T) => T;
 
 interface IR1 {
     moduleName: string;
-    dependencies: Array<string>;
-    args: Array<any>;
+    dependencies: string[];
+    args: any[];
 }
 
 interface IR2 extends IR1 {
