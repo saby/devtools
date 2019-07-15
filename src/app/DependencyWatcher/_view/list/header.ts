@@ -1,4 +1,6 @@
 import { ListItem } from "../../_data/types";
+// @ts-ignore
+import { rk } from 'Core/i18n';
 
 export interface IHeader<TItem extends ListItem = ListItem> {
     title: string;
@@ -9,11 +11,11 @@ export interface IHeader<TItem extends ListItem = ListItem> {
 export type Headers<TItem extends ListItem = ListItem> = Array<IHeader>
 
 export const name: IHeader = {
-     title: 'name',
+     title: rk('name'),
     sortingProperty: "name"
 };
 export const fileName: IHeader = {
-    title: 'fileName',
+    title: rk('file'),
     sortingProperty: "fileName"
 };
 export const isDynamic: IHeader = {
@@ -21,12 +23,12 @@ export const isDynamic: IHeader = {
     align: 'center'
 };
 export const defined: IHeader = {
-    title: 'defined',
+    title: rk('used'),
     align: 'center',
     sortingProperty: "defined"
 };
 export const size: IHeader = {
-    title: 'size',
+    title: rk('size'),
     align: 'right',
     sortingProperty: "size"
 };

@@ -22,7 +22,7 @@ let getEachHandler = (results: dependency.Item[], isDynamic: boolean, parentItem
     return (module: Module) => {
         let { name, fileId, id, defined } = module;
         results.push({
-            name, fileId, defined: defined,
+            name, fileId, defined,
             isDynamic,
             id: createId(id, parentItemId),
             parent: parentItemId,
@@ -63,24 +63,16 @@ let getById = (
     return getFromModule(findModule(map, parentModuleId), parentItemId);
 };
 
-let getRootChild = (map: ModulesMap): dependency.Item[] => {
-    const root = map.get(GLOBAL_MODULE_NAME);
-    return getFromModule(root);
-};
-
 export class Dependencies<
     TFilter extends dependency.IFilterData = dependency.IFilterData
 > extends Abstract<dependency.Item, TFilter> {
     protected _query(map: ModulesMap, where: TFilter): Promise<dependency.Item[]> {
         console.log('Dependencies => _query:', where);
-        const { parent, fromRoot } = where;
+        const { parent } = where;
         
         let parentModuleId = parent? getId(parent): undefined;
         return Promise.resolve(map).then((modules: ModulesMap) => {
             if (!parentModuleId) {
-                if (fromRoot) {
-                    return getRootChild(modules);
-                }
                 return getAllModules(modules);
             }
             return getById(modules, parentModuleId, parent);

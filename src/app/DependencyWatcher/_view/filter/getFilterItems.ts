@@ -1,6 +1,6 @@
 import { source } from 'DependencyWatcher/data';
 
-interface FilterItem<TValue = unknown> {
+export interface FilterItem<TValue = unknown> {
     name: string;
     value: TValue;
     resetValue: TValue;
@@ -19,7 +19,7 @@ type FilterItems<T = unknown> = {
     clone(): FilterItems<T>;
 } & FilterItem<T>[];
 
-const json: FilterItemAdditional<boolean> = {
+export const json: FilterItemAdditional<boolean> = {
     name: 'json',
     textValue: 'json!',
     itemText: 'Файлы конфигурации',
@@ -29,7 +29,7 @@ const json: FilterItemAdditional<boolean> = {
     visibility : false,
     viewMode: 'extended'
 };
-const i18n: FilterItemAdditional<boolean> = {
+export const i18n: FilterItemAdditional<boolean> = {
     name: 'i18n',
     textValue: 'i18n!',
     itemText: 'Файлы локализациии',
@@ -39,7 +39,7 @@ const i18n: FilterItemAdditional<boolean> = {
     visibility : false,
     viewMode: 'extended'
 };
-const css: FilterItemAdditional<boolean> = {
+export const css: FilterItemAdditional<boolean> = {
     name: 'css',
     textValue: 'css!',
     itemText: 'Файлы стилей',
@@ -50,11 +50,8 @@ const css: FilterItemAdditional<boolean> = {
     viewMode: 'extended'
 };
 
-const fileId: FilterItem = {
+export const fileId: FilterItem = {
     name: 'fileId',
-    // textValue: 'css!',
-    // itemText: 'Файлы стилей',
-    // additionalText: 'Включая файлы стилей',
     value: null,
     resetValue: null,
     visibility : false,
@@ -69,12 +66,12 @@ export const getFilterItems = ({
    fileSource
 }: Partial<FilterItemConfig>): FilterItem[] => {
     const result: FilterItem[] = [ json, css, i18n ];
-    if (fileSource) {
-        result.push({
-            ...fileId,
-            source: fileSource
-        });
-    }
+    // if (fileSource) {
+    //     result.push({
+    //         ...fileId,
+    //         source: fileSource
+    //     });
+    // }
     return result;
     // return Object.assign(result, {
     //     '[Types/_entity/ICloneable]': true,

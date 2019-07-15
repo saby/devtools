@@ -56,7 +56,6 @@ let getDependentModules = (
     map: ModulesMap,
     parentModuleId: string | void,
     parentItemId: string | void,
-    pageName: string
 ): dependent.Item[] => {
     let result: dependent.Item[] = [];
     if (!parentModuleId) {
@@ -78,12 +77,11 @@ let getModules = (
     record: ModulesMap,
     parentModuleId: string | void,
     parentItemId: string | void,
-    pageName: string
 ): dependent.Item[] => {
     if (!parentModuleId) {
         return getAllModules(record);
     }
-    return getDependentModules(record, parentModuleId, parentItemId, pageName);
+    return getDependentModules(record, parentModuleId, parentItemId);
 };
 
 export class Dependent<
@@ -94,12 +92,8 @@ export class Dependent<
         const { parent } = where;
 
         let parentModuleId = parent? getId(parent): undefined;
-        return Promise.all([
-            Promise.resolve(map),
-            this.__getPageName()
-        ]).then(([ modules, pageName ]: [ModulesMap, string]) => {
-            return getModules(modules, parentModuleId, parent, pageName);
-        });
+    
+        return Promise.resolve(getModules(map, parentModuleId, parent));
     }
     private __pageName: string;
     private __getPageName(): Promise<string> {

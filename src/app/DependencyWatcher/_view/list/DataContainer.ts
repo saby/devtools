@@ -6,8 +6,10 @@ import { source, types } from "../../data";
 import { columns, Columns } from "./column";
 import { getFilterItems } from "../filter";
 import { headers, Headers } from "./header";
+import { navigation } from "./navigation";
 import { ItemAction, getItemActions, ItemActionNames } from "./getItemActions";
 import { Model } from "Types/entity";
+import { fileId, FilterItem } from "../filter/getFilterItems";
 
 type Children = {
     listView: Control;
@@ -31,18 +33,19 @@ interface IConfig {
 export default class Main extends Control {
     protected _template = template;
     protected _children: Children;
+    protected _root?: string;
     private __column: Columns;
     private __headers: Headers;
     private __itemActions: ItemAction[];
     private __sorting: {[key: string]: 'desc' | 'asc'}[] = [];
     private __navigation: object;
     private __source: source.Abstract;
-    protected _filterItems: object[];
+    protected _filterItems: FilterItem[];
     protected _filter: types.IFilterData = {};
     constructor(cfg: IConfig) {
         super(cfg);
         this.__source = new cfg.Source(cfg.sourceConfig);
-        this.__navigation = cfg.navigation;
+        this.__navigation = cfg.navigation || navigation;
         this.__column = cfg.columns || columns;
         this.__headers = cfg.headers || headers;
         this._filterItems = getFilterItems({
@@ -56,12 +59,19 @@ export default class Main extends Control {
                     parent: undefined,
                     fileId: model.get('fileId')
                 });
+                this._root = undefined;
+                // fileId.value = model;
+                // let items = getFilterItems({});
+                // items.push(fileId);
+                // this._filterItems = items;
             },
             [ItemActionNames.dependentOnFile]: (model: Model) => {
                 this.__setFilter({
                     parent: undefined,
                     dependentOnFile: model.get('fileId')
                 });
+                this._root = undefined;
+                // this._filterItems.push(fileId);
             }
         });
     }
