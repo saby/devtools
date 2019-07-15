@@ -66,6 +66,10 @@ export class ModuleStorage extends Storage<Module> {
     initModule(name: string): void {
         let module = this.__get(name);
         module.defined = true;
+        if (this.__modulesReaded) {
+            this.__updates.add(module.id);
+            this.__onupdate(module.id);
+        }
     }
 
     require(name: string, dependencies: string | string[], type: DependencyType = DependencyType.dynamic) {
@@ -97,16 +101,8 @@ export class ModuleStorage extends Storage<Module> {
     }
 
     private __get(name: string): Module {
-        let module = super.getItemByName(name) || this.__create(name);
-        this.__updates.add(module.id);
-        /*
-         * Кидаем собыетие об обновлении только после того как модули будут хоть раз вычитаны
-         * Нет смысла забивать канал сообщениями, если вкладка не открыта
-         */
-        if (this.__modulesReaded) {
-            this.__onupdate(module.id);
-        }
-        return module;
+        return super.getItemByName(name) ||
+            this.__create(name);
     }
 
     private __create(name: string): Module {
@@ -142,10 +138,22 @@ export class ModuleStorage extends Storage<Module> {
         if (!_dependencies.length) {
             return;
         }
+        let updates;
         if (type == DependencyType.dynamic) {
-            addDynamic(module, _dependencies);
+            updates = addDynamic(module, _dependencies);
         } else {
-            addStatic(module, _dependencies);
+            updates = addStatic(module, _dependencies);
+        }
+        /*
+         * Кидаем собыетие об обновлении только после того как модули будут хоть раз вычитаны
+         * Нет смысла забивать канал сообщениями, если вкладка не открыта
+         */
+        if (this.__modulesReaded && updates.length) {
+            this.__updates.add(module.id);
+            updates.forEach(({ id }: Module) => {
+                this.__updates.add(id);
+            });
+            this.__onupdate(module.id);
         }
     }
 }
