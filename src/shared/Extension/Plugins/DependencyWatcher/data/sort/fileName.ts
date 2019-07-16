@@ -1,7 +1,7 @@
 import { SortFunction, SortResult } from "./Sort";
-import { ListItem } from "../../types";
+import { IItemInfo } from "Extension/Plugins/DependencyWatcher/IItem";
 
-export let fileName: SortFunction<ListItem> = <T extends ListItem>(firstItem: T, secondItem: T): SortResult => {
+const fileName: SortFunction<IItemInfo> = <T extends IItemInfo>(firstItem: T, secondItem: T): SortResult => {
     const first: string = firstItem.fileName || '';
     const second: string = secondItem.fileName || '';
     return first.localeCompare(
@@ -10,3 +10,5 @@ export let fileName: SortFunction<ListItem> = <T extends ListItem>(firstItem: T,
         { sensitivity: 'base' }
     );
 };
+
+export default fileName;
