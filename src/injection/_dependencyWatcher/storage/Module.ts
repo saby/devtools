@@ -71,10 +71,19 @@ export class ModuleStorage {
         this.__updates.clear();
         return updates;
     }
-
-    private __get(name: string): Module {
-        return super.getItemByName(name) ||
-            this.__create(name);
+    /*
+    query({
+        keys,
+        sortBy = {},
+        offset,
+        where,
+        limit
+    }: Partial<QueryParam<ModuleInfo>>): QueryResult<number> {
+        let modules = this.__storage.getItemsById(keys);
+        const filteredModules = applyWhere(modules, where, moduleFilters);
+        const sortedModules = applySort<IModule>(filteredModules, sortBy, modulesSort);
+        const resultKeys: number[] = sortedModules.map(({ id }: IModule) => id);
+        return applyPaging<number>(resultKeys, offset, limit);
     }
     */
     private __get(name: string): IModule {

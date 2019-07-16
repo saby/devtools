@@ -1,13 +1,9 @@
 import { Storage } from "./Storage";
 import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
 import { getId } from "./getId";
-
-interface ResourceTiming {
-    name: string,
-    transferSize: number,
-    decodedBodySize: number,
-    encodedBodySize: number
-}
+import getFileName from "./file/getFileName";
+import getResourceFromPerformance from "./file/getResourceFromPerformance";
+import findInPath from "./file/findInPath";
 
 export class FileStorage {
     private readonly __storage: Storage<IFile, string> = new Storage('path');

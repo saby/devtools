@@ -4,9 +4,8 @@ import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
 import { ModuleStorage } from "./storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 import { convertToRecord } from "Extension/Plugins/DependencyWatcher/Module";
-import { Module, ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
+import { IModule } from "Extension/Plugins/DependencyWatcher/IModule";
 import { Require } from "./Require";
-import { GLOBAL } from "../const";
 import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { getFileName } from "./require/getFileName";
 import { FileStorage } from "./storage/File";
@@ -27,7 +26,7 @@ let findFile = (bundles: Bundles, module: string): string | void => {
         }
     }
 };
-const sortByInit = (first: Module, second: Module) => {
+const sortByInit = (first: IModule, second: IModule) => {
     // return first.initNumber - second.initNumber
     return 0;
 };
@@ -69,7 +68,7 @@ export class RPCResponse {
         });
         return convertToRecord(modules);
     }
-    private __addFileId(module: Module) {
+    private __addFileId(module: IModule) {
         const bundle = findFile(this.__require.getConfig().bundles, module.name) || '';
         const name = getFileName(
             module.name,
@@ -84,7 +83,7 @@ export class RPCResponse {
     private setSize({ size, fileId }: RPCMethodsArgs[RPCMethodNames.setSize]): RPCMethodsResult[RPCMethodNames.setSize] {
         let file: IFile | void;
         if (fileId) {
-            file = this.__files.getItemById(fileId);
+            file = this.__files.getItem(fileId);
         }
         if (!file) {
             return false;
@@ -93,7 +92,7 @@ export class RPCResponse {
         return true;
     }
     private getFiles(idList?: number[]): IFile[] {
-        return Array.from(this.__files.getItemsById(idList))
+        return this.__files.getItems(idList)
     }
     private isRelease(): boolean {
         return isRelease(this.__require.getConfig().buildMode);
@@ -101,55 +100,5 @@ export class RPCResponse {
     
     private getStacks(keys: number[]): Record<number, Stack> {
         return {};
-        const result: Record<number, Stack> = {};
-
-        keys.forEach((id: number) => {
-            result[id] = this.__getStack(id);
-        });
-
-        return result;
-    }
-    private __getStack(fileId: number): Stack {
-        const file = this.__files.getItemById(fileId);
-        if (!file || !file.modules.size) {
-            return [];
-        }
-        if (file.stack.length) {
-            return file.stack;
-        }
-        const firstModule = this.__getFirstInFile(file.modules);
-        const firstDependent = this.__getFirstInDependent(new Set([
-            ...firstModule.dependent.static,
-            ...firstModule.dependent.dynamic
-        ]));
-        if (!firstDependent ||
-            !firstDependent.fileId
-        ) {
-            return [];
-        }
-        file.stack = [
-            ...this.__getStack(firstDependent.fileId),
-            [firstDependent.fileId, firstDependent.id]
-        ];
-        return file.stack;
-    }
-    private __getFirstInFile(set: Set<number>): Module {
-        if (set.size == 1) {
-            return <Module>this.__modules.getItemById([...set][0]);
-        }
-        return [
-            ...this.__modules.getItemsById([...set])
-        ].sort(sortByInit)[0];
-    }
-    private __getFirstInDependent(set: Set<Module>): Module | undefined {
-        if (!set.size) {
-            return ;
-        }
-        if (set.size == 1) {
-            return <Module>[...set][0];
-        }
-        return [
-            ...set
-        ].sort(sortByInit)[0];
     }
 }
