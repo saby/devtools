@@ -4,12 +4,16 @@ export type FileId = number;
 export type StackStep = [FileId, ModuleId];
 export interface Stack extends Array<StackStep> {}
 
-export interface IFile {
-    id: number;
+export interface IFileInfo {
     size: number;
     name: string;
     path: string;
-    isBundle?: boolean;
+}
+export interface IFileModules {
     modules: Set<number>;
-    stack: Stack;
+}
+export interface IFile extends IFileInfo, IFileModules {
+    id: FileId;
+    // isBundle?: boolean;
+    // stack: Stack;
 }

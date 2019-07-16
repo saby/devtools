@@ -1,17 +1,17 @@
 import {
-    Module,
-    TransferModule,
+    IModule,
+    ITransferModule,
     ModulesRecord,
     ModulesMap
 } from "Extension/Plugins/DependencyWatcher/IModule";
 
 
-let _toArray = (set: Set<Module>): number[] => {
+let _toArray = (set: Set<IModule>): number[] => {
     return [...set].map(module => module.id)
 };
 export let convertToTransferModule = (
-    module: Module
-): TransferModule => {
+    module: IModule
+): ITransferModule => {
     let { dependent, dependencies } = module;
     return {
         ...module,
@@ -26,10 +26,10 @@ export let convertToTransferModule = (
     }
 };
 
-export let convertToRecord = (map: ModulesMap): ModulesRecord<TransferModule> => {
-    let record: ModulesRecord<TransferModule> = Object.create(null);
-    map.forEach((module: Module, name: string) => {
-        record[name] = convertToTransferModule(module);
+export let convertToRecord = (set: IModule[]): ModulesRecord<ITransferModule> => {
+    let record: ModulesRecord<ITransferModule> = Object.create(null);
+    set.forEach((module: IModule) => {
+        record[module.name] = convertToTransferModule(module);
     });
     return record;
 };
@@ -38,24 +38,24 @@ let _toSet = (
     array: number[],
     transferMap: ModulesMap,
     idMap: Map<number, string>
-): Set<Module> => {
+): Set<IModule> => {
     return new Set(array.map((id: number) => {
-        return <Module> transferMap.get(<string> idMap.get(id));
+        return <IModule> transferMap.get(<string> idMap.get(id));
     }));
 };
 
 export let convertToMap = (
-    record: ModulesRecord<TransferModule>
+    record: ModulesRecord<ITransferModule>
 ): ModulesMap => {
     let map: ModulesMap = new Map();
     
-    let transferMap: ModulesMap<TransferModule> = new Map(Object.entries(record));
+    let transferMap: ModulesMap<ITransferModule> = new Map(Object.entries(record));
     
     // карта id-name для быстрого доступа к модулю по id во время преобразования id[] к Set<Module>
     let idMap: Map<number, string> = new Map();
 
     // преобразование TransferModule к Module
-    transferMap.forEach((transferModule: TransferModule, name: string) => {
+    transferMap.forEach((transferModule: ITransferModule, name: string) => {
         idMap.set(transferModule.id, name);
         map.set(name, {
             ...transferModule,
@@ -71,8 +71,8 @@ export let convertToMap = (
     });
 
     // проставление зависимостей в Module из TransferModule
-    transferMap.forEach((transferModule: TransferModule) => {
-        let module = <Module> map.get(transferModule.name);
+    transferMap.forEach((transferModule: ITransferModule) => {
+        let module = <IModule> map.get(transferModule.name);
         let { dependent, dependencies } = transferModule;
         
         module.dependent.static = _toSet(dependent.static, map, idMap);

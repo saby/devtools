@@ -25,17 +25,25 @@ interface ModuleData<TCollection> extends ModuleInfo, ModuleId, ModuleDependenci
 
 }
 
-interface Module extends ModuleData<Set<Module>> {
+interface IModule extends ModuleData<Set<IModule>> {
 
 }
 
-export interface TransferModule extends ModuleData<Array<number>> {
+export interface ITransferModule extends ModuleData<Array<number>> {
 }
 
-export interface ModulesMap<TModule extends ModuleInfo = Module> extends Map<string, TModule> {
+export interface ModulesMap<TModule extends ModuleInfo = IModule> extends Map<string, TModule> {
 
 }
 
-export interface ModulesRecord<TModule extends ModuleInfo = Module> extends Record<string, TModule>{
+export interface ModulesRecord<TModule extends ModuleInfo = IModule> extends Record<string, TModule>{
 
+}
+
+export interface IModuleFilter {
+    css: boolean;
+    json: boolean;
+    i18n: boolean;
+    name: string;
+    fileId: number;
 }
