@@ -1,39 +1,45 @@
 import { IStorage, Item } from "./IStorage";
 
-export class Storage<TItem extends Item = Item> implements IStorage<TItem> {
+export class Storage<TItem extends Item = Item, TIndex = unknown> implements IStorage<TItem, TIndex> {
     protected _idMap: Map<number, TItem> = new Map();
-    protected _nameMap: Map<string, TItem> = new Map();
+    protected _indexMap: Map<TIndex, TItem> = new Map();
     protected _allItems: Set<TItem> = new Set();
+    constructor(public readonly indexField: keyof TItem) {
+    
+    }
     getItemById(id: number): TItem | void  {
         return this._idMap.get(id);
     }
-    getItemByName(name: string): TItem | void  {
-        return this._nameMap.get(name);
+    getItemByIndex(index: TIndex): TItem | void  {
+        return this._indexMap.get(name);
     }
 
-    getItems(): Set<TItem> {
-        return this._allItems;
+    getItems(): TItem[] {
+        return [...this._allItems];
     }
-    getItemsById(idList?: number[]): Set<TItem> {
+    getItemsById(idList?: number[]): TItem[] {
         if (!idList) {
             return this.getItems();
         }
-        const set = new Set<TItem>();
+        const set:TItem[] = [];
         idList.forEach((id: number) => {
             let item = this.getItemById(id);
             if (item) {
-                set.add(item);
+                set.push(item);
             }
         });
         return set;
     }
-    getItemsByName(nameList?: string[]): Set<TItem> {
-        if (!nameList) {
+    getItemsByIndex(indexList?: TIndex[]): TItem[] {
+        if (!indexList) {
             return this.getItems();
         }
-        return new Set([...this._allItems].filter(({ name }) => {
-            return nameList.includes(name);
-        }));
+        return [...this._allItems].filter((item: TItem) => {
+            return indexList.includes(
+                // @ts-ignore
+                item[this.indexField]
+            );
+        });
     }
     
     has(item: TItem): boolean {
@@ -42,21 +48,28 @@ export class Storage<TItem extends Item = Item> implements IStorage<TItem> {
     hasId(id: number): boolean {
         return this._idMap.has(id);
     }
-    hasName(name: string): boolean {
-        return this._nameMap.has(name);
+    hasIndex(index: TIndex): boolean {
+        return this._indexMap.has(name);
     }
 
     add(item: TItem): void {
         this._allItems.add(item);
         this._idMap.set(item.id, item);
-        this._nameMap.set(item.name, item);
+        this._indexMap.set(
+            // @ts-ignore
+            item[this.indexField],
+            item
+        );
     }
     remove(item: TItem): boolean {
         if (!this._allItems.delete(item)) {
             return false;
         }
         this._idMap.delete(item.id);
-        this._nameMap.delete(item.name);
+        this._indexMap.delete(
+            // @ts-ignore
+            item[this.indexField]
+        );
         return true;
     }
 }

@@ -1,16 +1,22 @@
 import { Storage } from "./Storage";
-import { Module, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
+import { IModule, ModuleInfo } from "Extension/Plugins/DependencyWatcher/IModule";
 import {
     DependencyType,
-    GLOBAL_MODULE_NAME,
-    TYPESCRIPT_HELPERS_MODULE,
 } from "Extension/Plugins/DependencyWatcher/const";
 import { ignoredPlugins, IRequirePlugin } from "../require/plugins";
-import { getId } from "./getId";
+import filterHelpers from "./module/filterHelpers";
+import addDynamic from "./module/addDynamic";
+import addStatic from "./module/addStatic";
+import create from "./module/create";
+import { QueryParam, QueryResult } from "Extension/Plugins/DependencyWatcher/data/IQuery";
+import { applyPaging } from "Extension/Plugins/DependencyWatcher/data/applyPaging";
+import applyWhere from "Extension/Plugins/DependencyWatcher/data/applyWhere";
+import moduleFilters from "Extension/Plugins/DependencyWatcher/data/filter/moduleFilters";
+import applySort from "Extension/Plugins/DependencyWatcher/data/applySort";
+import modulesSort from "Extension/Plugins/DependencyWatcher/data/sort/modulesSort";
 
-let filterHelpers = (module: string): boolean => {
-    return !TYPESCRIPT_HELPERS_MODULE.includes(module);
-};
+const nope = () => {/* nope */};
+
 let mapIgnoredPlugins = (module: string): string => {
     ignoredPlugins.forEach((plugin: IRequirePlugin) => {
         module = plugin(module);
@@ -22,37 +28,9 @@ interface UpdateHandler {
     (moduleId: number): void;
 }
 
-const addDynamic = (module: Module, dependencies: Module[]): Module[] => {
-    let withoutStatic = dependencies.filter((dependency: Module) => {
-        return !module.dependencies.static.has(dependency);
-    });
-    
-    let withoutExisting = withoutStatic.filter((dependency: Module) => {
-        return !module.dependencies.dynamic.has(dependency);
-    });
-    
-    withoutStatic.forEach((dependency: Module) => {
-        module.dependencies.dynamic.add(dependency);
-        dependency.dependent.dynamic.add(module);
-    });
-    
-    return withoutExisting;
-};
-const addStatic = (module: Module, dependencies: Module[]): Module[] => {
-    let withoutExisting = dependencies.filter((dependency: Module) => {
-        return !module.dependencies.static.has(dependency);
-    });
-    withoutExisting.forEach((dependency: Module) => {
-        module.dependencies.static.add(dependency);
-        dependency.dependent.static.add(module);
-    });
-    return withoutExisting;
-};
-
-export class ModuleStorage extends Storage<Module> {
-    constructor(private __onupdate: UpdateHandler = (() => {})) {
-        super();
-    }
+export class ModuleStorage {
+    private readonly __storage: Storage<IModule, string> = new Storage('name');
+    constructor(private __onupdate: UpdateHandler = nope) {}
     private readonly __updates: Set<number> = new Set();
     private __modulesReaded: boolean = false;
 
@@ -83,55 +61,37 @@ export class ModuleStorage extends Storage<Module> {
         );
     }
 
-    getModules(keys?: number[]): ModulesMap {
+    getModules(keys?: number[]): IModule[] {
         this.__modulesReaded = true;
-        if (!keys || !keys.length) {
-            this.__updates.clear();
-            return this._nameMap;
-        }
-        let map: ModulesMap = new Map();
-        this.getItemsById(keys).forEach((module: Module) => {
-            map.set(module.name, module);
-            this.__updates.delete(module.id);
-        });
-        return  map;
+        return this.__storage.getItemsById(keys);
     }
+
     getUpdates(): number[] {
-        return [...this.__updates]
+        const updates = [...this.__updates];
+        this.__updates.clear();
+        return updates;
     }
 
     private __get(name: string): Module {
         return super.getItemByName(name) ||
             this.__create(name);
     }
-
-    private __create(name: string): Module {
-        const module: Module = {
-            name,
-            defined: false,
-            id: getId(),
-            dependencies: {
-                static: new Set(),
-                dynamic: new Set()
-            },
-            dependent: {
-                static: new Set(),
-                dynamic: new Set()
-            }
-        };
-        if (name == GLOBAL_MODULE_NAME) {
-            module.defined = true;
+    */
+    private __get(name: string): IModule {
+        let module = this.__storage.getItemByIndex(name);
+        if (!module) {
+            module = create(name);
+            this.__storage.add(module);
         }
-        super.add(module);
         return module;
     }
 
-    private __addDeps(module: Module, dependencies: string[], type: DependencyType) {
+    private __addDeps(module: IModule, dependencies: string[], type: DependencyType) {
         const _dependencies = dependencies.
         filter(filterHelpers).
         filter(dependency => !!dependency).
         map(mapIgnoredPlugins).
-        map((dependency: string): Module => {
+        map((dependency: string): IModule => {
             return this.__get(dependency);
         });
 
@@ -150,7 +110,7 @@ export class ModuleStorage extends Storage<Module> {
          */
         if (this.__modulesReaded && updates.length) {
             this.__updates.add(module.id);
-            updates.forEach(({ id }: Module) => {
+            updates.forEach(({ id }: IModule) => {
                 this.__updates.add(id);
             });
             this.__onupdate(module.id);

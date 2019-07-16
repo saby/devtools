@@ -1,20 +1,20 @@
 export interface Item {
     id: number;
-    name: string;
 }
 
-export interface IStorage<T extends Item> {
-    getItemById(id: number): T | void;
-    getItemByName(name: string): T | void;
-    
-    getItems(): Set<T>;
-    getItemsById(id?: number[]): Set<T>;
-    getItemsByName(id?: string[]): Set<T>;
+export interface IStorage<TItem extends Item, TIndex = unknown> {
+    readonly indexField: keyof TItem;
+    getItemById(id: number): TItem | void;
+    getItemByIndex(index: TIndex): TItem | void;
 
-    has(item: T): boolean;
+    getItems(): TItem[];
+    getItemsById(id?: number[]): TItem[];
+    getItemsByIndex(indexList?: TIndex[]): TItem[];
+
+    has(item: TItem): boolean;
     hasId(id: number): boolean;
-    hasName(name: string): boolean;
+    hasIndex(index: TIndex): boolean;
 
-    add(item: T): void;
-    remove(item: T): boolean;
+    add(item: TItem): void;
+    remove(item: TItem): boolean;
 }

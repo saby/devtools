@@ -9,64 +9,35 @@ interface ResourceTiming {
     encodedBodySize: number
 }
 
-const getResourceTiming = (): ResourceTiming[] => {
-    let resourceTimingList = <PerformanceResourceTiming[]> performance.getEntriesByType('resource');
-    return resourceTimingList.filter(({ name }) => {
-        return name.includes('/resources/') || name.includes('/cdn/');
-    }).map((entry: PerformanceResourceTiming) => {
-        return {
-            name: entry.name,
-            transferSize: entry.transferSize,
-            decodedBodySize: entry.decodedBodySize,
-            encodedBodySize: entry.encodedBodySize
-        };
-    });
-};
-
-const findInPath = (partOfPath: string, files: Set<IFile>): IFile | void => {
-    for ( const file of files ) {
-        if (file.path.includes(partOfPath)) {
-            return file;
-        }
+export class FileStorage {
+    private readonly __storage: Storage<IFile, string> = new Storage('path');
+    private __getNew(): IFile[] {
+        return getResourceFromPerformance().filter(({ path }) => {
+            return !this.__storage.hasIndex(path);
+        }).map<IFile>(({ path, transferSize, decodedBodySize, encodedBodySize }) => {
+            return this.create(path, transferSize | decodedBodySize);
+        });
     }
-};
-
-const getFileName = (path?: string): string => {
-    if (!path) {
-        return '';
+    getItems(keys?: number[]): IFile[] {
+        return this.__storage.getItemsById(keys);
     }
-    return path.
-        replace(/\?.+/, ''). // remove query
-        replace(/#.+/, ''). // remove hash
-        split(/\/|\\/).pop() // get last part of path
-        || '';
-};
-
-export class FileStorage extends Storage<IFile> {
-    private __getNew(): Set<IFile> {
-        return new Set(getResourceTiming().filter(({ name }) => {
-            return !this.hasName(name);
-        }).map<IFile>(({ name, transferSize, decodedBodySize, encodedBodySize }) => {
-            return this.create(name, transferSize | decodedBodySize);
-        }));
+    getItem(key: number): IFile | void {
+        return this.__storage.getItemById(key);
     }
     find(partOfName: string): IFile | void {
-        return findInPath(partOfName, this.getItems()) ||
+        return findInPath(partOfName, this.__storage.getItems()) ||
             findInPath(partOfName, this.__getNew());
     }
-    create(path: string, size: number, isBundle?: boolean): IFile {
+    create(path: string, size: number): IFile {
         const file: IFile = {
             path,
             size,
             name: getFileName(path),
             id: getId(),
             modules: new Set<number>(),
-            stack: []
+            // stack: []
         };
-        if (typeof isBundle != "undefined") {
-            file.isBundle = isBundle;
-        }
-        this.add(file);
+        this.__storage.add(file);
         return file;
     }
 }
