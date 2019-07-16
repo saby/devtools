@@ -8,12 +8,18 @@ export enum EventNames {
 }
 
 export enum RPCMethodNames {
+    // Modules
     getModules = 'getModules',
     getUpdates = 'getUpdates',
+    // Items
+    getItems = 'getItems',
+    queryItems = 'queryItems',
+    // File
     setSize = 'setSize',
     getFiles = 'getFiles',
-    isRelease = 'isRelease',
     getStacks = 'getStacks',
+    // other
+    isRelease = 'isRelease',
 }
 
 export const GLOBAL_MODULE_NAME = '~> page <~';
