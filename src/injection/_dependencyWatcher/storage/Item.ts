@@ -10,9 +10,9 @@ import { applyPaging } from "Extension/Plugins/DependencyWatcher/data/applyPagin
 import { DependencyType } from "Extension/Plugins/DependencyWatcher/const";
 import applySort from "Extension/Plugins/DependencyWatcher/data/applySort";
 import applyWhere from "Extension/Plugins/DependencyWatcher/data/applyWhere";
-import moduleFilters from "Extension/Plugins/DependencyWatcher/data/filter/moduleFilters";
 import findFile from "./item/findFile";
 import itemsSort from "Extension/Plugins/DependencyWatcher/data/sort/itemsSort";
+import itemFilters from "Extension/Plugins/DependencyWatcher/data/filter/itemFilters";
 
 let _toArray = (set: Set<IModule>): number[] => {
     return [...set].map(module => module.id)
@@ -34,8 +34,8 @@ export class Item {
         sortBy = {}
     }: Partial<QueryParam<IItem, IItemFilter>>): QueryResult<number> {
         let items = this.__getItems(keys);
-        const filteredItems = applyWhere(items, where, moduleFilters);
-        const sortedItems = applySort<IItem>(filteredItems, sortBy, itemsSort);
+        const filteredItems = applyWhere(items, where, itemFilters);
+        const sortedItems =  <IItem[]> applySort(filteredItems, sortBy, itemsSort);
         const resultKeys: number[] = sortedItems.map(({ id }: IItem) => id);
         return applyPaging<number>(resultKeys, offset, limit);
     }

@@ -12,8 +12,29 @@ export interface IFileInfo {
 export interface IFileModules {
     modules: Set<number>;
 }
-export interface IFile extends IFileInfo, IFileModules {
+export interface ITransportModules {
+    modules: number[];
+}
+
+export interface IFileId {
     id: FileId;
+}
+
+export interface IFile extends IFileInfo, IFileModules, IFileId {
     // isBundle?: boolean;
     // stack: Stack;
+}
+
+export interface ITransportFile extends IFileInfo, ITransportModules {
+
+}
+
+export interface IFileFilter {
+    withoutSize: boolean;
+    name: string;
+}
+
+export type UpdateFileParam = IFileId & {
+    // id: number;
+    [key in keyof IFileInfo]: IFileInfo[key];
 }

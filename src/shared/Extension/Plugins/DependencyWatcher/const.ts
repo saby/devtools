@@ -18,6 +18,9 @@ export enum RPCMethodNames {
     setSize = 'setSize',
     getFiles = 'getFiles',
     getStacks = 'getStacks',
+    queryFiles = 'queryFiles',
+    updateFile = 'updateFile',
+    updateFiles = 'updateFiles',
     // other
     isRelease = 'isRelease',
 }

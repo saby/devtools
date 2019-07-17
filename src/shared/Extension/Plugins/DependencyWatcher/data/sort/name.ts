@@ -10,7 +10,11 @@ let removePrefix = (str: string) => {
     return str.replace(/.+\!/, '').replace(/.+\?/, '');
 };
 
-const name: SortFunction<ModuleInfo> = <T extends ModuleInfo>(first: T, second: T): SortResult => {
+interface Name {
+    name: string;
+}
+
+const name: SortFunction<Name> = <T extends Name>(first: T, second: T): SortResult => {
     let _first = removePrefix(first.name);
     let _second = removePrefix(second.name);
 

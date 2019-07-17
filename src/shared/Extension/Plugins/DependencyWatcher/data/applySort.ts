@@ -1,19 +1,18 @@
 import { SortFunction, SortResult } from "./sort/Sort";
-import { ModuleInfo } from "Extension/Plugins/DependencyWatcher/IModule";
 import { SortBy } from "./IQuery";
 
 const isEmpty = <T extends object>(obj: T): boolean => {
     return !Object.keys(obj).length;
 };
 
-let wrapWithOrder = <T extends ModuleInfo>(sort: SortFunction<T>, order: boolean): SortFunction<T> => {
+let wrapWithOrder = <T>(sort: SortFunction<T>, order: boolean): SortFunction<T> => {
     let k = order? 1: -1;
     return (first: T, second: T): SortResult => {
         return sort(first, second) * k;
     }
 };
 
-let getSortFunctions = <TItem extends ModuleInfo>(
+let getSortFunctions = <TItem extends object>(
     sortBy: SortBy<TItem>,
     sortFunctions: Record<string, SortFunction<TItem>>
 ): SortFunction<TItem>[] => {
@@ -31,7 +30,7 @@ let getSortFunctions = <TItem extends ModuleInfo>(
     return result;
 };
 
-const applySort = <TItem extends ModuleInfo>(
+const applySort = <TItem extends object>(
     items: TItem[],
     sortBy: SortBy<TItem>,
     allSortFunctions: Record<string, SortFunction<TItem>>
