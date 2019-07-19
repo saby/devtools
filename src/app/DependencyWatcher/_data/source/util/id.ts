@@ -7,8 +7,12 @@ export const createId = (moduleId: string | number, parentId?: string) => {
     ].join(ID_SEPARATOR);
 };
 
-export let getId = (itemId: string): string | undefined => {
-    return itemId.split(ID_SEPARATOR)[0];
+export const getAll = (listItemId: string): number[] => {
+    return listItemId.split(ID_SEPARATOR).filter(key => !!key).map(id => +id);
+};
+
+export const getId = (itemId: string): number | undefined => {
+    return getAll(itemId)[0];
 };
 
 interface PathItem {
