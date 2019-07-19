@@ -31,14 +31,14 @@ export class Item {
             this.__updateItem(param);
         });
         return this._rpc.execute<boolean[], UpdateItemParam[]>({
-            methodName: RPCMethodNames.queryItems,
+            methodName: RPCMethodNames.updateItems,
             args: params
         });
     }
     updateItem(param: UpdateItemParam): Promise<boolean> {
         this.__updateItem(param);
         return this._rpc.execute<boolean, UpdateItemParam>({
-            methodName: RPCMethodNames.queryItems,
+            methodName: RPCMethodNames.updateItem,
             args: param
         });
     }

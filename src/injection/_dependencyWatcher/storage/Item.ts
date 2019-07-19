@@ -30,7 +30,7 @@ export class Item {
         keys,
         where = {},
         offset = 0,
-        limit = 50,
+        limit,
         sortBy = {}
     }: Partial<QueryParam<IItem, IItemFilter>>): QueryResult<number> {
         let items = this.__getItems(keys);

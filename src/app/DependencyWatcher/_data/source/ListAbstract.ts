@@ -1,6 +1,6 @@
 import { Item } from "../storage/Item";
 import { DataSet, Query as TypesQuery } from "Types/source";
-import { IItem, IItemFilter, ITransferItem } from "Extension/Plugins/DependencyWatcher/IItem";
+import { IItem, IItemFilter, ITransferItem, UpdateItemParam } from "Extension/Plugins/DependencyWatcher/IItem";
 import { QueryParam, QueryResult } from "Extension/Plugins/DependencyWatcher/data/IQuery";
 import { IListItem } from "../IListItem";
 import { createId, getAll, getId } from "./util/id";
@@ -13,6 +13,8 @@ import { GLOBAL_MODULE_NAME } from "Extension/Plugins/DependencyWatcher/const";
 import { queue } from "Extension/Utils/queue";
 import { RecordSet } from "Types/collection";
 import { IListConfig, DefaultFilters, IgnoreFilters } from "./IList";
+import { getSizes } from "./util/getSizes";
+import { ILogger } from "Extension/Logger/ILogger";
 
 let filterGlobal = (item: ITransferItem): boolean => {
     return item.name !== GLOBAL_MODULE_NAME;
@@ -22,14 +24,17 @@ export abstract class ListAbstract extends Compatibility {
     private __items: Item;
     private __defaultFilters: DefaultFilters;
     private __ignoreFilters: IgnoreFilters;
+    private __logger: ILogger;
     constructor(config: IListConfig) {
         super(config);
         this.__items = config.itemStorage;
+        this.__logger = config.logger;
         this.__defaultFilters = config.defaultFilters || {};
         this.__ignoreFilters = config.ignoreFilters || {};
     }
     
     query(query: TypesQuery): Promise<DataSet> {
+        this.__logger.log('start query');
         const queryParam = getQueryParam(
             query,
             undefined,
@@ -40,7 +45,9 @@ export abstract class ListAbstract extends Compatibility {
         const parent = where.parent;
         delete  where.parent;
         return this.__callQuery(queryParam, parent).then(({ data, hasMore }) => {
+            this.__logger.log(`query success. create path`);
             return this.__createPath(parent).then((path: RecordSet | void) => {
+                this.__logger.log(`query success`);
                 return new DataSet({
                     rawData: {
                         data,
@@ -54,7 +61,7 @@ export abstract class ListAbstract extends Compatibility {
                 });
             });
         }).catch((error: Error) => {
-            console.log(error);
+            this.__logger.error(error);
             throw error;
         });
     }
@@ -77,6 +84,7 @@ export abstract class ListAbstract extends Compatibility {
     }
 
     private __query(param: QueryParam<IItem, IItemFilter>): Promise<QueryResult<IListItem>> {
+        this.__logger.log('query without parent');
         let _hasMore: boolean;
         return this.__beforeQuery(param).then(() => {
             return this.__items.query(param);
@@ -96,6 +104,7 @@ export abstract class ListAbstract extends Compatibility {
         listItemId: string,
         param: QueryParam<IItem, IItemFilter>
     ): Promise<QueryResult<IListItem>> {
+        this.__logger.log(`query with parent: ${ listItemId }`);
         return this.__items.getItems([itemId]).then(([ item ]: ITransferItem[]) => {
             if (!item) {
                 throw new Error('Не удалось получить данные узела');
@@ -125,6 +134,7 @@ export abstract class ListAbstract extends Compatibility {
         parents: (string | undefined)[],
         param: QueryParam<IItem, IWhere>
     ): Promise<QueryResult<IListItem>> {
+        this.__logger.log(`query with parents: ${ parents } (on update event called)`);
         const querySteps = parents.map((parent?: string) => {
             return () => {
                 return this.__callQuery(param, parent);
@@ -155,13 +165,64 @@ export abstract class ListAbstract extends Compatibility {
         }
     }
     
-    private __beforeQuery({ sortBy }: QueryParam<IItem, IItemFilter>): Promise<void> {
+    /**
+     *
+     */
+    private __updateSizePromise?: Promise<void>;
+    private __beforeQuery(param: QueryParam<IItem, IItemFilter>): Promise<void> {
+        const { where, sortBy, offset } = param;
         if (
-            typeof sortBy.size == 'undefined'
+            typeof sortBy.size == 'undefined' ||
+            offset != 0
         ) {
             return Promise.resolve();
         }
-        return Promise.resolve();
+        this.__logger.log(`query with sort by size & without offset: try to get items without size & set it them`);
+        if (this.__updateSizePromise) {
+            this.__logger.log(`previous request not finished, waiting him`);
+            return this.__updateSizePromise.then(() => {
+                this.__logger.log(`previous request are finished, try get size again`);
+                return this.__beforeQuery(param);
+            });
+        }
+        const _param: Partial<QueryParam<IItem, IItemFilter>> = {
+            where: {
+                ...where,
+                withoutSize: true,
+            }
+        };
+        this.__logger.log(`query items without size`);
+        this.__updateSizePromise = this.__items.query(_param).then(({ data }) => {
+            return Promise.all([
+                getSizes(),
+                this.__items.getItems(data)
+            ]);
+        }).then(([ sizes, items ]: [Record<string, number>, ITransferItem[]]) => {
+            this.__logger.log(`success query items without size: ${ items.length }`);
+            const updates: UpdateItemParam[] = [];
+            items.forEach((item: ITransferItem) => {
+                for (const url in sizes) {
+                    if (url.includes(item.path)) {
+                        const update: UpdateItemParam = {
+                            id: item.id,
+                            size: sizes[url]
+                        };
+                        if (url > item.path) {
+                            update.path = url;
+                        }
+                        updates.push(update);
+                        delete sizes[url];
+                        return;
+                    }
+                }
+            });
+            this.__logger.log(`update items`);
+            return this.__items.updateItems(updates);
+        }).then(() => {
+            this.__logger.log(`complete update items`);
+            delete this.__updateSizePromise;
+        });
+        return this.__updateSizePromise;
     }
     
     private __createPath(parent?: string | string[]): Promise<RecordSet | void> {

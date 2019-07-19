@@ -50,6 +50,7 @@ export class RPCResponse {
 
         rpc.registerMethod(RPCMethodNames.queryItems, this.__items.query.bind(this.__items));
         rpc.registerMethod(RPCMethodNames.getItems, this.__items.getItems.bind(this.__items));
+        rpc.registerMethod(RPCMethodNames.updateItems, this.__items.updateItems.bind(this.__items));
     
         rpc.registerMethod(RPCMethodNames.hasUpdates, this.__modules.hasUpdates.bind(this.__modules));
         rpc.registerMethod(RPCMethodNames.queryFiles, this.__files.query.bind(this.__files));
