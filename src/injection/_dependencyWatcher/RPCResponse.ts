@@ -1,17 +1,16 @@
 import { IConfigWithStorage } from "./IConfig";
 import { RPC } from "Extension/Event/RPC";
-import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
+import { RPCMethodNames, Bundles } from "Extension/Plugins/DependencyWatcher/const";
 import { ModuleStorage } from "./storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
-import { convertToRecord } from "Extension/Plugins/DependencyWatcher/Module";
 import { IModule } from "Extension/Plugins/DependencyWatcher/IModule";
 import { Require } from "./Require";
-import { Bundles } from "Extension/Plugins/DependencyWatcher/EventData";
 import { getFileName } from "./require/getFileName";
 import { FileStorage } from "./storage/File";
 import { RPCMethodsArgs, RPCMethodsResult } from "Extension/Plugins/DependencyWatcher/RPCMethods";
 import { IFile, Stack } from "Extension/Plugins/DependencyWatcher/IFile";
 import { isRelease } from "./require/isRelease";
+import { Item } from "./storage/Item";
 
 interface Config extends IConfigWithStorage{
     rpc: RPC;
@@ -43,31 +42,24 @@ export class RPCResponse {
         this.__files = fileStorage;
         this.__logger = logger;
         this.__require = require;
-
-        rpc.registerMethod(RPCMethodNames.getModules, this.getModules.bind(this));
+        this.__items = new Item(this.__modules, this.__files, this.__require);
         rpc.registerMethod(RPCMethodNames.getUpdates, this.__modules.getUpdates.bind(this.__modules));
         rpc.registerMethod(RPCMethodNames.setSize, this.setSize.bind(this));
-        rpc.registerMethod(RPCMethodNames.getFiles, this.getFiles.bind(this));
         rpc.registerMethod(RPCMethodNames.isRelease, this.isRelease.bind(this));
         rpc.registerMethod(RPCMethodNames.getStacks, this.getStacks.bind(this));
+
+        rpc.registerMethod(RPCMethodNames.queryItems, this.__items.query.bind(this.__items));
+        rpc.registerMethod(RPCMethodNames.getItems, this.__items.getItems.bind(this.__items));
+    
+        rpc.registerMethod(RPCMethodNames.hasUpdates, this.__modules.hasUpdates.bind(this.__modules));
+        rpc.registerMethod(RPCMethodNames.queryFiles, this.__files.query.bind(this.__files));
+        rpc.registerMethod(RPCMethodNames.getFiles, this.__files.getItems.bind(this.__files));
     }
     private __modules: ModuleStorage;
     private __files: FileStorage;
     private __logger: ILogger;
     private __require: Require;
-    private getModules(keys: RPCMethodsArgs[RPCMethodNames.getModules]): RPCMethodsResult[RPCMethodNames.getModules] {
-        const _require = this.__require.getOrigin();
-        const modules = this.__modules.getModules(keys);
-        modules.forEach((module) => {
-            if (!module.fileId) {
-                this.__addFileId(module);
-            }
-            if (!module.defined) {
-                module.defined = _require.defined(module.name);
-            }
-        });
-        return convertToRecord(modules);
-    }
+    private __items: Item;
     private __addFileId(module: IModule) {
         const bundle = findFile(this.__require.getConfig().bundles, module.name) || '';
         const name = getFileName(
@@ -90,9 +82,6 @@ export class RPCResponse {
         }
         file.size = size;
         return true;
-    }
-    private getFiles(idList?: number[]): IFile[] {
-        return this.__files.getItems(idList)
     }
     private isRelease(): boolean {
         return isRelease(this.__require.getConfig().buildMode);

@@ -11,7 +11,7 @@ export class Storage<TItem extends Item = Item, TIndex = unknown> implements ISt
         return this._idMap.get(id);
     }
     getItemByIndex(index: TIndex): TItem | void  {
-        return this._indexMap.get(name);
+        return this._indexMap.get(index);
     }
 
     getItems(): TItem[] {
@@ -49,7 +49,7 @@ export class Storage<TItem extends Item = Item, TIndex = unknown> implements ISt
         return this._idMap.has(id);
     }
     hasIndex(index: TIndex): boolean {
-        return this._indexMap.has(name);
+        return this._indexMap.has(index);
     }
 
     add(item: TItem): void {

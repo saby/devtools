@@ -3,7 +3,7 @@ import { FileStorage } from "./File";
 import { IModule } from "Extension/Plugins/DependencyWatcher/IModule";
 import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
 import { QueryParam, QueryResult } from "Extension/Plugins/DependencyWatcher/data/IQuery";
-import { IItem, IItemFilter, ITransferItem } from "Extension/Plugins/DependencyWatcher/IItem";
+import { IItem, IItemFilter, ITransferItem, UpdateItemParam } from "Extension/Plugins/DependencyWatcher/IItem";
 import { getFileName } from "../require/getFileName";
 import { Require } from "../Require";
 import { applyPaging } from "Extension/Plugins/DependencyWatcher/data/applyPaging";
@@ -54,6 +54,29 @@ export class Item {
                 }
             }
         })
+    }
+    updateItem(param: UpdateItemParam): boolean {
+        const module = this.__modules.getItem(param.id);
+        if (!module) {
+            return false;
+        }
+        const { fileName, size, path } = param;
+        if (!(fileName || size || path)) {
+            return false;
+        }
+        let file = this.__files.getItem(<number> module.fileId);
+        if (!file) {
+            return false;
+        }
+        file.name = fileName || file.name;
+        file.size = size || file.size;
+        file.path = path || file.path;
+        return true;
+    }
+    updateItems(params: UpdateItemParam[]): boolean[] {
+        return params.map((param) => {
+            return this.updateItem(param);
+        });
     }
     private __getItems(keys?: number[]): IItem[] {
         let modules = this.__modules.getModules(keys);

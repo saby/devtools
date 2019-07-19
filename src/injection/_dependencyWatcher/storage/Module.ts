@@ -60,12 +60,21 @@ export class ModuleStorage {
             type
         );
     }
-
+    getItem(id: number): IModule | void {
+       return this.__storage.getItemById(id);
+    }
     getModules(keys?: number[]): IModule[] {
         this.__modulesReaded = true;
         return this.__storage.getItemsById(keys);
     }
-
+    hasUpdates(keys: number[]): boolean[] {
+        const result: boolean[] = [];
+        keys.forEach((key: number) => {
+           result.push(this.__updates.has(key));
+            this.__updates.delete(key);
+        });
+        return result;
+    }
     getUpdates(): number[] {
         const updates = [...this.__updates];
         this.__updates.clear();

@@ -1,4 +1,4 @@
-import { IModule, IModuleFilter, ITransferModule, ModuleInfo } from "./IModule";
+import { IModule, IModuleFilter, ITransferModule, ModuleId, ModuleInfo } from "./IModule";
 
 interface IFileInfo {
     fileName: string;
@@ -20,4 +20,8 @@ export interface ITransferItem extends IItemInfo, ITransferModule {
 
 export interface IItemFilter extends IModuleFilter {
 
+}
+
+export type UpdateItemParam = ModuleId & {
+    [key in keyof IFileInfo]: IFileInfo[key];
 }

@@ -8,7 +8,7 @@ export interface QueryParam<
     TData extends object,
     TWhere extends object = object,
 > extends Paging {
-    keys: number[];
+    keys?: number[];
     sortBy: SortBy<TData>;
     where: Partial<TWhere>;
 }
