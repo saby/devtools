@@ -30,13 +30,26 @@ interface IExecuteConfig<TArgs> {
     args?: TArgs;
 }
 
+interface WaitingRequests {
+    resolve(result: any): void;
+    methodName: string;
+}
+interface RPCError extends Error {
+    methodName: string;
+    code: number;
+}
+
+const getDefaultMessage = (method: string, code: number) => {
+    return `RPC call method "${ method }" error[${ code }]`;
+};
+
 /**
  * RPC источник данных, работающий поверх канала сообщений
  */
 export class RPC {
     private __methods: Map<string, Method> = new Map();
     private __channel: IEventEmitter;
-    private __waitingRequests: Map<string, (result: any) => void > = new Map();
+    private __waitingRequests: Map<string, WaitingRequests > = new Map();
     private __waitingTimeout: Map<string, number> = new Map();
     private __requestEvent = 'data-request';
     private __responseEvent = 'data-response';
@@ -61,7 +74,7 @@ export class RPC {
     } : IExecuteConfig<TArg>): Promise<TRes> {
         return new Promise<TRes>((resolve, reject) => {
             let id: string = guid();
-            this.__waitingRequests.set(id, resolve);
+            this.__waitingRequests.set(id, { resolve, methodName });
             // @ts-ignore
             let timer: number = setTimeout(() => {
                 reject(new Error('timeout'));
@@ -83,21 +96,26 @@ export class RPC {
         this.__methods.set(methodName, method);
     }
     private __responseHandler({ id, error, result }: IMessageResponse) {
-        let resolve = this.__waitingRequests.get(id);
+        const waiting = this.__waitingRequests.get(id);
+        if (!waiting) {
+            return;
+        }
+
+        const { resolve, methodName } = waiting;
         this.__waitingRequests.delete(id);
         clearTimeout(this.__waitingTimeout.get(id));
         this.__waitingTimeout.delete(id);
-        
-        if (!resolve) {
-            return;
-        }
+
         if (!error) {
             resolve(result);
             return;
         }
-        let resultError = new Error(error.message);
-        //@ts-ignore
+        let resultError = <RPCError> new Error(
+            error.message ||
+            getDefaultMessage(methodName, error.code)
+        );
         resultError.code = error.code;
+        resultError.methodName = methodName;
         resolve(Promise.reject(resultError));
     }
     private __onResponse: (response: IMessageResponse) => void;
