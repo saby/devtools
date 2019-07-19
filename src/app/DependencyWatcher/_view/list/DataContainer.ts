@@ -2,7 +2,7 @@
 import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
-import { source, types } from "../../data";
+import { source } from "../../data";
 import { columns, Columns } from "./column";
 import { getFilterItems } from "../filter";
 import { headers, Headers } from "./header";
@@ -17,11 +17,11 @@ type Children = {
 }
 
 interface SourceConstructor {
-    new(cfg: source.IConfig): source.Abstract;
+    new(cfg: source.IListConfig): source.ListAbstract;
 }
 
 interface IConfig {
-    sourceConfig: source.IConfig;
+    sourceConfig: source.IListConfig;
     Source: SourceConstructor;
     navigation: object;
     modeController?: Control;
@@ -39,9 +39,9 @@ export default class Main extends Control {
     private __itemActions: ItemAction[];
     private __sorting: {[key: string]: 'desc' | 'asc'}[] = [];
     private __navigation: object;
-    private __source: source.Abstract;
+    private __source: source.ListAbstract;
     protected _filterItems: FilterItem[];
-    protected _filter: types.IFilterData = {};
+    protected _filter: source.IWhere = {};
     constructor(cfg: IConfig) {
         super(cfg);
         this.__source = new cfg.Source(cfg.sourceConfig);
@@ -80,7 +80,7 @@ export default class Main extends Control {
             this._children.listView.reload();
         }
     }
-    private __setFilter(filter: Partial<types.IFilterData>) {
+    private __setFilter(filter: source.IWhere) {
         const id = Math.random();
         this._filter = {
             ...filter,

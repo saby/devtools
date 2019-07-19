@@ -1,4 +1,5 @@
 import * as source from './_data/source';
-import * as types from './_data/types';
+import * as storage from './_data/storage';
 
-export { source, types };
+export { source, storage };
+export { IListItem } from './_data/IListItem';

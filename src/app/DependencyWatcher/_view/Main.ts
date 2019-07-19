@@ -13,6 +13,7 @@ import { List } from "./list/List";
 import { ContentChannel } from "../../Devtool/Event/ContentChannel";
 import { Memory } from 'Types/source';
 import { Model } from 'Types/entity';
+import { storage, source } from "../data";
 
 let getList = (viewMode: ViewMode) => {
     switch (viewMode) {
@@ -25,11 +26,19 @@ let getList = (viewMode: ViewMode) => {
     }
 };
 
-let getSourceConfig = (channel: IEventEmitter) => {
+let getSourceConfig = (channel: IEventEmitter): source.IListConfig => {
     return {
-        rpc: new RPC({
+        itemStorage: new storage.Item(new RPC({
             channel
-        }),
+        })),
+        defaultFilters: {
+            css:  false,
+            json: false,
+            i18n: false
+        },
+        ignoreFilters: {
+            parent: ['fileId']
+        },
         idProperty: 'id',
         parentProperty: 'parent'
     };
