@@ -14,6 +14,8 @@ import { ContentChannel } from "../../Devtool/Event/ContentChannel";
 import { Memory } from 'Types/source';
 import { Model } from 'Types/entity';
 import { storage, source } from "../data";
+import { ILogger, INamedLogger } from "Extension/Logger/ILogger";
+import { ConsoleLogger } from "Extension/Logger/Console";
 
 let getList = (viewMode: ViewMode) => {
     switch (viewMode) {
@@ -26,7 +28,7 @@ let getList = (viewMode: ViewMode) => {
     }
 };
 
-let getSourceConfig = (channel: IEventEmitter): source.IListConfig => {
+let getSourceConfig = (channel: IEventEmitter, logger: ILogger): source.IListConfig => {
     return {
         itemStorage: new storage.Item(new RPC({
             channel
@@ -37,8 +39,9 @@ let getSourceConfig = (channel: IEventEmitter): source.IListConfig => {
             i18n: false
         },
         ignoreFilters: {
-            parent: ['fileId']
+            parent: ['fileId', 'dependentOnFile']
         },
+        logger,
         idProperty: 'id',
         parentProperty: 'parent'
     };
@@ -51,6 +54,8 @@ interface IChildren {
 export default class Main extends Control {
     protected readonly _template = template;
     protected readonly _children: IChildren;
+    private __sourceConfig: source.IListConfig;
+    private __logger: INamedLogger = new ConsoleLogger('DependencyWatcher');
     private __viewMode: ViewMode = ViewMode.dependent;
     private __list: Control = getList(this.__viewMode);
     private __channel: IEventEmitter = new ContentChannel(PLUGIN_NAME);
@@ -74,8 +79,11 @@ export default class Main extends Control {
     constructor(...args: unknown[]) {
         super(...args);
         this.__addListener();
+        this.__sourceConfig = getSourceConfig(
+            this.__channel,
+            this.__logger.create('source')
+        )
     }
-    private __sourceConfig = getSourceConfig(this.__channel);
     private __changeView(event: unknown, model: Model) {
         const mode: ViewMode = model.getId();
         if (this.__viewMode == mode) {
