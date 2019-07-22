@@ -1,4 +1,4 @@
-<ws:if data="{{ !itemData.item['defined'] }}">
+<ws:if data="{{ !itemData.item['initialized'] }}">
     <Controls.popup:InfoboxTarget attr:style="width: 100%;">
         <ws:content>
             <div class="icon-small icon-Alert icon-attention"></div>
@@ -7,7 +7,7 @@
             <p>
                 <h1>{[Неиспользуемый модуль]}</h1>
                 <h2>
-                    Возможно модуль был загружен в общем с другими модулями файле
+                    Возможно модуль был загружен в общем бандле
                 </h2>
                 <h3>
                     Попробуйте отфильтровать данные по файлу <ws:if data="{{ itemData.item['fileName'] }}">"{{ itemData.item['fileName'] }}"</ws:if> и посмотреть кто его загрузил

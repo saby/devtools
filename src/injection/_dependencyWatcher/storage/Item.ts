@@ -85,8 +85,8 @@ export class Item {
             if (!module.fileId) {
                 this.__addFileId(module);
             }
-            if (!module.defined) {
-                module.defined = _require.defined(module.name);
+            if (!module.initialized) {
+                module.initialized = _require.defined(module.name);
             }
         });
         return modules.map<IItem>((module: IModule) => {

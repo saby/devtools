@@ -37,13 +37,14 @@ export class ModuleStorage {
     define(name: string, dependencies: string[], moduleData: unknown): void {
         let module = this.__get(name);
         if (typeof moduleData !== 'function') {
-            module.defined = true;
+            module.initialized = true;
         }
+        module.defined = true;
         this.__addDeps(module, dependencies, DependencyType.static);
     }
     initModule(name: string): void {
         let module = this.__get(name);
-        module.defined = true;
+        module.initialized = true;
         if (this.__modulesReaded) {
             this.__updates.add(module.id);
             this.__onupdate(module.id);

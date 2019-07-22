@@ -1,11 +1,11 @@
-import { ListItem } from "../../_data/types";
 // @ts-ignore
 import * as pathTemplate from 'wml!DependencyWatcher/template/column/file';
 // @ts-ignore
-import * as definedTemplate from 'wml!DependencyWatcher/template/column/defined';
+import * as definedTemplate from 'wml!DependencyWatcher/template/column/initialized';
 // @ts-ignore
 import * as isDynamicTemplate from 'wml!DependencyWatcher/template/column/isDynamic';
 import SizeTemplate from "./column/Size";
+import { IListItem } from "../../data";
 
 /**
  * @typedef {Object} IColumn
@@ -18,7 +18,7 @@ import SizeTemplate from "./column/Size";
  * @property {String} [stickyProperty] The name of the field used to sticking the column data.
  * @property {TextOverflow} [textOverflow] Defines the visibility parameters of the text in the block, if the entire text does not fit in the specified area.
  */
-export interface IColumn<TItem extends ListItem = ListItem> {
+export interface IColumn<TItem extends IListItem = IListItem> {
     displayProperty: keyof TItem;
     width: string;
     align: string;
@@ -29,7 +29,7 @@ export interface IColumn<TItem extends ListItem = ListItem> {
 }
 
 export type Columns<
-    TItem extends ListItem = ListItem,
+    TItem extends IListItem = IListItem,
     TColumn extends IColumn<TItem> = IColumn<TItem>
 > = Array<Partial<TColumn>>
 
@@ -47,7 +47,7 @@ export const isDynamic: Partial<IColumn> = {
     align: 'center',
     template: isDynamicTemplate
 };
-export const defined: Partial<IColumn> = {
+export const initialized: Partial<IColumn> = {
     width: '55px',
     align: 'center',
     template: definedTemplate
@@ -63,6 +63,6 @@ export const columns: Columns = [
     name,
     fileName,
     isDynamic,
-    defined,
+    initialized,
     size
 ];

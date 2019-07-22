@@ -22,10 +22,10 @@ export const isDynamic: IHeader = {
     title: '',
     align: 'center'
 };
-export const defined: IHeader = {
+export const initialized: IHeader = {
     title: rk('used'),
     align: 'center',
-    sortingProperty: "defined"
+    sortingProperty: "initialized"
 };
 export const size: IHeader = {
     title: rk('size'),
@@ -37,6 +37,6 @@ export const headers: Headers = [
     name,
     fileName,
     isDynamic,
-    defined,
+    initialized,
     size
 ];

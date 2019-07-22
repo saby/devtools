@@ -155,9 +155,9 @@ export abstract class ListAbstract extends Compatibility {
         parent?: string,
         isDynamic: boolean = false
     ): IListItem {
-        const { name, id, defined, fileName, fileId, path, size } = item;
+        const { name, id, defined, initialized,  fileName, fileId, path, size } = item;
         return {
-            name, defined, fileName, fileId, path, size,
+            name, defined, fileName, fileId, path, size, initialized,
             isDynamic,
             parent,
             id: createId(id, parent),

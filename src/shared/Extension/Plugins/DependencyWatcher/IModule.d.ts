@@ -19,6 +19,7 @@ export interface ModuleInfo {
     name: string
     fileId?: number;
     defined: boolean;
+    initialized: boolean;
 }
 
 interface ModuleData<TCollection> extends ModuleInfo, ModuleId, ModuleDependencies<TCollection> {
@@ -45,5 +46,5 @@ export interface IModuleFilter {
     json: boolean;
     i18n: boolean;
     name: string;
-    fileId: number;
+    file: { id: number, name: string };
 }
