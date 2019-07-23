@@ -1,5 +1,4 @@
 import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
-import { ModulesRecord, ITransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
 import {
     IFile,
     IFileFilter,
@@ -22,12 +21,6 @@ export interface RPCMethodsArgs extends Record<RPCMethodNames, unknown> {
     [RPCMethodNames.updateItem]: UpdateItemParam;
     [RPCMethodNames.updateItems]: UpdateItemParam[];
     // File
-    [RPCMethodNames.getStacks]: number[];
-    [RPCMethodNames.setSize]: {
-        size: number;
-        fileId: number;
-        // fileName?: string;
-    }
     [RPCMethodNames.updateFile]: UpdateFileParam;
     [RPCMethodNames.updateFiles]: UpdateFileParam[];
     [RPCMethodNames.getFiles]: number[];
@@ -38,7 +31,6 @@ export interface RPCMethodsArgs extends Record<RPCMethodNames, unknown> {
 
 export interface RPCMethodsResult extends Record<RPCMethodNames, unknown> {
     // Modules
-    [RPCMethodNames.getModules]: ModulesRecord<ITransferModule>;
     [RPCMethodNames.getUpdates]: number[];
     [RPCMethodNames.hasUpdates]: boolean[];
     // Items
@@ -47,10 +39,8 @@ export interface RPCMethodsResult extends Record<RPCMethodNames, unknown> {
     [RPCMethodNames.updateItem]: boolean;
     [RPCMethodNames.updateItems]: boolean[];
     // File
-    [RPCMethodNames.setSize]: boolean;
     [RPCMethodNames.updateFile]: boolean;
     [RPCMethodNames.updateFiles]: boolean[];
-    [RPCMethodNames.getStacks]: Record<number, Stack>;
     [RPCMethodNames.getFiles]: ITransportFile[];
     [RPCMethodNames.queryFiles]: QueryResult<number>;
     // other

@@ -17,9 +17,7 @@ export enum RPCMethodNames {
     updateItem = 'updateItem',
     updateItems = 'updateItems',
     // File
-    setSize = 'setSize',
     getFiles = 'getFiles',
-    getStacks = 'getStacks',
     queryFiles = 'queryFiles',
     updateFile = 'updateFile',
     updateFiles = 'updateFiles',
@@ -40,6 +38,3 @@ export enum DependencyType {
     static = "static",
     dynamic = "dynamic"
 }
-
-export type Bundle = string[];
-export type Bundles = Record<string, Bundle>
