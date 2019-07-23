@@ -1,4 +1,4 @@
-import { IDependencies, IModule, ModulesMap } from "Extension/Plugins/DependencyWatcher/IModule";
+import { IDependencies } from "Extension/Plugins/DependencyWatcher/IModule";
 import { ListAbstract } from "./ListAbstract";
 import { ITransferItem } from "Extension/Plugins/DependencyWatcher/IItem";
 
