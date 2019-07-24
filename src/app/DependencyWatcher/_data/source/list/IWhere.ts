@@ -1,7 +1,5 @@
-import { IItemFilter } from "Extension/Plugins/DependencyWatcher/IItem";
-
-export interface IWhere extends Partial<IItemFilter> {
+export type IWhere<TFilter extends object> = Partial<TFilter> & {
     parent?: string | string[];
 }
 
-export type IWhereKey = keyof IWhere;
+export type IWhereKey<TFilter extends object> = keyof IWhere<TFilter>;

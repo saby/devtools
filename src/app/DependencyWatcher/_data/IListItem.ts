@@ -5,4 +5,5 @@ export interface IListItem extends IItemInfo {
     parent?: string;
     isDynamic?: boolean;
     child: boolean | null;
+    itemId: number;
 }

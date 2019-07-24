@@ -1,20 +1,64 @@
-<ws:partial
-    name="listContainer"
-    template="{{ __list }}"
-    sourceConfig="{{ __sourceConfig }}"
+<Controls.filter:Controller
+    filterButtonSource="{{ _filterButtonSource }}"
+    filter="{{ _filter }}"
 >
-    <ws:modeController>
-        <Controls.dropdown:Button
-            displayProperty="caption"
-            viewMode="link"
-            caption="{{ _caption }}"
-            tooltip="{[Режим отображения]}: {{ _title }}"
-            source="{{ _modeSource }}"
-            keyProperty="id"
-            navigation="{{ null }}"
-            filter="{{ null }}"
-            on:menuItemActivate="__changeView()"
-        />
-<!--        filter и navigation == null для того чтобы компонент не подсасывал эти значения из контейнера, в который мы его встраиваем-->
-    </ws:modeController>
-</ws:partial>
+    <Controls.list:DataContainer
+        source="{{ _source }}"
+        keyProperty="id"
+        parentProperty="parent"
+        navigation="{{ _navigation }}"
+        virtualScrolling="{{ true }}"
+    >
+        <Controls.search:Controller searchParam="name" minSearchLength="{{ 3 }}">
+            <div class="DependencyWatcher_Page">
+                <div class="DependencyWatcher_Page__head">
+                    <Controls.dropdown:Button
+                        displayProperty="caption"
+                        viewMode="link"
+                        caption="{{ _modeCaption }}"
+                        tooltip="{[Режим отображения]}: {{ _modeTitle }}"
+                        source="{{ _modeSource }}"
+                        keyProperty="id"
+                        navigation="{{ null }}"
+                        filter="{{ null }}"
+                        on:menuItemActivate="_changeView()"
+                    />
+                    <Controls.search:InputContainer>
+                        <Controls.search:Input/>
+                    </Controls.search:InputContainer>
+                    <Controls.filter:ButtonContainer>
+                        <Controls.filter:View
+                            detailPanelTemplateName="DependencyWatcher/view:filter.Panel"
+                        />
+                    </Controls.filter:ButtonContainer>
+                </div>
+
+                <Controls.scroll:Container
+                    attr:class="DependencyWatcher_Page__scroll"
+                >
+                    <Controls.list:Container>
+                        <Controls.explorer:View
+                            name="listView"
+                            bind:root="_root"
+                            bind:sorting="_sorting"
+                            displayProperty="name"
+                            nodeProperty="child"
+                            columns="{{ _column }}"
+                            header="{{ _headers }}"
+                            columnScroll="{{ true }}"
+                            contextMenuVisibility="{{ true }}"
+                            itemActions="{{ _itemActions }}"
+                            itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
+                        >
+                            <ws:emptyTemplate>
+                                <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xxl" bottomSpacing="m">
+                                    <ws:contentTemplate>No data available!</ws:contentTemplate>
+                                </ws:partial>
+                            </ws:emptyTemplate>
+                        </Controls.explorer:View>
+                    </Controls.list:Container>
+                </Controls.scroll:Container>
+            </div>
+        </Controls.search:Controller>
+    </Controls.list:DataContainer>
+</Controls.filter:Controller>

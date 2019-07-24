@@ -1,35 +1,37 @@
 import { Query as TypesQuery } from "Types/source";
 import { QueryParam, SortBy } from "Extension/Plugins/DependencyWatcher/data/IQuery";
-import { IItem, IItemFilter, IItemInfo } from "Extension/Plugins/DependencyWatcher/IItem";
 import { IWhere, IWhereKey } from "./IWhere";
-import { DefaultFilters, IgnoreFilters } from "../IList";
 
-export const getQueryParam = (
+export type IgnoreFilters<TData extends object> = Partial<Record<IWhereKey<TData>, IWhereKey<TData>[]>>;
+
+export type DefaultFilters<TData extends object> = Partial<TData>;
+
+export const getQueryParam = <TData extends object>(
     query: TypesQuery,
     keys?: number[],
-    ignoreFilters: IgnoreFilters = {},
-    defaultFilters: DefaultFilters = {}
-): QueryParam<IItem, IWhere> => {
-    const sortBy: SortBy<IItemInfo> = {};
+    ignoreFilters: IgnoreFilters<TData> = {},
+    defaultFilters: DefaultFilters<TData> = {}
+): QueryParam<TData, IWhere<TData>> => {
+    const sortBy: SortBy<TData> = {};
     query.getOrderBy().forEach((order) => {
-        sortBy[<keyof IItemInfo> order.getSelector()] = !!order.getOrder();
+        sortBy[<keyof TData> order.getSelector()] = !!order.getOrder();
     });
-    const where = <IWhere> {
+    const where = <IWhere<TData>> {
         ...defaultFilters,
         ...query.getWhere()
     };
     for (let filterKey in ignoreFilters) {
         if (!where.hasOwnProperty(filterKey) ||
-            where[ <IWhereKey> filterKey] === null ||
-            where[ <IWhereKey> filterKey] === undefined
+            where[ <IWhereKey<TData>> filterKey] === null ||
+            where[ <IWhereKey<TData>> filterKey] === undefined
         ) {
             continue;
         }
-        let ignore = ignoreFilters[<IWhereKey> filterKey];
+        let ignore = ignoreFilters[<IWhereKey<TData>> filterKey];
         if (!ignore) {
             continue;
         }
-        ignore.forEach((ignore: IWhereKey) => {
+        ignore.forEach((ignore: IWhereKey<TData>) => {
             delete where[ignore];
         });
     }

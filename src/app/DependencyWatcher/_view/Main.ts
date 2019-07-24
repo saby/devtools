@@ -2,97 +2,79 @@
 import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_view/main/Main';
-import { ViewMode } from "../const";
-import { RPC } from "Extension/Event/RPC";
-import { default as Dependency } from "./dependency/List";
-import { default as Dependent } from "./dependent/List";
+import { RPC } from 'Extension/Event/RPC';
 import 'css!DependencyWatcher/_view/main/Main';
-import { IEventEmitter } from "Extension/Event/IEventEmitter";
-import { EventNames, PLUGIN_NAME } from "Extension/Plugins/DependencyWatcher/const";
-import { List } from "./list/List";
-import { ContentChannel } from "../../Devtool/Event/ContentChannel";
+import { IEventEmitter } from 'Extension/Event/IEventEmitter';
+import { EventNames, PLUGIN_NAME, RPCMethodNames } from 'Extension/Plugins/DependencyWatcher/const';
+import { ContentChannel } from '../../Devtool/Event/ContentChannel';
 import { Memory } from 'Types/source';
 import { Model } from 'Types/entity';
-import { storage, source } from "../data";
-import { ILogger, INamedLogger } from "Extension/Logger/ILogger";
-import { ConsoleLogger } from "Extension/Logger/Console";
-
-let getList = (viewMode: ViewMode) => {
-    switch (viewMode) {
-        case ViewMode.dependency: {
-            return Dependency;
-        }
-        case ViewMode.dependent: {
-            return Dependent;
-        }
-    }
-};
-
-let getSourceConfig = (channel: IEventEmitter, logger: ILogger): source.IListConfig => {
-    return {
-        itemStorage: new storage.Item(new RPC({
-            channel
-        })),
-        defaultFilters: {
-            css:  false,
-            json: false,
-            i18n: false
-        },
-        ignoreFilters: {
-            parent: ['fileId', 'dependentOnFile']
-        },
-        logger,
-        idProperty: 'id',
-        parentProperty: 'parent'
-    };
-};
+import { source, storage } from '../data';
+import { INamedLogger } from 'Extension/Logger/ILogger';
+import { ConsoleLogger } from 'Extension/Logger/Console';
+import { navigation } from './list/navigation';
+import { columns, Columns } from './list/column';
+import { headers, Headers } from './list/header';
+import { IItemFilter } from 'Extension/Plugins/DependencyWatcher/IItem';
+import { file, FilterItem, getButtonSource } from './filter/getButtonSource';
+import { getItemActions, ItemAction, ItemActionNames, visibilityCallback } from './list/getItemActions';
+import { ViewMode } from './main/ViewMode';
+import { getTabConfig, tabs } from './main/Tabs';
 
 interface IChildren {
-    listContainer: List;
+    listView: Control;
 }
 
 export default class Main extends Control {
     protected readonly _template = template;
     protected readonly _children: IChildren;
+    protected readonly _column: Columns = columns;
+    protected readonly _headers: Headers = headers;
+    protected readonly _navigation = navigation;
+    protected readonly _itemActionVisibilityCallback = visibilityCallback;
+    protected readonly _modeSource: Memory = tabs;
+    protected _filterButtonSource: FilterItem[];
+    protected _filter: source.IWhere<IItemFilter>;
+    protected _source: source.ListAbstract;
+    protected _root?: string;
+    protected _sorting?: object;
+    protected _itemActions: ItemAction[];
+    protected _modeCaption: string;
+    protected _modeTitle: string;
+    private __viewMode: ViewMode;
+    private readonly __rpc: RPC;
+    
     private __sourceConfig: source.IListConfig;
     private __logger: INamedLogger = new ConsoleLogger('DependencyWatcher');
-    private __viewMode: ViewMode = ViewMode.dependent;
-    private __list: Control = getList(this.__viewMode);
     private __channel: IEventEmitter = new ContentChannel(PLUGIN_NAME);
-    private _caption: string = 'Dependent';
-    private _title: string = 'Зависимые модули';
-    private _modeSource = new Memory({
-        data: [
-            {
-                id: ViewMode.dependency,
-                caption: 'Dependency',
-                title: 'Зависимости модулей',
-            }, {
-                id: ViewMode.dependent,
-                caption: 'Dependent',
-                title: 'Зависимые модули',
-            }
-        ],
-        idProperty: 'id'
-    });
-    
+
     constructor(...args: unknown[]) {
         super(...args);
+        this.__rpc = new RPC({ channel: this.__channel });
+        storage.setFileStorage(new storage.File(this.__rpc));
+        this._filterButtonSource = getButtonSource({
+            /*fileSource: new source.File({
+                rpc: cfg.sourceConfig.rpc
+            })*/
+        });
         this.__addListener();
-        this.__sourceConfig = getSourceConfig(
-            this.__channel,
-            this.__logger.create('source')
-        )
+        this.__setItemActions();
+        this.__initSourceConfig();
+        this.__changeView(ViewMode.dependent);
     }
-    private __changeView(event: unknown, model: Model) {
-        const mode: ViewMode = model.getId();
+    private __changeView(mode: ViewMode) {
         if (this.__viewMode == mode) {
             return;
         }
-        this._caption = model.get('caption');
-        this._title = model.get('title');
         this.__viewMode = mode;
-        this.__list = getList(mode);
+        const config = getTabConfig(mode);
+        this._modeCaption = config.caption;
+        this._modeTitle = config.title;
+        this._source = new config.Source(this.__sourceConfig);
+    }
+    protected _changeView(event: unknown, model: Model) {
+        const mode: ViewMode = model.getId();
+        this.__changeView(mode);
     }
     private __addListener() {
         this.__onUpdateHandler = this.__onUpdate.bind(this);
@@ -100,13 +82,84 @@ export default class Main extends Control {
     }
     private __onUpdateHandler: () => void;
     private __onUpdate(...args: unknown[]) {
-        if (this._children.listContainer) {
-            this._children.listContainer.update(...args);
+        if (this._children.listView) {
+            this._children.listView.reload();
         }
     }
     protected _beforeUnmount() {
         this.__channel.removeListener(EventNames.update, this.__onUpdateHandler);
         this.__channel.destructor();
         delete this.__channel;
+    }
+
+    private __setItemActions() {
+        this._itemActions = getItemActions({
+            [ItemActionNames.file]: (model: Model) => {
+                const fileData = {
+                    id: model.get('fileId'),
+                    name: model.get('fileName')
+                };
+                this.__setFilter({
+                    parent: undefined,
+                    file: fileData
+                });
+                this._root = undefined;
+                file.value = fileData;
+                //@ts-ignore
+                file.textValue = fileData.name;
+                let items = getButtonSource({});
+                items.push(file);
+                this._filterButtonSource = items;
+            },
+            [ItemActionNames.dependentOnFile]: (model: Model) => {
+                this.__setFilter({
+                    parent: undefined,
+                    dependentOnFile: model.get('fileId')
+                });
+                this._root = undefined;
+                // this._filterItems.push(fileId);
+            },
+            [ItemActionNames.openSource]: (model: Model) => {
+                this.__rpc.execute<boolean, number>({
+                    methodName: RPCMethodNames.openSource,
+                    args: model.get('itemId')
+                }).then((result: boolean) => {
+                    if (!result) {
+                        return;
+                    }
+                    chrome.devtools.inspectedWindow.eval(
+                        'inspect(window.__WASABY_DEV_MODULE__)'
+                    );
+                })
+            }
+        });
+    }
+
+    private __setFilter(filter: source.IWhere<IItemFilter>) {
+        const id = Math.random();
+        this._filter = {
+            ...filter,
+            //@ts-ignore
+            getVersion() {
+                return id;
+            }
+        }
+    }
+
+    private __initSourceConfig() {
+        this.__sourceConfig = {
+            itemStorage: new storage.Item(this.__rpc),
+            defaultFilters: {
+                css:  false,
+                json: false,
+                i18n: false
+            },
+            ignoreFilters: {
+                parent: ['file', 'dependentOnFile']
+            },
+            logger: this.__logger.create('source'),
+            idProperty: 'id',
+            parentProperty: 'parent'
+        }
     }
 }

@@ -1,18 +1,24 @@
 import { Item } from "../storage/Item";
 import { DataSet, Query as TypesQuery } from "Types/source";
-import { IItem, IItemFilter, ITransferItem, UpdateItemParam } from "Extension/Plugins/DependencyWatcher/IItem";
+import {
+    IItem,
+    IItemFilter,
+    IItemInfo,
+    ITransferItem,
+    UpdateItemParam
+} from "Extension/Plugins/DependencyWatcher/IItem";
 import { QueryParam, QueryResult } from "Extension/Plugins/DependencyWatcher/data/IQuery";
 import { IListItem } from "../IListItem";
 import { createId, getAll, getId } from "./util/id";
 import { IDependencies } from "Extension/Plugins/DependencyWatcher/IModule";
 import { Compatibility } from './Compatibility';
 import { IWhere } from "./list/IWhere";
-import { getQueryParam } from "./list/getQueryParam";
+import { DefaultFilters, getQueryParam, IgnoreFilters } from "./list/getQueryParam";
 import { hasChildren } from "./list/hasChildren";
 import { GLOBAL_MODULE_NAME } from "Extension/Plugins/DependencyWatcher/const";
 import { queue } from "Extension/Utils/queue";
 import { RecordSet } from "Types/collection";
-import { IListConfig, DefaultFilters, IgnoreFilters } from "./IList";
+import { IListConfig } from "./IList";
 import { getSizes } from "./util/getSizes";
 import { ILogger } from "Extension/Logger/ILogger";
 
@@ -22,8 +28,8 @@ let filterGlobal = (item: ITransferItem): boolean => {
 
 export abstract class ListAbstract extends Compatibility {
     private __items: Item;
-    private __defaultFilters: DefaultFilters;
-    private __ignoreFilters: IgnoreFilters;
+    private __defaultFilters: DefaultFilters<IItemFilter>;
+    private __ignoreFilters: IgnoreFilters<IItemFilter>;
     private __logger: ILogger;
     constructor(config: IListConfig) {
         super(config);
@@ -35,7 +41,7 @@ export abstract class ListAbstract extends Compatibility {
     
     query(query: TypesQuery): Promise<DataSet> {
         this.__logger.log('start query');
-        const queryParam = getQueryParam(
+        const queryParam = getQueryParam<IItemFilter>(
             query,
             undefined,
             this.__ignoreFilters,
@@ -132,7 +138,7 @@ export abstract class ListAbstract extends Compatibility {
 
     private __queryItems(
         parents: (string | undefined)[],
-        param: QueryParam<IItem, IWhere>
+        param: QueryParam<IItem, IWhere<IItemInfo>>
     ): Promise<QueryResult<IListItem>> {
         this.__logger.log(`query with parents: ${ parents } (on update event called)`);
         const querySteps = parents.map((parent?: string) => {
@@ -160,6 +166,7 @@ export abstract class ListAbstract extends Compatibility {
             name, defined, fileName, fileId, path, size, initialized,
             isDynamic,
             parent,
+            itemId: id,
             id: createId(id, parent),
             child: hasChildren(this._getChildren(item))
         }

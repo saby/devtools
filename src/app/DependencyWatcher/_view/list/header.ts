@@ -1,14 +1,14 @@
-import { ListItem } from "../../_data/types";
 // @ts-ignore
 import { rk } from 'Core/i18n';
+import { IListItem } from "../../data";
 
-export interface IHeader<TItem extends ListItem = ListItem> {
+export interface IHeader<TItem extends IListItem = IListItem> {
     title: string;
     align?: string;
     sortingProperty?: keyof TItem;
 }
 
-export type Headers<TItem extends ListItem = ListItem> = Array<IHeader>
+export type Headers<TItem extends IListItem = IListItem> = Array<IHeader<TItem>>
 
 export const name: IHeader = {
      title: rk('name'),
