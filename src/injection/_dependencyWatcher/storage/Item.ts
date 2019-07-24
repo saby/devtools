@@ -13,6 +13,7 @@ import applyWhere from "Extension/Plugins/DependencyWatcher/data/applyWhere";
 import findFile from "./item/findFile";
 import itemsSort from "Extension/Plugins/DependencyWatcher/data/sort/itemsSort";
 import itemFilters from "Extension/Plugins/DependencyWatcher/data/filter/itemFilters";
+import { ILogger } from "Extension/Logger/ILogger";
 
 let _toArray = (set: Set<IModule>): number[] => {
     return [...set].map(module => module.id)
@@ -22,7 +23,8 @@ export class Item {
     constructor(
         private __modules: ModuleStorage,
         private __files: FileStorage,
-        private __require: Require
+        private __require: Require,
+        private __logger: ILogger
     ) {
     
     }
@@ -87,6 +89,10 @@ export class Item {
             }
             if (!module.initialized) {
                 module.initialized = _require.defined(module.name);
+            }
+            if (module.initialized && !module.defined) {
+                this.__logger.warn('');
+                module.defined = true;
             }
         });
         return modules.map<IItem>((module: IModule) => {

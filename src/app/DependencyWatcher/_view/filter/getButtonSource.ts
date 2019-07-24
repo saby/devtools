@@ -50,11 +50,19 @@ export const css: FilterItemAdditional<boolean> = {
     viewMode: 'extended'
 };
 
-export const fileId: FilterItem = {
-    name: 'fileId',
-    value: null,
+export const file: FilterItem = {
+    name: 'file',
+    value: undefined,
     resetValue: null,
-    visibility : false,
+    visibility : true,
+    viewMode: 'base'
+};
+
+export const dependentOnFile: FilterItem = {
+    name: 'dependentOnFile',
+    value: undefined,
+    resetValue: null,
+    visibility : true,
     viewMode: 'base'
 };
 
@@ -62,21 +70,24 @@ export interface FilterItemConfig {
     fileSource: source.File;
 }
 
-export const getFilterItems = ({
+export const getButtonSource = ({
    fileSource
 }: Partial<FilterItemConfig>): FilterItem[] => {
     const result: FilterItem[] = [ json, css, i18n ];
-    // if (fileSource) {
-    //     result.push({
-    //         ...fileId,
-    //         source: fileSource
-    //     });
-    // }
-    return result;
-    // return Object.assign(result, {
-    //     '[Types/_entity/ICloneable]': true,
-    //     clone() {
-    //         return result;
-    //     }
-    // });
+    if (fileSource) {
+        result.push({
+            ...file,
+            source: fileSource
+        }, {
+            ...dependentOnFile,
+            source: fileSource
+        });
+    }
+    // return result;
+    return Object.assign(result, {
+        '[Types/_entity/ICloneable]': true,
+        clone() {
+            return result;
+        }
+    });
 };

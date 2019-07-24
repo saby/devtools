@@ -51,7 +51,7 @@ export class Item {
         item.size = param.size || item.size;
         item.path = param.path || item.path;
     }
-    private __updateCache(keys: number[]) {
+    private __updateCache(keys: number[]): Promise<void>  {
         if (!keys.length) {
             return Promise.resolve();
         }

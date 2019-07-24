@@ -25,7 +25,7 @@ export interface IFile extends IFileInfo, IFileModules, IFileId {
     // stack: Stack;
 }
 
-export interface ITransportFile extends IFileInfo, ITransportModules {
+export interface ITransportFile extends IFileInfo, ITransportModules, IFileId {
 
 }
 
