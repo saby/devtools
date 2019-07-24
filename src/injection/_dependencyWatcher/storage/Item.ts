@@ -94,12 +94,12 @@ export class Item {
             const {
                 size,
                 path,
-                name
             } = file;
+            const { defined, initialized, id, name, fileId, dependent, dependencies } = module;
             return <IItem> {
-                ...module,
+                defined, initialized, id, name, fileId, dependent, dependencies,
                 size, path,
-                fileName: name
+                fileName: file.name
             }
         });
     }

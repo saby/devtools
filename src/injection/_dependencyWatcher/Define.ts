@@ -18,8 +18,12 @@ export class Define implements IDescriptor {
         let _this = this;
         return {
             set(value: IDefine) {
-                _this.__define = value;
-                _this.__proxy = proxyDefine(_this.__define, _this.__storage, _this.__logger);
+                if (!_this.__define) {
+                    _this.__define = value;
+                    _this.__proxy = proxyDefine(_this.__define, _this.__storage, _this.__logger);
+                } else {
+                    _this.__proxy = value;
+                }
             },
             get(): IDefine | void {
                 return _this.__proxy;

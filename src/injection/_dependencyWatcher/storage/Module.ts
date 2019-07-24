@@ -40,6 +40,7 @@ export class ModuleStorage {
             module.initialized = true;
         }
         module.defined = true;
+        module.data = moduleData;
         this.__addDeps(module, dependencies, DependencyType.static);
     }
     initModule(name: string): void {
@@ -80,6 +81,19 @@ export class ModuleStorage {
         const updates = [...this.__updates];
         this.__updates.clear();
         return updates;
+    }
+    openSource(id: number): boolean {
+        const module = this.__storage.getItemById(id);
+        if (!module) {
+            return false;
+        }
+        if (!module.defined) {
+            return false;
+        }
+        // TODO нужен нормальный подход шарить какие-то данные
+        // @ts-ignore
+        window.__WASABY_DEV_MODULE__ = module.data;
+        return true;
     }
     /*
     query({

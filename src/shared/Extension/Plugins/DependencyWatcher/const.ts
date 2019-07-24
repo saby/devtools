@@ -11,6 +11,7 @@ export enum RPCMethodNames {
     getModules = 'getModules',
     getUpdates = 'getUpdates',
     hasUpdates = 'hasUpdates',
+    openSource = 'openSource',
     // Items
     getItems = 'getItems',
     queryItems = 'queryItems',
