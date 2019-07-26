@@ -2,7 +2,7 @@ import { adapter, Model } from "Types/entity";
 
 export interface ICompatibilityConfig {
     idProperty: string;
-    parentProperty: string
+    parentProperty?: string
 }
 
 const ERROR_TEXT = 'Not implemented';

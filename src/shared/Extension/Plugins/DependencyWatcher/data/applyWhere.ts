@@ -2,25 +2,27 @@ import { FilterFunction, FilterFunctionGetter } from "./filter/Filter";
 
 const getFilterFunctions = <
     TItem,
-    TFilter
+    TFilter extends object
 >(
     where: TFilter,
-    filterFunctionGetters: Record<string, FilterFunctionGetter<any, TItem>>
+    filterFunctionGetters: Partial<Record<keyof TFilter, FilterFunctionGetter<any, TItem>>>
 ): FilterFunction<TItem>[] => {
     const filterFunctions: FilterFunction<TItem>[] = [];
     for (const filterName in where) {
-        if (filterFunctionGetters.hasOwnProperty(filterName)) {
-            filterFunctions.push(filterFunctionGetters[filterName](where[filterName]));
+        const filterGetter = filterFunctionGetters[filterName];
+        if (!filterGetter) {
+            continue;
         }
+        filterFunctions.push(filterGetter(where[filterName]));
     }
     return filterFunctions;
 };
 
 
-const applyWhere = <TItem, TFilter> (
+const applyWhere = <TItem, TFilter extends object> (
     items: TItem[],
     where: TFilter,
-    filterFunctionGetters: Record<string, FilterFunctionGetter<any, TItem>>
+    filterFunctionGetters: Partial<Record<keyof TFilter, FilterFunctionGetter<any, TItem>>>
 ) => {
     let filterFunctions: FilterFunction<TItem>[] = getFilterFunctions(where, filterFunctionGetters);
     return items.filter((item: TItem) => {

@@ -28,6 +28,14 @@ const WASABY_MODULES = [
     "path": "saby-i18n/I18n"
   },
   {
+    "name": "Layout",
+    "path": "sbis3.engine/client/Layout"
+  },
+  {
+    "name": "Layout-theme",
+    "path": "sbis3.engine/client/Layout-theme"
+  },
+  {
     "name": "Application",
     "path": "wasaby-app/src/Application"
   },

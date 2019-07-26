@@ -28,7 +28,7 @@
                     </Controls.search:InputContainer>
                     <Controls.filter:ButtonContainer>
                         <Controls.filter:View
-                            detailPanelTemplateName="DependencyWatcher/view:filter.Panel"
+                            detailPanelTemplateName="DependencyWatcher/template:filter.Panel"
                         />
                     </Controls.filter:ButtonContainer>
                 </div>
@@ -51,9 +51,7 @@
                             itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
                         >
                             <ws:emptyTemplate>
-                                <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xxl" bottomSpacing="m">
-                                    <ws:contentTemplate>No data available!</ws:contentTemplate>
-                                </ws:partial>
+                                <ws:partial template="DependencyWatcher/template:list.EmptyPage"/>
                             </ws:emptyTemplate>
                         </Controls.explorer:View>
                     </Controls.list:Container>

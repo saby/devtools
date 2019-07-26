@@ -1,11 +1,6 @@
-// @ts-ignore
-import * as pathTemplate from 'wml!DependencyWatcher/template/column/file';
-// @ts-ignore
-import * as definedTemplate from 'wml!DependencyWatcher/template/column/initialized';
-// @ts-ignore
-import * as isDynamicTemplate from 'wml!DependencyWatcher/template/column/isDynamic';
 import SizeTemplate from "./column/Size";
 import { IListItem } from "../../data";
+import { column } from 'DependencyWatcher/template';
 
 export interface IColumn<TItem extends IListItem = IListItem> {
     displayProperty: keyof TItem;
@@ -29,17 +24,17 @@ export const name: Partial<IColumn> = {
 };
 export const fileName: Partial<IColumn> = {
     displayProperty: 'fileName',
-    template: pathTemplate
+    template: column.file
 };
 export const isDynamic: Partial<IColumn> = {
     width: '30px',
     align: 'center',
-    template: isDynamicTemplate
+    template: column.isDynamic
 };
 export const initialized: Partial<IColumn> = {
     width: '55px',
     align: 'center',
-    template: definedTemplate
+    template: column.initialized
 };
 export const size: Partial<IColumn> = {
     displayProperty: 'size',

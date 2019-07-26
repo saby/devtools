@@ -34,7 +34,7 @@ export class File {
             return !this.__files.has(key);
         });
         return this._rpc.execute<ITransportFile[], number[]>({
-            methodName: RPCMethodNames.getItems,
+            methodName: RPCMethodNames.getFiles,
             args: needKeys
         }).then((items: ITransportFile[]) => {
             items.forEach((item: ITransportFile) => {

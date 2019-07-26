@@ -20,7 +20,7 @@ export interface ITransferItem extends IItemInfo, ITransferModule {
 }
 
 export interface IItemFilter extends IModuleFilter, IFileFilter {
-    dependentOnFile: number;
+    dependentOnFile: number[];
 }
 
 export type UpdateItemParam = ModuleId & Partial<{

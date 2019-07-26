@@ -16,7 +16,7 @@ import { navigation } from './list/navigation';
 import { columns, Columns } from './list/column';
 import { headers, Headers } from './list/header';
 import { IItemFilter } from 'Extension/Plugins/DependencyWatcher/IItem';
-import { file, FilterItem, getButtonSource } from './filter/getButtonSource';
+import { FilterItem, getButtonSource } from './list/getButtonSource';
 import { getItemActions, ItemAction, ItemActionNames, visibilityCallback } from './list/getItemActions';
 import { ViewMode } from './main/ViewMode';
 import { getTabConfig, tabs } from './main/Tabs';
@@ -53,9 +53,11 @@ export default class Main extends Control {
         this.__rpc = new RPC({ channel: this.__channel });
         storage.setFileStorage(new storage.File(this.__rpc));
         this._filterButtonSource = getButtonSource({
-            /*fileSource: new source.File({
-                rpc: cfg.sourceConfig.rpc
-            })*/
+            fileSource: new source.File({
+                logger: this.__logger.create('FileSource'),
+                idProperty: 'id',
+                // rpc: cfg.sourceConfig.rpc
+            })
         });
         this.__addListener();
         this.__setItemActions();
@@ -95,21 +97,20 @@ export default class Main extends Control {
     private __setItemActions() {
         this._itemActions = getItemActions({
             [ItemActionNames.file]: (model: Model) => {
-                const fileData = {
-                    id: model.get('fileId'),
-                    name: model.get('fileName')
-                };
+                const files = this._filterButtonSource.find(({ name }) => {
+                    return name == 'files'
+                });
+                if (!files) {
+                    return;
+                }
                 this.__setFilter({
                     parent: undefined,
-                    file: fileData
+                    files: [model.get('fileId')]
                 });
                 this._root = undefined;
-                file.value = fileData;
-                //@ts-ignore
-                file.textValue = fileData.name;
-                let items = getButtonSource({});
-                items.push(file);
-                this._filterButtonSource = items;
+                files.value = [model.get('fileId')];
+                files.textValue = model.get('fileName');
+                this._filterButtonSource = [...this._filterButtonSource];
             },
             [ItemActionNames.dependentOnFile]: (model: Model) => {
                 this.__setFilter({
@@ -155,7 +156,7 @@ export default class Main extends Control {
                 i18n: false
             },
             ignoreFilters: {
-                parent: ['file', 'dependentOnFile']
+                parent: ['files', 'dependentOnFile']
             },
             logger: this.__logger.create('source'),
             idProperty: 'id',

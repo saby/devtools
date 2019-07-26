@@ -1,7 +1,8 @@
-import { source } from 'DependencyWatcher/data';
+import { source } from 'app/DependencyWatcher/data';
 
 export interface FilterItem<TValue = unknown> {
     name: string;
+    textValue?: string;
     value: TValue;
     resetValue: TValue;
     visibility : boolean;
@@ -9,7 +10,6 @@ export interface FilterItem<TValue = unknown> {
     source?: any;
 }
 interface  FilterItemAdditional<TValue = unknown> extends FilterItem<TValue> {
-    textValue: string,
     itemText: string,
     additionalText: string,
 }
@@ -50,15 +50,15 @@ export const css: FilterItemAdditional<boolean> = {
     viewMode: 'extended'
 };
 
-export const file: FilterItem = {
-    name: 'file',
+export const files: FilterItem = {
+    name: 'files',
     value: undefined,
     resetValue: null,
     visibility : true,
     viewMode: 'base'
 };
 
-export const dependentOnFile: FilterItem = {
+export const dependentOnFile: FilterItem<number[] | undefined | null> = {
     name: 'dependentOnFile',
     value: undefined,
     resetValue: null,
@@ -76,7 +76,7 @@ export const getButtonSource = ({
     const result: FilterItem[] = [ json, css, i18n ];
     if (fileSource) {
         result.push({
-            ...file,
+            ...files,
             source: fileSource
         }, {
             ...dependentOnFile,

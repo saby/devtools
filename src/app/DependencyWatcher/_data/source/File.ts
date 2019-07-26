@@ -10,6 +10,7 @@ export interface IFileConfig extends ICompatibilityConfig {
     // fileStorage: FileStorage;
     logger: ILogger;
 }
+
 export class File extends Compatibility {
     private __files: FileStorage;
     private __logger: ILogger;
@@ -31,7 +32,12 @@ export class File extends Compatibility {
                 this.__logger.log(`get items - success`);
                 return new DataSet({
                     rawData: {
-                        data: files,
+                        data: files.map((f) => {
+                            return {
+                                ...f,
+                                title: f.name
+                            }
+                        }),
                         meta: {
                             more: hasMore
                         }

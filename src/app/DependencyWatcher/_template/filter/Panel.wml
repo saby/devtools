@@ -1,0 +1,7 @@
+<Controls.filterPopup:DetailPanel
+    items="{{ _options.items }}"
+    attr:class="DependencyFilter__Panel"
+>
+    <ws:itemTemplate templateName="DependencyWatcher/template:filter.itemTemplate"/>
+    <ws:additionalTemplate templateName="DependencyWatcher/template:filter.additionalTemplate"/>
+</Controls.filterPopup:DetailPanel>

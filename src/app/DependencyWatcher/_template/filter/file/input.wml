@@ -1,0 +1,30 @@
+<Controls.lookup:Input
+    bind:value="textValue"
+    bind:selectedKeys="value"
+    displayProperty="name"
+    keyProperty="id"
+    searchParam="name"
+    source="{{ _options.source }}"
+    trim="{{ true }}"
+    searchDelay="{{ 0 }}"
+    placeholder="{[Выберите файл]}"
+    multiSelect="{{ false }}"
+>
+    <ws:navigation
+        source="page"
+        view="infinity"
+    >
+        <ws:sourceConfig
+            pageSize="{{ 50 }}"
+            page="{{ 0 }}"
+            mode="totalCount"
+        />
+    </ws:navigation>
+    <ws:selectorTemplate templateName="wml!DependencyWatcher/_template/filter/file/panel">
+        <ws:templateOptions
+            source="{{ _options.source }}"
+            searchValue="{{ _options.textValue }}"
+        />
+    </ws:selectorTemplate>
+    <ws:suggestTemplate templateName="wml!DependencyWatcher/_template/filter/file/suggest"/>
+</Controls.lookup:Input>

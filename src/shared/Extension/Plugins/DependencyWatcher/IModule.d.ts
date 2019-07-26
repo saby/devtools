@@ -38,5 +38,5 @@ export interface IModuleFilter {
     json: boolean;
     i18n: boolean;
     name: string;
-    file: { id: number, name: string };
+    files: number[];
 }

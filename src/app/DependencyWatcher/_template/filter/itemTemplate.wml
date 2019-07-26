@@ -1,0 +1,38 @@
+<ws:template name="filterPopup">
+    <Controls.filterPopup:Text
+        bind:value="item.value"
+        caption="{{ item.itemText }}"
+    />
+</ws:template>
+
+<ws:template name="css">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
+<ws:template name="json">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
+<ws:template name="i18n">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
+<ws:template name="files">
+    {[Модули файла]}
+    <DependencyWatcher._template.filter.file.input
+        bind:value="item.value"
+        bind:textValue="item.textValue"
+        source="{{ item.source }}"
+    />
+</ws:template>
+
+<ws:template name="dependentOnFile">
+    {[Зависят от файла]}
+    <DependencyWatcher._template.filter.file.input
+        bind:value="item.value"
+        bind:textValue="item.textValue"
+        source="{{ item.source }}"
+    />
+</ws:template>
+
+<ws:partial template="{{ _options.item.id }}" item="{{ _options.item }}"/>
