@@ -13,7 +13,6 @@ import { IItemFilter, IItemInfo, ITransferItem, UpdateItemParam } from "Extensio
 export interface RPCMethodsArgs extends Record<RPCMethodNames, unknown> {
     // Modules
     [RPCMethodNames.getModules]: number[] | undefined;
-    [RPCMethodNames.getUpdates]: void;
     [RPCMethodNames.hasUpdates]: number[];
     // Items
     [RPCMethodNames.queryItems]: QueryParam<IItemInfo, IItemFilter>;
@@ -31,7 +30,6 @@ export interface RPCMethodsArgs extends Record<RPCMethodNames, unknown> {
 
 export interface RPCMethodsResult extends Record<RPCMethodNames, unknown> {
     // Modules
-    [RPCMethodNames.getUpdates]: number[];
     [RPCMethodNames.hasUpdates]: boolean[];
     // Items
     [RPCMethodNames.queryItems]: QueryResult<number>;

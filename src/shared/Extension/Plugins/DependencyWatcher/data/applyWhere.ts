@@ -4,7 +4,7 @@ const getFilterFunctions = <
     TItem,
     TFilter extends object
 >(
-    where: TFilter,
+    where: Partial<TFilter>,
     filterFunctionGetters: Partial<Record<keyof TFilter, FilterFunctionGetter<any, TItem>>>
 ): FilterFunction<TItem>[] => {
     const filterFunctions: FilterFunction<TItem>[] = [];
@@ -21,7 +21,7 @@ const getFilterFunctions = <
 
 const applyWhere = <TItem, TFilter extends object> (
     items: TItem[],
-    where: TFilter,
+    where: Partial<TFilter>,
     filterFunctionGetters: Partial<Record<keyof TFilter, FilterFunctionGetter<any, TItem>>>
 ) => {
     let filterFunctions: FilterFunction<TItem>[] = getFilterFunctions(where, filterFunctionGetters);

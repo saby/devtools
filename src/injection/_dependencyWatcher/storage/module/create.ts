@@ -5,6 +5,7 @@ import { GLOBAL_MODULE_NAME } from "Extension/Plugins/DependencyWatcher/const";
 const create = (name: string): IModule => {
     const module: IModule = {
         name,
+        fileId: Number.MIN_SAFE_INTEGER,
         defined: false,
         initialized: false,
         id: getId(),

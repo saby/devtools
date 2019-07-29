@@ -58,8 +58,8 @@ export const files: FilterItem = {
     viewMode: 'base'
 };
 
-export const dependentOnFile: FilterItem<number[] | undefined | null> = {
-    name: 'dependentOnFile',
+export const dependentOnFiles: FilterItem<number[] | undefined | null> = {
+    name: 'dependentOnFiles',
     value: undefined,
     resetValue: null,
     visibility : true,
@@ -79,7 +79,7 @@ export const getButtonSource = ({
             ...files,
             source: fileSource
         }, {
-            ...dependentOnFile,
+            ...dependentOnFiles,
             source: fileSource
         });
     }

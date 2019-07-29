@@ -9,7 +9,6 @@ export enum EventNames {
 export enum RPCMethodNames {
     // Modules
     getModules = 'getModules',
-    getUpdates = 'getUpdates',
     hasUpdates = 'hasUpdates',
     openSource = 'openSource',
     // Items

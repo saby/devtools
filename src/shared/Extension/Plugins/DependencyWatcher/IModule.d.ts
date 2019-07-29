@@ -17,7 +17,7 @@ export interface ModuleId {
 
 export interface ModuleInfo {
     name: string
-    fileId?: number;
+    fileId: number;
     defined: boolean;
     initialized: boolean;
 }
@@ -27,7 +27,7 @@ interface ModuleData<TCollection> extends ModuleInfo, ModuleId, ModuleDependenci
 }
 
 interface IModule extends ModuleData<Set<IModule>> {
-    data: any;
+    data?: any;
 }
 
 export interface ITransferModule extends ModuleData<Array<number>> {
@@ -39,4 +39,5 @@ export interface IModuleFilter {
     i18n: boolean;
     name: string;
     files: number[];
+    dependentOnFiles: number[];
 }

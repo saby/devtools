@@ -27,7 +27,6 @@ export class RPCResponse {
         this.__logger = logger;
         this.__require = require;
         this.__items = new Item(this.__modules, this.__files, this.__require, logger.create('ItemStorage'));
-        rpc.registerMethod(RPCMethodNames.getUpdates, this.__modules.getUpdates.bind(this.__modules));
         rpc.registerMethod(RPCMethodNames.openSource, this.__modules.openSource.bind(this.__modules));
         rpc.registerMethod(RPCMethodNames.isRelease, this.isRelease.bind(this));
 

@@ -1,5 +1,5 @@
 import { Storage } from "./Storage";
-import { IModule, ModuleInfo } from "Extension/Plugins/DependencyWatcher/IModule";
+import { IModule, IModuleFilter, ModuleInfo } from 'Extension/Plugins/DependencyWatcher/IModule';
 import {
     DependencyType,
 } from "Extension/Plugins/DependencyWatcher/const";
@@ -8,12 +8,11 @@ import filterHelpers from "./module/filterHelpers";
 import addDynamic from "./module/addDynamic";
 import addStatic from "./module/addStatic";
 import create from "./module/create";
-import { QueryParam, QueryResult } from "Extension/Plugins/DependencyWatcher/data/IQuery";
-import { applyPaging } from "Extension/Plugins/DependencyWatcher/data/applyPaging";
-import applyWhere from "Extension/Plugins/DependencyWatcher/data/applyWhere";
 import moduleFilters from "Extension/Plugins/DependencyWatcher/data/filter/moduleFilters";
-import applySort from "Extension/Plugins/DependencyWatcher/data/applySort";
 import modulesSort from "Extension/Plugins/DependencyWatcher/data/sort/modulesSort";
+import { Query } from './Query';
+import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
+import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
 
 const nope = () => {/* nope */};
 
@@ -28,9 +27,11 @@ interface UpdateHandler {
     (moduleId: number): void;
 }
 
-export class ModuleStorage {
+export class ModuleStorage extends Query<IModule, IModuleFilter> {
     private readonly __storage: Storage<IModule, string> = new Storage('name');
-    constructor(private __onupdate: UpdateHandler = nope) {}
+    constructor(private __onupdate: UpdateHandler = nope) {
+        super();
+    }
     private readonly __updates: Set<number> = new Set();
     private __modulesReaded: boolean = false;
 
@@ -77,11 +78,6 @@ export class ModuleStorage {
         });
         return result;
     }
-    getUpdates(): number[] {
-        const updates = [...this.__updates];
-        this.__updates.clear();
-        return updates;
-    }
     openSource(id: number): boolean {
         const module = this.__storage.getItemById(id);
         if (!module) {
@@ -95,21 +91,6 @@ export class ModuleStorage {
         window.__WASABY_DEV_MODULE__ = module.data;
         return true;
     }
-    /*
-    query({
-        keys,
-        sortBy = {},
-        offset,
-        where,
-        limit
-    }: Partial<QueryParam<ModuleInfo>>): QueryResult<number> {
-        let modules = this.__storage.getItemsById(keys);
-        const filteredModules = applyWhere(modules, where, moduleFilters);
-        const sortedModules = applySort<IModule>(filteredModules, sortBy, modulesSort);
-        const resultKeys: number[] = sortedModules.map(({ id }: IModule) => id);
-        return applyPaging<number>(resultKeys, offset, limit);
-    }
-    */
     private __get(name: string): IModule {
         let module = this.__storage.getItemByIndex(name);
         if (!module) {
@@ -148,5 +129,15 @@ export class ModuleStorage {
             });
             this.__onupdate(module.id);
         }
+    }
+
+    protected _getFilters(): Partial<Record<keyof IModuleFilter, FilterFunctionGetter<any, IModule>>> {
+        return moduleFilters;
+    }
+    protected _getSorting(): Record<keyof IModule, SortFunction<IModule>> {
+        return modulesSort;
+    }
+    protected _getItems(keys?: number[]): IModule[] {
+        return this.__storage.getItemsById(keys);
     }
 }

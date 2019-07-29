@@ -97,28 +97,10 @@ export default class Main extends Control {
     private __setItemActions() {
         this._itemActions = getItemActions({
             [ItemActionNames.file]: (model: Model) => {
-                const files = this._filterButtonSource.find(({ name }) => {
-                    return name == 'files'
-                });
-                if (!files) {
-                    return;
-                }
-                this.__setFilter({
-                    parent: undefined,
-                    files: [model.get('fileId')]
-                });
-                this._root = undefined;
-                files.value = [model.get('fileId')];
-                files.textValue = model.get('fileName');
-                this._filterButtonSource = [...this._filterButtonSource];
+                this.__updateFilterSource('files', [model.get('fileId')], model.get('fileName'), 'dependentOnFiles');
             },
             [ItemActionNames.dependentOnFile]: (model: Model) => {
-                this.__setFilter({
-                    parent: undefined,
-                    dependentOnFile: model.get('fileId')
-                });
-                this._root = undefined;
-                // this._filterItems.push(fileId);
+                this.__updateFilterSource('dependentOnFiles', [model.get('fileId')], model.get('fileName'), 'files');
             },
             [ItemActionNames.openSource]: (model: Model) => {
                 this.__rpc.execute<boolean, number>({
@@ -156,11 +138,34 @@ export default class Main extends Control {
                 i18n: false
             },
             ignoreFilters: {
-                parent: ['files', 'dependentOnFile']
+                parent: ['files', 'dependentOnFiles']
             },
             logger: this.__logger.create('source'),
             idProperty: 'id',
             parentProperty: 'parent'
         }
+    }
+    private __updateFilterSource<T>(id: string, value: T, textValue: string, resetId: string) {
+        const item = this._filterButtonSource.find(({ name }) => {
+            return name == id
+        });
+        if (!item) {
+            return;
+        }
+        const resetItem = this._filterButtonSource.find(({ name }) => {
+            return name == resetId
+        });
+        if (resetItem) {
+            resetItem.value = null;
+            resetItem.textValue = undefined;
+        }
+        this.__setFilter({
+            parent: undefined,
+            [id]: value
+        });
+        this._root = undefined;
+        item.value = value;
+        item.textValue = textValue;
+        this._filterButtonSource = [...this._filterButtonSource];
     }
 }
