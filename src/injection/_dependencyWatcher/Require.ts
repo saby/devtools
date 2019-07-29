@@ -1,6 +1,6 @@
 import { IRequire, IRequireInitObject } from "./require/IRequire";
 import { proxyRequire } from "./require/proxy";
-import { ModuleStorage } from "./moduleStorage";
+import { ModuleStorage } from "./storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 import { IDescriptor } from "./IDescriptor";
 import { IConfigWithStorage } from "./IConfig";

@@ -6,48 +6,42 @@ import { css } from "../filter/css";
 import { json } from "../filter/json";
 import { i18n } from "../filter/i18n";
 
-let emptyWrap = <T>(f: FilterFunction<T>): FilterFunctionGetter<T> => {
-    return (where) => {
+let ignoreWrap = (f: FilterFunction): FilterFunctionGetter<boolean> => {
+    return (ignoreFilter: boolean) => {
+        if (ignoreFilter) {
+            return () => true;
+        }
         return f;
     }
 };
 
-const ALL_FILTER_GETTER: Record<string, FilterFunctionGetter> = {
-    name: getForName,
-    css: emptyWrap(css),
-    json: emptyWrap(json),
-    i18n: emptyWrap(i18n),
+const ALL_FILTER_GETTER: Record<string, FilterFunctionGetter<any>> = {
+    name: <FilterFunctionGetter<string>> getForName,
+    css: <FilterFunctionGetter<boolean>> ignoreWrap(css),
+    json: <FilterFunctionGetter<boolean>> ignoreWrap(json),
+    i18n: <FilterFunctionGetter<boolean>> ignoreWrap(i18n),
+};
+const DEFAULT_FILTERS: Record<string, boolean> = {
+    css:  false,
+    json: false,
+    i18n: false,
 };
 
-let getDefaultFilter = <
-    T extends ListItem,
-    TFilter extends IFilterData
->(where: TFilter): FilterFunction<T>[] => {
-    return [
-        css,
-        json,
-        i18n
-    ]
-};
-let getNames = <TFilter extends IFilterData>(where: TFilter) => {
-    let keys = Object.keys(where);
-    return keys.filter((key) => {
-        return ALL_FILTER_GETTER.hasOwnProperty(key);
-    });
-};
 let getFilterFunctions = <
     T extends ListItem,
     TFilter extends IFilterData
 >(where: TFilter): FilterFunction<T>[] => {
-    let filterNames = getNames(where);
-    if (!filterNames.length) {
-        return getDefaultFilter(where);
+    const _where = {
+        ...DEFAULT_FILTERS,
+        ...where
+    };
+    const filterFunctions: FilterFunction[] = [];
+    for (const fName in _where) {
+        if (ALL_FILTER_GETTER.hasOwnProperty(fName)) {
+            filterFunctions.push(ALL_FILTER_GETTER[fName](_where[fName]));
+        }
     }
-    return filterNames.map((name) => {
-        return ALL_FILTER_GETTER[name];
-    }).map((getter) => {
-        return getter(where);
-    });
+    return filterFunctions;
 };
 
 

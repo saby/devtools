@@ -1,6 +1,6 @@
 import { IDefine, Args } from "./IDefine";
 import { prepareArgs } from "./prepareArgs";
-import { ModuleStorage } from "../ModuleStorage";
+import { ModuleStorage } from "../storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 
 let regDepsFunction = (storage: ModuleStorage, logger: ILogger) => {

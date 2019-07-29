@@ -12,11 +12,14 @@ export enum RPCMethods {
     getModules = 'getModules',
     getNewModules = 'getNewModules',
     setSize = 'setSize',
+    getFiles = 'getFiles',
+    isRelease = 'isRelease',
 }
 
 export const GLOBAL_MODULE_NAME = '~> page <~';
 
 export const TYPESCRIPT_HELPERS_MODULE = [
+    "module",
     "require",
     'exports',
     'tslib'

@@ -1,0 +1,18 @@
+import { RPCMethods } from "Extension/Plugins/DependencyWatcher/const";
+import { ModulesRecord, TransferModule } from "Extension/Plugins/DependencyWatcher/IModule";
+
+export interface RPCMethodsArgs extends Record<RPCMethods, unknown> {
+    [RPCMethods.getModules]: string[];
+    [RPCMethods.isRelease]: void;
+    [RPCMethods.setSize]: {
+        size: number;
+        fileId?: number;
+        fileName?: string;
+    }
+}
+
+export interface RPCMethodsResult extends Record<RPCMethods, unknown> {
+    [RPCMethods.getModules]: ModulesRecord<TransferModule>;
+    [RPCMethods.setSize]: boolean;
+    [RPCMethods.isRelease]: boolean;
+}

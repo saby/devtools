@@ -6,4 +6,6 @@ export interface Item extends ModuleInfo {
     id: string;
     isDynamic?: boolean;
     notUsed?: boolean;
+    size?: number;
+    fileName?: string;
 }

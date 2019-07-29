@@ -5,9 +5,11 @@ import * as template from 'wml!DependencyWatcher/_view/list/DataContainer';
 // @ts-ignore
 import * as nameTemplate from 'wml!DependencyWatcher/_view/list/column/name';
 // @ts-ignore
-import * as sizeTemplate from 'wml!DependencyWatcher/_view/list/column/size';
+import * as pathTemplate from 'wml!DependencyWatcher/_view/list/column/path';
+import SizeTemplate from 'DependencyWatcher/_view/list/column/Size';
 import { source } from "../../data";
 import { Columns } from "./column";
+import { source as filterSource } from "../filter";
 
 type Children = {
     listView: Control;
@@ -23,7 +25,6 @@ interface IConfig {
     Source: SourceConstructor;
     navigation: object;
     modeController?: Control;
-    grouping<T>(item:T): string;
     itemTemplate?: Function;
 }
 
@@ -45,32 +46,32 @@ export default class Main extends Control {
                 template: cfg.itemTemplate || nameTemplate
             },
             {
-                displayProperty: 'fileName'
+                displayProperty: 'fileName',
+                template: pathTemplate
             },
             {
                 displayProperty: 'size',
                 width: '100px',
                 align: 'right',
-                template: sizeTemplate
+                template: SizeTemplate
             }
         ];
     }
-    private _root: string| void;
-    __changeRoot(event: unknown, id: string) {
-        this._root = id;
-    }
     private __filterObject: object = {};
+    protected _filter: object = {};
+    protected _filterItems: object[] = filterSource;
     private get __filter() {
         return {
-            root: this._root,
-            ...this.__filterObject
+            ...this.__filterObject,
+            ...this._filter
         }
     };
     private set __filter(value) {
         this.__filterObject = value;
     }
     update(...args: unknown[]): void {
-        
-        // this._children.listView.reload();
+        if (this._children.listView) {
+            this._children.listView.reload();
+        }
     }
 }

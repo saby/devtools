@@ -23,17 +23,31 @@
                 <ws:Array>
                     <ws:Object id="Dependencies">
                         <ws:itemTemplate>
-                            <DependencyWatcher.view:Main/>
+                            <Controls.Container.Async
+                                templateName="DependencyWatcher/view:Main"
+                            />
                         </ws:itemTemplate>
                     </ws:Object>
                     <ws:Object id="Elements">
                         <ws:itemTemplate>
-                            <Elements.Elements store="{{_store}}"/>
+                            <Controls.Container.Async
+                                templateName="Elements/Elements"
+                            >
+                                <ws:templateOptions
+                                    store="{{_store}}"
+                                />
+                            </Controls.Container.Async>
                         </ws:itemTemplate>
                     </ws:Object>
                     <ws:Object id="Profiler">
                         <ws:itemTemplate>
-                            <Profiler.Profiler store="{{_store}}"/>
+                            <Controls.Container.Async
+                                templateName="Profiler/Profiler"
+                            >
+                                <ws:templateOptions
+                                    store="{{_store}}"
+                                />
+                            </Controls.Container.Async>
                         </ws:itemTemplate>
                     </ws:Object>
                 </ws:Array>

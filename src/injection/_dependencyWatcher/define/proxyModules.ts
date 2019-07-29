@@ -1,6 +1,6 @@
 import { REQUIRE } from "../const";
 import { ILocalRequire } from "../require/IRequire";
-import { ModuleStorage } from "../moduleStorage";
+import { ModuleStorage } from "../storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 
 type ReplaceFunction<T = any> = (name: string, origin: T) => T;

@@ -7,7 +7,10 @@ import { globalChannel } from './_devtool/globalChannel';
 import { ConsoleLogger } from "Extension/Logger/Console";
 // import { logger } from './_devtool/logger';
 
-const ALL_PLUGINS: IPluginConstructor[] = [ DependencyWatcher, InjectHook ];
+const ALL_PLUGINS: IPluginConstructor[] = [
+    DependencyWatcher,
+    InjectHook
+];
 
 const logger = new ConsoleLogger('Wasaby devtool');
 const PLUGINS: Map<string, IPlugin> = new Map();

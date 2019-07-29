@@ -9,7 +9,9 @@
    "scripts": {
       "build": "npm run build:shared && npm run build:extension && npm run build:injection && npm run build:app && npm run build:cdn",
       "build:injection": "node ./scripts/build_injection.js",
+      "build:injection-min": "node ./scripts/build_injection.js -min",
       "build:content": "node ./scripts/build_content.js",
+      "build:content-min": "node ./scripts/build_content.js -min",
       "build:extension": "node ./scripts/build_extension.js && npm run build:content",
       "build:app": "node ./scripts/build_app.js",
       "build:cdn": "node ./scripts/build_cdn.js",

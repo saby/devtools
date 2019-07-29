@@ -1,45 +1,55 @@
+<Controls.filter:Controller filterButtonSource="{{ _filterItems }}">
 <Controls.list:DataContainer
     source="{{ __source }}"
     keyProperty="id"
     parentProperty="parent"
     navigation="{{ __navigation }}"
     virtualScrolling="{{ true }}"
-    bind:filter="__filter"
 >
-    <Controls.search:Controller searchParam="name" minSearchLength="{{3}}">
-        <div class="ws-fragment">
-            <Controls.scroll:StickyHeader
-                attr:class="DependencyWatcher_Page__head"
-            >
-                <Controls.search:InputContainer>
-                    <Controls.search:Input/>
-                </Controls.search:InputContainer>
+    <Controls.search:Controller searchParam="name" minSearchLength="{{ 3 }}">
+        <div class="DependencyWatcher_Page">
+            <div class="DependencyWatcher_Page__head">
                 <ws:if data="{{ _options.modeController }}">
                     <ws:partial template="{{ _options.modeController }}" />
                 </ws:if>
-            </Controls.scroll:StickyHeader>
+                <Controls.search:InputContainer>
+                    <Controls.search:Input/>
+                </Controls.search:InputContainer>
+                <Controls.filter:ButtonContainer>
+                    <Controls.filter:View
+                        detailPanelTemplateName="DependencyWatcher/view:filter.Panel"
+                    />
+                </Controls.filter:ButtonContainer>
+            </div>
 
-            <Controls.list:Container>
-                <Controls.operations:Container>
+            <Controls.scroll:Container
+                attr:class="DependencyWatcher_Page__scroll"
+            >
+                <Controls.list:Container>
                     <Controls.explorer:View
                         name="listView"
                         bind:root="_root"
                         displayProperty="name"
                         nodeProperty="child"
                         columns="{{ __column }}"
-                        columnScroll="{{ true }}"
+                        columnScroll="{{ false }}"
                         bind:sorting="__sorting"
                     >
                         <ws:header>
                             <ws:Array>
                                 <ws:Object title="module" sortingProperty="name" align="left"/>
                                 <ws:Object title="file" sortingProperty="fileName" align="left"/>
-                                <ws:Object title="size" align="right"/>
+                                <ws:Object title="size" sortingProperty="size" align="right"/>
                             </ws:Array>
                         </ws:header>
+                        <ws:emptyTemplate>
+                            <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xxl" bottomSpacing="m">
+                                <ws:contentTemplate>No data available!</ws:contentTemplate>
+                            </ws:partial>
+                        </ws:emptyTemplate>
                     </Controls.explorer:View>
-                </Controls.operations:Container>
-            </Controls.list:Container>
+                </Controls.list:Container>
+            </Controls.scroll:Container>
 <!--            <Controls.popup:Notification-->
 <!--                name="notificationOpener"-->
 <!--                template="wml!Controls/popupTemplate:NotificationSimple"-->
@@ -49,3 +59,4 @@
         </div>
     </Controls.search:Controller>
 </Controls.list:DataContainer>
+</Controls.filter:Controller>
