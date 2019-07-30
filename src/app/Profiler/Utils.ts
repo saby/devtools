@@ -1,15 +1,7 @@
 import Store from '../Elements/Store';
-import {
-   IBackendProfilingData,
-   IChangesDescription,
-   IControlNode
-} from 'Extension/Plugins/Elements/IControlNode';
+import { IBackendProfilingData, IChangesDescription, IControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
-import Profiler, {
-   IFrontendSynchronizationDescription,
-   IProfilingData
-} from './Profiler';
-import { ControlUpdateReason } from './Flamegraph/Flamegraph';
+import Profiler, { IFrontendSynchronizationDescription, IProfilingData } from './Profiler';
 
 // TODO: почти копипаста из Store
 function getDepth(
@@ -242,6 +234,12 @@ export function getBackgroundColorBasedOnTiming(
       Math.max(0, Math.min(colors.length - 1, value)) * (colors.length - 1);
    return colors[Math.round(index)];
 }
+
+export type ControlUpdateReason =
+   | 'mounted'
+   | 'selfUpdated'
+   | 'parentUpdated'
+   | 'unchanged';
 
 export function getBackgroundColorBasedOnReason(
    updateReason: ControlUpdateReason

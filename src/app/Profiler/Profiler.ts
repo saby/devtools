@@ -9,11 +9,12 @@ import Store from 'Elements/Store';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import CommitDetails from 'Profiler/CommitDetails';
 import 'css!Profiler/Profiler';
-import Flamegraph, { ControlUpdateReason } from './Flamegraph/Flamegraph';
+import Flamegraph from './Flamegraph/Flamegraph';
 import RankedView from './RankedView/RankedView';
 import SynchronizationsList from './SynchronizationsList/SynchronizationsList';
 import {
    applyOperations,
+   ControlUpdateReason,
    convertProfilingData,
    getActualDurations,
    getChanges,
@@ -73,6 +74,36 @@ function getElementState(
    return 'unchanged';
 }
 
+function getSynchronizationOverview(
+   snapshot: Flamegraph['_options']['snapshot']
+): Profiler['_synchronizationOverview'] {
+   const result = {
+      mountedCount: 0,
+      selfUpdatedCount: 0,
+      parentUpdatedCount: 0,
+      unchangedCount: 0
+   };
+
+   snapshot.forEach(({ updateReason }) => {
+      switch (updateReason) {
+         case 'mounted':
+            result.mountedCount++;
+            break;
+         case 'selfUpdated':
+            result.selfUpdatedCount++;
+            break;
+         case 'parentUpdated':
+            result.parentUpdatedCount++;
+            break;
+         case 'unchanged':
+            result.unchangedCount++;
+            break;
+      }
+   });
+
+   return result;
+}
+
 class Profiler extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 
@@ -104,6 +135,13 @@ class Profiler extends Control<IOptions> {
    protected _snapshot?: Flamegraph['_options']['snapshot'];
 
    protected _synchronizations?: SynchronizationsList['_options']['synchronizations'];
+
+   protected _synchronizationOverview?: {
+      mountedCount?: number;
+      selfUpdatedCount?: number;
+      parentUpdatedCount?: number;
+      unchangedCount?: number;
+   };
 
    protected _masterFilter: SynchronizationsList['_options']['filter'] = masterFilter;
 
@@ -222,6 +260,7 @@ class Profiler extends Control<IOptions> {
          this._snapshotBySynchronization.set(synchronizationKey, snapshot);
       }
 
+      this._synchronizationOverview = getSynchronizationOverview(snapshot);
       this._snapshot = snapshot;
       this.__updateSelectedCommitChanges();
    }

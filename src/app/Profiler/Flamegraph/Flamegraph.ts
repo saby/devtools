@@ -6,15 +6,13 @@ import {
 } from 'Extension/Plugins/Elements/IControlNode';
 import 'css!Profiler/Flamegraph/Flamegraph';
 import { getWidth } from './Utils';
-import { formatTime, getBackgroundColorBasedOnReason } from '../Utils';
+import {
+   ControlUpdateReason,
+   formatTime,
+   getBackgroundColorBasedOnReason
+} from '../Utils';
 // @ts-ignore
 import template = require('wml!Profiler/Flamegraph/Flamegraph');
-
-export type ControlUpdateReason =
-   | 'mounted'
-   | 'selfUpdated'
-   | 'parentUpdated'
-   | 'unchanged';
 
 interface IFlamegraphControlNode extends IFrontendControlNode {
    selfDuration: number;

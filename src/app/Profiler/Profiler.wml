@@ -55,6 +55,12 @@
             <ws:if data="{{ _selectedCommitId }}">
                 <Profiler.CommitDetails changesDescription="{{ _selectedCommitChanges }}"/>
             </ws:if>
+            <ws:else>
+                <Profiler.Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"
+                                            selfUpdatedCount="{{ _synchronizationOverview.selfUpdatedCount }}"
+                                            parentUpdatedCount="{{ _synchronizationOverview.parentUpdatedCount }}"
+                                            unchangedCount="{{ _synchronizationOverview.unchangedCount }}" />
+            </ws:else>
         </ws:if>
         <ws:else>
             <div class="Profiler__greeting">

@@ -8,12 +8,8 @@ import { descriptor } from 'Types/entity';
 import commitTimeTemplate = require('wml!Profiler/RankedView/commitTimeTemplate');
 // @ts-ignore
 import reasonTemplate = require('wml!Profiler/RankedView/reasonTemplate');
-import {
-   getBackgroundColorBasedOnReason,
-   getBackgroundColorBasedOnTiming
-} from '../Utils';
-import { ControlUpdateReason } from '../Flamegraph/Flamegraph';
-import 'css!Profiler/RankedView/RankedView';
+import { getBackgroundColorBasedOnTiming } from '../Utils';
+import { ControlUpdateReason } from '../Utils';
 
 interface IRankedViewControlNode extends IFrontendControlNode {
    selfDuration: number;
@@ -30,7 +26,6 @@ interface IOptions extends IControlOptions {
 function getDataWithLengths(
    initialData: Array<{
       selfDuration: number;
-      updateReason: ControlUpdateReason;
    }>
 ): Array<{ selfDuration: number; length: number; barColor: string }> {
    const maxDuration = initialData.reduce(
@@ -40,7 +35,6 @@ function getDataWithLengths(
    return initialData.map((item) => {
       return {
          ...item,
-         reasonColor: getBackgroundColorBasedOnReason(item.updateReason),
          barColor: getBackgroundColorBasedOnTiming(
             item.selfDuration / maxDuration
          ),

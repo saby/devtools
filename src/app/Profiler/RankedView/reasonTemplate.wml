@@ -1,7 +1,6 @@
 <ws:partial template="Controls/grid:ColumnTemplate"
             scope="{{ _options }}">
     <ws:contentTemplate>
-        <div attr:class="RankedView__reason"
-             attr:style="background-color: {{ itemData.item.reasonColor }};"></div>
+        <Profiler.ReasonTag.ReasonTag updateReason="{{ itemData.item.updateReason }}" />
     </ws:contentTemplate>
 </ws:partial>
