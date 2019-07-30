@@ -315,18 +315,17 @@ class Profiler extends Control<IOptions> {
          const changes = Array.from(this._changesBySynchronization);
          let previousElements = this._elementsSnapshot;
 
+         if (this._elementsBySynchronization.size > 0) {
+            previousElements = Array.from(
+               this._elementsBySynchronization.values()
+            )[this._elementsBySynchronization.size - 1];
+         }
+
          for (const [currentId, operations] of changes) {
-            let elements = this._elementsBySynchronization.get(currentId);
+            const elements = applyOperations(previousElements, operations);
+            this._elementsBySynchronization.set(currentId, elements);
+            this._changesBySynchronization.delete(currentId);
 
-            if (!elements) {
-               elements = applyOperations(previousElements, operations);
-               this._elementsBySynchronization.set(currentId, elements);
-
-               // TODO: хотелось бы эту строку вернуть, но тогда я теряю все посчитанные
-               //  синхронизации и вычисляю неправильные деревья
-               // нужно for с 0 до changes.length+elementsBySynchronization.length
-               // this._changesBySynchronization.delete(currentId);
-            }
             const diffCount = elements.length - previousElements.length;
             this._destroyedCountBySynchronization.set(
                synchronizationId,
