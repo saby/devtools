@@ -24,6 +24,7 @@ import {
 // @ts-ignore
 import template = require('wml!Profiler/Profiler');
 import Tab = chrome.tabs.Tab;
+import { OperationType } from 'Extension/Plugins/Elements/const';
 
 interface IOptions extends IControlOptions {
    store: Store;
@@ -325,11 +326,11 @@ class Profiler extends Control<IOptions> {
             const elements = applyOperations(previousElements, operations);
             this._elementsBySynchronization.set(currentId, elements);
             this._changesBySynchronization.delete(currentId);
-
-            const diffCount = elements.length - previousElements.length;
             this._destroyedCountBySynchronization.set(
                synchronizationId,
-               diffCount > 0 ? diffCount : 0
+               operations.reduce((acc, [type]) => {
+                  return type === OperationType.DELETE ? acc + 1 : acc;
+               }, 0)
             );
 
             if (currentId === synchronizationId) {

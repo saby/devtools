@@ -9,6 +9,7 @@ interface IOptions extends IControlOptions {
    selfUpdatedCount: number;
    parentUpdatedCount: number;
    unchangedCount: number;
+   destroyedCount: number;
 }
 
 class Overview extends Control<IOptions> {
@@ -20,6 +21,7 @@ class Overview extends Control<IOptions> {
          selfUpdatedCount: descriptor(Number).required(),
          parentUpdatedCount: descriptor(Number).required(),
          unchangedCount: descriptor(Number).required(),
+         destroyedCount: descriptor(Number).required(),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };
