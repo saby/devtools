@@ -6,10 +6,18 @@ import template = require('wml!Profiler/RankedView/RankedView');
 import { descriptor } from 'Types/entity';
 // @ts-ignore
 import commitTimeTemplate = require('wml!Profiler/RankedView/commitTimeTemplate');
-import { getBackgroundColor } from '../Utils';
+// @ts-ignore
+import reasonTemplate = require('wml!Profiler/RankedView/reasonTemplate');
+import {
+   getBackgroundColorBasedOnReason,
+   getBackgroundColorBasedOnTiming
+} from '../Utils';
+import { ControlUpdateReason } from '../Flamegraph/Flamegraph';
+import 'css!Profiler/RankedView/RankedView';
 
 interface IRankedViewControlNode extends IFrontendControlNode {
    selfDuration: number;
+   updateReason: ControlUpdateReason;
 }
 
 interface IOptions extends IControlOptions {
@@ -20,8 +28,11 @@ interface IOptions extends IControlOptions {
 
 // TODO: копипаста в SynchronizationsList
 function getDataWithLengths(
-   initialData: Array<{ selfDuration: number }>
-): Array<{ selfDuration: number; length: number }> {
+   initialData: Array<{
+      selfDuration: number;
+      updateReason: ControlUpdateReason;
+   }>
+): Array<{ selfDuration: number; length: number; barColor: string }> {
    const maxDuration = initialData.reduce(
       (max, { selfDuration }) => Math.max(max, selfDuration),
       0
@@ -29,18 +40,25 @@ function getDataWithLengths(
    return initialData.map((item) => {
       return {
          ...item,
-         barColor: getBackgroundColor(item.selfDuration / maxDuration, true),
+         reasonColor: getBackgroundColorBasedOnReason(item.updateReason),
+         barColor: getBackgroundColorBasedOnTiming(
+            item.selfDuration / maxDuration
+         ),
          length: (item.selfDuration / maxDuration) * 100
       };
    });
 }
 
-class RankedView extends  Control<IOptions> {
+class RankedView extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 
    protected _source: Memory;
 
    protected _columns: object[] = [
+      {
+         template: reasonTemplate,
+         width: '30px'
+      },
       {
          displayProperty: 'name',
          textOverflow: 'ellipsis'
@@ -65,10 +83,15 @@ class RankedView extends  Control<IOptions> {
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
-      if (this._options.filter !== newOptions.filter || this._options.snapshot !== newOptions.snapshot) {
+      if (
+         this._options.filter !== newOptions.filter ||
+         this._options.snapshot !== newOptions.snapshot
+      ) {
          this._source = new Memory({
             idProperty: 'id',
-            data: getDataWithLengths(newOptions.snapshot.filter(newOptions.filter))
+            data: getDataWithLengths(
+               newOptions.snapshot.filter(newOptions.filter)
+            )
          });
       }
    }

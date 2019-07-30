@@ -6,15 +6,21 @@ import {
 } from 'Extension/Plugins/Elements/IControlNode';
 import 'css!Profiler/Flamegraph/Flamegraph';
 import { getWidth } from './Utils';
-import { formatTime, getBackgroundColor } from '../Utils';
+import { formatTime, getBackgroundColorBasedOnReason } from '../Utils';
 // @ts-ignore
 import template = require('wml!Profiler/Flamegraph/Flamegraph');
+
+export type ControlUpdateReason =
+   | 'mounted'
+   | 'selfUpdated'
+   | 'parentUpdated'
+   | 'unchanged';
 
 interface IFlamegraphControlNode extends IFrontendControlNode {
    selfDuration: number;
    actualDuration: number;
    actualBaseDuration: number;
-   didRender: boolean;
+   updateReason: ControlUpdateReason;
 }
 
 interface IOptions extends IControlOptions {
@@ -64,7 +70,7 @@ function getMaxTreeDuration(
 
 function getMaxSelfDuration(snapshot: IOptions['snapshot']): number {
    return snapshot
-      .filter(({ didRender }) => didRender)
+      .filter(({ updateReason }) => updateReason !== 'unchanged')
       .reduce(
          (maxDuration, { selfDuration }) => Math.max(maxDuration, selfDuration),
          0
@@ -197,7 +203,9 @@ function getLeftOffset(
    return offset;
 }
 
-function getIdToIndexMap(previousItemData?: INodeItemData[]): Map<string, number> {
+function getIdToIndexMap(
+   previousItemData?: INodeItemData[]
+): Map<string, number> {
    const result = new Map();
 
    if (previousItemData) {
@@ -233,7 +241,7 @@ function getItemDataForDepth(
          actualBaseDuration,
          name,
          parentId,
-         didRender
+         updateReason
       }) => {
          const width = getWidth(
             actualBaseDuration,
@@ -253,14 +261,15 @@ function getItemDataForDepth(
             previousItemData
          );
 
+         const didRender = updateReason !== 'unchanged';
+
          result.push({
             id,
             parentId,
             leftOffset,
             width,
-            style: `width: ${width}px; background-color: ${getBackgroundColor(
-               selfDuration / maxSelfDuration,
-               didRender
+            style: `width: ${width}px; background-color: ${getBackgroundColorBasedOnReason(
+               updateReason
             )}; left: ${leftOffset}px; top: ${topOffset}px;`,
             tooltip: getTooltip(name, selfDuration, actualDuration, didRender),
             caption: getCaption(

@@ -9,6 +9,7 @@ import Profiler, {
    IFrontendSynchronizationDescription,
    IProfilingData
 } from './Profiler';
+import { ControlUpdateReason } from './Flamegraph/Flamegraph';
 
 // TODO: почти копипаста из Store
 function getDepth(
@@ -166,7 +167,7 @@ export function getActualDurations(
    dataWithSelfDurations: Array<{
       id: string;
       selfDuration: number;
-      didRender: boolean;
+      updateReason: ControlUpdateReason;
       parentId?: string;
    }>,
    startId: IControlNode['id'],
@@ -176,9 +177,10 @@ export function getActualDurations(
    actualBaseDuration: number;
 } {
    let actualBaseDuration = dataWithSelfDurations[startIndex].selfDuration;
-   let actualDuration = dataWithSelfDurations[startIndex].didRender
-      ? dataWithSelfDurations[startIndex].selfDuration
-      : 0;
+   let actualDuration =
+      dataWithSelfDurations[startIndex].updateReason !== 'unchanged'
+         ? dataWithSelfDurations[startIndex].selfDuration
+         : 0;
    const parents: Set<string> = new Set();
    parents.add(startId);
 
@@ -186,18 +188,18 @@ export function getActualDurations(
       const {
          id,
          parentId,
-         didRender,
+         updateReason,
          selfDuration
       }: {
          id: string;
          selfDuration: number;
-         didRender: boolean;
+         updateReason: ControlUpdateReason;
          parentId?: string;
       } = dataWithSelfDurations[i];
       if (parentId && parents.has(parentId)) {
          parents.add(id);
          actualBaseDuration += selfDuration;
-         if (didRender) {
+         if (updateReason !== 'unchanged') {
             actualDuration += selfDuration;
          }
       }
@@ -233,19 +235,27 @@ const colors: Array<Exclude<BACKGROUND_COLOR, '#e2e2e2'>> = [
    '#efc457'
 ];
 
-export function getBackgroundColor(
-   value: number,
-   didRender: boolean
-): BACKGROUND_COLOR {
-   let result: BACKGROUND_COLOR = '#e2e2e2';
+export function getBackgroundColorBasedOnTiming(
+   value: number
+): Exclude<BACKGROUND_COLOR, '#e2e2e2'> {
+   const index =
+      Math.max(0, Math.min(colors.length - 1, value)) * (colors.length - 1);
+   return colors[Math.round(index)];
+}
 
-   if (didRender) {
-      const index =
-         Math.max(0, Math.min(colors.length - 1, value)) * (colors.length - 1);
-      result = colors[Math.round(index)];
+export function getBackgroundColorBasedOnReason(
+   updateReason: ControlUpdateReason
+): '#e2e2e2' | '#ffab66' | '#e6d174' | '#b3e6e6' {
+   switch (updateReason) {
+      case 'mounted':
+         return '#ffab66';
+      case 'selfUpdated':
+         return '#e6d174';
+      case 'parentUpdated':
+         return '#b3e6e6';
+      case 'unchanged':
+         return '#e2e2e2';
    }
-
-   return result;
 }
 
 export function formatTime(value: number): string {

@@ -9,7 +9,7 @@ import Store from 'Elements/Store';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import CommitDetails from 'Profiler/CommitDetails';
 import 'css!Profiler/Profiler';
-import Flamegraph from './Flamegraph/Flamegraph';
+import Flamegraph, { ControlUpdateReason } from './Flamegraph/Flamegraph';
 import RankedView from './RankedView/RankedView';
 import SynchronizationsList from './SynchronizationsList/SynchronizationsList';
 import {
@@ -41,17 +41,36 @@ export interface IProfilingData {
    >;
 }
 
-function masterFilter(item: {
-   selfDuration: number;
-}): boolean {
+function masterFilter(item: { selfDuration: number }): boolean {
    return item.selfDuration !== 0;
 }
 
 function detailFilter(item: {
    selfDuration: number;
-   didRender?: boolean;
+   updateReason?: ControlUpdateReason;
 }): boolean {
-   return item.selfDuration !== 0 && !!item.didRender;
+   return item.selfDuration !== 0 && item.updateReason !== 'unchanged';
+}
+
+function getElementState(
+   changesDescription?: IChangesDescription
+): ControlUpdateReason {
+   if (changesDescription) {
+      if (changesDescription.isFirstRender) {
+         return 'mounted';
+      }
+
+      if (
+         changesDescription.changedOptions ||
+         changesDescription.changedAttributes
+      ) {
+         return 'selfUpdated';
+      }
+
+      return 'parentUpdated';
+   }
+
+   return 'unchanged';
 }
 
 class Profiler extends Control<IOptions> {
@@ -178,7 +197,7 @@ class Profiler extends Control<IOptions> {
          const dataWithSelfDurations = elements.map((element) => {
             return {
                ...element,
-               didRender: changes.has(element.id),
+               updateReason: getElementState(changes.get(element.id)),
                selfDuration: getSelfDuration(
                   this._profilingData,
                   synchronizationKey,

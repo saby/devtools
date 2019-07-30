@@ -5,7 +5,7 @@ import { Memory } from 'Types/source';
 import synchronizationTemplate = require('wml!Profiler/SynchronizationsList/synchronizationTemplate');
 // @ts-ignore
 import template = require('wml!Profiler/SynchronizationsList/SynchronizationsList');
-import { getBackgroundColor } from '../Utils';
+import { getBackgroundColorBasedOnTiming } from '../Utils';
 
 interface ISynchronizationsList {
    id: string;
@@ -21,7 +21,7 @@ interface IOptions extends IControlOptions {
 // TODO: копипаста в RankedView
 function getDataWithLengths(
    initialData: Array<{ selfDuration: number }>
-): Array<{ selfDuration: number; length: number }> {
+): Array<{ selfDuration: number; length: number; barColor: string }> {
    const maxDuration = initialData.reduce(
       (max, { selfDuration }) => Math.max(max, selfDuration),
       0
@@ -29,7 +29,9 @@ function getDataWithLengths(
    return initialData.map((item) => {
       return {
          ...item,
-         barColor: getBackgroundColor(item.selfDuration / maxDuration, true),
+         barColor: getBackgroundColorBasedOnTiming(
+            item.selfDuration / maxDuration
+         ),
          length: (item.selfDuration / maxDuration) * 100
       };
    });
@@ -44,7 +46,9 @@ class SynchronizationsList extends Control<IOptions> {
       super(options);
       this._source = new Memory({
          idProperty: 'id',
-         data: getDataWithLengths(options.synchronizations.filter(options.filter))
+         data: getDataWithLengths(
+            options.synchronizations.filter(options.filter)
+         )
       });
    }
 
@@ -55,7 +59,9 @@ class SynchronizationsList extends Control<IOptions> {
       ) {
          this._source = new Memory({
             idProperty: 'id',
-            data: getDataWithLengths(newOptions.synchronizations.filter(newOptions.filter))
+            data: getDataWithLengths(
+               newOptions.synchronizations.filter(newOptions.filter)
+            )
          });
       }
    }
