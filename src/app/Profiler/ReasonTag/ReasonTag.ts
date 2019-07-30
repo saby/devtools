@@ -27,7 +27,8 @@ class ReasonTag extends Control<IOptions> {
             'mounted',
             'selfUpdated',
             'parentUpdated',
-            'unchanged'
+            'unchanged',
+            'destroyed'
          ]),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)

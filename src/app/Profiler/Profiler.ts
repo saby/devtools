@@ -74,14 +74,24 @@ function getElementState(
    return 'unchanged';
 }
 
+interface ISynchronizationOverview {
+   mountedCount: number;
+   selfUpdatedCount: number;
+   parentUpdatedCount: number;
+   unchangedCount: number;
+   destroyedCount: number;
+}
+
 function getSynchronizationOverview(
-   snapshot: Flamegraph['_options']['snapshot']
-): Profiler['_synchronizationOverview'] {
+   snapshot: Flamegraph['_options']['snapshot'],
+   destroyedCount: number = 0
+): ISynchronizationOverview {
    const result = {
       mountedCount: 0,
       selfUpdatedCount: 0,
       parentUpdatedCount: 0,
-      unchangedCount: 0
+      unchangedCount: 0,
+      destroyedCount
    };
 
    snapshot.forEach(({ updateReason }) => {
@@ -123,6 +133,8 @@ class Profiler extends Control<IOptions> {
       Store['_elements']
    > = new Map();
 
+   protected _destroyedCountBySynchronization: Map<string, number> = new Map();
+
    protected _snapshotBySynchronization: Map<
       string,
       Flamegraph['_options']['snapshot']
@@ -136,12 +148,7 @@ class Profiler extends Control<IOptions> {
 
    protected _synchronizations?: SynchronizationsList['_options']['synchronizations'];
 
-   protected _synchronizationOverview?: {
-      mountedCount?: number;
-      selfUpdatedCount?: number;
-      parentUpdatedCount?: number;
-      unchangedCount?: number;
-   };
+   protected _synchronizationOverview?: ISynchronizationOverview;
 
    protected _masterFilter: SynchronizationsList['_options']['filter'] = masterFilter;
 
@@ -260,7 +267,10 @@ class Profiler extends Control<IOptions> {
          this._snapshotBySynchronization.set(synchronizationKey, snapshot);
       }
 
-      this._synchronizationOverview = getSynchronizationOverview(snapshot);
+      this._synchronizationOverview = getSynchronizationOverview(
+         snapshot,
+         this._destroyedCountBySynchronization.get(synchronizationKey)
+      );
       this._snapshot = snapshot;
       this.__updateSelectedCommitChanges();
    }
@@ -317,6 +327,11 @@ class Profiler extends Control<IOptions> {
                // нужно for с 0 до changes.length+elementsBySynchronization.length
                // this._changesBySynchronization.delete(currentId);
             }
+            const diffCount = elements.length - previousElements.length;
+            this._destroyedCountBySynchronization.set(
+               synchronizationId,
+               diffCount > 0 ? diffCount : 0
+            );
 
             if (currentId === synchronizationId) {
                result = elements;

@@ -239,11 +239,12 @@ export type ControlUpdateReason =
    | 'mounted'
    | 'selfUpdated'
    | 'parentUpdated'
-   | 'unchanged';
+   | 'unchanged'
+   | 'destroyed';
 
 export function getBackgroundColorBasedOnReason(
    updateReason: ControlUpdateReason
-): '#e2e2e2' | '#ffab66' | '#e6d174' | '#b3e6e6' {
+): '#e2e2e2' | '#ffab66' | '#e6d174' | '#b3e6e6' | '#000' {
    switch (updateReason) {
       case 'mounted':
          return '#ffab66';
@@ -253,6 +254,8 @@ export function getBackgroundColorBasedOnReason(
          return '#b3e6e6';
       case 'unchanged':
          return '#e2e2e2';
+      case 'destroyed':
+         return '#000';
    }
 }
 

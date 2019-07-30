@@ -59,7 +59,8 @@
                 <Profiler.Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"
                                             selfUpdatedCount="{{ _synchronizationOverview.selfUpdatedCount }}"
                                             parentUpdatedCount="{{ _synchronizationOverview.parentUpdatedCount }}"
-                                            unchangedCount="{{ _synchronizationOverview.unchangedCount }}" />
+                                            unchangedCount="{{ _synchronizationOverview.unchangedCount }}"
+                                            destroyedCount="{{ _synchronizationOverview.destroyedCount }}" />
             </ws:else>
         </ws:if>
         <ws:else>

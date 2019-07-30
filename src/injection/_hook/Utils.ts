@@ -1,11 +1,10 @@
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
-import Agent, {
-   IChangedNode} from './Agent';
+import Agent, { IChangedNode } from './Agent';
 import {
-   IChangesDescription,
-   IControlNode,
    IBackendProfilingData,
-   IBackendSynchronizationDescription
+   IBackendSynchronizationDescription,
+   IChangesDescription,
+   IControlNode
 } from 'Extension/Plugins/Elements/IControlNode';
 
 function operationToString(
@@ -80,7 +79,10 @@ function processChanges(value?: object): string | undefined {
    return result;
 }
 
-function getChangesDescription({ operation, node }: IChangedNode): IChangesDescription {
+function getChangesDescription({
+   operation,
+   node
+}: IChangedNode): IChangesDescription {
    return {
       isFirstRender: operation === OperationType.CREATE,
       changedOptions: processChanges(node.changedOptions),
