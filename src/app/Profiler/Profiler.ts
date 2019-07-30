@@ -79,19 +79,16 @@ interface ISynchronizationOverview {
    selfUpdatedCount: number;
    parentUpdatedCount: number;
    unchangedCount: number;
-   destroyedCount: number;
 }
 
 function getSynchronizationOverview(
-   snapshot: Flamegraph['_options']['snapshot'],
-   destroyedCount: number = 0
+   snapshot: Flamegraph['_options']['snapshot']
 ): ISynchronizationOverview {
    const result = {
       mountedCount: 0,
       selfUpdatedCount: 0,
       parentUpdatedCount: 0,
-      unchangedCount: 0,
-      destroyedCount
+      unchangedCount: 0
    };
 
    snapshot.forEach(({ updateReason }) => {
@@ -132,8 +129,6 @@ class Profiler extends Control<IOptions> {
       string,
       Store['_elements']
    > = new Map();
-
-   protected _destroyedCountBySynchronization: Map<string, number> = new Map();
 
    protected _snapshotBySynchronization: Map<
       string,
@@ -267,10 +262,7 @@ class Profiler extends Control<IOptions> {
          this._snapshotBySynchronization.set(synchronizationKey, snapshot);
       }
 
-      this._synchronizationOverview = getSynchronizationOverview(
-         snapshot,
-         this._destroyedCountBySynchronization.get(synchronizationKey)
-      );
+      this._synchronizationOverview = getSynchronizationOverview(snapshot);
       this._snapshot = snapshot;
       this.__updateSelectedCommitChanges();
    }
@@ -325,12 +317,6 @@ class Profiler extends Control<IOptions> {
             const elements = applyOperations(previousElements, operations);
             this._elementsBySynchronization.set(currentId, elements);
             this._changesBySynchronization.delete(currentId);
-
-            const diffCount = elements.length - previousElements.length;
-            this._destroyedCountBySynchronization.set(
-               synchronizationId,
-               diffCount > 0 ? diffCount : 0
-            );
 
             if (currentId === synchronizationId) {
                result = elements;

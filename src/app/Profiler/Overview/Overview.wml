@@ -27,12 +27,6 @@
                     caption="Parent updated"
                     count="{{ _options.parentUpdatedCount }}" />
     </ws:if>
-    <ws:if data="{{ _options.destroyedCount > 0 }}">
-        <ws:partial template="row"
-                    updateReason="destroyed"
-                    caption="Destroyed"
-                    count="{{ _options.destroyedCount }}" />
-    </ws:if>
     <ws:if data="{{ _options.unchangedCount > 0 }}">
         <ws:partial template="row"
                     updateReason="unchanged"
