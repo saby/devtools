@@ -12,6 +12,7 @@ import 'css!Elements/Elements';
 import Store from './Store';
 import Model from './Model';
 import { throttle } from 'Types/function';
+import Controller from 'Search/Controller';
 
 interface IOptions {
    store: Store;
@@ -34,9 +35,11 @@ class Elements extends Control {
 
    protected _searchValue: string = '';
 
+   protected _searchController: Controller = new Controller('name');
+
    protected _lastFoundItemIndex: number = 0;
 
-   protected _searchResults: Store['_elements'] = [];
+   protected _searchTotal: number = 0;
 
    protected _throttledUpdateSearch: Function;
 
@@ -124,17 +127,17 @@ class Elements extends Control {
       this.__selectElement(id);
    }
 
-   protected _onListKeyDown(
-      e: {
-         nativeEvent: KeyboardEvent;
-         stopPropagation: Event['stopPropagation'];
-      }
-   ): void {
+   protected _onListKeyDown(e: {
+      nativeEvent: KeyboardEvent;
+      stopPropagation: Event['stopPropagation'];
+   }): void {
       const key = e.nativeEvent.key;
       if (ARROWS.indexOf(key) !== -1 && this._selectedItemId) {
          e.stopPropagation();
          const visibleItems = this._model.getVisibleItems();
-         const index = visibleItems.findIndex((item) => item.id === this._selectedItemId);
+         const index = visibleItems.findIndex(
+            (item) => item.id === this._selectedItemId
+         );
          if (index !== -1) {
             const originalItem = visibleItems[index];
             switch (key) {
@@ -147,7 +150,9 @@ class Elements extends Control {
                   if (originalItem.isExpanded) {
                      this._model.toggleExpanded(originalItem.id, false);
                   } else if (originalItem.parentId) {
-                     const parent = visibleItems.find((item) => item.id === originalItem.parentId);
+                     const parent = visibleItems.find(
+                        (item) => item.id === originalItem.parentId
+                     );
                      if (parent) {
                         this.__selectElement(parent.id);
                      }
@@ -246,47 +251,31 @@ class Elements extends Control {
    }
 
    private __updateSearch(value: string): void {
-      if (value) {
-         this._searchResults = this._options.store.getElements().filter(
-            (element) =>
-               element.name.toLowerCase().indexOf(value.toLowerCase()) !== -1
-         );
-         if (this._searchResults.length > 0 && !this._searchResults.find((element) => element.id === this._selectedItemId)) {
-            this.__selectElement(this._searchResults[0].id);
-            this._lastFoundItemIndex = 0;
-         }
-      } else {
-         this._searchResults = [];
-         this._lastFoundItemIndex = 0;
+      const searchResult = this._searchController.updateSearch(
+         this._options.store.getElements(),
+         value,
+         this._selectedItemId
+      );
+
+      if (searchResult.id) {
+         this.__selectElement(searchResult.id);
       }
+      this._lastFoundItemIndex = searchResult.index;
+      this._searchTotal = searchResult.total;
    }
 
    private __onSearchKeydown(e: { nativeEvent: KeyboardEvent }): void {
       if (e.nativeEvent.key === 'Enter') {
-         if (this._searchValue && this._searchResults.length > 0) {
-            if (e.nativeEvent.shiftKey) {
-               if (this._lastFoundItemIndex === 0) {
-                  this._lastFoundItemIndex = this._searchResults.length - 1;
-               } else {
-                  this._lastFoundItemIndex--;
-               }
-            } else {
-               if (
-                  this._lastFoundItemIndex ===
-                  this._searchResults.length - 1
-               ) {
-                  this._lastFoundItemIndex = 0;
-               } else {
-                  this._lastFoundItemIndex++;
-               }
-            }
+         const searchResult = this._searchController.getNextItemId(
+            this._searchValue,
+            e.nativeEvent.shiftKey
+         );
 
-            const id = this._searchResults[this._lastFoundItemIndex].id;
-
-            if (id) {
-               this.__selectElement(id);
-            }
+         if (searchResult.id) {
+            this.__selectElement(searchResult.id);
          }
+         this._lastFoundItemIndex = searchResult.index;
+         this._searchTotal = searchResult.total;
       }
    }
 }
