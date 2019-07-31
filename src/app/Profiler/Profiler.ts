@@ -48,13 +48,6 @@ function masterFilter(item: { selfDuration: number }): boolean {
    return item.selfDuration !== 0;
 }
 
-function detailFilter(item: {
-   selfDuration: number;
-   updateReason?: ControlUpdateReason;
-}): boolean {
-   return item.selfDuration !== 0 && item.updateReason !== 'unchanged';
-}
-
 function getElementState(
    changesDescription?: IChangesDescription
 ): ControlUpdateReason {
