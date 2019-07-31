@@ -5,6 +5,8 @@
                         markedKey="{{ _options.markedKey }}"
                         markerVisibility="visible"
                         sorting="{{ _sorting }}"
+                        groupingKeyCallback="{{ _groupingCallback }}"
+                        groupTemplate="{{ _groupTemplate }}"
                         on:markedKeyChanged="__markedKeyChanged()">
         <ws:emptyTemplate>
             <ws:partial template="Controls/list:EmptyTemplate">

@@ -3,11 +3,13 @@ import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { Memory } from 'Types/source';
 // @ts-ignore
 import template = require('wml!Profiler/RankedView/RankedView');
-import { descriptor } from 'Types/entity';
+import { descriptor, Model } from 'Types/entity';
 // @ts-ignore
 import commitTimeTemplate = require('wml!Profiler/RankedView/commitTimeTemplate');
 // @ts-ignore
 import reasonTemplate = require('wml!Profiler/RankedView/reasonTemplate');
+// @ts-ignore
+import groupTemplate = require('wml!Profiler/RankedView/groupTemplate');
 import { getBackgroundColorBasedOnTiming } from '../Utils';
 import { ControlUpdateReason } from '../Utils';
 
@@ -56,6 +58,10 @@ function applyFilter(
    );
 }
 
+function groupByReason(item: Model): ControlUpdateReason {
+   return item.get('updateReason') as ControlUpdateReason;
+}
+
 class RankedView extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 
@@ -80,6 +86,12 @@ class RankedView extends Control<IOptions> {
          selfDuration: 'desc'
       }
    ];
+
+   protected _groupingCallback: (
+      item: Model
+   ) => ControlUpdateReason = groupByReason;
+
+   protected _groupTemplate: TemplateFunction = groupTemplate;
 
    constructor(options: IOptions) {
       super(options);
