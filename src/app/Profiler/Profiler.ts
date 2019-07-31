@@ -25,6 +25,7 @@ import {
 import template = require('wml!Profiler/Profiler');
 import Tab = chrome.tabs.Tab;
 import { OperationType } from 'Extension/Plugins/Elements/const';
+import Controller from '../Search/Controller';
 
 interface IOptions extends IControlOptions {
    store: Store;
@@ -153,7 +154,11 @@ class Profiler extends Control<IOptions> {
 
    protected _masterFilter: SynchronizationsList['_options']['filter'] = masterFilter;
 
-   protected _detailFilter: RankedView['_options']['filter'] = detailFilter;
+   protected _detailFilter: RankedView['_options']['filter'] = {
+      minDuration: 0,
+      name: '',
+      displayReasons: ['mounted', 'selfUpdated', 'parentUpdated']
+   };
 
    protected _currentOperations: Array<IOperationEvent['args']>;
 
@@ -178,6 +183,14 @@ class Profiler extends Control<IOptions> {
    protected _selectedCommitChanges: CommitDetails['_options']['changesDescription'];
 
    protected _saveScreenshots: boolean = false;
+
+   protected _searchValue: string = '';
+
+   protected _searchController: Controller = new Controller('name');
+
+   protected _lastFoundItemIndex: number = 0;
+
+   protected _searchTotal: number = 0;
 
    constructor(options: IOptions) {
       super(options);
@@ -274,6 +287,8 @@ class Profiler extends Control<IOptions> {
       );
       this._snapshot = snapshot;
       this.__updateSelectedCommitChanges();
+
+      this.__updateSearch(this._searchValue);
    }
 
    private __updateSelectedCommitChanges(): void {
@@ -419,6 +434,41 @@ class Profiler extends Control<IOptions> {
       chrome.devtools.inspectedWindow.reload({
          injectedScript: 'this.__WASABY_START_PROFILING = true'
       });
+   }
+
+   private __onSearchValueChanged(e: Event, value: string): void {
+      this.__updateSearch(value);
+   }
+
+   private __updateSearch(value: string): void {
+      const searchResult = this._searchController.updateSearch(
+         this._snapshot || [],
+         value,
+         this._selectedCommitId
+      );
+
+      if (searchResult.id) {
+         this._selectedCommitId = searchResult.id;
+         this.__updateSelectedCommitChanges();
+      }
+      this._lastFoundItemIndex = searchResult.index;
+      this._searchTotal = searchResult.total;
+   }
+
+   private __onSearchKeydown(e: { nativeEvent: KeyboardEvent }): void {
+      if (e.nativeEvent.key === 'Enter') {
+         const searchResult = this._searchController.getNextItemId(
+            this._searchValue,
+            e.nativeEvent.shiftKey
+         );
+
+         if (searchResult.id) {
+            this._selectedCommitId = searchResult.id;
+            this.__updateSelectedCommitChanges();
+         }
+         this._lastFoundItemIndex = searchResult.index;
+         this._searchTotal = searchResult.total;
+      }
    }
 }
 

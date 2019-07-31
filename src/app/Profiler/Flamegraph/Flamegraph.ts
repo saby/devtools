@@ -328,6 +328,7 @@ class Flamegraph extends Control<IOptions> {
    protected _maxSelfDuration: number = 0;
    protected _containerWidth: number = 0;
    protected _depthToItemData: INodeItemData[][] = [];
+   protected _shouldRestoreFocus: boolean = false;
 
    protected _afterMount(): void {
       this._containerWidth = this._container.clientWidth;
@@ -350,8 +351,13 @@ class Flamegraph extends Control<IOptions> {
          oldOptions.markedKey !== this._options.markedKey &&
          this._children[this._options.markedKey]
       ) {
-         // @ts-ignore
-         this._children[this._options.markedKey].focus();
+         (this._children[this._options.markedKey] as HTMLElement).scrollIntoView();
+         if (this._shouldRestoreFocus) {
+            this._shouldRestoreFocus = false;
+
+            // @ts-ignore
+            this._children[this._options.markedKey].focus();
+         }
       }
 
       // TODO: попробовать перейти на схему с controlResize
@@ -422,7 +428,7 @@ class Flamegraph extends Control<IOptions> {
          ({ parentId }) => parentId === selectedItem.id
       );
       if (firstChild) {
-         this._notify('markedKeyChanged', [firstChild.id]);
+         this.__changeMarkedKeyAfterKeydown(firstChild.id);
       }
    }
 
@@ -432,7 +438,7 @@ class Flamegraph extends Control<IOptions> {
             ({ id }) => id === selectedItem.parentId
          );
          if (parent) {
-            this._notify('markedKeyChanged', [parent.id]);
+            this.__changeMarkedKeyAfterKeydown(parent.id);
          }
       }
    }
@@ -449,9 +455,9 @@ class Flamegraph extends Control<IOptions> {
          itemsOnTheSameDepth[selectedItemIndex - 1].parentId ===
             selectedItem.parentId
       ) {
-         this._notify('markedKeyChanged', [
+         this.__changeMarkedKeyAfterKeydown(
             itemsOnTheSameDepth[selectedItemIndex - 1].id
-         ]);
+         );
       }
    }
 
@@ -467,10 +473,15 @@ class Flamegraph extends Control<IOptions> {
          itemsOnTheSameDepth[selectedItemIndex + 1].parentId ===
             selectedItem.parentId
       ) {
-         this._notify('markedKeyChanged', [
+         this.__changeMarkedKeyAfterKeydown(
             itemsOnTheSameDepth[selectedItemIndex + 1].id
-         ]);
+         );
       }
+   }
+
+   private __changeMarkedKeyAfterKeydown(id: string): void {
+      this._shouldRestoreFocus = true;
+      this._notify('markedKeyChanged', [id]);
    }
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {

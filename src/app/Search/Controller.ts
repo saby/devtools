@@ -13,32 +13,42 @@ class Controller {
       this._displayProperty = displayProperty;
    }
 
-   updateSearch(items: object[], value: string, selectedItemId?: string): IResult {
-      const result = {
-         id: '',
-         index: 0,
-         total: 0
-      };
+   updateSearch(
+      items: object[],
+      value: string,
+      selectedItemId: string = ''
+   ): IResult {
+      let id = selectedItemId;
       if (value) {
          this._searchResults = items.filter(
             (element) =>
-               element[this._displayProperty].toLowerCase().indexOf(value.toLowerCase()) !== -1
+               element[this._displayProperty]
+                  .toLowerCase()
+                  .indexOf(value.toLowerCase()) !== -1
          );
-         if (
-            this._searchResults.length > 0 &&
-            !this._searchResults.find(
+
+         if (this._searchResults.length > 0) {
+            const selectedItemIndex = this._searchResults.findIndex(
                (element) => element.id === selectedItemId
-            )
-         ) {
-            result.id = this._searchResults[0].id;
-            this._lastFoundItemIndex = 0;
+            );
+
+            if (selectedItemIndex !== this._lastFoundItemIndex) {
+               this._lastFoundItemIndex =
+                  selectedItemIndex === -1 ? 0 : selectedItemIndex;
+               id = this._searchResults[this._lastFoundItemIndex].id;
+            }
          }
       } else {
+         id = '';
          this._searchResults = [];
          this._lastFoundItemIndex = 0;
       }
-      result.total = this._searchResults.length;
-      return result;
+
+      return {
+         id,
+         index: this._lastFoundItemIndex,
+         total: this._searchResults.length
+      };
    }
 
    getNextItemId(value: string, shiftKey: boolean = false): IResult {

@@ -19,14 +19,16 @@ interface IRankedViewControlNode extends IFrontendControlNode {
 interface IOptions extends IControlOptions {
    snapshot: IRankedViewControlNode[];
    markedKey: string;
-   filter: (item: IRankedViewControlNode) => boolean;
+   filter: {
+      name: string;
+      minDuration: number;
+      displayReasons: ControlUpdateReason[];
+   };
 }
 
 // TODO: копипаста в SynchronizationsList
 function getDataWithLengths(
-   initialData: Array<{
-      selfDuration: number;
-   }>
+   initialData: IOptions['snapshot']
 ): Array<{ selfDuration: number; length: number; barColor: string }> {
    const maxDuration = initialData.reduce(
       (max, { selfDuration }) => Math.max(max, selfDuration),
@@ -41,6 +43,17 @@ function getDataWithLengths(
          length: (item.selfDuration / maxDuration) * 100
       };
    });
+}
+
+function applyFilter(
+   initialData: IOptions['snapshot'],
+   filter: IOptions['filter']
+): IOptions['snapshot'] {
+   return initialData.filter(
+      (item) =>
+         item.selfDuration >= filter.minDuration &&
+         filter.displayReasons.indexOf(item.updateReason) !== -1
+   );
 }
 
 class RankedView extends Control<IOptions> {
@@ -72,7 +85,7 @@ class RankedView extends Control<IOptions> {
       super(options);
       this._source = new Memory({
          idProperty: 'id',
-         data: getDataWithLengths(options.snapshot.filter(options.filter))
+         data: getDataWithLengths(applyFilter(options.snapshot, options.filter))
       });
    }
 
@@ -84,7 +97,7 @@ class RankedView extends Control<IOptions> {
          this._source = new Memory({
             idProperty: 'id',
             data: getDataWithLengths(
-               newOptions.snapshot.filter(newOptions.filter)
+               applyFilter(newOptions.snapshot, newOptions.filter)
             )
          });
       }
@@ -101,7 +114,7 @@ class RankedView extends Control<IOptions> {
          // @ts-ignore
          markedKey: descriptor(String).required(),
          // @ts-ignore
-         filter: descriptor(Function).required(),
+         filter: descriptor(Object).required(),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

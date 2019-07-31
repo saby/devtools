@@ -4,13 +4,13 @@
                                  iconStyle="{{ _isProfiling ? 'danger' : 'secondary' }}"
                                  viewMode="link"
                                  tooltip="{{ _isProfiling ? 'Stop recording' : 'Start recording' }}"
-                                 attr:class="Profiler__headButton"
+                                 attr:class="Profiler__headElement"
                                  on:click="__toggleProfiling()"/>
         <Controls.buttons:Button icon="icon-Refresh icon-small"
                                  viewMode="link"
                                  readOnly="{{ _isProfiling }}"
                                  tooltip="Reload the page and start recording"
-                                 attr:class="Profiler__headButton"
+                                 attr:class="Profiler__headElement"
                                  on:click="__reloadAndProfile()"/>
         <Controls.toggle:Checkbox caption="Screenshots"
                                   readOnly="{{ _isProfiling }}"
@@ -21,8 +21,18 @@
             <Controls.toggle:RadioGroup source="{{ _radioGroupSource }}"
                                         direction="horizontal"
                                         keyProperty="title"
-                                        attr:class="Profiler__headRadioGroup"
+                                        attr:class="Profiler__headRadioGroup Profiler__headElement"
                                         bind:selectedKey="_selectedTab" />
+        </ws:if>
+        <!--TODO: включить поиск и в RankedView, после того как ключи станут нормальными-->
+        <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot && _selectedTab === 'Flamegraph' }}">
+            <Controls.search:Input bind:value="_searchValue"
+                                   on:valueChanged="__onSearchValueChanged()"
+                                   on:keydown="__onSearchKeydown()"
+                                   attr:class="Profiler__headElement" />
+            <ws:if data="{{ _searchTotal > 0 }}">
+                <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchTotal }}</span>
+            </ws:if>
         </ws:if>
     </ws:headTemplate>
     <ws:content>
