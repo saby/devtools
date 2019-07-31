@@ -63,7 +63,7 @@
                 </ws:detail>
             </Controls.masterDetail:Base>
             <ws:if data="{{ _selectedCommitId }}">
-                <Profiler.CommitDetails changesDescription="{{ _selectedCommitChanges }}"/>
+                <Profiler.CommitDetails.CommitDetails changesDescription="{{ _selectedCommitChanges }}"/>
             </ws:if>
             <ws:else>
                 <Profiler.Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"
