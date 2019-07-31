@@ -351,7 +351,10 @@ class Flamegraph extends Control<IOptions> {
          oldOptions.markedKey !== this._options.markedKey &&
          this._children[this._options.markedKey]
       ) {
-         (this._children[this._options.markedKey] as HTMLElement).scrollIntoView();
+         (this._children[this._options.markedKey] as HTMLElement).scrollIntoView({
+            block: 'nearest',
+            inline: 'nearest'
+         });
          if (this._shouldRestoreFocus) {
             this._shouldRestoreFocus = false;
 
