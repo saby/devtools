@@ -1,9 +1,9 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
-import template = require('wml!Profiler/TimeRender');
+import template = require('wml!Profiler/TimeRender/TimeRender');
 import { descriptor } from 'Types/entity';
-import 'css!Profiler/TimeRender';
-import { formatTime } from './Utils';
+import 'css!Profiler/TimeRender/TimeRender';
+import { formatTime } from '../Utils';
 
 interface IOptions extends IControlOptions {
    value: number;

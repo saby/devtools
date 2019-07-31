@@ -1,8 +1,8 @@
 <ws:partial template="Controls/grid:ColumnTemplate"
             scope="{{ _options }}">
    <ws:contentTemplate>
-      <Profiler.TimeRender value="{{ itemData.item.selfDuration }}"
-                           barColor="{{ itemData.item.barColor }}"
-                           length="{{ itemData.item.length }}"/>
+      <Profiler.TimeRender.TimeRender value="{{ itemData.item.selfDuration }}"
+                                      barColor="{{ itemData.item.barColor }}"
+                                      length="{{ itemData.item.length }}"/>
    </ws:contentTemplate>
 </ws:partial>
