@@ -67,14 +67,12 @@ export function getControlType(node: IControlNode): ControlType {
    return ControlType.TEMPLATE;
 }
 
-function processChanges(value?: object): string | undefined {
+function processChanges(value?: object): string[] | undefined {
    let result;
    if (value) {
-      result = Object.keys(value)
-         .map((key) => {
-            return key.replace('attr:', '');
-         })
-         .join(', ');
+      result = Object.keys(value).map((key) => {
+         return key.replace('attr:', '');
+      });
    }
    return result;
 }

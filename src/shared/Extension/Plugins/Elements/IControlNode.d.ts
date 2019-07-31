@@ -61,8 +61,8 @@ export interface IFrontendControlNode {
 export interface IChangesDescription {
    selfDuration: number;
    isFirstRender: boolean;
-   changedOptions?: string;
-   changedAttributes?: string;
+   changedOptions?: string[];
+   changedAttributes?: string[];
 }
 
 export interface IBackendSynchronizationDescription {

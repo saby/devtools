@@ -6,8 +6,8 @@ import 'css!Profiler/CommitDetails/CommitDetails';
 
 interface IOptions extends IControlOptions {
    changesDescription?: {
-      changedOptions?: string;
-      changedAttributes?: string;
+      changedOptions?: string[];
+      changedAttributes?: string[];
       isFirstRender?: boolean;
       screenshotURL?: string;
    };
