@@ -1,6 +1,7 @@
 <Devtool.Page.Application>
 <div
     class="Devtool_Page"
+    attr:key="{{ _rootKey }}"
 >
     <ws:if data="{{ _hasWasabyOnPage }}">
         <Controls.tabs:Buttons
