@@ -2,7 +2,7 @@ import { IItemInfo } from "Extension/Plugins/DependencyWatcher/IItem";
 
 export interface IListItem extends IItemInfo {
     id: string;
-    parent?: string;
+    parent: string | null;
     isDynamic?: boolean;
     child: boolean | null;
     itemId: number;

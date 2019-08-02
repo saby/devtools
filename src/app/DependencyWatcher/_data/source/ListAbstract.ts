@@ -165,7 +165,7 @@ export abstract class ListAbstract extends Compatibility {
         return {
             name, defined, fileName, fileId, path, size, initialized,
             isDynamic,
-            parent,
+            parent: parent || null,
             itemId: id,
             id: createId(id, parent),
             child: hasChildren(this._getChildren(item))
