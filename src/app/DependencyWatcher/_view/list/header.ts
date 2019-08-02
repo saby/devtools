@@ -5,7 +5,7 @@ import { IListItem } from "../../data";
 export interface IHeader<TItem extends IListItem = IListItem> {
     title: string;
     align?: string;
-    sortingProperty?: keyof TItem;
+    sortingProperty?: keyof TItem | string;
 }
 
 export type Headers<TItem extends IListItem = IListItem> = Array<IHeader<TItem>>
@@ -22,10 +22,10 @@ export const isDynamic: IHeader = {
     title: '',
     align: 'center'
 };
-export const initialized: IHeader = {
+export const used: IHeader = {
     title: rk('used'),
     align: 'center',
-    sortingProperty: "initialized"
+    sortingProperty: "used"
 };
 export const size: IHeader = {
     title: rk('size'),
@@ -37,6 +37,6 @@ export const headers: Headers = [
     name,
     fileName,
     isDynamic,
-    initialized,
+    used,
     size
 ];

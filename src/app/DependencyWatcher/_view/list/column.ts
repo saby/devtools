@@ -31,10 +31,10 @@ export const isDynamic: Partial<IColumn> = {
     align: 'center',
     template: column.isDynamic
 };
-export const initialized: Partial<IColumn> = {
+export const used: Partial<IColumn> = {
     width: '55px',
     align: 'center',
-    template: column.initialized
+    template: column.used
 };
 export const size: Partial<IColumn> = {
     displayProperty: 'size',
@@ -47,6 +47,6 @@ export const columns: Columns = [
     name,
     fileName,
     isDynamic,
-    initialized,
+    used,
     size
 ];
