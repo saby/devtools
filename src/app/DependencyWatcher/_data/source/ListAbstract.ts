@@ -250,7 +250,7 @@ export abstract class ListAbstract extends Compatibility {
             }
             return  listItems;
         }).then((items: IListItem[]) => {
-            return new RecordSet({ rawData: items })
+            return new RecordSet({ rawData: items, idProperty: 'id' })
         });
     }
     
