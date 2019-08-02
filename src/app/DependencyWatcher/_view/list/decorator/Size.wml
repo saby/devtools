@@ -1,8 +1,0 @@
-<ws:if data="{{ _options.size }}">
-    <span title="{{ _options.size }} {[байт]}" class="Decorator-size">
-        {{ _size }} {{ _unit }}
-    </span>
-</ws:if>
-<ws:else>
-    <invisible-node/>
-</ws:else>
