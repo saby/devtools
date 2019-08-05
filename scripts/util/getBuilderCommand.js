@@ -8,6 +8,7 @@ module.exports = (buildTemplatePath) => {
         `--gulpfile=${ resolve(NODE_MODULES, "sbis3-builder/gulpfile.js") }`,
         "build",
         `--config="${ buildTemplatePath }"`,
-        "-LLLL"
+        "-LL",
+        process.env.NODE_ENV === 'production' ? '--log-level=error' : ''
     ].join(' ');
 };

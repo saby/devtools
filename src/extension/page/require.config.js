@@ -8,7 +8,7 @@ setRequireConfig({
     paths: {
         "tslib": "../ext/tslib",
         "Extension": [
-            "../resources/Extension"
+            "../Extension"
         ],
     },
 });
