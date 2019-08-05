@@ -36,6 +36,7 @@
                             >
                                 <ws:templateOptions
                                     store="{{_store}}"
+                                    selected="{{ itemTemplate.templateOptions.selected }}"
                                 />
                             </Controls.Container.Async>
                         </ws:itemTemplate>
@@ -47,6 +48,7 @@
                             >
                                 <ws:templateOptions
                                     store="{{_store}}"
+                                    selected="{{ itemTemplate.templateOptions.selected }}"
                                 />
                             </Controls.Container.Async>
                         </ws:itemTemplate>

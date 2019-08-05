@@ -76,13 +76,12 @@ class Elements extends Control {
 
    _beforeUpdate(newOptions: IOptions): void {
       // TODO: нужно ещё следить за видимостью панели
-      // TODO: вернуть все оптимизации с selected после того, как сделаю получение Store не через опции
-      // if (newOptions.selected && !this._options.selected) {
+      if (newOptions.selected && !this._options.selected) {
          this._model.setItems(newOptions.store.getElements());
          newOptions.store.dispatch('inspectElement', this._selectedItemId);
          this._throttledUpdateSearch();
          this._itemsChanged = false;
-      // }
+      }
    }
 
    _afterUpdate(): void {
@@ -174,8 +173,7 @@ class Elements extends Control {
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
-      // TODO: вернуть все оптимизации с selected после того, как сделаю получение Store не через опции
-      // if (this._options.selected) {
+      if (this._options.selected) {
          switch (args[0]) {
             case OperationType.UPDATE:
                this.__updateNode(args[1]);
@@ -188,7 +186,7 @@ class Elements extends Control {
                this._itemsChanged = true;
                break;
          }
-      // }
+      }
    }
 
    private __updateNode(id: IControlNode['id']): void {
@@ -225,15 +223,14 @@ class Elements extends Control {
    }
 
    private __onEndSynchronization(): void {
-      // TODO: вернуть все оптимизации с selected после того, как сделаю получение Store не через опции
-      // if (this._options.selected) {
+      if (this._options.selected) {
          this._model.setItems(this._options.store.getElements());
 
          if (this._itemsChanged) {
             this._throttledUpdateSearch();
          }
          this._itemsChanged = false;
-      // }
+      }
    }
 
    private __toggleSelectElementFromPage(): void {
