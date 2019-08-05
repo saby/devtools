@@ -8,6 +8,7 @@
    },
    "scripts": {
       "build": "npm run build:shared && npm run build:extension && npm run build:injection && npm run build:app && npm run build:cdn",
+      "build:production": "cross-env-shell NODE_ENV=production \"npm run build && node ./scripts/cleaner.js\"",
       "build:injection": "node ./scripts/build_injection.js",
       "build:injection-min": "node ./scripts/build_injection.js -min",
       "build:content": "node ./scripts/build_content.js",
@@ -19,6 +20,7 @@
    },
    "devDependencies": {
       "@types/chrome": "0.0.81",
+      "cross-env": "^5.2.0",
       "tslint": "^5.15.0"
    },
    "dependencies": {
