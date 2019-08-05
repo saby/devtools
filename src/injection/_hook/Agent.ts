@@ -277,6 +277,10 @@ class Agent {
    }
 
    private __handleUpdate(node: IBackendControlNode): void {
+      if (!this.elements.has(node.id)) {
+         this.__handleAdd(node);
+         return;
+      }
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
