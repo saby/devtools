@@ -1,5 +1,8 @@
 import { ContentChannel } from '../Devtool/Event/ContentChannel';
-import { IControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IControlNode,
+   IFrontendControlNode
+} from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
@@ -8,9 +11,17 @@ class Store {
    protected _channel: ContentChannel = new ContentChannel('elements');
    protected _elements: IFrontendControlNode[] = [];
    protected _devtoolsOpened: boolean = false;
+   protected _hasFullTree: boolean = false;
+   protected _getElementsPromise?: Promise<Store['_elements']>;
 
    constructor() {
-      this._channel.addListener('operation', this.__operationHandler.bind(this));
+      this._channel.addListener(
+         'operation',
+         this.__operationHandler.bind(this)
+      );
+      this._channel.addListener('endOfTree', () => {
+         this._hasFullTree = true;
+      });
       this._channel.addListener(
          'endSynchronization',
          this.__onEndSynchronization.bind(this)
@@ -32,6 +43,23 @@ class Store {
 
    getElements(): Store['_elements'] {
       return this._elements;
+   }
+
+   getFullTree(): Promise<Store['_elements']> {
+      if (this._getElementsPromise) {
+         return this._getElementsPromise;
+      }
+      if (!this._hasFullTree) {
+         this._getElementsPromise = new Promise((resolve) => {
+            const waitForFullTree = () => {
+               this._channel.removeListener('endOfTree', waitForFullTree);
+               resolve(this.getElements());
+            };
+            this._channel.addListener('endOfTree', waitForFullTree);
+         });
+         return this._getElementsPromise;
+      }
+      return Promise.resolve(this.getElements());
    }
 
    toggleDevtoolsOpened(state: boolean): void {

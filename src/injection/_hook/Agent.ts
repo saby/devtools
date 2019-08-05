@@ -137,6 +137,7 @@ class Agent {
 
          window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       });
+      window.__WASABY_DEV_HOOK__.pushMessage('endOfTree');
 
       this.channel.dispatch('longMessage');
    }

@@ -69,24 +69,20 @@ class Elements extends Control {
       window.elementsPanel = this;
 
       options.store.toggleDevtoolsOpened(true);
-      /**
-       * TODO: обычно данные синхронизируются с каждой синхронизацией. Но при первом открытии это не работает
-       * Тут я дожидаюсь пока прилетят элементы и потом забираю текущее состояние. Это очень плохое решение, стор сам
-       * должен говорить когда нужно забирать элементы.
-       */
-      setTimeout(() => {
-         this._model.setItems(options.store.getElements());
-      }, 1000);
+      options.store.getFullTree().then((items) => {
+         this._model.setItems(items);
+      });
    }
 
    _beforeUpdate(newOptions: IOptions): void {
       // TODO: нужно ещё следить за видимостью панели
-      if (newOptions.selected && !this._options.selected) {
+      // TODO: вернуть все оптимизации с selected после того, как сделаю получение Store не через опции
+      // if (newOptions.selected && !this._options.selected) {
          this._model.setItems(newOptions.store.getElements());
          newOptions.store.dispatch('inspectElement', this._selectedItemId);
          this._throttledUpdateSearch();
          this._itemsChanged = false;
-      }
+      // }
    }
 
    _afterUpdate(): void {
@@ -178,7 +174,8 @@ class Elements extends Control {
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
-      if (this._options.selected) {
+      // TODO: вернуть все оптимизации с selected после того, как сделаю получение Store не через опции
+      // if (this._options.selected) {
          switch (args[0]) {
             case OperationType.UPDATE:
                this.__updateNode(args[1]);
@@ -191,7 +188,7 @@ class Elements extends Control {
                this._itemsChanged = true;
                break;
          }
-      }
+      // }
    }
 
    private __updateNode(id: IControlNode['id']): void {
@@ -228,14 +225,15 @@ class Elements extends Control {
    }
 
    private __onEndSynchronization(): void {
-      if (this._options.selected) {
+      // TODO: вернуть все оптимизации с selected после того, как сделаю получение Store не через опции
+      // if (this._options.selected) {
          this._model.setItems(this._options.store.getElements());
 
          if (this._itemsChanged) {
             this._throttledUpdateSearch();
          }
          this._itemsChanged = false;
-      }
+      // }
    }
 
    private __toggleSelectElementFromPage(): void {
