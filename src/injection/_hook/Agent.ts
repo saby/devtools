@@ -250,7 +250,8 @@ class Agent {
           */
          this.changedNodesBySynchronization.set(id, changes);
       }
-      this.channel.dispatch('endSynchronization', id);
+      window.__WASABY_DEV_HOOK__.pushMessage('endSynchronization', id);
+      this.channel.dispatch('longMessage');
       this.changedRoots.delete(rootId);
       this.rootStack.pop();
    }
@@ -272,7 +273,7 @@ class Agent {
          if (node.parentId) {
             message.push(node.parentId);
          }
-         this.channel.dispatch('operation', message);
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       }
    }
 
@@ -288,7 +289,7 @@ class Agent {
             OperationType.UPDATE,
             node.id
          ];
-         this.channel.dispatch('operation', message);
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       }
    }
 
@@ -308,7 +309,7 @@ class Agent {
                      OperationType.DELETE,
                      key
                   ];
-                  this.channel.dispatch('operation', message);
+                  window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
                }
             }
          });
@@ -319,7 +320,7 @@ class Agent {
             OperationType.DELETE,
             node.id
          ];
-         this.channel.dispatch('operation', message);
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       }
    }
 
@@ -336,7 +337,7 @@ class Agent {
                OperationType.DELETE,
                key
             ];
-            this.channel.dispatch('operation', message);
+            window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
          }
       });
    }
