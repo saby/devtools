@@ -1,4 +1,4 @@
-const { input, output, root, logs } = require('./config');
+const { input, output, root, logs, minimize } = require('./config');
 const { resolve } = require('path');
 const NODE_MODULES = resolve(root, "node_modules");
 
@@ -107,7 +107,7 @@ module.exports = {
   "themes": true,
   "sources": false,
   "symlinks": false,
-  "minimize": process.env.NODE_ENV === 'production',
+  "minimize": minimize,
   "wml": true,
   "joinedMeta": true,
   "modules": MODULES
