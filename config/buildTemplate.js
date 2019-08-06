@@ -104,17 +104,11 @@ module.exports = {
   "typescript": true,
   "less": true,
   "contents": true,
-  "deprecatedWebPageTemplates": true,
-  "htmlWml": true,
   "themes": true,
   "sources": false,
   "symlinks": false,
-  "minimize": false,
+  "minimize": process.env.NODE_ENV === 'production',
   "wml": true,
-  "customPack": false,
-  "dependenciesGraph": false,
-  "resourcesUrl": false,
   "joinedMeta": true,
-  "gzip" : false,
   "modules": MODULES
 };

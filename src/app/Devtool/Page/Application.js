@@ -4,7 +4,7 @@ define('Devtool/Page/Application', [
     'wml!Devtool/Page/Application'
 ], function (Base,
       scrollLib,
-      template,
+      template
 ) {
     /*
      * перенос частичной логики Core/Application для работоспособности контролов
@@ -14,12 +14,12 @@ define('Devtool/Page/Application', [
      */
     return Base.extend({
         _template: template,
-        _beforeMount() {
+        _beforeMount: function() {
             this._scrollContext = new scrollLib._scrollContext({
                 pagingVisible: false
             });
         },
-        _getChildContext() {
+        _getChildContext: function() {
             return {
                 ScrollData: this._scrollContext
             };
