@@ -45,7 +45,7 @@ class Extension extends Control {
       logger.log('сообщаем странице об активности вкладки');
       this._channel.dispatch(GlobalMessages.devtoolsInitialized);
       this._channel.addListener(GlobalMessages.wasabyInitialized, () => {
-         logger.log('получили ответ т вкладки, скрываем оверлей');
+         logger.log('получили ответ от вкладки, скрываем оверлей');
          this._store = new Store();
          this._hasWasabyOnPage = true;
       });
