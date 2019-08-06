@@ -4,11 +4,9 @@ const root = resolve(__dirname, "../");
 const source = resolve(root, 'src');
 const build = resolve(root, 'build');
 
-const MIN_KEY = '-min';
-
 module.exports = {
   root,
-  minimize: process.argv.includes(MIN_KEY),
+  minimize: process.env.NODE_ENV === 'production',
   input: {
     /**
      * Корневая директория с исходниками
