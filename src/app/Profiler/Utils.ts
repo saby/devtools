@@ -1,61 +1,14 @@
-import Store from '../Elements/Store';
-import { IBackendProfilingData, IChangesDescription, IControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import { OperationType } from 'Extension/Plugins/Elements/const';
-import Profiler, { IFrontendSynchronizationDescription, IProfilingData } from './Profiler';
-
-// TODO: почти копипаста из Store
-function getDepth(
-   elements: Store['_elements'],
-   parentId?: IControlNode['parentId']
-): number {
-   if (parentId) {
-      const parent = elements.find((element) => element.id === parentId);
-      if (parent) {
-         return parent.depth + 1;
-      }
-   }
-   return 0;
-}
-
-// TODO: почти копипаста из Store
-function addNode(
-   elements: Store['_elements'],
-   id: IControlNode['id'],
-   name: IControlNode['name'],
-   parentId?: IControlNode['parentId']
-): void {
-   if (!parentId) {
-      elements.push({
-         id,
-         name,
-         parentId,
-         class: '',
-         depth: 0
-      });
-   } else {
-      const parentIndex = elements.findIndex(
-         (element) => element.id === parentId
-      );
-      let lastChildIndex = parentIndex + 1;
-      if (parentIndex === -1) {
-         lastChildIndex = 0;
-      } else {
-         while (
-            elements[lastChildIndex] &&
-            elements[lastChildIndex].depth > elements[parentIndex].depth
-         ) {
-            lastChildIndex++;
-         }
-      }
-      elements.splice(lastChildIndex, 0, {
-         id,
-         name,
-         parentId,
-         class: '',
-         depth: getDepth(elements, parentId)
-      });
-   }
-}
+import Store, { applyOperation } from '../Elements/Store';
+import {
+   IBackendProfilingData,
+   IChangesDescription,
+   IControlNode
+} from 'Extension/Plugins/Elements/IControlNode';
+import Profiler, {
+   IFrontendSynchronizationDescription,
+   IProfilingData
+} from './Profiler';
+import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 
 export function applyOperations(
    initialElements: Store['_elements'],
@@ -63,23 +16,8 @@ export function applyOperations(
 ): Store['_elements'] {
    const result = initialElements.slice();
 
-   operations.forEach(([type, id, ...args]) => {
-      switch (type) {
-         case OperationType.CREATE:
-            const parentId = args.length === 3 ? args[2] : undefined;
-            addNode(result, id, args[0] as string, parentId);
-            break;
-         case OperationType.DELETE:
-            const index = result.findIndex((element) => element.id === id);
-            if (index !== -1) {
-               result.splice(index, 1);
-            }
-            break;
-         case OperationType.REORDER:
-            break;
-         case OperationType.UPDATE:
-            break;
-      }
+   operations.forEach((args: IOperationEvent['args']) => {
+      applyOperation(result, args);
    });
 
    return result;
