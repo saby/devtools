@@ -2,7 +2,7 @@ import { FilterFunction, FilterFunctionGetter } from "./Filter";
 import { IModule } from 'Extension/Plugins/DependencyWatcher/IModule';
 
 export let dependentOnFiles: FilterFunctionGetter<number[] | undefined, IModule> = (keys?: number[]): FilterFunction<IModule> => {
-    if (!keys || !keys.length) {
+    if (!keys || !keys.length || !Array.isArray(keys)) {
         return () => true;
     }
     return (item: IModule) => {

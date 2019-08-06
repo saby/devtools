@@ -12,7 +12,7 @@ export let getForFiles: FilterFunctionGetter<number[] | undefined, WithFileId> =
      * TODO:
      * https://online.sbis.ru/opendoc.html?guid=e8a934bb-533c-4506-aab9-d4e7a0e9d55b
      */
-    if (!keys || !keys.length) {
+    if (!keys || !keys.length || !Array.isArray(keys)) {
         return () => true;
     }
     return (item: WithFileId) => {
