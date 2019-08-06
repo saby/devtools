@@ -1,6 +1,7 @@
 <Controls.filter:Controller
     filterButtonSource="{{ _filterButtonSource }}"
     filter="{{ _filter }}"
+    on:filterChanged="_filterChanged()"
 >
     <Controls.list:DataContainer
         source="{{ _source }}"

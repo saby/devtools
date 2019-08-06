@@ -50,18 +50,18 @@ export const css: FilterItemAdditional<boolean> = {
     viewMode: 'extended'
 };
 
-export const files: FilterItem = {
+export const files: FilterItem<number[]> = {
     name: 'files',
-    value: undefined,
-    resetValue: null,
+    value: [],
+    resetValue: [],
     visibility : true,
     viewMode: 'base'
 };
 
-export const dependentOnFiles: FilterItem<number[] | undefined | null> = {
+export const dependentOnFiles: FilterItem<number[]> = {
     name: 'dependentOnFiles',
-    value: undefined,
-    resetValue: null,
+    value: [],
+    resetValue: [],
     visibility : true,
     viewMode: 'base'
 };

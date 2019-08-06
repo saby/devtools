@@ -1,16 +1,5 @@
 <Controls.suggestPopup:ListContainer>
-    <Controls.list:View
-            displayProperty="name"
-            keyProperty="id"
-    >
-        <ws:navigation source="page" view="infinity">
-            <ws:sourceConfig pageSize="{{ 20 }}" page="{{ 0 }}" mode="totalCount"></ws:sourceConfig>
-        </ws:navigation>
-        <ws:emptyTemplate>
-            <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
-                <ws:contentTemplate>{[Не найдено]}</ws:contentTemplate>
-            </ws:partial>
-        </ws:emptyTemplate>
-    </Controls.list:View>
-
+    <DependencyWatcher.file:List
+        scope="{{ _options }}"
+    />
 </Controls.suggestPopup:ListContainer>

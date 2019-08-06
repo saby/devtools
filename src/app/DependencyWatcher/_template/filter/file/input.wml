@@ -1,10 +1,13 @@
 <Controls.lookup:Input
-    bind:value="textValue"
-    bind:selectedKeys="value"
+    value="{{ _textValue }}"
+    selectedKeys="{{ _selectedKeys }}"
+    on:selectedKeysChanged="_selectedKeysChanged()"
+    on:textValueChanged="_textValueChanged()"
+    on:valueChanged="_valueChanged()"
     displayProperty="name"
     keyProperty="id"
     searchParam="name"
-    source="{{ _options.source }}"
+    source="{{ _options.item.source }}"
     trim="{{ true }}"
     searchDelay="{{ 0 }}"
     placeholder="{[Выберите файл]}"
@@ -22,8 +25,8 @@
     </ws:navigation>
     <ws:selectorTemplate templateName="wml!DependencyWatcher/_template/filter/file/panel">
         <ws:templateOptions
-            source="{{ _options.source }}"
-            searchValue="{{ _options.textValue }}"
+            source="{{ _options.item.source }}"
+            searchValue="{{ _options.item.textValue }}"
         />
     </ws:selectorTemplate>
     <ws:suggestTemplate templateName="wml!DependencyWatcher/_template/filter/file/suggest"/>

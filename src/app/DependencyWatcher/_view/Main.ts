@@ -9,17 +9,19 @@ import { EventNames, PLUGIN_NAME, RPCMethodNames } from 'Extension/Plugins/Depen
 import { ContentChannel } from '../../Devtool/Event/ContentChannel';
 import { Memory } from 'Types/source';
 import { Model } from 'Types/entity';
-import { source, storage } from '../data';
+import { IListItem, source, storage } from '../data';
 import { INamedLogger } from 'Extension/Logger/ILogger';
 import { ConsoleLogger } from 'Extension/Logger/Console';
 import { navigation } from './list/navigation';
-import { columns, Columns } from './list/column';
-import { headers, Headers } from './list/header';
+import { columns } from './list/column';
+import { headers } from './list/header';
 import { IItemFilter } from 'Extension/Plugins/DependencyWatcher/IItem';
 import { FilterItem, getButtonSource } from './list/getButtonSource';
 import { getItemActions, ItemAction, ItemActionNames, visibilityCallback } from './list/getItemActions';
 import { ViewMode } from './main/ViewMode';
 import { getTabConfig, tabs } from './main/Tabs';
+import { IColumn } from '../interface/IColumn';
+import { IHeaders } from '../interface/IHeaders';
 
 interface IChildren {
     listView: Control;
@@ -28,8 +30,8 @@ interface IChildren {
 export default class Main extends Control {
     protected readonly _template = template;
     protected readonly _children: IChildren;
-    protected readonly _column: Columns = columns;
-    protected readonly _headers: Headers = headers;
+    protected readonly _column: Partial<IColumn<IListItem>>[] = columns;
+    protected readonly _headers: IHeaders<IListItem> = headers;
     protected readonly _navigation = navigation;
     protected readonly _itemActionVisibilityCallback = visibilityCallback;
     protected readonly _modeSource: Memory = tabs;
@@ -97,10 +99,24 @@ export default class Main extends Control {
     private __setItemActions() {
         this._itemActions = getItemActions({
             [ItemActionNames.file]: (model: Model) => {
-                this.__updateFilterSource('files', [model.get('fileId')], model.get('fileName'), 'dependentOnFiles');
+                this.__setFilter({
+                    parent: undefined,
+                    'files': [model.get('fileId')]
+                });
+                this._root = undefined;
+                this._setFilterValue('files', [model.get('fileId')], `file: ${ model.get('fileName') }`);
+                this._setFilterValue('dependentOnFiles');
+                this._filterButtonSource = [...this._filterButtonSource];
             },
             [ItemActionNames.dependentOnFile]: (model: Model) => {
-                this.__updateFilterSource('dependentOnFiles', [model.get('fileId')], model.get('fileName'), 'files');
+                this.__setFilter({
+                    parent: undefined,
+                    'files': [model.get('fileId')]
+                });
+                this._root = undefined;
+                this._setFilterValue('dependentOnFiles', [model.get('fileId')], `depend on: ${ model.get('fileName') }`);
+                this._setFilterValue('files');
+                this._filterButtonSource = [...this._filterButtonSource];
             },
             [ItemActionNames.openSource]: (model: Model) => {
                 this.__rpc.execute<boolean, number>({
@@ -145,27 +161,51 @@ export default class Main extends Control {
             parentProperty: 'parent'
         }
     }
-    private __updateFilterSource<T>(id: string, value: T, textValue: string, resetId: string) {
+    protected _filterChanged(event: unknown, filter: source.IWhere<IItemFilter>) {
+        // TODO 86d9e478a7d3 - очистка значений, которые внесли руками в FilterButtonSource при изменении фильтра
+        const keys: Array<keyof source.IWhere<IItemFilter>> = ['files', 'dependentOnFiles'];
+        const updated = keys.some((resetId) => {
+            if (filter.hasOwnProperty(resetId) &&
+                Array.isArray(filter[resetId]) &&
+                (<number[]> filter[resetId]).length
+            ) {
+                return false;
+            }
+            return this._setFilterValue(resetId);
+        });
+        if (updated) {
+            this._filterButtonSource = [...this._filterButtonSource];
+        }
+    }
+    protected _setFilterValue<T>(id: keyof source.IWhere<IItemFilter>, value?: T, textValue?: string): boolean {
+        // TODO 86d9e478a7d3 - прокидывание данных в items внутри filterButtonSource
         const item = this._filterButtonSource.find(({ name }) => {
             return name == id
         });
-        if (!item) {
-            return;
+        if (!item ||
+            value == item.value
+        ) {
+            return false;
         }
-        const resetItem = this._filterButtonSource.find(({ name }) => {
-            return name == resetId
-        });
-        if (resetItem) {
-            resetItem.value = null;
-            resetItem.textValue = undefined;
+        if (!value) {
+            // reset
+            if (
+                item.value == item.resetValue ||
+                Array.isArray(item.value) && !item.value.length
+            ) {
+                return false
+            }
         }
-        this.__setFilter({
-            parent: undefined,
-            [id]: value
-        });
-        this._root = undefined;
-        item.value = value;
-        item.textValue = textValue;
-        this._filterButtonSource = [...this._filterButtonSource];
+        item.value = value || item.resetValue;
+        item.textValue = textValue || '';
+        return true;
     }
 }
+/*
+ * TODO 86d9e478a7d3
+ *  Костыль для прокидывания поля фильтрации в filter.Controller > filter.Button сверху
+ *  В текущей реализации он либо не отрисует значение фильтра, либо затрёт значение, т.к. оно выставлено не самим фильтром
+ *  (в зависимости от параметров FilterButtonSource)
+ *  Убрать после задачи:
+ *  https://online.sbis.ru/opendoc.html?guid=bdbdae9b-a626-42a7-bda8-86d9e478a7d3
+ */

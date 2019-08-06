@@ -1,0 +1,31 @@
+<Controls.filter:Controller
+    filterButtonSource="{{ _filterButtonSource }}"
+    filter="{{ _filter }}"
+>
+    <Controls.list:DataContainer
+        source="{{ _options.source }}"
+        keyProperty="id"
+        navigation="{{ _navigation }}"
+        virtualScrolling="{{ true }}"
+    >
+        <Controls.search:Controller searchParam="name" minSearchLength="{{ 3 }}">
+            <div class="DependencyWatcher_File">
+                <div class="DependencyWatcher_File__head">
+                    <Controls.search:InputContainer>
+                        <Controls.search:Input/>
+                    </Controls.search:InputContainer>
+                    <Controls.filter:ButtonContainer>
+                        <Controls.filter:View detailPanelTemplateName="DependencyWatcher/file:filter.Panel"/>
+                    </Controls.filter:ButtonContainer>
+                </div>
+                <Controls.scroll:Container
+                    attr:class="DependencyWatcher_File__scroll"
+                >
+                    <Controls.list:Container>
+                        <DependencyWatcher._file.List/>
+                    </Controls.list:Container>
+                </Controls.scroll:Container>
+            </div>
+        </Controls.search:Controller>
+    </Controls.list:DataContainer>
+</Controls.filter:Controller>

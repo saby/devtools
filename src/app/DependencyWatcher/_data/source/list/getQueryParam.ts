@@ -16,9 +16,14 @@ export const getQueryParam = <TData extends object>(
     query.getOrderBy().forEach((order) => {
         sortBy[<keyof TData> order.getSelector()] = !!order.getOrder();
     });
+    const queryWhere = <IWhere<TData> & { id?: number | number[]}> query.getWhere();
+    if (queryWhere.id) {
+        keys = Array.isArray(queryWhere.id)? queryWhere.id: [queryWhere.id];
+        delete queryWhere.id;
+    }
     const where = <IWhere<TData>> {
         ...defaultFilters,
-        ...query.getWhere()
+        ...queryWhere
     };
     for (let filterKey in ignoreFilters) {
         if (!where.hasOwnProperty(filterKey) ||

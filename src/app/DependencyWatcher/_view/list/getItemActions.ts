@@ -1,4 +1,5 @@
 import { Model } from "Types/entity";
+import { GLOBAL_MODULE_NAME } from 'Extension/Plugins/DependencyWatcher/const';
 
 export enum ItemActionNames {
     file  = 'fileId',
@@ -35,12 +36,12 @@ const openFile: ItemAction = {
     icon: "icon-Publish2",
     iconStyle: 'secondary',
     visibilityCallback(model: Model): boolean {
-        return !!model.get('defined');
+        return (model.get('name') !== GLOBAL_MODULE_NAME) && !!model.get('defined');
     }
 };
 const dependentOnFile: ItemAction = {
     id: ItemActionNames.dependentOnFile,
-    title: 'Отобразить модули зависящие от файла',
+    title: 'Отобразить модули, зависящие от файла',
     showType: ShowType.menu
 };
 const file: ItemAction = {

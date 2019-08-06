@@ -4,6 +4,14 @@
         caption="{{ item.itemText }}"
     />
 </ws:template>
+<ws:template name="fileInput">
+    <span style="width:120px">{{ caption }}</span>
+    <DependencyWatcher._template.filter.file.input
+        textPrefix="{{ textPrefix }}"
+        bind:item="item"
+        attr:style="width: 334px"
+    />
+</ws:template>
 
 <ws:template name="css">
     <ws:partial template="filterPopup" item="{{ item }}"/>
@@ -18,21 +26,11 @@
 </ws:template>
 
 <ws:template name="files">
-    {[Модули файла]}
-    <DependencyWatcher._template.filter.file.input
-        bind:value="item.value"
-        bind:textValue="item.textValue"
-        source="{{ item.source }}"
-    />
+    <ws:partial template="fileInput" item="{{ item }}" caption="{[Модули файла]}" textPrefix="file"/>
 </ws:template>
 
-<ws:template name="dependentOnFile">
-    {[Зависят от файла]}
-    <DependencyWatcher._template.filter.file.input
-        bind:value="item.value"
-        bind:textValue="item.textValue"
-        source="{{ item.source }}"
-    />
+<ws:template name="dependentOnFiles">
+    <ws:partial template="fileInput" item="{{ item }}" caption="{[Зависят от файла]}" textPrefix="depend on"/>
 </ws:template>
 
 <ws:partial template="{{ _options.item.id }}" item="{{ _options.item }}"/>

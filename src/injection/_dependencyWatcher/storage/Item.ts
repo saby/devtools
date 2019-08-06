@@ -166,11 +166,11 @@ export class Item extends Query<IItem, IItemFilter> {
             return params;
         }
         let _keys: number[] | undefined;
-        if (where.files && where.files.length) {
+        if (Array.isArray(where.files) && where.files.length) {
             _keys = this.__gitForFiles(where.files);
             delete where.files;
         }
-        if (where.dependentOnFiles && where.dependentOnFiles.length) {
+        if (Array.isArray(where.dependentOnFiles) && where.dependentOnFiles.length) {
             _keys = this.__getDependentOnFiles(where.dependentOnFiles, _keys);
             delete where.dependentOnFiles;
         }

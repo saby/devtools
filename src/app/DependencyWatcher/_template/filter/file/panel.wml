@@ -20,8 +20,7 @@
                 <Controls.scroll:Container
                     attr:class="DependencyFilter__FilePanel_scroll"
                 >
-                    <ws:partial
-                        template="wml!DependencyWatcher/_template/filter/file/list"
+                    <DependencyWatcher.file:List
                         scope="{{ _options }}"
                     />
                 </Controls.scroll:Container>

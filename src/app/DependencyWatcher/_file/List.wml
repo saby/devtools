@@ -1,13 +1,16 @@
-<Controls.list:View
-    displayProperty="name"
+<Controls.grid:View
     keyProperty="id"
+    name="listView"
+    bind:sorting="_sorting"
+    displayProperty="name"
+    columns="{{ _column }}"
+    header="{{ _headers }}"
+    navigation="{{ _navigation }}"
+    scope="{{ _options }}"
 >
-    <ws:navigation source="page" view="infinity">
-        <ws:sourceConfig pageSize="{{ 50 }}" page="{{ 0 }}" mode="totalCount"></ws:sourceConfig>
-    </ws:navigation>
     <ws:emptyTemplate>
         <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
             <ws:contentTemplate>{[Не найдено]}</ws:contentTemplate>
         </ws:partial>
     </ws:emptyTemplate>
-</Controls.list:View>
+</Controls.grid:View>

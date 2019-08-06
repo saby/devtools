@@ -1,0 +1,14 @@
+<!--<ws:if data="{{ itemData.searchValue }}">-->
+<!--    <Controls.grid:ColumnTemplate-->
+<!--        displayProperty="path"-->
+<!--        itemData="{{ itemData }}"-->
+<!--        attr:title="{{ itemData.item.get('path') }}"-->
+<!--    />-->
+<!--</ws:if>-->
+<!--<ws:else>-->
+    <Controls.grid:ColumnTemplate
+        displayProperty="name"
+        itemData="{{ itemData }}"
+        attr:title="{{ itemData.item.get('path') }}"
+    />
+<!--</ws:else>-->
