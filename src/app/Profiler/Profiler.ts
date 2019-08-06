@@ -236,11 +236,6 @@ class Profiler extends Control<IOptions> {
    private __setSynchronization(synchronizationKey: IControlNode['id']): void {
       let snapshot = this._snapshotBySynchronization.get(synchronizationKey);
       if (!snapshot) {
-         /**
-          * TODO: адская жесть с несколькими обходами массива и кучей мержей объектов
-          * Особенно при подсчёте actualDurations. По идее нужно слить в одну функцию и
-          * actualDuration высчитывать вообще по-другому
-          */
          const changes = getChanges(this._profilingData, synchronizationKey);
          const elements = this.__getElementsBySynchronization(
             synchronizationKey

@@ -100,8 +100,7 @@ class Pane extends Control<IOptions> {
                this._source.update(new RecordSet({
                   rawData
                }));
-               // TODO: подумать почему это вообще может упасть
-               if (this._children.list) {
+               if (newOptions.expanded && this._children.list) {
                   this._children.list.reload();
                }
             }
