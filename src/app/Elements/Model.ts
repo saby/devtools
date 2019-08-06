@@ -1,5 +1,5 @@
 import Store from './Store';
-import { IControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
 // @ts-ignore
 import * as ArraySimpleValuesUtil from 'Controls/Utils/ArraySimpleValuesUtil';
@@ -84,7 +84,7 @@ class Model {
       this._itemsChanged = true;
    }
 
-   getPath(id: IControlNode['id']): BreadcrumbsOptions['items'] {
+   getPath(id: IFrontendControlNode['id']): BreadcrumbsOptions['items'] {
       const index = this._items.findIndex((node) => node.id === id);
       if (index !== -1) {
          const node = this._items[index];
@@ -117,10 +117,12 @@ class Model {
       return this._visibleItemsArray;
    }
 
-   expandParents(id: IControlNode['id']): void {
+   expandParents(id: IFrontendControlNode['id']): void {
       const item = this._items.find((element) => element.id === id);
       if (item && item.parentId) {
-         const parent = this._items.find((element) => element.id === item.parentId);
+         const parent = this._items.find(
+            (element) => element.id === item.parentId
+         );
          if (parent) {
             this.toggleExpanded(parent.id, true);
          }

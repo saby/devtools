@@ -1,17 +1,22 @@
 import prepareForSerialization from './prepareForSerialization';
 import {
    IBackendControlNode,
-   IControlNode,
-   IBackendProfilingData,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
-import { endMark, getControlType, getSyncList, startMark, updateSelfDurations } from './Utils';
+import {
+   endMark,
+   getControlType,
+   getSyncList,
+   startMark,
+   updateSelfDurations
+} from './Utils';
 import Highlighter from './Highlighter';
 import { IWasabyDevHook } from './IHook';
+import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -24,7 +29,7 @@ declare global {
    interface Window {
       __WASABY_DEV_HOOK__: IWasabyDevHook;
       __WASABY_START_PROFILING?: boolean;
-      $wasaby?: IControlNode;
+      $wasaby?: IBackendControlNode;
       $tmp?: unknown;
       wasabyDevtoolsOptions?: {
          useUserTimingAPI?: boolean;
@@ -33,19 +38,22 @@ declare global {
 }
 
 class Agent {
-   private elements: Map<IControlNode['id'], IBackendControlNode> = new Map();
+   private elements: Map<
+      IBackendControlNode['id'],
+      IBackendControlNode
+   > = new Map();
 
    private changedRoots: Map<
-      IControlNode['id'],
-      Map<IControlNode['id'], IChangedNode>
+      IBackendControlNode['id'],
+      Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
 
    private changedNodesBySynchronization: Map<
       string,
-      Map<IControlNode['id'], IChangedNode>
+      Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
 
-   private rootStack: Array<IControlNode['id']> = [];
+   private rootStack: Array<IBackendControlNode['id']> = [];
 
    private unfinishedNodes: Set<IChangedNode> = new Set();
 
@@ -59,11 +67,14 @@ class Agent {
       onSelect: this.__selectByDomNode.bind(this)
    });
 
-   private previousSelectedItemId: IControlNode['id'] | undefined;
+   private previousSelectedItemId: IBackendControlNode['id'] | undefined;
 
    private currentModuleName: string = '';
 
-   private initialIdToDuration: Map<IControlNode['id'], number> = new Map();
+   private initialIdToDuration: Map<
+      IBackendControlNode['id'],
+      number
+   > = new Map();
 
    constructor() {
       this.channel.addListener(
@@ -142,12 +153,12 @@ class Agent {
       this.channel.dispatch('longMessage');
    }
 
-   onStartSync(rootId: IControlNode['id']): void {
+   onStartSync(rootId: IBackendControlNode['id']): void {
       this.rootStack.push(rootId);
       this.changedRoots.set(rootId, new Map());
    }
 
-   onStartCommit(node: IControlNode, operation: OperationType): void {
+   onStartCommit(node: IBackendControlNode, operation: OperationType): void {
       const currentRootId = this.rootStack[this.rootStack.length - 1];
       const currentRoot = this.changedRoots.get(currentRootId);
       if (!currentRoot) {
@@ -170,7 +181,7 @@ class Agent {
       this.unfinishedNodes.add(currentRoot.get(id) as IChangedNode);
    }
 
-   onEndCommit(node: IControlNode): void {
+   onEndCommit(node: IBackendControlNode): void {
       const currentRootId = this.rootStack[this.rootStack.length - 1];
       const id = node.id + currentRootId;
       const currentRoot = this.changedRoots.get(currentRootId);
@@ -217,7 +228,7 @@ class Agent {
       updateSelfDurations(this.unfinishedNodes, selfDuration);
    }
 
-   onEndSync(rootId: IControlNode['id']): void {
+   onEndSync(rootId: IBackendControlNode['id']): void {
       const changes = this.changedRoots.get(rootId);
       if (!changes) {
          throw new Error('Trying to change nonexistent root');
@@ -324,8 +335,8 @@ class Agent {
       }
    }
 
-   private __removeChildren(id: IControlNode['id']): void {
-      const parents: Array<IControlNode['parentId']> = [];
+   private __removeChildren(id: IBackendControlNode['id']): void {
+      const parents: Array<IBackendControlNode['parentId']> = [];
       this.elements.forEach((element, key) => {
          if (
             element.parentId === id ||
@@ -342,7 +353,7 @@ class Agent {
       });
    }
 
-   private __inspectElement(id: IControlNode['id']): void {
+   private __inspectElement(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node) {
          window.__WASABY_DEV_HOOK__.pushMessage(
@@ -361,21 +372,21 @@ class Agent {
       }
    }
 
-   private __viewTemplate(id: IControlNode['id']): void {
+   private __viewTemplate(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node) {
          window.__WASABY_DEV_HOOK__.__template = node.template;
       }
    }
 
-   private __viewConstructor(id: IControlNode['id']): void {
+   private __viewConstructor(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node && node.instance) {
          window.__WASABY_DEV_HOOK__.__constructor = node.instance.constructor;
       }
    }
 
-   private __viewContainer(id: IControlNode['id']): void {
+   private __viewContainer(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node && node.instance) {
          window.__WASABY_DEV_HOOK__.__container = node.instance._container;
@@ -386,7 +397,7 @@ class Agent {
       id,
       path
    }: {
-      id: IControlNode['id'];
+      id: IBackendControlNode['id'];
       path: Array<string | number>;
    }): void {
       window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(
@@ -399,7 +410,7 @@ class Agent {
       id,
       path
    }: {
-      id: IControlNode['id'];
+      id: IBackendControlNode['id'];
       path: Array<string | number>;
    }): void {
       window.$tmp = this.__getValueByPath(id, path);
@@ -408,7 +419,7 @@ class Agent {
    }
 
    private __getValueByPath(
-      id: IControlNode['id'],
+      id: IBackendControlNode['id'],
       path: Array<string | number>
    ): unknown {
       let currentProperty = path.pop();
@@ -418,7 +429,7 @@ class Agent {
       } else {
          const element = this.elements.get(id);
          if (element) {
-            value = element[currentProperty as keyof IControlNode];
+            value = element[currentProperty as keyof IBackendControlNode];
          }
       }
       while (path.length) {
@@ -430,7 +441,7 @@ class Agent {
       return value;
    }
 
-   private __highlightElement(id?: IControlNode['id']): void {
+   private __highlightElement(id?: IBackendControlNode['id']): void {
       if (id) {
          const node = this.elements.get(id);
          if (node && node.instance && node.instance._container) {
@@ -463,7 +474,7 @@ class Agent {
 
    private __findControlByDomNode(
       element: IWasabyElement
-   ): IControlNode | undefined {
+   ): IBackendControlNode | undefined {
       let currentElement = element;
 
       /*
@@ -523,7 +534,7 @@ class Agent {
    }
 
    private __getEvents(
-      id: IControlNode['id']
+      id: IBackendControlNode['id']
    ): Record<string, Array<{ function: Function; arguments: unknown[] }>> {
       /*
       TODO: пока только для контролов, потому что я не имею доступа к контейнерам шаблонов

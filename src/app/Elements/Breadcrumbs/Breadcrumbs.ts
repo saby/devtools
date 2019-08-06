@@ -1,17 +1,17 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
 import template = require('wml!Elements/Breadcrumbs/Breadcrumbs');
-import { IControlNode } from 'shared/Extension/Plugins/Elements/IControlNode';
+import { IFrontendControlNode } from 'shared/Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import 'css!Elements/BreadCrumbs/BreadCrumbs';
 
 interface IOptions extends IControlOptions {
    items: Array<{
-      id: IControlNode['id'];
-      name: IControlNode['name'];
+      id: IFrontendControlNode['id'];
+      name: IFrontendControlNode['name'];
       class?: string;
    }>;
-   selectedItemId: IControlNode['id'];
+   selectedItemId: IFrontendControlNode['id'];
 }
 
 class Breadcrumbs extends Control<IOptions> {
@@ -35,7 +35,7 @@ class Breadcrumbs extends Control<IOptions> {
       }
    }
 
-   protected _onItemClick(e: Event, id: IControlNode['id']): void {
+   protected _onItemClick(e: Event, id: IFrontendControlNode['id']): void {
       this._notify('itemClick', [id]);
    }
 
@@ -46,11 +46,11 @@ class Breadcrumbs extends Control<IOptions> {
       }
    }
 
-   protected _onMouseEnter(e: Event, id: IControlNode['id']): void {
+   protected _onMouseEnter(e: Event, id: IFrontendControlNode['id']): void {
       this._notify('itemMouseEnter', [id]);
    }
 
-   protected _onMouseLeave(e: Event, id: IControlNode['id']): void {
+   protected _onMouseLeave(e: Event, id: IFrontendControlNode['id']): void {
       this._notify('itemMouseLeave', [id]);
    }
 

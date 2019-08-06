@@ -1,11 +1,11 @@
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import Agent, { IChangedNode } from './Agent';
+import { IBackendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import {
    IBackendProfilingData,
    IBackendSynchronizationDescription,
-   IChangesDescription,
-   IControlNode
-} from 'Extension/Plugins/Elements/IControlNode';
+   IChangesDescription
+} from 'Extension/Plugins/Elements/IProfilingData';
 
 function operationToString(
    operation: OperationType
@@ -58,7 +58,7 @@ export function updateSelfDurations(
    });
 }
 
-export function getControlType(node: IControlNode): ControlType {
+export function getControlType(node: IBackendControlNode): ControlType {
    if (node.instance) {
       return typeof node.options === 'object' && node.options.content
          ? ControlType.HOC
@@ -90,7 +90,7 @@ function getChangesDescription({
 }
 
 function getChanges(
-   changedNodesEntries: Array<[IControlNode['id'], IChangedNode]>
+   changedNodesEntries: Array<[IBackendControlNode['id'], IChangedNode]>
 ): IBackendSynchronizationDescription['changes'] {
    return changedNodesEntries.map(([commitKey, changedNode]) => {
       return [commitKey, getChangesDescription(changedNode)];
@@ -98,7 +98,7 @@ function getChanges(
 }
 
 function getSynchronizationDuration(
-   changedNodesEntries: Array<[IControlNode['id'], IChangedNode]>
+   changedNodesEntries: Array<[IBackendControlNode['id'], IChangedNode]>
 ): number {
    return changedNodesEntries.reduce((acc, [key, changes]) => {
       return acc + changes.node.selfDuration;

@@ -1,14 +1,13 @@
 import Store, { applyOperation } from '../Elements/Store';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import Profiler from './Profiler';
+import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import {
    IBackendProfilingData,
    IChangesDescription,
-   IControlNode
-} from 'Extension/Plugins/Elements/IControlNode';
-import Profiler, {
-   IFrontendSynchronizationDescription,
-   IProfilingData
-} from './Profiler';
-import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
+   IFrontendProfilingData,
+   IFrontendSynchronizationDescription
+} from 'Extension/Plugins/Elements/IProfilingData';
 
 export function applyOperations(
    initialElements: Store['_elements'],
@@ -26,7 +25,7 @@ export function applyOperations(
 export function convertProfilingData({
    initialIdToDuration,
    syncList
-}: IBackendProfilingData): IProfilingData {
+}: IBackendProfilingData): IFrontendProfilingData {
    const syncMap = new Map();
 
    syncList.forEach(([key, { selfDuration, changes }]) => {
@@ -43,16 +42,16 @@ export function convertProfilingData({
 }
 
 export function getChanges(
-   profilingData: IProfilingData,
+   profilingData: IFrontendProfilingData,
    synchronizationId: string
-): Map<IControlNode['id'], IChangesDescription> {
+): Map<IFrontendControlNode['id'], IChangesDescription> {
    return (profilingData.synchronizationKeyToDescription.get(
       synchronizationId
    ) as IFrontendSynchronizationDescription).changes;
 }
 
 export function getChangesDescription(
-   profilingData: IProfilingData,
+   profilingData: IFrontendProfilingData,
    synchronizationId: string,
    controlId: string
 ): IChangesDescription | undefined {
@@ -60,7 +59,7 @@ export function getChangesDescription(
 }
 
 export function getSelfDuration(
-   profilingData: IProfilingData,
+   profilingData: IFrontendProfilingData,
    synchronizationId: string,
    controlId: string
 ): number {
@@ -100,7 +99,7 @@ export function getActualDurations(
       updateReason: ControlUpdateReason;
       parentId?: string;
    }>,
-   startId: IControlNode['id'],
+   startId: IFrontendControlNode['id'],
    startIndex: number
 ): {
    actualDuration: number;

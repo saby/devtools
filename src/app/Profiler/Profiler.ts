@@ -1,10 +1,5 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { Memory } from 'Types/source';
-import {
-   IBackendProfilingData,
-   IChangesDescription,
-   IControlNode
-} from 'Extension/Plugins/Elements/IControlNode';
 import Store from 'Elements/Store';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import CommitDetails from 'Profiler/CommitDetails/CommitDetails';
@@ -21,27 +16,19 @@ import {
    getChangesDescription,
    getSelfDuration
 } from './Utils';
+import { OperationType } from 'Extension/Plugins/Elements/const';
+import Controller from '../Search/Controller';
+import {
+   IBackendProfilingData,
+   IChangesDescription,
+   IFrontendProfilingData
+} from 'Extension/Plugins/Elements/IProfilingData';
 // @ts-ignore
 import template = require('wml!Profiler/Profiler');
 import Tab = chrome.tabs.Tab;
-import { OperationType } from 'Extension/Plugins/Elements/const';
-import Controller from '../Search/Controller';
 
 interface IOptions extends IControlOptions {
    store: Store;
-}
-
-export interface IFrontendSynchronizationDescription {
-   selfDuration: number;
-   changes: Map<IControlNode['id'], IChangesDescription>;
-}
-
-export interface IProfilingData {
-   initialIdToDuration: Map<IControlNode['id'], number>;
-   synchronizationKeyToDescription: Map<
-      string,
-      IFrontendSynchronizationDescription
-   >;
 }
 
 function masterFilter(item: { selfDuration: number }): boolean {
@@ -116,7 +103,7 @@ class Profiler extends Control<IOptions> {
 
    protected _didProfile: boolean = false;
 
-   protected _profilingData: IProfilingData;
+   protected _profilingData: IFrontendProfilingData;
 
    protected _changesBySynchronization: Map<
       string,
@@ -233,7 +220,7 @@ class Profiler extends Control<IOptions> {
       }
    }
 
-   private __setSynchronization(synchronizationKey: IControlNode['id']): void {
+   private __setSynchronization(synchronizationKey: string): void {
       let snapshot = this._snapshotBySynchronization.get(synchronizationKey);
       if (!snapshot) {
          const changes = getChanges(this._profilingData, synchronizationKey);

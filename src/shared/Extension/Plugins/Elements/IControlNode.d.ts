@@ -1,5 +1,4 @@
-// TODO: надо развести интерфейсы на фронте и в контент скрипте
-export interface ITemplateNode {
+interface ITemplateNode {
    id: string;
    name: string;
    template: Function;
@@ -36,7 +35,7 @@ export interface IWasabyElement extends HTMLElement {
    }>;
 }
 
-export interface IControlNode extends ITemplateNode {
+interface IControlNode extends ITemplateNode {
    instance?: {
       _container: IWasabyElement;
       _destroyed: boolean;
@@ -55,22 +54,4 @@ export interface IFrontendControlNode {
    depth: number;
    class: string;
    parentId?: IControlNode['parentId'];
-}
-
-// TODO: перекинуть в отдельный файл или переименовать этот
-export interface IChangesDescription {
-   selfDuration: number;
-   isFirstRender: boolean;
-   changedOptions?: string[];
-   changedAttributes?: string[];
-}
-
-export interface IBackendSynchronizationDescription {
-   selfDuration: number;
-   changes: Array<[IControlNode['id'], IChangesDescription]>;
-}
-
-export interface IBackendProfilingData {
-   initialIdToDuration: Array<[IControlNode['id'], number]>;
-   syncList: Array<[string, IBackendSynchronizationDescription]>;
 }

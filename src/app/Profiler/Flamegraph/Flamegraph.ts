@@ -1,7 +1,6 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
 import {
-   IControlNode,
    IFrontendControlNode
 } from 'Extension/Plugins/Elements/IControlNode';
 import 'css!Profiler/Flamegraph/Flamegraph';
@@ -163,7 +162,7 @@ function getCaption(
 function getLeftOffset(
    previousNodesOnThisDepth: INodeItemData[],
    depth: number,
-   parentId: IControlNode['parentId'],
+   parentId: IFrontendControlNode['parentId'],
    idToIndexMap?: Map<string, number>,
    previousItemData?: INodeItemData[]
 ): number {

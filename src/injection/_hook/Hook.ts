@@ -1,5 +1,5 @@
 import { IWasabyDevHook } from './IHook';
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { IBackendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
 import Agent from './Agent';
@@ -21,7 +21,10 @@ export class Hook implements IWasabyDevHook {
       this._agent = agent;
    }
 
-   onStartCommit(node: IControlNode, typeOfOperation: OperationType): void {
+   onStartCommit(
+      node: IBackendControlNode,
+      typeOfOperation: OperationType
+   ): void {
       try {
          this._agent.onStartCommit(node, typeOfOperation);
       } catch (e) {
@@ -29,7 +32,7 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onEndCommit(node: IControlNode): void {
+   onEndCommit(node: IBackendControlNode): void {
       try {
          this._agent.onEndCommit(node);
       } catch (e) {
@@ -37,7 +40,7 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onStartSync(rootId: IControlNode['id'], instanceId: string): void {
+   onStartSync(rootId: IBackendControlNode['id'], instanceId: string): void {
       try {
          this._agent.onStartSync(rootId + instanceId);
       } catch (e) {
@@ -45,7 +48,7 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onEndSync(rootId: IControlNode['id'], instanceId: string): void {
+   onEndSync(rootId: IBackendControlNode['id'], instanceId: string): void {
       try {
          this._agent.onEndSync(rootId + instanceId);
       } catch (e) {

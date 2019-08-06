@@ -1,6 +1,6 @@
 import { ContentChannel } from '../Devtool/Event/ContentChannel';
 import {
-   IControlNode,
+   IBackendControlNode,
    IFrontendControlNode
 } from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
@@ -88,7 +88,7 @@ class Store {
    }
 
    private __onEndSynchronization(): void {
-      const uniqueIds: Set<IControlNode['id']> = new Set();
+      const uniqueIds: Set<IFrontendControlNode['id']> = new Set();
       this._elements = this._elements.filter((element) => {
          if (uniqueIds.has(element.id)) {
             return false;
@@ -105,7 +105,7 @@ class Store {
 
 function removeNode(
    elements: Store['_elements'],
-   id: IControlNode['parentId']
+   id: IBackendControlNode['parentId']
 ): void {
    const index = elements.findIndex((element) => element.id === id);
    if (index !== -1) {
@@ -115,10 +115,10 @@ function removeNode(
 
 function addNode(
    elements: Store['_elements'],
-   id: IControlNode['id'],
-   name: IControlNode['name'],
+   id: IBackendControlNode['id'],
+   name: IBackendControlNode['name'],
    controlType: ControlType,
-   parentId?: IControlNode['parentId']
+   parentId?: IBackendControlNode['parentId']
 ): void {
    if (!parentId) {
       elements.push({
@@ -172,7 +172,7 @@ function getClassByControlType(controlType: ControlType): string {
 
 function getDepth(
    elements: Store['_elements'],
-   parentId?: IControlNode['parentId']
+   parentId?: IBackendControlNode['parentId']
 ): number {
    if (parentId) {
       const parent = elements.find((element) => element.id === parentId);

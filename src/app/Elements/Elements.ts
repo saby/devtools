@@ -2,7 +2,10 @@
 import Control = require('Core/Control');
 // @ts-ignore
 import template = require('wml!Elements/Elements');
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IBackendControlNode,
+   IFrontendControlNode
+} from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
@@ -23,13 +26,13 @@ const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
 class Elements extends Control {
    protected _template: Function = template;
-   protected _selectedItemId: IControlNode['id'] | undefined;
-   protected _inspectedItem: IControlNode | undefined;
-   protected _children: Record<IControlNode['id'], HTMLElement>;
+   protected _selectedItemId: IFrontendControlNode['id'] | undefined;
+   protected _inspectedItem: IBackendControlNode | undefined;
+   protected _children: Record<IFrontendControlNode['id'], HTMLElement>;
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
-   protected _scrollToId: IControlNode['id'];
+   protected _scrollToId: IFrontendControlNode['id'];
    protected _model: Model = new Model();
 
    protected _searchValue: string = '';
@@ -46,9 +49,12 @@ class Elements extends Control {
 
    constructor(options: IOptions) {
       super();
-      options.store.addListener('inspectedElement', (node: IControlNode) => {
-         this._inspectedItem = retrocycle(node);
-      });
+      options.store.addListener(
+         'inspectedElement',
+         (node: IBackendControlNode) => {
+            this._inspectedItem = retrocycle(node);
+         }
+      );
       options.store.addListener(
          'setSelectedItem',
          this.__selectElement.bind(this)
@@ -114,7 +120,7 @@ class Elements extends Control {
       window.elementsPanel = undefined;
    }
 
-   protected _onItemClick(e: Event, id: IControlNode['id']): void {
+   protected _onItemClick(e: Event, id: IFrontendControlNode['id']): void {
       this.__selectElement(id);
    }
 
@@ -185,18 +191,18 @@ class Elements extends Control {
       }
    }
 
-   private __updateNode(id: IControlNode['id']): void {
+   private __updateNode(id: IFrontendControlNode['id']): void {
       if (this._selectedItemId === id) {
          this._options.store.dispatch('inspectElement', this._selectedItemId);
       }
       this.__highlightNode(id);
    }
 
-   private __highlightElement(e: Event, id?: IControlNode['id']): void {
+   private __highlightElement(e: Event, id?: IFrontendControlNode['id']): void {
       this._options.store.dispatch('highlightElement', id);
    }
 
-   private __selectElement(id: IControlNode['id']): void {
+   private __selectElement(id: IFrontendControlNode['id']): void {
       this._selectingFromPage = false;
       if (this._model.getVisibleItems().length > 0) {
          this._model.expandParents(id);
@@ -207,13 +213,13 @@ class Elements extends Control {
       }
    }
 
-   private __highlightNode(id: IControlNode['id']): void {
+   private __highlightNode(id: IFrontendControlNode['id']): void {
       if (this._children[id]) {
          highlightUpdate(this._children[id]);
       }
    }
 
-   private __toggleExpanded(e: Event, id: IControlNode['id']): void {
+   private __toggleExpanded(e: Event, id: IFrontendControlNode['id']): void {
       e.stopPropagation();
       this._model.toggleExpanded(id);
    }
