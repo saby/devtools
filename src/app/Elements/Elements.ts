@@ -29,7 +29,6 @@ class Elements extends Control {
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
-   protected _tabShown: boolean = false;
    protected _scrollToId: IControlNode['id'];
    protected _model: Model = new Model();
 
@@ -75,7 +74,6 @@ class Elements extends Control {
    }
 
    _beforeUpdate(newOptions: IOptions): void {
-      // TODO: нужно ещё следить за видимостью панели
       if (newOptions.selected && !this._options.selected) {
          this._model.setItems(newOptions.store.getElements());
          newOptions.store.dispatch('inspectElement', this._selectedItemId);
@@ -97,7 +95,6 @@ class Elements extends Control {
    }
 
    panelShownCallback(): void {
-      this._tabShown = true;
       chrome.devtools.inspectedWindow.eval(
          'window.__WASABY_DEV_HOOK__.$0 = $0',
          () => {
@@ -107,7 +104,6 @@ class Elements extends Control {
    }
 
    panelHiddenCallback(): void {
-      this._tabShown = false;
       this._options.store.dispatch('toggleSelectFromPage', false);
    }
 
