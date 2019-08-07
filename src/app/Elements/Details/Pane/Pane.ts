@@ -1,10 +1,11 @@
-import { Control, IControlOptions } from 'UI/Base';
+import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
 import template = require('wml!Elements/Details/Pane/Pane');
 import { descriptor, Model } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
 import { TEMPLATES } from './const';
 import { Source } from './Source';
+// @ts-ignore
 import columnTemplate = require('wml!Elements/Details/Pane/columnTemplate');
 import { highlightUpdate } from '../../highlightUpdate';
 
@@ -33,7 +34,6 @@ interface IItemAction {
    handler?: (item: Model) => void;
 }
 
-// TODO: сделать это через async
 import './templates/StringTemplate';
 import './templates/NumberTemplate';
 import './templates/ObjectTemplate';
@@ -56,7 +56,7 @@ function getSource(initialData: IOptions['data']): Source {
 }
 
 class Pane extends Control<IOptions> {
-   protected _template: Function = template;
+   protected _template: TemplateFunction = template;
    protected _source: Source;
    protected _columns: object[];
    protected _itemActions: IItemAction[];
@@ -89,19 +89,22 @@ class Pane extends Control<IOptions> {
       if (this._options.data !== newOptions.data) {
          if (this._options.controlId === newOptions.controlId) {
             if (newOptions.changedData) {
-               const rawData = Object.entries(newOptions.changedData).map(([key, value]) => {
-                  return {
-                     key,
-                     value,
-                     name: key,
-                     parent: null
-                  };
-               });
-               this._source.update(new RecordSet({
-                  rawData
-               }));
-               // TODO: подумать почему это вообще может упасть
-               if (this._children.list) {
+               const rawData = Object.entries(newOptions.changedData).map(
+                  ([key, value]) => {
+                     return {
+                        key,
+                        value,
+                        name: key,
+                        parent: null
+                     };
+                  }
+               );
+               this._source.update(
+                  new RecordSet({
+                     rawData
+                  })
+               );
+               if (newOptions.expanded && this._children.list) {
                   this._children.list.reload();
                }
             }
@@ -117,23 +120,18 @@ class Pane extends Control<IOptions> {
          this._options.changedData !== oldOptions.changedData &&
          this._options.controlId === oldOptions.controlId
       ) {
-         /**
-          * TODO: Подсветка изменившихся опций. Пока без учёта сортировки, фильтрации, виртуальный скролл и т.д.
-          * Сделано через прямые манипуляции с DOM по двум причинам:
-          * 1) Я не знаю какие элементы отрисованы в определённый момент. Действия должны производится только над видимыми элементами,
-          * и если в списке есть виртуальный скролл, то понять какой элемент видим официально нельзя.
-          * 2) Это быстрее. Другой вариант: вешать класс на элементы, который запустит анимацию. Подписаться на окончание анимации и снимать этот класс.
-          * Такой вариант в худшем случае может вызывать N перерисовок, где N - количество изменившихся элементов. Также если элемент уничтожится за время
-          * анимации, то он никогда не удалится из списка изменившихся.
-          */
-         const items = this._children.list._container.querySelectorAll(
-            '.controls-GridViewV__itemsContainer .controls-Grid__row-cell'
-         );
-         const keys = Object.keys(this._options.data);
          Object.keys(this._options.changedData).forEach((key) => {
-            const index = keys.indexOf(key);
-            if (index !== -1 && items[index]) {
-               highlightUpdate(items[index]);
+            const child = this._children[key] as Control;
+            if (child && child._container.parentElement) {
+               /**
+                * Update highlighting uses direct DOM manipulation for 2 reasons:
+                * 1) I don't know which elements are displayed at any given moment and in which order.
+                * 2) This is faster. Another option was to add class to changed elements then subscribe
+                * to "animationend" event and remove this class. That option could cause N synchronizations,
+                * where N is a number of changed elements.
+                * And any element could get removed during animation, so it will be never removed from changed elements.
+                */
+               highlightUpdate(child._container.parentElement);
             }
          });
       }

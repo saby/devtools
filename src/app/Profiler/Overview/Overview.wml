@@ -1,0 +1,42 @@
+<ws:template name="row">
+    <div class="Overview__row">
+        <Profiler.ReasonTag.ReasonTag updateReason="{{ updateReason }}"
+                                      attr:class="Overview__reasonTag" />{{ caption }}: {{ count }}
+    </div>
+</ws:template>
+
+<div class="Overview">
+    <Controls.heading:Title caption="Synchronization overview"
+                            size="s"
+                            style="secondary" />
+    <ws:if data="{{ _options.mountedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="mounted"
+                    caption="Mounted"
+                    count="{{ _options.mountedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.selfUpdatedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="selfUpdated"
+                    caption="Updated"
+                    count="{{ _options.selfUpdatedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.parentUpdatedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="parentUpdated"
+                    caption="Parent updated"
+                    count="{{ _options.parentUpdatedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.destroyedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="destroyed"
+                    caption="Destroyed"
+                    count="{{ _options.destroyedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.unchangedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="unchanged"
+                    caption="Unchanged"
+                    count="{{ _options.unchangedCount }}" />
+    </ws:if>
+</div>

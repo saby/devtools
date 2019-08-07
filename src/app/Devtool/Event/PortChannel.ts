@@ -1,6 +1,7 @@
 import { IEventEmitter, IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
 import { Emitter } from 'Extension/Event/Emitter';
 import { IMessageData } from "Extension/Event/IContentMessage";
+import EvaluationExceptionInfo = chrome.devtools.inspectedWindow.EvaluationExceptionInfo;
 
 class PortChannel implements IEventEmitter {
     private __emitter: Emitter;
@@ -55,10 +56,18 @@ class PortChannel implements IEventEmitter {
     private __onLongMessage(): void {
         chrome.devtools.inspectedWindow.eval(
            'window.__WASABY_DEV_HOOK__.readMessageQueue()',
-           (result: Array<[string, ISerializable?]>) => {
-               result.forEach((event) => {
-                   this.__emitter.dispatch(event[0], event[1]);
-               });
+           (result: Array<[string, ISerializable?]>, exceptionInfo: EvaluationExceptionInfo) => {
+               if (exceptionInfo && (exceptionInfo.isError || exceptionInfo.isException)) {
+                   const e = new Error('Code evaluation failed');
+                   if (exceptionInfo.isException) {
+                       e.stack = exceptionInfo.value;
+                   }
+                   throw e;
+               } else {
+                   result.forEach((event) => {
+                       this.__emitter.dispatch(event[0], event[1]);
+                   });
+               }
            }
         );
     }

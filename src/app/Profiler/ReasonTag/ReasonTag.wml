@@ -1,0 +1,2 @@
+<div attr:class="ReasonTag"
+     attr:style="background-color: {{ _getColor(_options.updateReason) }};"></div>

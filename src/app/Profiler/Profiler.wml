@@ -1,89 +1,111 @@
 <Devtool.Layout.Browser>
-   <ws:headTemplate>
-      <Controls.buttons:Button icon="icon-Rec icon-small"
-                               iconStyle="{{ _isProfiling ? 'danger' : 'secondary' }}"
-                               viewMode="link"
-                               tooltip="{{ _isProfiling ? 'Stop recording' : 'Start recording' }}"
-                               attr:class="Profiler__headButton"
-                               on:click="__toggleProfiling()" />
-      <Controls.buttons:Button icon="icon-Refresh icon-small"
-                               viewMode="link"
-                               readOnly="{{ _isProfiling }}"
-                               tooltip="Reload the page and start recording"
-                               attr:class="Profiler__headButton"
-                               on:click="__reloadAndProfile()" />
-      <Controls.toggle:Checkbox caption="Screenshots"
-                                readOnly="{{ _isProfiling }}"
-                                tooltip="Save screenshots during recording"
-                                on:valueChanged="__toggleSaveScreenshots()"
-                                bind:value="_saveScreenshots" />
-   </ws:headTemplate>
-   <ws:content>
-      <ws:if data="{{ !_isProfiling && _masterSource && _detailSource }}">
-         <Controls.masterDetail:Base attr:class="Profiler__masterDetail">
-            <ws:master>
-               <Controls.scroll:Container attr:class="Profiler__master">
-                  <Controls.list:View keyProperty="id"
-                                      source="{{ _masterSource }}"
-                                      itemTemplate="{{ _synchronizationTemplate }}"
-                                      style="master"
-                                      markedKey="{{ _selectedSynchronizationId }}"
-                                      markerVisibility="visible"
-                                      on:itemClick="__masterMarkedKeyChanged()" />
-               </Controls.scroll:Container>
-            </ws:master>
-            <ws:detail>
-               <Controls.scroll:Container attr:class="Profiler__detail">
-                  <Controls.grid:View keyProperty="id"
-                                      source="{{ _detailSource }}"
-                                      columns="{{ _detailColumns }}"
-                                      markedKey="{{ _selectedCommitId }}"
-                                      markerVisibility="visible"
-                                      sorting="{{ _detailsSorting }}"
-                                      on:itemClick="__detailsMarkedKeyChanged()">
-                     <ws:emptyTemplate>
-                        <ws:partial template="Controls/list:EmptyTemplate">
-                           <ws:contentTemplate>There is no profiling data available for this synchronization.</ws:contentTemplate>
-                        </ws:partial>
-                     </ws:emptyTemplate>
-                  </Controls.grid:View>
-               </Controls.scroll:Container>
-            </ws:detail>
-         </Controls.masterDetail:Base>
-         <ws:if data="{{ _selectedCommitId }}">
-            <Profiler.CommitDetails changesDescription="{{ _selectedCommitChanges }}" />
-         </ws:if>
-      </ws:if>
-      <ws:else>
-         <div class="Profiler__greeting">
-            <ws:if data="{{ _isProfiling }}">
-               <div class="Profiler__status">
-                  Profiling...
-                  <Controls.buttons:Button caption="Stop"
-                                           style="secondary"
-                                           viewMode="link"
-                                           attr:class="Profiler__stopButton"
-                                           on:click="__toggleProfiling()" />
-               </div>
+    <ws:headTemplate>
+        <Controls.buttons:Button icon="icon-Rec icon-small"
+                                 iconStyle="{{ _isProfiling ? 'danger' : 'secondary' }}"
+                                 viewMode="link"
+                                 tooltip="{{ _isProfiling ? 'Stop recording' : 'Start recording' }}"
+                                 attr:class="Profiler__headElement"
+                                 on:click="__toggleProfiling()"/>
+        <Controls.buttons:Button icon="icon-Refresh icon-small"
+                                 viewMode="link"
+                                 readOnly="{{ _isProfiling }}"
+                                 tooltip="Reload the page and start recording"
+                                 attr:class="Profiler__headElement"
+                                 on:click="__reloadAndProfile()"/>
+        <Controls.toggle:Checkbox caption="Screenshots"
+                                  readOnly="{{ _isProfiling }}"
+                                  tooltip="Save screenshots during recording"
+                                  on:valueChanged="__toggleSaveScreenshots()"
+                                  bind:value="_saveScreenshots"/>
+        <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
+            <Controls.toggle:RadioGroup source="{{ _radioGroupSource }}"
+                                        direction="horizontal"
+                                        keyProperty="title"
+                                        attr:class="Profiler__headRadioGroup Profiler__headElement"
+                                        bind:selectedKey="_selectedTab" />
+        </ws:if>
+        <!--TODO: включить поиск и в RankedView, после того как ключи станут нормальными-->
+        <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot && _selectedTab === 'Flamegraph' }}">
+            <Controls.search:Input bind:value="_searchValue"
+                                   on:valueChanged="__onSearchValueChanged()"
+                                   on:keydown="__onSearchKeydown()"
+                                   attr:class="Profiler__headElement" />
+            <ws:if data="{{ _searchTotal > 0 }}">
+                <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchTotal }}</span>
+            </ws:if>
+        </ws:if>
+    </ws:headTemplate>
+    <ws:content>
+        <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
+            <Controls.masterDetail:Base attr:class="Profiler__masterDetail">
+                <ws:master>
+                    <Controls.scroll:Container attr:class="Profiler__master">
+                        <Profiler.SynchronizationsList.SynchronizationsList synchronizations="{{ _synchronizations }}"
+                                                                            markedKey="{{ _selectedSynchronizationId }}"
+                                                                            filter="{{ _masterFilter }}"
+                                                                            on:markedKeyChanged="__masterMarkedKeyChanged()"/>
+                    </Controls.scroll:Container>
+                </ws:master>
+                <ws:detail>
+                    <ws:if data="{{ _selectedTab === 'Flamegraph' }}">
+                        <Profiler.Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
+                                                        markedKey="{{ _selectedCommitId }}"
+                                                        on:markedKeyChanged="__detailMarkedKeyChanged()"
+                                                        attr:class="Profiler__detail"/>
+                    </ws:if>
+                    <ws:else>
+                        <Profiler.RankedView.RankedView snapshot="{{ _snapshot }}"
+                                                        markedKey="{{ _selectedCommitId }}"
+                                                        filter="{{ _detailFilter }}"
+                                                        on:markedKeyChanged="__detailMarkedKeyChanged()"
+                                                        attr:class="Profiler__detail"/>
+                    </ws:else>
+                </ws:detail>
+            </Controls.masterDetail:Base>
+            <ws:if data="{{ _selectedCommitId }}">
+                <Profiler.CommitDetails.CommitDetails changesDescription="{{ _selectedCommitChanges }}"/>
             </ws:if>
             <ws:else>
-               <div class="Profiler__status">
-                  <div>
-                     Click the record button <Controls.buttons:Button icon="icon-Rec icon-small"
-                                                                      iconStyle="secondary"
-                                                                      viewMode="toolButton"
-                                                                      tooltip="Start recording"
-                                                                      on:click="__toggleProfiling()" /> to start recording.
-                  </div>
-                  <div>
-                     Click the reload button <Controls.buttons:Button icon="icon-Refresh icon-small"
-                                                                      viewMode="toolButton"
-                                                                      tooltip="Reload the page and start recording"
-                                                                      on:click="__reloadAndProfile()" /> to reload the page and start recording.
-                  </div>
-               </div>
+                <Profiler.Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"
+                                            selfUpdatedCount="{{ _synchronizationOverview.selfUpdatedCount }}"
+                                            parentUpdatedCount="{{ _synchronizationOverview.parentUpdatedCount }}"
+                                            unchangedCount="{{ _synchronizationOverview.unchangedCount }}"
+                                            destroyedCount="{{ _synchronizationOverview.destroyedCount }}" />
             </ws:else>
-         </div>
-      </ws:else>
-   </ws:content>
+        </ws:if>
+        <ws:else>
+            <div class="Profiler__greeting">
+                <ws:if data="{{ _isProfiling }}">
+                    <div class="Profiler__status">
+                        Profiling...
+                        <Controls.buttons:Button caption="Stop"
+                                                 style="secondary"
+                                                 viewMode="link"
+                                                 attr:class="Profiler__stopButton"
+                                                 on:click="__toggleProfiling()"/>
+                    </div>
+                </ws:if>
+                <ws:else>
+                    <div class="Profiler__status">
+                        <ws:if data="{{ _didProfile }}">
+                            <div>There were no synchronizations during the last profiling session.</div>
+                        </ws:if>
+                        <div>
+                            Click the record button <Controls.buttons:Button icon="icon-Rec icon-small"
+                                                     iconStyle="secondary"
+                                                     viewMode="toolButton"
+                                                     tooltip="Start recording"
+                                                     on:click="__toggleProfiling()"/> to start recording.
+                        </div>
+                        <div>
+                            Click the reload button <Controls.buttons:Button icon="icon-Refresh icon-small"
+                                                     viewMode="toolButton"
+                                                     tooltip="Reload the page and start recording"
+                                                     on:click="__reloadAndProfile()"/> to reload the page and start recording.
+                        </div>
+                    </div>
+                </ws:else>
+            </div>
+        </ws:else>
+    </ws:content>
 </Devtool.Layout.Browser>

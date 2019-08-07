@@ -2,7 +2,10 @@
 import Control = require('Core/Control');
 // @ts-ignore
 import template = require('wml!Elements/Elements');
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IBackendControlNode,
+   IFrontendControlNode
+} from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
@@ -12,6 +15,7 @@ import 'css!Elements/Elements';
 import Store from './Store';
 import Model from './Model';
 import { throttle } from 'Types/function';
+import Controller from 'Search/Controller';
 
 interface IOptions {
    store: Store;
@@ -22,21 +26,22 @@ const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
 class Elements extends Control {
    protected _template: Function = template;
-   protected _selectedItemId: IControlNode['id'] | undefined;
-   protected _inspectedItem: IControlNode | undefined;
-   protected _children: Record<IControlNode['id'], HTMLElement>;
+   protected _selectedItemId: IFrontendControlNode['id'] | undefined;
+   protected _inspectedItem: IBackendControlNode | undefined;
+   protected _children: Record<IFrontendControlNode['id'], HTMLElement>;
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
-   protected _tabShown: boolean = false;
-   protected _scrollToId: IControlNode['id'];
+   protected _scrollToId: IFrontendControlNode['id'];
    protected _model: Model = new Model();
 
    protected _searchValue: string = '';
 
+   protected _searchController: Controller = new Controller('name');
+
    protected _lastFoundItemIndex: number = 0;
 
-   protected _searchResults: Store['_elements'] = [];
+   protected _searchTotal: number = 0;
 
    protected _throttledUpdateSearch: Function;
 
@@ -44,9 +49,12 @@ class Elements extends Control {
 
    constructor(options: IOptions) {
       super();
-      options.store.addListener('inspectedElement', (node: IControlNode) => {
-         this._inspectedItem = retrocycle(node);
-      });
+      options.store.addListener(
+         'inspectedElement',
+         (node: IBackendControlNode) => {
+            this._inspectedItem = retrocycle(node);
+         }
+      );
       options.store.addListener(
          'setSelectedItem',
          this.__selectElement.bind(this)
@@ -64,18 +72,20 @@ class Elements extends Control {
          this.__updateSearch(this._searchValue);
       }, 200);
       window.elementsPanel = this;
+
+      options.store.toggleDevtoolsOpened(true);
+      options.store.getFullTree().then((items) => {
+         this._model.setItems(items);
+      });
    }
 
-   _afterMount(): void {
-      this._options.store.dispatch('devtoolsInitialized');
-      /**
-       * TODO: обычно данные синхронизируются с каждой синхронизацией. Но при первом открытии это не работает
-       * Тут я дожидаюсь пока прилетят элементы и потом забираю текущее состояние. Это очень плохое решение, стор сам
-       * должен говорить когда нужно забирать элементы.
-       */
-      setTimeout(() => {
-         this._model.setItems(this._options.store.getElements());
-      }, 100);
+   _beforeUpdate(newOptions: IOptions): void {
+      if (newOptions.selected && !this._options.selected) {
+         this._model.setItems(newOptions.store.getElements());
+         newOptions.store.dispatch('inspectElement', this._selectedItemId);
+         this._throttledUpdateSearch();
+         this._itemsChanged = false;
+      }
    }
 
    _afterUpdate(): void {
@@ -91,7 +101,6 @@ class Elements extends Control {
    }
 
    panelShownCallback(): void {
-      this._tabShown = true;
       chrome.devtools.inspectedWindow.eval(
          'window.__WASABY_DEV_HOOK__.$0 = $0',
          () => {
@@ -101,7 +110,6 @@ class Elements extends Control {
    }
 
    panelHiddenCallback(): void {
-      this._tabShown = false;
       this._options.store.dispatch('toggleSelectFromPage', false);
    }
 
@@ -112,21 +120,21 @@ class Elements extends Control {
       window.elementsPanel = undefined;
    }
 
-   protected _onItemClick(e: Event, id: IControlNode['id']): void {
+   protected _onItemClick(e: Event, id: IFrontendControlNode['id']): void {
       this.__selectElement(id);
    }
 
-   protected _onListKeyDown(
-      e: {
-         nativeEvent: KeyboardEvent;
-         stopPropagation: Event['stopPropagation'];
-      }
-   ): void {
+   protected _onListKeyDown(e: {
+      nativeEvent: KeyboardEvent;
+      stopPropagation: Event['stopPropagation'];
+   }): void {
       const key = e.nativeEvent.key;
       if (ARROWS.indexOf(key) !== -1 && this._selectedItemId) {
          e.stopPropagation();
          const visibleItems = this._model.getVisibleItems();
-         const index = visibleItems.findIndex((item) => item.id === this._selectedItemId);
+         const index = visibleItems.findIndex(
+            (item) => item.id === this._selectedItemId
+         );
          if (index !== -1) {
             const originalItem = visibleItems[index];
             switch (key) {
@@ -139,7 +147,9 @@ class Elements extends Control {
                   if (originalItem.isExpanded) {
                      this._model.toggleExpanded(originalItem.id, false);
                   } else if (originalItem.parentId) {
-                     const parent = visibleItems.find((item) => item.id === originalItem.parentId);
+                     const parent = visibleItems.find(
+                        (item) => item.id === originalItem.parentId
+                     );
                      if (parent) {
                         this.__selectElement(parent.id);
                      }
@@ -165,33 +175,34 @@ class Elements extends Control {
    }
 
    protected _operationHandler(args: IOperationEvent['args']): void {
-      switch (args[0]) {
-         case OperationType.UPDATE:
-            this.__updateNode(args[1]);
-            break;
-         case OperationType.CREATE:
-            this.__highlightNode(args[1]);
-            this._itemsChanged = true;
-            break;
-         case OperationType.DELETE:
-            this._itemsChanged = true;
-            break;
+      if (this._options.selected) {
+         switch (args[0]) {
+            case OperationType.UPDATE:
+               this.__updateNode(args[1]);
+               break;
+            case OperationType.CREATE:
+               this.__highlightNode(args[1]);
+               this._itemsChanged = true;
+               break;
+            case OperationType.DELETE:
+               this._itemsChanged = true;
+               break;
+         }
       }
    }
 
-   private __updateNode(id: IControlNode['id']): void {
-      // TODO: если вкладка закрыта, то делать это не надо, но пока сложно отказаться
+   private __updateNode(id: IFrontendControlNode['id']): void {
       if (this._selectedItemId === id) {
          this._options.store.dispatch('inspectElement', this._selectedItemId);
       }
       this.__highlightNode(id);
    }
 
-   private __highlightElement(e: Event, id?: IControlNode['id']): void {
+   private __highlightElement(e: Event, id?: IFrontendControlNode['id']): void {
       this._options.store.dispatch('highlightElement', id);
    }
 
-   private __selectElement(id: IControlNode['id']): void {
+   private __selectElement(id: IFrontendControlNode['id']): void {
       this._selectingFromPage = false;
       if (this._model.getVisibleItems().length > 0) {
          this._model.expandParents(id);
@@ -202,26 +213,26 @@ class Elements extends Control {
       }
    }
 
-   private __highlightNode(id: IControlNode['id']): void {
-      if (this._tabShown && this._options.selected) {
-         if (this._children[id]) {
-            highlightUpdate(this._children[id]);
-         }
+   private __highlightNode(id: IFrontendControlNode['id']): void {
+      if (this._children[id]) {
+         highlightUpdate(this._children[id]);
       }
    }
 
-   private __toggleExpanded(e: Event, id: IControlNode['id']): void {
+   private __toggleExpanded(e: Event, id: IFrontendControlNode['id']): void {
       e.stopPropagation();
       this._model.toggleExpanded(id);
    }
 
    private __onEndSynchronization(): void {
-      this._model.setItems(this._options.store.getElements());
+      if (this._options.selected) {
+         this._model.setItems(this._options.store.getElements());
 
-      if (this._itemsChanged) {
-         this._throttledUpdateSearch();
+         if (this._itemsChanged) {
+            this._throttledUpdateSearch();
+         }
+         this._itemsChanged = false;
       }
-      this._itemsChanged = false;
    }
 
    private __toggleSelectElementFromPage(): void {
@@ -237,47 +248,31 @@ class Elements extends Control {
    }
 
    private __updateSearch(value: string): void {
-      if (value) {
-         this._searchResults = this._options.store.getElements().filter(
-            (element) =>
-               element.name.toLowerCase().indexOf(value.toLowerCase()) !== -1
-         );
-         if (this._searchResults.length > 0 && !this._searchResults.find((element) => element.id === this._selectedItemId)) {
-            this.__selectElement(this._searchResults[0].id);
-            this._lastFoundItemIndex = 0;
-         }
-      } else {
-         this._searchResults = [];
-         this._lastFoundItemIndex = 0;
+      const searchResult = this._searchController.updateSearch(
+         this._options.store.getElements(),
+         value,
+         this._selectedItemId
+      );
+
+      if (searchResult.id) {
+         this.__selectElement(searchResult.id);
       }
+      this._lastFoundItemIndex = searchResult.index;
+      this._searchTotal = searchResult.total;
    }
 
    private __onSearchKeydown(e: { nativeEvent: KeyboardEvent }): void {
       if (e.nativeEvent.key === 'Enter') {
-         if (this._searchValue && this._searchResults.length > 0) {
-            if (e.nativeEvent.shiftKey) {
-               if (this._lastFoundItemIndex === 0) {
-                  this._lastFoundItemIndex = this._searchResults.length - 1;
-               } else {
-                  this._lastFoundItemIndex--;
-               }
-            } else {
-               if (
-                  this._lastFoundItemIndex ===
-                  this._searchResults.length - 1
-               ) {
-                  this._lastFoundItemIndex = 0;
-               } else {
-                  this._lastFoundItemIndex++;
-               }
-            }
+         const searchResult = this._searchController.getNextItemId(
+            this._searchValue,
+            e.nativeEvent.shiftKey
+         );
 
-            const id = this._searchResults[this._lastFoundItemIndex].id;
-
-            if (id) {
-               this.__selectElement(id);
-            }
+         if (searchResult.id) {
+            this.__selectElement(searchResult.id);
          }
+         this._lastFoundItemIndex = searchResult.index;
+         this._searchTotal = searchResult.total;
       }
    }
 }

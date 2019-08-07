@@ -1,12 +1,12 @@
 import Control = require('Core/Control');
 import template = require('wml!Elements/Details/Details');
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import Store from 'Elements/Store';
 
 import 'css!Elements/Details/Details';
 
-interface IOptions extends IControlNode {
+interface IOptions extends IFrontendControlNode {
    store: Store;
 }
 

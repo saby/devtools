@@ -35,4 +35,8 @@ function onDocumentLoad(): void {
    document.removeEventListener('DOMContentLoaded', onDocumentLoad);
 }
 
-document.addEventListener('DOMContentLoaded', onDocumentLoad);
+if (document.readyState === 'loading') {
+   document.addEventListener('DOMContentLoaded', onDocumentLoad);
+} else {
+   onDocumentLoad();
+}

@@ -1,13 +1,13 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
-import template = require('wml!Profiler/CommitDetails');
+import template = require('wml!Profiler/CommitDetails/CommitDetails');
 import { descriptor } from 'Types/entity';
-import 'css!Profiler/CommitDetails';
+import 'css!Profiler/CommitDetails/CommitDetails';
 
 interface IOptions extends IControlOptions {
    changesDescription?: {
-      changedOptions?: string;
-      changedAttributes?: string;
+      changedOptions?: string[];
+      changedAttributes?: string[];
       isFirstRender?: boolean;
       screenshotURL?: string;
    };

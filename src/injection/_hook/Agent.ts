@@ -1,33 +1,59 @@
 import prepareForSerialization from './prepareForSerialization';
-import { IControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
+import {
+   IBackendControlNode,
+   IWasabyElement
+} from 'Extension/Plugins/Elements/IControlNode';
+import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
-import { endMark, startMark, updateSelfDurations } from './Utils';
+import {
+   endMark,
+   getControlType,
+   getSyncList,
+   startMark,
+   updateSelfDurations
+} from './Utils';
 import Highlighter from './Highlighter';
+import { IWasabyDevHook } from './IHook';
+import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData';
 
 export interface IChangedNode {
-   node: IControlNode;
+   node: IBackendControlNode;
    operation: OperationType;
-   selfStartTime: number;
-   selfDuration: number;
+}
+
+// TODO: утащить в нормальное место
+declare global {
+   // tslint:disable-next-line: interface-name
+   interface Window {
+      __WASABY_DEV_HOOK__: IWasabyDevHook;
+      __WASABY_START_PROFILING?: boolean;
+      $wasaby?: IBackendControlNode;
+      $tmp?: unknown;
+      wasabyDevtoolsOptions?: {
+         useUserTimingAPI?: boolean;
+      };
+   }
 }
 
 class Agent {
-   private elements: Map<IControlNode['id'], IControlNode> = new Map();
+   private elements: Map<
+      IBackendControlNode['id'],
+      IBackendControlNode
+   > = new Map();
 
    private changedRoots: Map<
-      IControlNode['id'],
-      Map<IControlNode['id'], IChangedNode>
+      IBackendControlNode['id'],
+      Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
 
    private changedNodesBySynchronization: Map<
       string,
-      Map<IControlNode['id'], IChangedNode>
+      Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
 
-   private rootStack: Array<IControlNode['id']> = [];
+   private rootStack: Array<IBackendControlNode['id']> = [];
 
    private unfinishedNodes: Set<IChangedNode> = new Set();
 
@@ -41,9 +67,14 @@ class Agent {
       onSelect: this.__selectByDomNode.bind(this)
    });
 
-   private previousSelectedItemId: IControlNode['id'] | undefined;
+   private previousSelectedItemId: IBackendControlNode['id'] | undefined;
 
    private currentModuleName: string = '';
+
+   private initialIdToDuration: Map<
+      IBackendControlNode['id'],
+      number
+   > = new Map();
 
    constructor() {
       this.channel.addListener(
@@ -84,27 +115,19 @@ class Agent {
          this.__toggleSelectFromPage.bind(this)
       );
       this.channel.addListener(
-         'getSynchronizationsList',
-         this.__getSyncList.bind(this)
-      );
-      this.channel.addListener(
-         'getSynchronization',
-         this.__getSynchronization.bind(this)
-      );
-      this.channel.addListener(
          'toggleProfiling',
          this.__toggleProfiling.bind(this)
       );
       this.channel.addListener(
-         'getControlChangesOnSynchronization',
-         this.__getControlChangesOnSynchronization.bind(this)
+         'getProfilingData',
+         this.__getProfilingData.bind(this)
       );
       this.channel.addListener(
          'getProfilingStatus',
          this.__getProfilingStatus.bind(this)
       );
       if (window.__WASABY_START_PROFILING) {
-         this.__toggleProfiling(!!window.__WASABY_START_PROFILING);
+         this.__toggleProfiling(window.__WASABY_START_PROFILING);
          this.isDevtoolsOpened = true;
       }
    }
@@ -117,7 +140,7 @@ class Agent {
             OperationType.CREATE,
             node.id,
             node.name,
-            this.__getControlType(node)
+            getControlType(node)
          ];
          if (node.parentId) {
             message.push(node.parentId);
@@ -125,16 +148,17 @@ class Agent {
 
          window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       });
+      window.__WASABY_DEV_HOOK__.pushMessage('endOfTree');
 
       this.channel.dispatch('longMessage');
    }
 
-   onStartSync(rootId: IControlNode['id']): void {
+   onStartSync(rootId: IBackendControlNode['id']): void {
       this.rootStack.push(rootId);
       this.changedRoots.set(rootId, new Map());
    }
 
-   onStartCommit(node: IControlNode, operation: OperationType): void {
+   onStartCommit(node: IBackendControlNode, operation: OperationType): void {
       const currentRootId = this.rootStack[this.rootStack.length - 1];
       const currentRoot = this.changedRoots.get(currentRootId);
       if (!currentRoot) {
@@ -147,15 +171,17 @@ class Agent {
       const id = node.id + currentRootId;
 
       currentRoot.set(id, {
-         node,
-         operation,
-         selfStartTime: performance.now(),
-         selfDuration: 0
+         node: {
+            ...node,
+            selfStartTime: performance.now(),
+            selfDuration: 0
+         },
+         operation
       });
       this.unfinishedNodes.add(currentRoot.get(id) as IChangedNode);
    }
 
-   onEndCommit(node: IControlNode): void {
+   onEndCommit(node: IBackendControlNode): void {
       const currentRootId = this.rootStack[this.rootStack.length - 1];
       const id = node.id + currentRootId;
       const currentRoot = this.changedRoots.get(currentRootId);
@@ -182,32 +208,27 @@ class Agent {
        * So, the formula to calculate selfDuration is:
        */
       const selfDuration =
-         changedNode.selfDuration +
+         changedNode.node.selfDuration +
          performance.now() -
-         changedNode.selfStartTime;
+         changedNode.node.selfStartTime;
 
       endMark(changedNode.node.name, changedNode.operation);
 
       this.unfinishedNodes.delete(changedNode);
-      currentRoot.set(id, {
-         ...changedNode,
-         node: {
-            ...changedNode.node,
-            ...node,
-            id,
-            parentId: changedNode.node.parentId
-               ? changedNode.node.parentId + currentRootId
-               : undefined
-         },
-         selfDuration
-      });
+      changedNode.node = {
+         ...changedNode.node,
+         ...node,
+         id,
+         selfDuration,
+         parentId: changedNode.node.parentId
+            ? changedNode.node.parentId + currentRootId
+            : undefined
+      };
 
-      if (this.isProfiling) {
-         updateSelfDurations(this.unfinishedNodes, selfDuration);
-      }
+      updateSelfDurations(this.unfinishedNodes, selfDuration);
    }
 
-   onEndSync(rootId: IControlNode['id']): void {
+   onEndSync(rootId: IBackendControlNode['id']): void {
       const changes = this.changedRoots.get(rootId);
       if (!changes) {
          throw new Error('Trying to change nonexistent root');
@@ -240,7 +261,8 @@ class Agent {
           */
          this.changedNodesBySynchronization.set(id, changes);
       }
-      this.channel.dispatch('endSynchronization', id);
+      window.__WASABY_DEV_HOOK__.pushMessage('endSynchronization', id);
+      this.channel.dispatch('longMessage');
       this.changedRoots.delete(rootId);
       this.rootStack.pop();
    }
@@ -249,7 +271,7 @@ class Agent {
       return this.currentModuleName;
    }
 
-   private __handleAdd(node: IControlNode): void {
+   private __handleAdd(node: IBackendControlNode): void {
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -257,25 +279,20 @@ class Agent {
             OperationType.CREATE,
             node.id,
             node.name,
-            this.__getControlType(node)
+            getControlType(node)
          ];
          if (node.parentId) {
             message.push(node.parentId);
          }
-         this.channel.dispatch('operation', message);
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       }
    }
 
-   private __getControlType(node: IControlNode): ControlType {
-      if (node.instance) {
-         return typeof node.options === 'object' && node.options.content
-            ? ControlType.HOC
-            : ControlType.CONTROL;
+   private __handleUpdate(node: IBackendControlNode): void {
+      if (!this.elements.has(node.id)) {
+         this.__handleAdd(node);
+         return;
       }
-      return ControlType.TEMPLATE;
-   }
-
-   private __handleUpdate(node: IControlNode): void {
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -283,11 +300,11 @@ class Agent {
             OperationType.UPDATE,
             node.id
          ];
-         this.channel.dispatch('operation', message);
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       }
    }
 
-   private __handleRemove(node: IControlNode): void {
+   private __handleRemove(node: IBackendControlNode): void {
       this.elements.delete(node.id);
       this.__removeChildren(node.id);
 
@@ -303,7 +320,7 @@ class Agent {
                      OperationType.DELETE,
                      key
                   ];
-                  this.channel.dispatch('operation', message);
+                  window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
                }
             }
          });
@@ -314,12 +331,12 @@ class Agent {
             OperationType.DELETE,
             node.id
          ];
-         this.channel.dispatch('operation', message);
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       }
    }
 
-   private __removeChildren(id: IControlNode['id']): void {
-      const parents: Array<IControlNode['parentId']> = [];
+   private __removeChildren(id: IBackendControlNode['id']): void {
+      const parents: Array<IBackendControlNode['parentId']> = [];
       this.elements.forEach((element, key) => {
          if (
             element.parentId === id ||
@@ -331,12 +348,12 @@ class Agent {
                OperationType.DELETE,
                key
             ];
-            this.channel.dispatch('operation', message);
+            window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
          }
       });
    }
 
-   private __inspectElement(id: IControlNode['id']): void {
+   private __inspectElement(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node) {
          window.__WASABY_DEV_HOOK__.pushMessage(
@@ -355,21 +372,21 @@ class Agent {
       }
    }
 
-   private __viewTemplate(id: IControlNode['id']): void {
+   private __viewTemplate(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node) {
          window.__WASABY_DEV_HOOK__.__template = node.template;
       }
    }
 
-   private __viewConstructor(id: IControlNode['id']): void {
+   private __viewConstructor(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node && node.instance) {
          window.__WASABY_DEV_HOOK__.__constructor = node.instance.constructor;
       }
    }
 
-   private __viewContainer(id: IControlNode['id']): void {
+   private __viewContainer(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node && node.instance) {
          window.__WASABY_DEV_HOOK__.__container = node.instance._container;
@@ -380,25 +397,29 @@ class Agent {
       id,
       path
    }: {
-      id: IControlNode['id'];
+      id: IBackendControlNode['id'];
       path: Array<string | number>;
    }): void {
-      window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(id, path);
+      window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(
+         id,
+         path
+      ) as Function;
    }
 
    private __storeAsGlobal({
       id,
       path
    }: {
-      id: IControlNode['id'];
+      id: IBackendControlNode['id'];
       path: Array<string | number>;
    }): void {
       window.$tmp = this.__getValueByPath(id, path);
+      // tslint:disable-next-line: no-console
       console.log('$tmp = ', window.$tmp);
    }
 
    private __getValueByPath(
-      id: IControlNode['id'],
+      id: IBackendControlNode['id'],
       path: Array<string | number>
    ): unknown {
       let currentProperty = path.pop();
@@ -406,20 +427,28 @@ class Agent {
       if (currentProperty === 'events') {
          value = this.__getEvents(id);
       } else {
-         value = this.elements.get(id)[currentProperty];
+         const element = this.elements.get(id);
+         if (element) {
+            value = element[currentProperty as keyof IBackendControlNode];
+         }
       }
       while (path.length) {
          currentProperty = path.pop();
+         // tslint:disable-next-line: ban-ts-ignore
+         // @ts-ignore
          value = value[currentProperty];
       }
       return value;
    }
 
-   private __highlightElement(id?: IControlNode['id']): void {
+   private __highlightElement(id?: IBackendControlNode['id']): void {
       if (id) {
          const node = this.elements.get(id);
          if (node && node.instance && node.instance._container) {
-            this.highlighter.highlightElement(node.instance._container, node.name);
+            this.highlighter.highlightElement(
+               node.instance._container,
+               node.name
+            );
             return;
          }
       }
@@ -434,7 +463,7 @@ class Agent {
       }
    }
 
-   private __selectByDomNode(elem: Element): void {
+   private __selectByDomNode(elem: IWasabyElement): void {
       const control = this.__findControlByDomNode(elem);
       if (control) {
          this.channel.dispatch('setSelectedItem', control.id);
@@ -444,16 +473,17 @@ class Agent {
    }
 
    private __findControlByDomNode(
-      element: Element
-   ): IControlNode | undefined {
+      element: IWasabyElement
+   ): IBackendControlNode | undefined {
       let currentElement = element;
 
       /*
-      TODO: сейчас на странице могут быть элементы с одинаковыми ключами, для этого я к ключу каждого элемента добавляю id корня, в котором он находится
+      TODO: сейчас на странице могут быть элементы с одинаковыми ключами,
+      для этого я к ключу каждого элемента добавляю id корня, в котором он находится
       Потом ключи будут браться из инферно и будут уникальными, и все костыли с приклеиванием rootId можно будет убрать
        */
-      function getRootId(elem: Element): string {
-         let currentRoot = elem;
+      function getRootId(elem: IWasabyElement): string {
+         let currentRoot: IWasabyElement | null = elem;
          while (currentRoot) {
             if (
                currentRoot.controlNodes &&
@@ -466,7 +496,7 @@ class Agent {
                      .id
                );
             }
-            currentRoot = currentRoot.parentElement;
+            currentRoot = currentRoot.parentElement as IWasabyElement;
          }
          return '_inst_1';
       }
@@ -488,7 +518,7 @@ class Agent {
                ].key + rootId
             );
          }
-         currentElement = currentElement.parentElement;
+         currentElement = currentElement.parentElement as IWasabyElement;
       }
       return;
    }
@@ -504,11 +534,12 @@ class Agent {
    }
 
    private __getEvents(
-      id: IControlNode['id']
+      id: IBackendControlNode['id']
    ): Record<string, Array<{ function: Function; arguments: unknown[] }>> {
       /*
       TODO: пока только для контролов, потому что я не имею доступа к контейнерам шаблонов
        */
+      const EVENT_NAME_OFFSET = 3;
       const node = this.elements.get(id);
       const events: Record<
          string,
@@ -522,115 +553,56 @@ class Agent {
       ) {
          Object.keys(node.instance._container.eventProperties).forEach(
             (key) => {
-               events[key.slice(3)] = node.instance._container.eventProperties[
-                  key
-               ].map((handler) => {
-                  if (handler.fn.control[handler.value]) {
-                     return {
-                        function: handler.fn.control[handler.value],
-                        arguments: handler.args
-                     };
-                  } else {
-                     return {
-                        function: handler.fn,
-                        arguments: handler.args
-                     };
-                  }
-               });
+               if (node.instance) {
+                  // ts for some reason forgets about previous check
+                  events[
+                     key.slice(EVENT_NAME_OFFSET)
+                  ] = node.instance._container.eventProperties[key].map(
+                     (handler) => {
+                        if (handler.fn.control[handler.value]) {
+                           return {
+                              function: handler.fn.control[handler.value],
+                              arguments: handler.args
+                           };
+                        } else {
+                           return {
+                              function: handler.fn,
+                              arguments: handler.args
+                           };
+                        }
+                     }
+                  );
+               }
             }
          );
       }
       return events;
    }
 
-   private __getSyncList(): void {
-      this.channel.dispatch(
-         'synchronizationsList',
-         Array.from(this.changedNodesBySynchronization.entries()).map(
-            ([key, value]) => {
-               return {
-                  id: key,
-                  // TODO: на самом деле это неправильная цифра, т.к. сейчас тут теряется вся работа инферно + время между построением компонентов
-                  selfDuration: Array.from(value.values()).reduce(
-                     (acc, node) => {
-                        return acc + node.selfDuration;
-                     },
-                     0
-                  )
-               };
-            }
-         )
-      );
-   }
-
-   private __getSynchronization(id: string): void {
-      const synchronization = this.changedNodesBySynchronization.get(id);
-      if (!synchronization) {
-         throw new Error('Trying to get nonexistent synchronization');
-      }
-      this.channel.dispatch('synchronization', {
-         changes: Array.from(synchronization.entries()).map(([key, value]) => {
-            return {
-               id: key,
-               selfDuration: value.selfDuration
-            };
-         }),
-         id
-      });
-   }
-
-   private __getControlChangesOnSynchronization({
-      synchronizationId,
-      commitId
-   }: {
-      synchronizationId: string;
-      commitId: string;
-   }): void {
-      const synchronization = this.changedNodesBySynchronization.get(
-         synchronizationId
-      );
-      if (!synchronization) {
-         throw new Error('Trying to get nonexistent synchronization');
-      }
-      const changedNode = synchronization.get(commitId);
-
-      function processChanges(value?: object): string | undefined {
-         let result;
-         if (value) {
-            result = Object.keys(value)
-               .map((key) => {
-                  return key.replace('attr:', '');
-               })
-               .join(', ');
-         }
-         return result;
-      }
-
-      if (changedNode) {
-         this.channel.dispatch('controlChanges', {
-            changedOptions: processChanges(changedNode.node.changedOptions),
-            changedAttributes: processChanges(
-               changedNode.node.changedAttributes
-            ),
-            isFirstRender: changedNode.operation === OperationType.CREATE,
-            commitId,
-            synchronizationId
-         });
-      } else {
-         this.channel.dispatch('controlChanges');
-      }
-   }
-
    private __toggleProfiling(state: boolean = !this.isProfiling): void {
       this.isProfiling = state;
       if (state) {
          this.changedNodesBySynchronization.clear();
+         this.initialIdToDuration.clear();
+         this.elements.forEach(({ id, selfDuration }) => {
+            this.initialIdToDuration.set(id, selfDuration);
+         });
       }
       this.channel.dispatch('profilingStatus', this.isProfiling);
    }
 
    private __getProfilingStatus(): void {
       this.channel.dispatch('profilingStatus', this.isProfiling);
+   }
+
+   private __getProfilingData(): void {
+      const profilingData: IBackendProfilingData = {
+         initialIdToDuration: Array.from(this.initialIdToDuration.entries()),
+         syncList: getSyncList(this.changedNodesBySynchronization)
+      };
+      this.initialIdToDuration.clear();
+      this.changedNodesBySynchronization.clear();
+      this.channel.dispatch('profilingData', profilingData);
    }
 }
 

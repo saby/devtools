@@ -1,19 +1,14 @@
 import { ICrud, Query, DataSet } from 'Types/source';
 import { Record as EntityRecord } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
-import { decycle } from 'Extension/Utils/decycle';
 
 interface IOptions {
    idProperty: string;
    parentProperty: string;
-   data: object[];
-}
-
-function hasChildren(value: unknown): true | null {
-   if (typeof value === 'object' && value !== null && Object.keys(value).length > 0) {
-      return true;
-   }
-   return null;
+   data: Array<{
+      value: unknown;
+      name: string;
+   }>;
 }
 
 const SEPARATOR = '---';
@@ -21,7 +16,11 @@ const SEPARATOR = '---';
 export class Source implements ICrud {
    protected readonly _idProperty: IOptions['idProperty'];
    protected readonly _parentProperty: IOptions['parentProperty'];
-   protected _data: object[];
+   protected _data: Array<{
+      value: unknown;
+      hasChildren: true | null;
+      name: string;
+   }>;
    readonly '[Types/_source/ICrud]': boolean = true;
    readonly _mixins: object = {
       '[Types/_source/ICrud]': true
@@ -47,9 +46,7 @@ export class Source implements ICrud {
    }
 
    read(key: string): Promise<EntityRecord> {
-      const rawData = this._data.find(
-         (item) => item[this._idProperty] === key
-      );
+      const rawData = this._data.find((item) => item[this._idProperty] === key);
       return Promise.resolve(
          new EntityRecord({
             rawData
@@ -107,10 +104,9 @@ export class Source implements ICrud {
 
    query(query: Query): Promise<DataSet> {
       const filter = query.getWhere();
-      let result: object[];
+      let result: Source['_data'];
       if (typeof filter === 'function') {
-         // TODO: подумать может ли быть у меня такой фильтр вообще
-         result = this._data;
+         result = this._data.filter((item, index) => filter(item, index));
       } else {
          if (filter[this._parentProperty]) {
             if (filter[this._parentProperty] instanceof Array) {
@@ -123,21 +119,33 @@ export class Source implements ICrud {
                   }
                });
             } else {
-               result = this.__getImmediateChildren(filter[this._parentProperty]);
+               result = this.__getImmediateChildren(
+                  filter[this._parentProperty]
+               );
             }
          } else {
             result = this._data;
 
             if (filter.name) {
-               // TODO: нужно научиться нормально применять фильтр
-               result = result.filter((item) => item.name.toLowerCase().indexOf(filter.name.toLowerCase()) !== -1);
+               result = result.filter(
+                  (item) =>
+                     item.name
+                        .toLowerCase()
+                        .indexOf(filter.name.toLowerCase()) !== -1
+               );
             }
          }
       }
       return Promise.resolve(
          new DataSet({
             rawData: {
-               data: result.map((item) => decycle(item)), // TODO: потенциальный источник больших тормозов, нужно потом попробовать делать decycle только
+               /**
+                * We don't really need an item's value to draw it if it's not a primitive,
+                * because only text description will be provided for it.
+                * But because the list will try to deep clone items using JSON.stringify we can't just leave it,
+                * we have to either remove circular references or substitute values with stubs.
+                */
+               data: result.map(stubValue),
                meta: {
                   more: false
                }
@@ -165,7 +173,7 @@ export class Source implements ICrud {
       return value;
    }
 
-   private __getImmediateChildren(parentId: string): object[] {
+   private __getImmediateChildren(parentId: string): Source['_data'] {
       const parent = this._data.find(
          (item) => item[this._idProperty] === parentId
       );
@@ -198,4 +206,41 @@ export class Source implements ICrud {
 
       return result;
    }
+}
+
+function hasChildren(value: unknown): true | null {
+   if (
+      typeof value === 'object' &&
+      value !== null &&
+      Object.keys(value).length > 0
+   ) {
+      return true;
+   }
+   return null;
+}
+
+function stubValue<
+   T extends {
+      value: unknown;
+   }
+>(item: T): T {
+   const value = item.value;
+   if (typeof value === 'object') {
+      let newValue: null | undefined[] | Record<number, null>;
+      if (value === null) {
+         newValue = null;
+      } else if (value instanceof Array) {
+         // We have to preserve length in order to provide accurate description
+         newValue = new Array(value.length);
+      } else {
+         const numberOfKeys = Object.keys(value).length;
+         // With objects we care only about emptiness, so one key is enough
+         newValue = numberOfKeys === 0 ? {} : { 0: null };
+      }
+      return {
+         ...item,
+         value: newValue
+      };
+   }
+   return item;
 }

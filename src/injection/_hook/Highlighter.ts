@@ -1,7 +1,8 @@
 import Overlay from './Overlay';
+import { IWasabyElement } from 'Extension/Plugins/Elements/IControlNode';
 
 interface IOptions {
-   onSelect: (target: Element) => void;
+   onSelect: (target: IWasabyElement) => void;
 }
 
 class Highlighter {
@@ -49,7 +50,7 @@ class Highlighter {
       e.stopPropagation();
       e.preventDefault();
       this.stopSelectingFromPage();
-      this.onSelect(e.target as Element);
+      this.onSelect(e.target as IWasabyElement);
    }
 
    private __mouseOverHandler(e: MouseEvent): void {
@@ -57,6 +58,8 @@ class Highlighter {
       if (element && this.overlay) {
          this.overlay.inspect(element);
       }
+      e.stopPropagation();
+      e.preventDefault();
    }
 
    private __mouseDownHandler(e: MouseEvent): void {
@@ -68,8 +71,8 @@ class Highlighter {
       eventName: K,
       callback: (this: Window, ev: WindowEventMap[K]) => void
    ): () => void {
-      window.addEventListener(eventName, callback);
-      return () => window.removeEventListener(eventName, callback);
+      window.addEventListener(eventName, callback, true);
+      return () => window.removeEventListener(eventName, callback, true);
    }
 }
 
