@@ -46,6 +46,7 @@
                             columns="{{ _column }}"
                             header="{{ _headers }}"
                             columnScroll="{{ true }}"
+                            displayProperty="name"
                             contextMenuVisibility="{{ true }}"
                             itemActions="{{ _itemActions }}"
                             itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"

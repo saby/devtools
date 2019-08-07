@@ -1,6 +1,6 @@
 <Controls.popup:InfoboxTarget>
     <ws:content>
-        <span>{{ itemData.item['fileName'] }}</span>
+        <span class="DependencyFilter__Items_file">{{ itemData.item['fileName'] }}</span>
     </ws:content>
     <ws:template>
             <ws:for data="key, item in itemData.item['stack']">
