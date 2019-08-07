@@ -2,12 +2,12 @@ import { DataSet, Query as TypesQuery } from 'Types/source';
 import { ITransportFile } from "Extension/Plugins/DependencyWatcher/IFile";
 import { getQueryParam } from "./list/getQueryParam";
 import { IItemInfo } from "Extension/Plugins/DependencyWatcher/IItem";
-import { File as FileStorage, getFileStorage } from "../storage/File";
+import { File as FileStorage } from "../storage/File";
 import { ILogger } from "Extension/Logger/ILogger";
 import { Compatibility, ICompatibilityConfig } from "./Compatibility";
 
 export interface IFileConfig extends ICompatibilityConfig {
-    // fileStorage: FileStorage;
+    fileStorage: FileStorage;
     logger: ILogger;
 }
 
@@ -16,7 +16,7 @@ export class File extends Compatibility {
     private __logger: ILogger;
     constructor(config: IFileConfig) {
         super(config);
-        this.__files = getFileStorage();
+        this.__files = config.fileStorage;
         this.__logger = config.logger;
     }
     query(query: TypesQuery): Promise<DataSet> {
@@ -43,7 +43,9 @@ export class File extends Compatibility {
                         }
                     },
                     itemsProperty: 'data',
-                    metaProperty: 'meta'
+                    metaProperty: 'meta',
+                    //@ts-ignore
+                    idProperty: 'id'
                 });
             });
         }).catch((error: Error) => {

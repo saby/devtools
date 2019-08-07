@@ -42,7 +42,6 @@
                             name="listView"
                             bind:root="_root"
                             bind:sorting="_sorting"
-                            displayProperty="name"
                             nodeProperty="child"
                             columns="{{ _column }}"
                             header="{{ _headers }}"

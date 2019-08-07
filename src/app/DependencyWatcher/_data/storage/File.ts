@@ -1,7 +1,7 @@
 import { QueryParam, QueryResult } from "Extension/Plugins/DependencyWatcher/data/IQuery";
 import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
 import { RPC } from "Extension/Event/RPC";
-import { IFile, IFileFilter, ITransportFile } from "Extension/Plugins/DependencyWatcher/IFile";
+import { IFileFilter, ITransportFile } from "Extension/Plugins/DependencyWatcher/IFile";
 
 interface FileQueryResult extends QueryResult<number> {
 
@@ -44,14 +44,3 @@ export class File {
     }
     
 }
-
-/*
- *
- */
-let fileStorage: File;
-export const getFileStorage = (): File => {
-    return fileStorage;
-};
-export const setFileStorage = (storage: File) => {
-    fileStorage = storage;
-};

@@ -1,2 +1,2 @@
 export { Item } from './storage/Item';
-export { File, getFileStorage, setFileStorage } from './storage/File';
+export { File } from './storage/File';

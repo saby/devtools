@@ -12,14 +12,9 @@
             keyProperty="id"
             bind:filter="_filter"
             searchValue="{{ _options.searchValue }}"
+            navigation="{{ _navigation }}"
+            sorting="{{ _sorting }}"
         >
-            <ws:navigation source="page" view="infinity">
-                <ws:sourceConfig
-                    pageSize="25"
-                    page="0"
-                    mode="totalCount"
-                />
-            </ws:navigation>
             <ws:search>
                 <Controls.search:Input/>
             </ws:search>
@@ -27,7 +22,7 @@
                 <Controls.scroll:Container
                     attr:class="DependencyFilter__FilePanel_scroll"
                 >
-                    <DependencyWatcher.file:List
+                    <DependencyWatcher._file.List
                         scope="{{ _options }}"
                     />
                 </Controls.scroll:Container>

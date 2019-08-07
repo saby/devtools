@@ -2,6 +2,7 @@ import { source } from 'app/DependencyWatcher/data';
 
 export interface FilterItem<TValue = unknown> {
     name: string;
+    id?: string;
     textValue?: string;
     value: TValue;
     resetValue: TValue;
@@ -52,6 +53,7 @@ export const css: FilterItemAdditional<boolean> = {
 
 export const files: FilterItem<number[]> = {
     name: 'files',
+    id: 'files',
     value: [],
     resetValue: [],
     visibility : true,
@@ -60,6 +62,7 @@ export const files: FilterItem<number[]> = {
 
 export const dependentOnFiles: FilterItem<number[]> = {
     name: 'dependentOnFiles',
+    id: 'dependentOnFiles',
     value: [],
     resetValue: [],
     visibility : true,
@@ -71,7 +74,7 @@ export interface FilterItemConfig {
 }
 
 export const getButtonSource = ({
-   fileSource
+    fileSource
 }: Partial<FilterItemConfig>): FilterItem[] => {
     const result: FilterItem[] = [ json, css, i18n ];
     if (fileSource) {
@@ -83,11 +86,5 @@ export const getButtonSource = ({
             source: fileSource
         });
     }
-    // return result;
-    return Object.assign(result, {
-        '[Types/_entity/ICloneable]': true,
-        clone() {
-            return result;
-        }
-    });
+    return result;
 };

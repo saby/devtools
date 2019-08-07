@@ -53,12 +53,11 @@ export default class Main extends Control {
     constructor(...args: unknown[]) {
         super(...args);
         this.__rpc = new RPC({ channel: this.__channel });
-        storage.setFileStorage(new storage.File(this.__rpc));
         this._filterButtonSource = getButtonSource({
             fileSource: new source.File({
                 logger: this.__logger.create('FileSource'),
                 idProperty: 'id',
-                // rpc: cfg.sourceConfig.rpc
+                fileStorage: new storage.File(this.__rpc)
             })
         });
         this.__addListener();
