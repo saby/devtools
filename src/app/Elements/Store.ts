@@ -159,7 +159,6 @@ function addNode(
 }
 
 function getClassByControlType(controlType: ControlType): string {
-   //TODO: это должно быть в Elements
    switch (controlType) {
       case ControlType.HOC:
          return 'Elements__node_hoc';
