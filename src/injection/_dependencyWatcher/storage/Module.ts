@@ -1,9 +1,9 @@
 import { Storage } from "./Storage";
-import { IModule, IModuleFilter, ModuleInfo } from 'Extension/Plugins/DependencyWatcher/IModule';
+import { IModule, IModuleFilter } from 'Extension/Plugins/DependencyWatcher/IModule';
 import {
     DependencyType,
 } from "Extension/Plugins/DependencyWatcher/const";
-import { ignoredPlugins, IRequirePlugin } from "../require/plugins";
+import { ignoredPlugins, IRequirePlugin } from "../require/ignoredPlugins";
 import filterHelpers from "./module/filterHelpers";
 import addDynamic from "./module/addDynamic";
 import addStatic from "./module/addStatic";

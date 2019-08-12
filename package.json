@@ -40,6 +40,6 @@
       "saby-ui": "git+https://github.com/saby/UI.git#rc-19.510",
       "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-19.510",
       "wasaby-app": "git+https://github.com/saby/wasaby-app.git#rc-19.510",
-     "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-19.510"
+      "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-19.510"
    }
 }

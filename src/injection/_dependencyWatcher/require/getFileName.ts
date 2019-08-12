@@ -1,48 +1,47 @@
 import { IRequire } from "./IRequire";
-import { extensionPlugins } from "./plugins";
+import { pathPlugins } from "./pathPlugins";
 import { GLOBAL_MODULE_NAME } from "Extension/Plugins/DependencyWatcher/const";
-import { isRelease } from "./isRelease";
 
-const RELEASE_MODE = 'release';
+const findFile = (bundles: Record<string, string[]>, module: string): string | void => {
+    for (let fileName in bundles) {
+        if (bundles.hasOwnProperty(fileName) && bundles[fileName].includes(module)) {
+            return fileName;
+        }
+    }
+};
 
-let clearPath = (path: string) => path.replace(/^\//, '').replace(/\?.+/, '');
-let getSuffix = (buildMode: string) => isRelease(buildMode) ? '.min' : '';
+const getBundle = (
+    moduleName: string,
+    bundles: Record<string, string[]>,
+    isRelease: boolean
+): string | void => {
+    if (!isRelease) {
+        return;
+    }
+    const bundle = findFile(bundles, moduleName);
+    if (bundle) {
+        return bundle + '.js';
+    }
+};
 
 export let getFileName = (
     moduleName: string,
     require: IRequire,
-    bundle: string = '',
-    buildMode: string = RELEASE_MODE,
-) => {
-    if (bundle && isRelease(buildMode)) {
-        return bundle + '.js';
-    }
+    isRelease: boolean,
+    bundles: Record<string, string[]>
+): string => {
     if (moduleName == GLOBAL_MODULE_NAME) {
         return location.href;
     }
-    let path = clearPath(require.toUrl(moduleName));
-    if (bundle && bundle == path) {
-        return path;
+    const bundle = getBundle(moduleName, bundles, isRelease);
+    if (bundle) {
+        return bundle;
     }
-    let name: string = moduleName;
-    let extension: string;
-    for (let plugin of extensionPlugins) {
-        const pluginData = plugin(moduleName);
-        if (!pluginData) {
-            continue;
+    for (let plugin of pathPlugins) {
+        const path = plugin(moduleName, require, isRelease);
+        if (path) {
+            return path;
         }
-        const { module, ext } = pluginData;
-        name = module;
-        extension = ext;
-        break;
     }
-    // @ts-ignore
-    if (typeof extension == 'undefined') {
-        extension = '.js';
-    }
-    path = clearPath(require.toUrl(name));
-    if (path.endsWith(extension)) {
-        return path;
-    }
-    return clearPath(require.toUrl(name)) + getSuffix(buildMode) + extension;
+    return  require.toUrl(moduleName);
 };

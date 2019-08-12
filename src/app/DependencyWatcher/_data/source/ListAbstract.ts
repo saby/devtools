@@ -98,6 +98,8 @@ export abstract class ListAbstract extends Compatibility {
             _hasMore = hasMore;
             return this.__items.getItems(data);
         }).then((items: ITransferItem[]) => {
+            return this.__updateSizes(items).then(() => items);
+        }).then((items: ITransferItem[]) => {
             return {
                 hasMore: _hasMore,
                 data: items.filter(filterGlobal).map(item => this.__createItem(item))
@@ -123,6 +125,8 @@ export abstract class ListAbstract extends Compatibility {
             }).then(({ data, hasMore }) => {
                 _hasMore = hasMore;
                 return this.__items.getItems(data);
+            }).then((items: ITransferItem[]) => {
+                return this.__updateSizes(items).then(() => items);
             }).then((items: ITransferItem[]) => {
                 return {
                     hasMore: _hasMore,
@@ -200,16 +204,27 @@ export abstract class ListAbstract extends Compatibility {
         };
         this.__logger.log(`query items without size`);
         this.__updateSizePromise = this.__items.query(_param).then(({ data }) => {
-            return Promise.all([
-                getSizes(),
-                this.__items.getItems(data)
-            ]);
-        }).then(([ sizes, items ]: [Record<string, number>, ITransferItem[]]) => {
+            return this.__items.getItems(data);
+        }).then((items: ITransferItem[]) => {
             this.__logger.log(`success query items without size: ${ items.length }`);
+            return this.__updateSizes(items);
+        }).then(() => {
+            this.__logger.log(`complete update items`);
+            delete this.__updateSizePromise;
+        });
+        return this.__updateSizePromise;
+    }
+
+    private __updateSizes(items: ITransferItem[]): Promise<boolean[]> {
+        return getSizes().then((sizes: Record<string, number>) => {
             const updates: UpdateItemParam[] = [];
             items.forEach((item: ITransferItem) => {
+                if (item.size) {
+                    return;
+                }
+                const _path = item.path.replace('.min.', '.');
                 for (const url in sizes) {
-                    if (url.includes(item.path)) {
+                    if (url.replace('.min.', '.').includes(_path)) {
                         const update: UpdateItemParam = {
                             id: item.id,
                             size: sizes[url]
@@ -225,13 +240,8 @@ export abstract class ListAbstract extends Compatibility {
             });
             this.__logger.log(`update items`);
             return this.__items.updateItems(updates);
-        }).then(() => {
-            this.__logger.log(`complete update items`);
-            delete this.__updateSizePromise;
         });
-        return this.__updateSizePromise;
     }
-    
     private __createPath(parent?: string | string[]): Promise<RecordSet | void> {
         if (!parent || Array.isArray(parent)) {
             return Promise.resolve();

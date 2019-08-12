@@ -6,7 +6,6 @@ import { IItem, IItemFilter, ITransferItem, UpdateItemParam } from "Extension/Pl
 import { getFileName } from "../require/getFileName";
 import { Require } from "../Require";
 import { DependencyType } from "Extension/Plugins/DependencyWatcher/const";
-import findFile from "./item/findFile";
 import itemsSort from "Extension/Plugins/DependencyWatcher/data/sort/itemsSort";
 import itemFilters from "Extension/Plugins/DependencyWatcher/data/filter/itemFilters";
 import { ILogger } from "Extension/Logger/ILogger";
@@ -14,6 +13,7 @@ import { Query } from './Query';
 import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
 import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
 import { QueryParam, QueryResult } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
+import { isRelease } from '../require/isRelease';
 
 let _toArray = (set: Set<IModule>): number[] => {
     return [...set].map(module => module.id)
@@ -110,14 +110,13 @@ export class Item extends Query<IItem, IItemFilter> {
         if (module.fileId !== Number.MIN_SAFE_INTEGER) {
             return;
         }
-        const bundle = findFile(this.__require.getConfig().bundles, module.name) || '';
-        const name = getFileName(
+        const fileName = getFileName(
             module.name,
             this.__require.getOrigin(),
-            bundle,
-            this.__require.getConfig().buildMode
+            isRelease(this.__require.getConfig().buildMode),
+            this.__require.getConfig().bundles
         );
-        const file: IFile = this.__files.find(name) || this.__files.create(name, 0);
+        const file: IFile = this.__files.find(fileName) || this.__files.create(fileName, 0);
         file.modules.add(module.id);
         module.fileId = file.id;
     }
