@@ -10,7 +10,17 @@
             <Controls.Application.TouchDetector name="touchDetector">
                 <Controls.dragnDrop:Controller name="dragNDropContainer">
                     <UI.HotKeys:Dispatcher>
-                        <div>
+                        <div
+                            on:scroll="_scrollPage()"
+                            on:resize="_resizePage()"
+                            on:mousemove="_mousemovePage()"
+                            on:touchmove="_touchmovePage()"
+                            on:touchend="_touchendPage()"
+                            on:mousedown="_mousedownPage()"
+                            on:mouseup="_mouseupPage()"
+                            on:keyPress="_keyPressHandler()"
+                            on:suggestStateChanged="_suggestStateChangedHandler()"
+                        >
                             <ws:partial
                                     template="{{ _options.content }}"
                                     scope="{{ _options }}"
