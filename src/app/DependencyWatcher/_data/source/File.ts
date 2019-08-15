@@ -1,10 +1,11 @@
 import { DataSet, Query as TypesQuery } from 'Types/source';
-import { ITransportFile } from "Extension/Plugins/DependencyWatcher/IFile";
-import { getQueryParam } from "./list/getQueryParam";
-import { IItemInfo } from "Extension/Plugins/DependencyWatcher/IItem";
-import { File as FileStorage } from "../storage/File";
-import { ILogger } from "Extension/Logger/ILogger";
-import { Compatibility, ICompatibilityConfig } from "./Compatibility";
+import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
+import { getQueryParam } from './list/getQueryParam';
+import { IItemInfo } from 'Extension/Plugins/DependencyWatcher/IItem';
+import { File as FileStorage } from '../storage/File';
+import { ILogger } from 'Extension/Logger/ILogger';
+import { Compatibility, ICompatibilityConfig } from './Compatibility';
+import { Lang, revert } from 'Extension/Utils/kbLayout';
 
 export interface IFileConfig extends ICompatibilityConfig {
     fileStorage: FileStorage;
@@ -25,7 +26,21 @@ export class File extends Compatibility {
             query,
             undefined
         );
+        let switchedStr: string | undefined;
         return this.__files.query(queryParam).then(({ data, hasMore }) => {
+            // Если есть результат или строка поиска пустая, возвращаем как есть
+            if (data.length || !queryParam.where.name) {
+                return { data, hasMore };
+            }
+            switchedStr = revert(queryParam.where.name, Lang.ru, Lang.en);
+            // если ничего не поменялось, то тоже возвращаем как есть
+            if (switchedStr == queryParam.where.name) {
+                switchedStr = undefined;
+                return { data, hasMore };
+            }
+            queryParam.where.name = switchedStr;
+            return this.__files.query(queryParam);
+        }).then(({ data, hasMore }) => {
             this.__logger.log(`query success`);
             this.__logger.log(`get items`);
             return this.__files.getItems(data).then((files: ITransportFile[]) => {
@@ -39,7 +54,8 @@ export class File extends Compatibility {
                             }
                         }),
                         meta: {
-                            more: hasMore
+                            more: hasMore,
+                            switchedStr
                         }
                     },
                     itemsProperty: 'data',

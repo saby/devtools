@@ -39,6 +39,7 @@ export default class Main extends Control {
     protected _filter: source.IWhere<IItemFilter>;
     protected _source: source.ListAbstract;
     protected _root?: string;
+    protected _searchValue?: string;
     protected _sorting?: object;
     protected _itemActions: ItemAction[];
     protected _modeCaption: string;

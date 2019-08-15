@@ -1,26 +1,27 @@
-import { Item } from "../storage/Item";
-import { DataSet, Query as TypesQuery } from "Types/source";
+import { Item } from '../storage/Item';
+import { DataSet, Query as TypesQuery } from 'Types/source';
 import {
     IItem,
     IItemFilter,
     IItemInfo,
     ITransferItem,
     UpdateItemParam
-} from "Extension/Plugins/DependencyWatcher/IItem";
-import { QueryParam, QueryResult } from "Extension/Plugins/DependencyWatcher/data/IQuery";
-import { IListItem } from "../IListItem";
-import { createId, getAll, getId } from "./util/id";
-import { IDependencies } from "Extension/Plugins/DependencyWatcher/IModule";
+} from 'Extension/Plugins/DependencyWatcher/IItem';
+import { QueryParam, QueryResult } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
+import { IListItem } from '../IListItem';
+import { createId, getAll, getId } from './util/id';
+import { IDependencies } from 'Extension/Plugins/DependencyWatcher/IModule';
 import { Compatibility } from './Compatibility';
-import { IWhere } from "./list/IWhere";
-import { DefaultFilters, getQueryParam, IgnoreFilters } from "./list/getQueryParam";
-import { hasChildren } from "./list/hasChildren";
-import { GLOBAL_MODULE_NAME } from "Extension/Plugins/DependencyWatcher/const";
-import { queue } from "Extension/Utils/queue";
-import { RecordSet } from "Types/collection";
-import { IListConfig } from "./IList";
-import { getSizes } from "./util/getSizes";
-import { ILogger } from "Extension/Logger/ILogger";
+import { IWhere } from './list/IWhere';
+import { DefaultFilters, getQueryParam, IgnoreFilters } from './list/getQueryParam';
+import { hasChildren } from './list/hasChildren';
+import { GLOBAL_MODULE_NAME } from 'Extension/Plugins/DependencyWatcher/const';
+import { queue } from 'Extension/Utils/queue';
+import { RecordSet } from 'Types/collection';
+import { IListConfig } from './IList';
+import { getSizes } from './util/getSizes';
+import { ILogger } from 'Extension/Logger/ILogger';
+import { Lang, revert } from 'Extension/Utils/kbLayout';
 
 let filterGlobal = (item: ITransferItem): boolean => {
     return item.name !== GLOBAL_MODULE_NAME;
@@ -38,7 +39,7 @@ export abstract class ListAbstract extends Compatibility {
         this.__defaultFilters = config.defaultFilters || {};
         this.__ignoreFilters = config.ignoreFilters || {};
     }
-    
+
     query(query: TypesQuery): Promise<DataSet> {
         this.__logger.log('start query');
         const queryParam = getQueryParam<IItemFilter>(
@@ -49,8 +50,23 @@ export abstract class ListAbstract extends Compatibility {
         );
         const { where } = queryParam;
         const parent = where.parent;
+        let switchedStr: string | undefined;
         delete  where.parent;
         return this.__callQuery(queryParam, parent).then(({ data, hasMore }) => {
+            // Если есть результат или строка поиска пустая, возвращаем как есть
+            if (data.length || !where.name) {
+                return { data, hasMore };
+            }
+            switchedStr = revert(where.name, Lang.ru, Lang.en);
+            // если ничего не поменялось, то тоже возвращаем как есть
+            if (switchedStr == where.name) {
+                switchedStr = undefined;
+                return { data, hasMore };
+            }
+            // Иначе попробуем перезапросить с изменённым языком строки поиска
+            where.name = switchedStr;
+            return this.__callQuery(queryParam, parent);
+        }).then(({ data, hasMore }) => {
             this.__logger.log(`query success. create path`);
             return this.__createPath(parent).then((path: RecordSet | void) => {
                 this.__logger.log(`query success`);
@@ -59,7 +75,8 @@ export abstract class ListAbstract extends Compatibility {
                         data,
                         meta: {
                             more: hasMore,
-                            path
+                            path,
+                            switchedStr
                         }
                     },
                     itemsProperty: 'data',

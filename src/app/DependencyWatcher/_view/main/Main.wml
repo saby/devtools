@@ -1,63 +1,63 @@
-<Controls.filter:Controller
+<Layout.Browser
     filterButtonSource="{{ _filterButtonSource }}"
     filter="{{ _filter }}"
     on:filterChanged="_filterChanged()"
+    source="{{ _source }}"
+    keyProperty="id"
+    parentProperty="parent"
+    navigation="{{ _navigation }}"
+    minSearchLength="{{ 3 }}"
+    searchParam="name"
+    searchStartingWith="current"
+    viewMode="table"
+    root="{{ _root }}"
+    theme="default-Layout"
+    searchValue="{{ _searchValue }}"
 >
-    <Controls.list:DataContainer
-        source="{{ _source }}"
-        keyProperty="id"
-        parentProperty="parent"
-        navigation="{{ _navigation }}"
-        virtualScrolling="{{ true }}"
-    >
-        <Controls.search:Controller searchParam="name" minSearchLength="{{ 3 }}">
-            <div class="DependencyWatcher_Page">
-                <div class="DependencyWatcher_Page__head">
-                    <Controls.dropdown:Button
-                        displayProperty="caption"
-                        viewMode="link"
-                        caption="{{ _modeCaption }}"
-                        tooltip="{[Режим отображения]}: {{ _modeTitle }}"
-                        source="{{ _modeSource }}"
-                        keyProperty="id"
-                        navigation="{{ null }}"
-                        filter="{{ null }}"
-                        on:menuItemActivate="_changeView()"
-                    />
-                    <Controls.search:InputContainer>
-                        <Controls.search:Input/>
-                    </Controls.search:InputContainer>
-                    <Controls.filter:ButtonContainer>
-                        <Controls.filter:View
-                            detailPanelTemplateName="DependencyWatcher/template:filter.Panel"
-                        />
-                    </Controls.filter:ButtonContainer>
-                </div>
-
-                <Controls.scroll:Container
-                    attr:class="DependencyWatcher_Page__scroll"
-                >
-                    <Controls.list:Container>
-                        <Controls.explorer:View
-                            name="listView"
-                            bind:root="_root"
-                            bind:sorting="_sorting"
-                            nodeProperty="child"
-                            columns="{{ _column }}"
-                            header="{{ _headers }}"
-                            columnScroll="{{ true }}"
-                            displayProperty="name"
-                            contextMenuVisibility="{{ true }}"
-                            itemActions="{{ _itemActions }}"
-                            itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
-                        >
-                            <ws:emptyTemplate>
-                                <ws:partial template="DependencyWatcher/template:list.EmptyPage"/>
-                            </ws:emptyTemplate>
-                        </Controls.explorer:View>
-                    </Controls.list:Container>
-                </Controls.scroll:Container>
-            </div>
-        </Controls.search:Controller>
-    </Controls.list:DataContainer>
-</Controls.filter:Controller>
+    <ws:search>
+        <span class="DependencyWatcher_Page__head">
+            <Controls.dropdown:Button
+                displayProperty="caption"
+                viewMode="link"
+                caption="{{ _modeCaption }}"
+                tooltip="{[Режим отображения]}: {{ _modeTitle }}"
+                source="{{ _modeSource }}"
+                keyProperty="id"
+                navigation="{{ null }}"
+                filter="{{ null }}"
+                on:menuItemActivate="_changeView()"
+            />
+            <Controls.search:Input
+                bind:value="_searchValue"
+            />
+        </span>
+    </ws:search>
+    <ws:filterButton>
+        <Controls.filter:View
+            detailPanelTemplateName="DependencyWatcher/template:filter.Panel"
+        />
+    </ws:filterButton>
+    <ws:content>
+        <Controls.scroll:Container
+            attr:class="DependencyWatcher_Page__scroll"
+        >
+            <Controls.explorer:View
+                name="listView"
+                bind:sorting="_sorting"
+                bind:root="_root"
+                nodeProperty="child"
+                columns="{{ _column }}"
+                header="{{ _headers }}"
+                columnScroll="{{ true }}"
+                displayProperty="name"
+                contextMenuVisibility="{{ true }}"
+                itemActions="{{ _itemActions }}"
+                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
+            >
+                <ws:emptyTemplate>
+                    <ws:partial template="DependencyWatcher/template:list.EmptyPage"/>
+                </ws:emptyTemplate>
+            </Controls.explorer:View>
+        </Controls.scroll:Container>
+    </ws:content>
+</Layout.Browser>
