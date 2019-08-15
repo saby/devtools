@@ -26,6 +26,7 @@ import {
 // @ts-ignore
 import template = require('wml!Profiler/Profiler');
 import Tab = chrome.tabs.Tab;
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
 interface IOptions extends IControlOptions {
    store: Store;
@@ -143,7 +144,7 @@ class Profiler extends Control<IOptions> {
    protected _currentOperations: Array<IOperationEvent['args']>;
 
    protected _radioGroupSource: Memory = new Memory({
-      idProperty: 'title',
+      keyProperty: 'title',
       data: [
          {
             title: 'Flamegraph'
@@ -158,7 +159,7 @@ class Profiler extends Control<IOptions> {
 
    protected _selectedSynchronizationId: string = '';
 
-   protected _selectedCommitId: string = '';
+   protected _selectedCommitId: IFrontendControlNode['id'] = '';
 
    protected _selectedCommitChanges: CommitDetails['_options']['changesDescription'];
 
@@ -287,12 +288,12 @@ class Profiler extends Control<IOptions> {
       }
    }
 
-   private __masterMarkedKeyChanged(e: Event, id: string): void {
+   private __masterMarkedKeyChanged(e: Event, id: Profiler['_selectedSynchronizationId']): void {
       this._selectedSynchronizationId = id;
       this.__setSynchronization(this._selectedSynchronizationId);
    }
 
-   private __detailMarkedKeyChanged(e: Event, id?: string): void {
+   private __detailMarkedKeyChanged(e: Event, id?: IFrontendControlNode['id']): void {
       this._selectedCommitId = id || '';
       this.__updateSelectedCommitChanges();
    }

@@ -120,7 +120,7 @@ function addNode(
    controlType: ControlType,
    parentId?: IBackendControlNode['parentId']
 ): void {
-   if (!parentId) {
+   if (typeof parentId === 'undefined') {
       elements.push({
          id,
          name,
@@ -173,7 +173,7 @@ function getDepth(
    elements: Store['_elements'],
    parentId?: IBackendControlNode['parentId']
 ): number {
-   if (parentId) {
+   if (typeof parentId !== 'undefined') {
       const parent = elements.find((element) => element.id === parentId);
       if (parent) {
          return parent.depth + 1;

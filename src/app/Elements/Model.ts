@@ -5,20 +5,23 @@ import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
 import * as ArraySimpleValuesUtil from 'Controls/Utils/ArraySimpleValuesUtil';
 
 interface IModelItem {
-   id: string;
+   id: IFrontendControlNode['id'];
    name: string;
    depth: number;
    class: string;
    isExpanded: boolean;
    hasChildren: boolean;
-   parentId?: string;
+   parentId?: IFrontendControlNode['parentId'];
 }
 
 class Model {
    private _items: Store['_elements'] = [];
-   private _visibleItems: Map<string, IModelItem> = new Map();
+   private _visibleItems: Map<
+      IFrontendControlNode['id'],
+      IModelItem
+   > = new Map();
    private _visibleItemsArray: IModelItem[] = [];
-   private _expandedItems: Set<string> = new Set();
+   private _expandedItems: Set<IFrontendControlNode['id']> = new Set();
    private _version: number = 0;
    private _itemsChanged: boolean = false;
 
@@ -29,12 +32,12 @@ class Model {
          this.__nextVersion();
          this._itemsChanged = true;
          if (this._visibleItems.size) {
-            diff.added.forEach((item) => {
+            diff.added.forEach((item: IModelItem) => {
                if (item.depth === 0) {
                   this._visibleItems.set(item.id, this.__getElement(item));
                }
             });
-            diff.removed.forEach((item) => {
+            diff.removed.forEach((item: IModelItem) => {
                this._visibleItems.delete(item.id);
                this._expandedItems.delete(item.id);
             });
@@ -48,7 +51,7 @@ class Model {
    }
 
    toggleExpanded(
-      key: string,
+      key: IFrontendControlNode['id'],
       newStatus: boolean = !this._expandedItems.has(key)
    ): void {
       if (newStatus) {
@@ -97,11 +100,11 @@ class Model {
             }
          }
          return path
-            .map((node) => {
+            .map((crumb) => {
                return {
-                  id: node.id,
-                  name: node.name,
-                  class: node.class
+                  id: crumb.id,
+                  name: crumb.name,
+                  class: crumb.class
                };
             })
             .reverse();
@@ -119,7 +122,7 @@ class Model {
 
    expandParents(id: IFrontendControlNode['id']): void {
       const item = this._items.find((element) => element.id === id);
-      if (item && item.parentId) {
+      if (item && typeof item.parentId !== 'undefined') {
          const parent = this._items.find(
             (element) => element.id === item.parentId
          );
@@ -139,7 +142,9 @@ class Model {
       this._version++;
    }
 
-   private __getChildren(parentId: string): IModelItem[] {
+   private __getChildren(
+      parentId: IFrontendControlNode['parentId']
+   ): IModelItem[] {
       const parents = new Set();
       parents.add(parentId);
       const result: IModelItem[] = [];
@@ -157,7 +162,9 @@ class Model {
       return result;
    }
 
-   private __getImmediateChildren(parentId: string): Store['_elements'] {
+   private __getImmediateChildren(
+      parentId: IFrontendControlNode['parentId']
+   ): Store['_elements'] {
       return this._items.filter((element) => element.parentId === parentId);
    }
 

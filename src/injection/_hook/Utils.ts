@@ -22,30 +22,55 @@ function operationToString(
    }
 }
 
-export function startMark(name: string, operation: OperationType): void {
+function getCaption(name: string, operation: OperationType): string {
+   return `${name} (${operationToString(operation)})`;
+}
+
+export function startSync(rootId: string): void {
    if (
       window.wasabyDevtoolsOptions &&
       window.wasabyDevtoolsOptions.useUserTimingAPI
    ) {
-      performance.mark(`${name} (${operationToString(operation)} start)`);
+      performance.mark(`Synchronization ${rootId}`);
    }
 }
 
-export function endMark(name: string, operation: OperationType): void {
+export function endSync(rootId: string): void {
    if (
       window.wasabyDevtoolsOptions &&
       window.wasabyDevtoolsOptions.useUserTimingAPI
    ) {
-      const prettifiedOperation = operationToString(operation);
-      performance.mark(`${name} (${prettifiedOperation} end)`);
-      performance.measure(
-         `${name} (${prettifiedOperation})`,
-         `${name} (${prettifiedOperation} start)`,
-         `${name} (${prettifiedOperation} end)`
-      );
-      performance.clearMarks(`${name} (${prettifiedOperation} start)`);
-      performance.clearMarks(`${name} (${prettifiedOperation} end)`);
-      performance.clearMeasures(`${name} (${prettifiedOperation})`);
+      performance.measure('Synchronization', `Synchronization ${rootId}`);
+   }
+}
+
+export function startMark(
+   name: string,
+   operation: OperationType,
+   id: IBackendControlNode['id']
+): void {
+   if (
+      window.wasabyDevtoolsOptions &&
+      window.wasabyDevtoolsOptions.useUserTimingAPI
+   ) {
+      performance.mark(`${getCaption(name, operation)} ${id}`);
+   }
+}
+
+export function endMark(
+   name: string,
+   operation: OperationType,
+   id: IBackendControlNode['id']
+): void {
+   if (
+      window.wasabyDevtoolsOptions &&
+      window.wasabyDevtoolsOptions.useUserTimingAPI
+   ) {
+      const caption = getCaption(name, operation);
+      const label = `${caption} ${id}`;
+      performance.measure(caption, label);
+      performance.clearMarks(label);
+      performance.clearMeasures(caption);
    }
 }
 

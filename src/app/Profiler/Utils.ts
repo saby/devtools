@@ -53,7 +53,7 @@ export function getChanges(
 export function getChangesDescription(
    profilingData: IFrontendProfilingData,
    synchronizationId: string,
-   controlId: string
+   controlId: IFrontendControlNode['id']
 ): IChangesDescription | undefined {
    return getChanges(profilingData, synchronizationId).get(controlId);
 }
@@ -61,7 +61,7 @@ export function getChangesDescription(
 export function getSelfDuration(
    profilingData: IFrontendProfilingData,
    synchronizationId: string,
-   controlId: string
+   controlId: IFrontendControlNode['id']
 ): number {
    let changesDescription = getChangesDescription(
       profilingData,
@@ -94,10 +94,10 @@ export function getSelfDuration(
 
 export function getActualDurations(
    dataWithSelfDurations: Array<{
-      id: string;
+      id: IFrontendControlNode['id'];
       selfDuration: number;
       updateReason: ControlUpdateReason;
-      parentId?: string;
+      parentId?: IFrontendControlNode['parentId'];
    }>,
    startId: IFrontendControlNode['id'],
    startIndex: number
@@ -110,7 +110,7 @@ export function getActualDurations(
       dataWithSelfDurations[startIndex].updateReason !== 'unchanged'
          ? dataWithSelfDurations[startIndex].selfDuration
          : 0;
-   const parents: Set<string> = new Set();
+   const parents: Set<IFrontendControlNode['id']> = new Set();
    parents.add(startId);
 
    for (let i = startIndex + 1; i < dataWithSelfDurations.length; i++) {
@@ -120,12 +120,12 @@ export function getActualDurations(
          updateReason,
          selfDuration
       }: {
-         id: string;
+         id: IFrontendControlNode['id'];
          selfDuration: number;
          updateReason: ControlUpdateReason;
-         parentId?: string;
+         parentId?: IFrontendControlNode['parentId'];
       } = dataWithSelfDurations[i];
-      if (parentId && parents.has(parentId)) {
+      if (typeof parentId !== 'undefined' && parents.has(parentId)) {
          parents.add(id);
          actualBaseDuration += selfDuration;
          if (updateReason !== 'unchanged') {

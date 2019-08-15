@@ -32,7 +32,7 @@ class Elements extends Control {
    protected _path: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
-   protected _scrollToId: IFrontendControlNode['id'];
+   protected _scrollToId?: IFrontendControlNode['id'];
    protected _model: Model = new Model();
 
    protected _searchValue: string = '';
@@ -96,7 +96,7 @@ class Elements extends Control {
                inline: 'nearest'
             });
          }
-         this._scrollToId = '';
+         this._scrollToId = undefined;
       }
    }
 
@@ -146,7 +146,7 @@ class Elements extends Control {
                case 'ArrowLeft':
                   if (originalItem.isExpanded) {
                      this._model.toggleExpanded(originalItem.id, false);
-                  } else if (originalItem.parentId) {
+                  } else if (typeof originalItem.parentId !== 'undefined') {
                      const parent = visibleItems.find(
                         (item) => item.id === originalItem.parentId
                      );

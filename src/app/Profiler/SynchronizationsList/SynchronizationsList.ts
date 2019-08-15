@@ -45,7 +45,7 @@ class SynchronizationsList extends Control<IOptions> {
    constructor(options: IOptions) {
       super(options);
       this._source = new Memory({
-         idProperty: 'id',
+         keyProperty: 'id',
          data: getDataWithLengths(
             options.synchronizations.filter(options.filter)
          )
@@ -58,7 +58,7 @@ class SynchronizationsList extends Control<IOptions> {
          this._options.synchronizations !== newOptions.synchronizations
       ) {
          this._source = new Memory({
-            idProperty: 'id',
+            keyProperty: 'id',
             data: getDataWithLengths(
                newOptions.synchronizations.filter(newOptions.filter)
             )

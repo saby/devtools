@@ -62,7 +62,7 @@
                     </ws:else>
                 </ws:detail>
             </Controls.masterDetail:Base>
-            <ws:if data="{{ _selectedCommitId }}">
+            <ws:if data="{{ _selectedCommitChanges }}">
                 <Profiler.CommitDetails.CommitDetails changesDescription="{{ _selectedCommitChanges }}"/>
             </ws:if>
             <ws:else>

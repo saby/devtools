@@ -9,9 +9,11 @@ import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
 import {
    endMark,
+   endSync,
    getControlType,
    getSyncList,
    startMark,
+   startSync,
    updateSelfDurations
 } from './Utils';
 import Highlighter from './Highlighter';
@@ -42,18 +44,32 @@ class Agent {
       IBackendControlNode['id'],
       IBackendControlNode
    > = new Map();
-
+   /**
+    * This map is used to batch updates by root during synchronization.
+    */
    private changedRoots: Map<
-      IBackendControlNode['id'],
+      string,
       Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
-
+   /**
+    * This map is used to store changes during profiling.
+    *
+    * To provide the best experience we'd be storing snapshot of the application's state for each synchronization.
+    * Unfortunately, this is very expensive and makes exporting to JSON impossible.
+    * A lot of things can't be stringified and properly recreated after (DOM-elements, functions, etc.).
+    * Also, application's state may contain some confidential information which should never be exported.
+    *
+    * But in most cases, knowing what's changed is enough to fix the problem.
+    * This is a lot cheaper, because we need to store only a couple of string arrays for each changed control.
+    */
    private changedNodesBySynchronization: Map<
       string,
       Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
-
-   private rootStack: Array<IBackendControlNode['id']> = [];
+   /**
+    * This is used to track which root gets synchronized, so we can batch updates by root.
+    */
+   private rootStack: string[] = [];
 
    private unfinishedNodes: Set<IChangedNode> = new Set();
 
@@ -142,7 +158,7 @@ class Agent {
             node.name,
             getControlType(node)
          ];
-         if (node.parentId) {
+         if (typeof node.parentId !== 'undefined') {
             message.push(node.parentId);
          }
 
@@ -153,9 +169,10 @@ class Agent {
       this.channel.dispatch('longMessage');
    }
 
-   onStartSync(rootId: IBackendControlNode['id']): void {
+   onStartSync(rootId: string): void {
       this.rootStack.push(rootId);
       this.changedRoots.set(rootId, new Map());
+      startSync(rootId);
    }
 
    onStartCommit(node: IBackendControlNode, operation: OperationType): void {
@@ -165,10 +182,9 @@ class Agent {
          throw new Error('Trying to change nonexistent root');
       }
 
-      startMark(node.name, operation);
-
       this.currentModuleName = node.name;
       const id = node.id + currentRootId;
+      startMark(node.name, operation, id);
 
       currentRoot.set(id, {
          node: {
@@ -212,7 +228,7 @@ class Agent {
          performance.now() -
          changedNode.node.selfStartTime;
 
-      endMark(changedNode.node.name, changedNode.operation);
+      endMark(changedNode.node.name, changedNode.operation, id);
 
       this.unfinishedNodes.delete(changedNode);
       changedNode.node = {
@@ -228,11 +244,12 @@ class Agent {
       updateSelfDurations(this.unfinishedNodes, selfDuration);
    }
 
-   onEndSync(rootId: IBackendControlNode['id']): void {
+   onEndSync(rootId: string): void {
       const changes = this.changedRoots.get(rootId);
       if (!changes) {
          throw new Error('Trying to change nonexistent root');
       }
+      endSync(rootId);
       changes.forEach(({ operation, node }) => {
          switch (operation) {
             case OperationType.DELETE:
@@ -250,19 +267,12 @@ class Agent {
       });
       const id = guid();
       if (this.isProfiling) {
-         /**
-          * To provide the best experience we'd be storing snapshot of the application's state for each synchronization.
-          * Unfortunately, this is very expensive and makes exporting to JSON impossible.
-          * A lot of things can't be stringified and properly recreated after (DOM-elements, functions, etc.).
-          * Also, application's state can contain some confidential information which should never be exported.
-          *
-          * But in most cases, knowing what's changed is enough to fix the problem.
-          * This is a lot cheaper, because we need to store only a couple of string arrays for each changed control.
-          */
          this.changedNodesBySynchronization.set(id, changes);
       }
-      window.__WASABY_DEV_HOOK__.pushMessage('endSynchronization', id);
-      this.channel.dispatch('longMessage');
+      if (this.isDevtoolsOpened) {
+         window.__WASABY_DEV_HOOK__.pushMessage('endSynchronization', id);
+         this.channel.dispatch('longMessage');
+      }
       this.changedRoots.delete(rootId);
       this.rootStack.pop();
    }
@@ -281,7 +291,7 @@ class Agent {
             node.name,
             getControlType(node)
          ];
-         if (node.parentId) {
+         if (typeof node.parentId !== 'undefined') {
             message.push(node.parentId);
          }
          window.__WASABY_DEV_HOOK__.pushMessage('operation', message);

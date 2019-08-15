@@ -96,7 +96,7 @@ class RankedView extends Control<IOptions> {
    constructor(options: IOptions) {
       super(options);
       this._source = new Memory({
-         idProperty: 'id',
+         keyProperty: 'id',
          data: getDataWithLengths(applyFilter(options.snapshot, options.filter))
       });
    }
@@ -107,7 +107,7 @@ class RankedView extends Control<IOptions> {
          this._options.snapshot !== newOptions.snapshot
       ) {
          this._source = new Memory({
-            idProperty: 'id',
+            keyProperty: 'id',
             data: getDataWithLengths(
                applyFilter(newOptions.snapshot, newOptions.filter)
             )

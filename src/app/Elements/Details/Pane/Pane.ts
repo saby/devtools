@@ -8,6 +8,7 @@ import { Source } from './Source';
 // @ts-ignore
 import columnTemplate = require('wml!Elements/Details/Pane/columnTemplate');
 import { highlightUpdate } from '../../highlightUpdate';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
 import 'css!Elements/Details/Pane/Pane';
 
@@ -15,7 +16,7 @@ interface IOptions extends IControlOptions {
    caption: string;
    data: object;
    expanded: boolean;
-   controlId: string;
+   controlId: IFrontendControlNode['id'];
    changedData?: object;
    canStoreAsGlobal?: boolean;
 }

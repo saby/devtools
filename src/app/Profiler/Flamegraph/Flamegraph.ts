@@ -22,17 +22,17 @@ interface IFlamegraphControlNode extends IFrontendControlNode {
 
 interface IOptions extends IControlOptions {
    snapshot: IFlamegraphControlNode[];
-   markedKey?: string;
+   markedKey?: IFrontendControlNode['id'];
 }
 
 interface INodeItemData {
-   id: string;
+   id: IFrontendControlNode['id'];
    style: string;
    tooltip: string;
    leftOffset: number;
    width: number;
    isSelected: boolean;
-   parentId?: string;
+   parentId?: IFrontendControlNode['parentId'];
    caption?: string;
 }
 
@@ -46,7 +46,7 @@ const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
 function getMaxTreeDuration(
    snapshot: IOptions['snapshot'],
-   markedKey?: string
+   markedKey?: IOptions['markedKey']
 ): number {
    if (markedKey) {
       const selectedNode = snapshot.find(({ id }) => id === markedKey);
@@ -76,7 +76,7 @@ function getMaxSelfDuration(snapshot: IOptions['snapshot']): number {
 
 function getSubtreeWithSelectedNode(
    snapshot: IOptions['snapshot'],
-   markedKey?: string
+   markedKey?: IOptions['markedKey']
 ): IOptions['snapshot'] {
    const selectedNodeIndex = snapshot.findIndex(({ id }) => id === markedKey);
 
@@ -95,7 +95,7 @@ function getSubtreeWithSelectedNode(
       const parents = new Set();
       parents.add(node.id);
       for (let i = selectedNodeIndex; i < snapshot.length; i++) {
-         if (snapshot[i].parentId && parents.has(snapshot[i].parentId)) {
+         if (typeof snapshot[i].parentId !== 'undefined' && parents.has(snapshot[i].parentId)) {
             parents.add(snapshot[i].id);
             result.push(snapshot[i]);
          }
@@ -163,7 +163,7 @@ function getLeftOffset(
    previousNodesOnThisDepth: INodeItemData[],
    depth: number,
    parentId: IFrontendControlNode['parentId'],
-   idToIndexMap?: Map<string, number>,
+   idToIndexMap?: Map<IFrontendControlNode['id'], number>,
    previousItemData?: INodeItemData[]
 ): number {
    let offset = 0;
@@ -202,7 +202,7 @@ function getLeftOffset(
 
 function getIdToIndexMap(
    previousItemData?: INodeItemData[]
-): Map<string, number> {
+): Map<IFrontendControlNode['id'], number> {
    const result = new Map();
 
    if (previousItemData) {
@@ -221,7 +221,7 @@ function getItemDataForDepth(
    containerWidth: number,
    depth: number,
    topOffset: number,
-   markedKey?: string,
+   markedKey?: IOptions['markedKey'],
    previousItemData?: INodeItemData[]
 ): INodeItemData[] {
    const elementsOnThisDepth = snapshot.filter(
@@ -289,7 +289,7 @@ function convertSnapshotToItemData(
    maxTreeDuration: number,
    maxSelfDuration: number,
    containerWidth: number,
-   markedKey?: string
+   markedKey?: IOptions['markedKey']
 ): INodeItemData[][] {
    let minDepth = snapshot[0].depth;
    let maxDepth = 0;
@@ -481,7 +481,7 @@ class Flamegraph extends Control<IOptions> {
       }
    }
 
-   private __changeMarkedKeyAfterKeydown(id: string): void {
+   private __changeMarkedKeyAfterKeydown(id: IOptions['markedKey']): void {
       this._shouldRestoreFocus = true;
       this._notify('markedKeyChanged', [id]);
    }

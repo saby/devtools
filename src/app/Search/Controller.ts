@@ -1,5 +1,7 @@
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+
 interface IResult {
-   id: string;
+   id: IFrontendControlNode['id'];
    index: number;
    total: number;
 }
@@ -16,7 +18,7 @@ class Controller {
    updateSearch(
       items: object[],
       value: string,
-      selectedItemId: string = ''
+      selectedItemId: IFrontendControlNode['id'] = ''
    ): IResult {
       let id = selectedItemId;
       if (value) {

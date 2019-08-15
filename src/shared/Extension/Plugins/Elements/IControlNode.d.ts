@@ -9,7 +9,7 @@ interface ITemplateNode {
    };
    changedOptions?: ITemplateNode['options'];
    attributes?: Record<string, string>;
-   changedAttributes: ITemplateNode['attributes'];
+   changedAttributes?: ITemplateNode['attributes'];
    eventHandlers?: Record<
       string,
       Array<{ function: Function; arguments: unknown[] }>
@@ -28,7 +28,7 @@ interface IWasabyEventHandler {
 }
 
 export interface IWasabyElement extends HTMLElement {
-   eventProperties: Record<string, IWasabyEventHandler[]>;
+   eventProperties?: Record<string, IWasabyEventHandler[]>;
    controlNodes?: Array<{
       key: IControlNode['id'];
       id: string;
