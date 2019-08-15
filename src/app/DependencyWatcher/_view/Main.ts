@@ -76,6 +76,7 @@ export default class Main extends Control {
         this._modeTitle = config.title;
         this._source = new config.Source(this.__sourceConfig);
         this._searchValue = '';
+        this._root = undefined;
     }
     protected _changeView(event: unknown, model: Model) {
         const mode: ViewMode = model.getId();

@@ -9,7 +9,7 @@ import {
 } from 'Extension/Plugins/DependencyWatcher/IItem';
 import { QueryParam, QueryResult } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
 import { IListItem } from '../IListItem';
-import { createId, getAll, getId } from './util/id';
+import { hierarchyId } from '../util';
 import { IDependencies } from 'Extension/Plugins/DependencyWatcher/IModule';
 import { Compatibility } from './Compatibility';
 import { IWhere } from './list/IWhere';
@@ -98,7 +98,7 @@ export abstract class ListAbstract extends Compatibility {
             return this.__queryItems(parent, param);
         }
 
-        let ItemId = parent? getId(parent): undefined;
+        let ItemId = parent? hierarchyId.split(parent)[0]: undefined;
         if (!ItemId) {
             return this.__query(param);
         }
@@ -188,7 +188,7 @@ export abstract class ListAbstract extends Compatibility {
             isDynamic,
             parent: parent || null,
             itemId: id,
-            id: createId(id, parent),
+            id: hierarchyId.create(id, parent),
             child: hasChildren(this._getChildren(item))
         }
     }
@@ -263,10 +263,10 @@ export abstract class ListAbstract extends Compatibility {
         if (!parent || Array.isArray(parent)) {
             return Promise.resolve();
         }
-        const keys: number[] = getAll(parent).reverse();
+        const keys: number[] = hierarchyId.split(parent).reverse();
         const parents: Record<number, string> = {};
         for (let i = 0; i < keys.length; i++) {
-            parents[keys[i]] = createId(keys[i], parents[keys[i -1]])
+            parents[keys[i]] = hierarchyId.create(keys[i], parents[keys[i -1]])
         }
         return this.__items.getItems(keys).then((items: ITransferItem[]) => {
             const listItems: IListItem[] = [];
