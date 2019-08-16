@@ -19,6 +19,8 @@ import {
 import Highlighter from './Highlighter';
 import { IWasabyDevHook } from './IHook';
 import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData';
+import isDeepEqual from './isDeepEqual';
+import deepClone from './deepClone';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -36,6 +38,35 @@ declare global {
       wasabyDevtoolsOptions?: {
          useUserTimingAPI?: boolean;
       };
+   }
+}
+
+function getObjectDiff(obj1?: object, obj2?: object): object | undefined {
+   if (!obj1) {
+      return obj2 ? obj2 : undefined;
+   }
+   if (!obj2) {
+      return obj1 ? obj1 : undefined;
+   }
+   const diff = Object.keys(obj1).reduce((result, key) => {
+      if (!obj2.hasOwnProperty(key)) {
+         result.push(key);
+      } else if (!isDeepEqual(obj1[key], obj2[key])) {
+         return result;
+      } else {
+         const resultKeyIndex = result.indexOf(key);
+         result.splice(resultKeyIndex, 1);
+      }
+      return result;
+   }, Object.keys(obj2));
+   if (diff.length === 0) {
+      return;
+   } else {
+      const resultDiff = {};
+      diff.forEach((key) => {
+         resultDiff[key] = obj2[key];
+      });
+      return resultDiff;
    }
 }
 
@@ -82,8 +113,15 @@ class Agent {
    private highlighter: Highlighter = new Highlighter({
       onSelect: this.__selectByDomNode.bind(this)
    });
-
-   private previousSelectedItemId: IBackendControlNode['id'] | undefined;
+   /**
+    * This is the id of the node closest to the element selected in the Elements tab of native devtools.
+    */
+   private idClosestToPreviousSelectedElement?: IBackendControlNode['id'];
+   /**
+    * This is the id of the node selected in the Elements tab of Wasaby devtools.
+    */
+   private selectedNodeId?: IBackendControlNode['id'];
+   private selectedNodePreviousState?: object;
 
    private currentModuleName: string = '';
 
@@ -363,20 +401,98 @@ class Agent {
       });
    }
 
-   private __inspectElement(id: IBackendControlNode['id']): void {
+   private __inspectElement({
+      id,
+      expandedTabs,
+      newTab,
+      reset
+   }: {
+      id: IBackendControlNode['id'];
+      expandedTabs: Array<'attributes' | 'state' | 'options'>;
+      newTab?: 'attributes' | 'state' | 'options';
+      reset: boolean;
+   }): void {
       const node = this.elements.get(id);
       if (node) {
-         window.__WASABY_DEV_HOOK__.pushMessage(
-            'inspectedElement',
-            prepareForSerialization({
-               ...node,
-               events: this.__getEvents(id),
-               container: null,
-               instance: null,
-               isControl: !!node.instance
-            })
-         );
-         this.channel.dispatch('longMessage');
+         const changedNode = id !== this.selectedNodeId;
+         if (changedNode) {
+            this.selectedNodeId = id;
+         }
+         /**
+          * TODO: пока считаем, что события не меняются никогда
+          * TODO: посылать только содержимое раскрытых вкладок, всё остальное заменить на заглушки
+          */
+         const result: Partial<IBackendControlNode> & {
+            isControl?: boolean;
+            events?: Record<
+               string,
+               Array<{ function: Function; arguments: unknown[] }>
+            >;
+            changedState?: object;
+         } = {
+            id
+         };
+         if (reset || changedNode) {
+            result.attributes = node.attributes;
+            result.state = node.state;
+            result.options = node.options;
+            result.events = this.__getEvents(id);
+            result.isControl = !!node.instance;
+            this.selectedNodePreviousState = result.isControl
+               ? deepClone(node.state)
+               : undefined;
+            window.__WASABY_DEV_HOOK__.pushMessage('inspectedElement', {
+               type: 'full',
+               node: prepareForSerialization(result)
+            });
+            this.channel.dispatch('longMessage');
+         } else {
+            let hasChanges = false;
+            expandedTabs.forEach((tabName) => {
+               if (newTab === tabName) {
+                  hasChanges = true;
+                  result[tabName] = node[tabName];
+                  if (tabName === 'state') {
+                     this.selectedNodePreviousState = deepClone(node.state);
+                  }
+                  return;
+               }
+               switch (tabName) {
+                  case 'attributes':
+                     if (node.changedAttributes) {
+                        hasChanges = true;
+                        result.changedAttributes = node.changedAttributes;
+                        node.changedAttributes = undefined;
+                     }
+                     break;
+                  case 'state':
+                     const changedState = getObjectDiff(
+                        this.selectedNodePreviousState,
+                        node.state
+                     );
+                     if (changedState) {
+                        hasChanges = true;
+                        result.changedState = changedState;
+                        this.selectedNodePreviousState = deepClone(node.state);
+                     }
+                     break;
+                  case 'options':
+                     if (node.changedOptions) {
+                        hasChanges = true;
+                        result.changedOptions = node.changedOptions;
+                        node.changedOptions = undefined;
+                     }
+                     break;
+               }
+            });
+            if (hasChanges) {
+               window.__WASABY_DEV_HOOK__.pushMessage('inspectedElement', {
+                  type: 'partial',
+                  node: prepareForSerialization(result)
+               });
+               this.channel.dispatch('longMessage');
+            }
+         }
 
          window.$wasaby = { ...node };
       }
@@ -515,12 +631,16 @@ class Agent {
       while (currentElement) {
          if (currentElement.controlNodes) {
             if (
-               this.previousSelectedItemId &&
+               this.idClosestToPreviousSelectedElement &&
                currentElement.controlNodes.find(
-                  (node) => node.key + rootId === this.previousSelectedItemId
+                  (node) =>
+                     node.key + rootId ===
+                     this.idClosestToPreviousSelectedElement
                )
             ) {
-               return this.elements.get(this.previousSelectedItemId);
+               return this.elements.get(
+                  this.idClosestToPreviousSelectedElement
+               );
             }
             return this.elements.get(
                currentElement.controlNodes[
@@ -537,9 +657,9 @@ class Agent {
       const node =
          this.__findControlByDomNode(window.__WASABY_DEV_HOOK__.$0) ||
          this.elements.values().next().value;
-      if (node && this.previousSelectedItemId !== node.id) {
+      if (node && this.idClosestToPreviousSelectedElement !== node.id) {
          this.channel.dispatch('setSelectedItem', node.id);
-         this.previousSelectedItemId = node.id;
+         this.idClosestToPreviousSelectedElement = node.id;
       }
    }
 

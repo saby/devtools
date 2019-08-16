@@ -1,4 +1,5 @@
-import Control = require('Core/Control');
+import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
+// @ts-ignore
 import template = require('wml!Elements/Details/Details');
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
@@ -6,17 +7,25 @@ import Store from 'Elements/Store';
 
 import 'css!Elements/Details/Details';
 
-interface IOptions extends IFrontendControlNode {
+interface IOptions extends IControlOptions {
+   id: IFrontendControlNode['id'];
    store: Store;
+   isControl: boolean;
+   optionsExpanded: boolean;
+   stateExpanded: boolean;
+   eventsExpanded: boolean;
+   attributesExpanded: boolean;
+   options?: object;
+   changedOptions?: object;
+   changedState?: object;
+   state?: object;
+   events?: object;
+   attributes?: object;
+   changedAttributes?: object;
 }
 
-class Details extends Control {
-   protected _template: Function = template;
-   protected readonly _options: Readonly<IOptions>;
-   protected _optionsExpanded: boolean = true;
-   protected _stateExpanded: boolean = true;
-   protected _eventsExpanded: boolean = false;
-   protected _attributesExpanded: boolean = false;
+class Details extends Control<IOptions> {
+   protected _template: TemplateFunction = template;
 
    private __viewFunctionSource(e: Event, path: Array<string | number>): void {
       this._options.store.dispatch('viewFunctionSource', {
@@ -68,19 +77,34 @@ class Details extends Control {
       return data && Object.keys(data).length > 0;
    }
 
-   // static getOptionTypes(): Record<keyof IOptions, unknown> {
-   //    return {
-   //       channel: descriptor(ContentChannel).required(),
-   //       id: descriptor(Number).required(),
-   //       name: descriptor(String).required(),
-   //       template: descriptor(String).required(),
-   //       options: descriptor(Object),
-   //       attributes: descriptor(Object),
-   //       eventHandlers: descriptor(Object),
-   //       state: descriptor(Object),
-   //       parentId: descriptor(Number)
-   //    };
-   // }
+   private __forwardExpanded(
+      e: Event,
+      eventName: string,
+      value: boolean
+   ): void {
+      this._notify('expandedChanged', [eventName, value]);
+   }
+
+   static getOptionTypes(): Record<keyof IOptions, unknown> {
+      return {
+         store: descriptor(Store).required(),
+         id: descriptor(String).required(),
+         isControl: descriptor(Boolean).required(),
+         optionsExpanded: descriptor(Boolean).required(),
+         stateExpanded: descriptor(Boolean).required(),
+         eventsExpanded: descriptor(Boolean).required(),
+         attributesExpanded: descriptor(Boolean).required(),
+         options: descriptor(Object),
+         changedOptions: descriptor(Object),
+         attributes: descriptor(Object),
+         changedAttributes: descriptor(Object),
+         events: descriptor(Object),
+         state: descriptor(Object),
+         changedState: descriptor(Object),
+         readOnly: descriptor(Boolean),
+         theme: descriptor(String)
+      };
+   }
 }
 
 export default Details;

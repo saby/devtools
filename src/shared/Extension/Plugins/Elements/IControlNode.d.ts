@@ -10,10 +10,6 @@ interface ITemplateNode {
    changedOptions?: ITemplateNode['options'];
    attributes?: Record<string, string>;
    changedAttributes?: ITemplateNode['attributes'];
-   eventHandlers?: Record<
-      string,
-      Array<{ function: Function; arguments: unknown[] }>
-   >;
    parentId?: ITemplateNode['id'];
 }
 

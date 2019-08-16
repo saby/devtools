@@ -41,7 +41,12 @@
          </div>
          <ws:if data="{{_inspectedItem}}">
             <Elements.Details.Details scope="{{_inspectedItem}}"
-                                      store="{{_options.store}}" />
+                                      store="{{_options.store}}"
+                                      on:expandedChanged="__onDetailsTabExpanded()"
+                                      optionsExpanded="{{_optionsExpanded}}"
+                                      stateExpanded="{{_stateExpanded}}"
+                                      eventsExpanded="{{_eventsExpanded}}"
+                                      attributesExpanded="{{_attributesExpanded}}" />
          </ws:if>
       </ws:if>
       <ws:else>

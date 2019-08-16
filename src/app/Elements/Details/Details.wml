@@ -19,7 +19,8 @@
                                   controlId="{{ _options.id }}"
                                   on:viewFunctionSource="__viewFunctionSource()"
                                   on:storeAsGlobal="__storeAsGlobal()"
-                                  bind:expanded="_optionsExpanded"/>
+                                  on:expandedChanged="__forwardExpanded('_optionsExpanded')"
+                                  expanded="{{_options.optionsExpanded}}"/>
    </ws:if>
    <ws:if data="{{_options.isControl}}">
       <ws:if data="{{ __hasData(_options.state) }}">
@@ -29,7 +30,8 @@
                                      controlId="{{ _options.id }}"
                                      on:viewFunctionSource="__viewFunctionSource()"
                                      on:storeAsGlobal="__storeAsGlobal()"
-                                     bind:expanded="_stateExpanded"/>
+                                     on:expandedChanged="__forwardExpanded('_stateExpanded')"
+                                     expanded="{{_options.stateExpanded}}"/>
       </ws:if>
       <ws:if data="{{ __hasData(_options.events) }}">
          <Elements.Details.Pane.Pane caption="Events"
@@ -38,7 +40,8 @@
                                 controlId="{{ _options.id }}"
                                 on:viewFunctionSource="__viewFunctionSource()"
                                 on:storeAsGlobal="__storeAsGlobal()"
-                                bind:expanded="_eventsExpanded"/>
+                                on:expandedChanged="__forwardExpanded('_eventsExpanded')"
+                                expanded="{{_options.eventsExpanded}}"/>
       </ws:if>
    </ws:if>
    <ws:if data="{{ __hasData(_options.attributes) }}">
@@ -46,6 +49,7 @@
                                   data="{{ _options.attributes }}"
                                   changedData="{{ _options.changedAttributes }}"
                                   controlId="{{ _options.id }}"
-                                  bind:expanded="_attributesExpanded"/>
+                                  on:expandedChanged="__forwardExpanded('_attributesExpanded')"
+                                  expanded="{{_options.attributesExpanded}}"/>
    </ws:if>
 </div>

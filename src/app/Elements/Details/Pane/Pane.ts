@@ -87,39 +87,38 @@ class Pane extends Control<IOptions> {
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
-      if (this._options.data !== newOptions.data) {
-         if (this._options.controlId === newOptions.controlId) {
-            if (newOptions.changedData) {
-               const rawData = Object.entries(newOptions.changedData).map(
-                  ([key, value]) => {
-                     return {
-                        key,
-                        value,
-                        name: key,
-                        parent: null
-                     };
-                  }
-               );
-               this._source.update(
-                  new RecordSet({
-                     rawData
-                  })
-               );
-               if (newOptions.expanded && this._children.list) {
-                  this._children.list.reload();
-               }
+      if (
+         newOptions.changedData &&
+         this._options.changedData !== newOptions.changedData
+      ) {
+         const rawData = Object.entries(newOptions.changedData).map(
+            ([key, value]) => {
+               return {
+                  key,
+                  value,
+                  name: key,
+                  parent: null
+               };
             }
-         } else {
-            this._source = getSource(newOptions.data);
+         );
+         this._source.update(
+            new RecordSet({
+               rawData
+            })
+         );
+         if (newOptions.expanded && this._children.list) {
+            this._children.list.reload();
          }
+      }
+      if (this._options.data !== newOptions.data) {
+         this._source = getSource(newOptions.data);
       }
    }
 
    protected _afterUpdate(oldOptions: IOptions): void {
       if (
          this._options.changedData &&
-         this._options.changedData !== oldOptions.changedData &&
-         this._options.controlId === oldOptions.controlId
+         this._options.changedData !== oldOptions.changedData
       ) {
          Object.keys(this._options.changedData).forEach((key) => {
             const child = this._children[key] as Control;

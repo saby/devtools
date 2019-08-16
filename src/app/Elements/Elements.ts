@@ -47,13 +47,16 @@ class Elements extends Control {
 
    protected _itemsChanged: boolean = false;
 
+   protected _optionsExpanded: boolean = true;
+   protected _stateExpanded: boolean = true;
+   protected _eventsExpanded: boolean = false;
+   protected _attributesExpanded: boolean = false;
+
    constructor(options: IOptions) {
       super();
       options.store.addListener(
          'inspectedElement',
-         (node: IBackendControlNode) => {
-            this._inspectedItem = retrocycle(node);
-         }
+         this.__setInspectedElement.bind(this)
       );
       options.store.addListener(
          'setSelectedItem',
@@ -82,7 +85,9 @@ class Elements extends Control {
    _beforeUpdate(newOptions: IOptions): void {
       if (newOptions.selected && !this._options.selected) {
          this._model.setItems(newOptions.store.getElements());
-         newOptions.store.dispatch('inspectElement', this._selectedItemId);
+         this.__inspectElement(newOptions.store, {
+            reset: true
+         });
          this._throttledUpdateSearch();
          this._itemsChanged = false;
       }
@@ -193,7 +198,7 @@ class Elements extends Control {
 
    private __updateNode(id: IFrontendControlNode['id']): void {
       if (this._selectedItemId === id) {
-         this._options.store.dispatch('inspectElement', this._selectedItemId);
+         this.__inspectElement(this._options.store);
       }
       this.__highlightNode(id);
    }
@@ -209,7 +214,7 @@ class Elements extends Control {
          this._path = this._model.getPath(id);
          this._selectedItemId = id;
          this._scrollToId = id;
-         this._options.store.dispatch('inspectElement', this._selectedItemId);
+         this.__inspectElement(this._options.store);
       }
    }
 
@@ -273,6 +278,81 @@ class Elements extends Control {
          }
          this._lastFoundItemIndex = searchResult.index;
          this._searchTotal = searchResult.total;
+      }
+   }
+
+   private __inspectElement(
+      store: IOptions['store'],
+      {
+         newTab,
+         reset
+      }: {
+         newTab?: string;
+         reset?: boolean;
+      } = {}
+   ): void {
+      store.dispatch('inspectElement', {
+         id: this._selectedItemId,
+         expandedTabs: this.__getVisibleTabs(),
+         newTab,
+         reset
+      });
+   }
+
+   private __setInspectedElement({
+      type,
+      node
+   }: {
+      type: 'full' | 'partial';
+      node: IBackendControlNode;
+   }): void {
+      if (this._selectedItemId === node.id) {
+         switch (type) {
+            case 'full':
+               this._inspectedItem = retrocycle(node);
+               break;
+            case 'partial':
+               const deserializedNode = retrocycle(node);
+               Object.entries(deserializedNode).forEach(([key, value]) => {
+                  if (key === 'id') {
+                     return;
+                  }
+                  this._inspectedItem[key] = value;
+                  this._forceUpdate();
+               });
+               break;
+         }
+      }
+   }
+
+   private __getVisibleTabs(): Array<'attributes' | 'state' | 'options'> {
+      const result: Array<'attributes' | 'state' | 'options'> = [];
+      if (this._optionsExpanded) {
+         result.push('options');
+      }
+      if (this._stateExpanded) {
+         result.push('state');
+      }
+      if (this._attributesExpanded) {
+         result.push('attributes');
+      }
+      return result;
+   }
+
+   private __onDetailsTabExpanded(
+      e: Event,
+      eventName:
+         | '_optionsExpanded'
+         | '_stateExpanded'
+         | '_eventsExpanded'
+         | '_attributesExpanded',
+      value: boolean
+   ): void {
+      this[eventName] = value;
+      if (eventName !== '_eventsExpanded') {
+         this.__inspectElement(this._options.store, {
+            newTab: value ? eventName.slice(1, -8) : undefined
+         });
       }
    }
 }
