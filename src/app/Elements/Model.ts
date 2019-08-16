@@ -54,6 +54,9 @@ class Model {
       key: IFrontendControlNode['id'],
       newStatus: boolean = !this._expandedItems.has(key)
    ): void {
+      if (this._expandedItems.has(key) === newStatus) {
+         return;
+      }
       if (newStatus) {
          this._expandedItems.add(key);
          this.__updateElement(key, {
@@ -64,6 +67,9 @@ class Model {
          });
          this.getPath(key).forEach((pathItem) => {
             if (pathItem.id !== key) {
+               if (this._expandedItems.has(pathItem.id)) {
+                  return;
+               }
                this._expandedItems.add(pathItem.id);
                this.__updateElement(pathItem.id, {
                   isExpanded: true
