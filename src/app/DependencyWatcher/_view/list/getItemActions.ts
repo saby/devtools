@@ -42,11 +42,13 @@ const openFile: ItemAction = {
 const dependentOnFile: ItemAction = {
     id: ItemActionNames.dependentOnFile,
     title: 'Отобразить модули, зависящие от файла',
+    icon: "icon-RelatedDocumentsUp",
     showType: ShowType.menu
 };
 const file: ItemAction = {
     id: ItemActionNames.file,
     title: 'Отобразить модули файла',
+    icon: "icon-RelatedDocumentsDown",
     showType: ShowType.menu
 };
 
