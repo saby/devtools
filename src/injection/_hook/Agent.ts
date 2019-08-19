@@ -117,10 +117,7 @@ class Agent {
     * This is the id of the node closest to the element selected in the Elements tab of native devtools.
     */
    private idClosestToPreviousSelectedElement?: IBackendControlNode['id'];
-   /**
-    * This is the id of the node selected in the Elements tab of Wasaby devtools.
-    */
-   private selectedNodeId?: IBackendControlNode['id'];
+
    private selectedNodePreviousState?: object;
 
    private currentModuleName: string = '';
@@ -414,10 +411,6 @@ class Agent {
    }): void {
       const node = this.elements.get(id);
       if (node) {
-         const changedNode = id !== this.selectedNodeId;
-         if (changedNode) {
-            this.selectedNodeId = id;
-         }
          /**
           * TODO: пока считаем, что события не меняются никогда
           * TODO: посылать только содержимое раскрытых вкладок, всё остальное заменить на заглушки
@@ -432,7 +425,7 @@ class Agent {
          } = {
             id
          };
-         if (reset || changedNode) {
+         if (reset) {
             result.attributes = node.attributes;
             result.state = node.state;
             result.options = node.options;

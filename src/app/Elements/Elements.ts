@@ -214,7 +214,9 @@ class Elements extends Control {
          this._path = this._model.getPath(id);
          this._selectedItemId = id;
          this._scrollToId = id;
-         this.__inspectElement(this._options.store);
+         this.__inspectElement(this._options.store, {
+            reset: true
+         });
       }
    }
 
