@@ -135,11 +135,7 @@ function addNode(
       );
       let lastChildIndex = parentIndex + 1;
       if (parentIndex === -1) {
-         /**
-          * TODO: иногда возникают циклические зависимости (пока такое встречалось только в попапах), и "родитель" приходит раньше "ребёнка"
-          * Засовываем такие поддеревья в корень, чтобы хоть как-то их показать
-          */
-         lastChildIndex = 0;
+         throw new Error(`Can't find the parent. Element id: ${id}, parentId: ${parentId}`);
       } else {
          while (
             elements[lastChildIndex] &&

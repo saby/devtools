@@ -18,7 +18,7 @@ class Controller {
    updateSearch(
       items: object[],
       value: string,
-      selectedItemId: IFrontendControlNode['id'] = ''
+      selectedItemId: IFrontendControlNode['id'] = NaN
    ): IResult {
       let id = selectedItemId;
       if (value) {
@@ -41,7 +41,7 @@ class Controller {
             }
          }
       } else {
-         id = '';
+         id = NaN;
          this._searchResults = [];
          this._lastFoundItemIndex = 0;
       }

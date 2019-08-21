@@ -188,7 +188,7 @@ class Pane extends Control<IOptions> {
          caption: descriptor(String).required(),
          data: descriptor(Object).required(),
          expanded: descriptor(Boolean).required(),
-         controlId: descriptor(String).required(),
+         controlId: descriptor(Number).required(),
          changedData: descriptor(Object, null),
          canStoreAsGlobal: descriptor(Boolean),
          readOnly: descriptor(Boolean),

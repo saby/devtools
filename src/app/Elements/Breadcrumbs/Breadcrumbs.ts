@@ -66,7 +66,7 @@ class Breadcrumbs extends Control<IOptions> {
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          items: descriptor(Array).required(),
-         selectedItemId: descriptor(String).required(),
+         selectedItemId: descriptor(Number).required(),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

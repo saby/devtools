@@ -134,7 +134,7 @@ class Elements extends Control {
       stopPropagation: Event['stopPropagation'];
    }): void {
       const key = e.nativeEvent.key;
-      if (ARROWS.indexOf(key) !== -1 && this._selectedItemId) {
+      if (ARROWS.indexOf(key) !== -1 && typeof this._selectedItemId !== 'undefined') {
          e.stopPropagation();
          const visibleItems = this._model.getVisibleItems();
          const index = visibleItems.findIndex(

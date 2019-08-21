@@ -8,8 +8,8 @@ import {
 } from 'Extension/Plugins/Elements/IProfilingData';
 
 function operationToString(
-   operation: OperationType
-): 'mount' | 'update' | 'unmount' | 'reorder' {
+   operation?: OperationType
+): 'mount' | 'update' | 'unmount' | 'reorder' | 'lifecycle' {
    switch (operation) {
       case OperationType.DELETE:
          return 'unmount';
@@ -19,14 +19,16 @@ function operationToString(
          return 'reorder';
       case OperationType.UPDATE:
          return 'update';
+      default:
+         return 'lifecycle';
    }
 }
 
-function getCaption(name: string, operation: OperationType): string {
+function getCaption(name: string, operation?: OperationType): string {
    return `${name} (${operationToString(operation)})`;
 }
 
-export function startSync(rootId: string): void {
+export function startSyncMark(rootId: string): void {
    if (
       window.wasabyDevtoolsOptions &&
       window.wasabyDevtoolsOptions.useUserTimingAPI
@@ -35,7 +37,7 @@ export function startSync(rootId: string): void {
    }
 }
 
-export function endSync(rootId: string): void {
+export function endSyncMark(rootId: string): void {
    if (
       window.wasabyDevtoolsOptions &&
       window.wasabyDevtoolsOptions.useUserTimingAPI
@@ -46,8 +48,8 @@ export function endSync(rootId: string): void {
 
 export function startMark(
    name: string,
-   operation: OperationType,
-   id: IBackendControlNode['id']
+   id: IBackendControlNode['id'],
+   operation?: OperationType
 ): void {
    if (
       window.wasabyDevtoolsOptions &&
@@ -59,8 +61,8 @@ export function startMark(
 
 export function endMark(
    name: string,
-   operation: OperationType,
-   id: IBackendControlNode['id']
+   id: IBackendControlNode['id'],
+   operation?: OperationType
 ): void {
    if (
       window.wasabyDevtoolsOptions &&
@@ -74,13 +76,17 @@ export function endMark(
    }
 }
 
-export function updateSelfDurations(
-   unfinishedNodes: Set<IChangedNode>,
-   childDuration: number
+export function updateParentDuration(
+   currentRoot: Map<IBackendControlNode['id'], IChangedNode>,
+   childDuration: number,
+   parentId?: IBackendControlNode['parentId']
 ): void {
-   unfinishedNodes.forEach(({ node }) => {
-      node.selfDuration -= childDuration;
-   });
+   if (typeof parentId !== 'undefined') {
+      const parent = currentRoot.get(parentId);
+      if (parent && parent.inProgress) {
+         parent.node.treeDuration += childDuration;
+      }
+   }
 }
 
 export function getControlType(node: IBackendControlNode): ControlType {

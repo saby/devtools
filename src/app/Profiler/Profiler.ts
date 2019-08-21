@@ -159,7 +159,7 @@ class Profiler extends Control<IOptions> {
 
    protected _selectedSynchronizationId: string = '';
 
-   protected _selectedCommitId: IFrontendControlNode['id'] = '';
+   protected _selectedCommitId: IFrontendControlNode['id'] = NaN;
 
    protected _selectedCommitChanges: CommitDetails['_options']['changesDescription'];
 
@@ -293,8 +293,8 @@ class Profiler extends Control<IOptions> {
       this.__setSynchronization(this._selectedSynchronizationId);
    }
 
-   private __detailMarkedKeyChanged(e: Event, id?: IFrontendControlNode['id']): void {
-      this._selectedCommitId = id || '';
+   private __detailMarkedKeyChanged(e: Event, id: IFrontendControlNode['id'] = NaN): void {
+      this._selectedCommitId = id;
       this.__updateSelectedCommitChanges();
    }
 
@@ -390,7 +390,7 @@ class Profiler extends Control<IOptions> {
             this._synchronizations = undefined;
             this._snapshot = undefined;
             this._selectedCommitChanges = undefined;
-            this._selectedCommitId = '';
+            this._selectedCommitId = NaN;
             this._selectedSynchronizationId = '';
             this._elementsSnapshot = this._options.store.getElements().slice();
          } else {

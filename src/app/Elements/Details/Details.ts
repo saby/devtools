@@ -88,7 +88,7 @@ class Details extends Control<IOptions> {
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          store: descriptor(Store).required(),
-         id: descriptor(String).required(),
+         id: descriptor(Number).required(),
          isControl: descriptor(Boolean).required(),
          optionsExpanded: descriptor(Boolean).required(),
          stateExpanded: descriptor(Boolean).required(),

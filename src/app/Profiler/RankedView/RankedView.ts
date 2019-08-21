@@ -20,7 +20,7 @@ interface IRankedViewControlNode extends IFrontendControlNode {
 
 interface IOptions extends IControlOptions {
    snapshot: IRankedViewControlNode[];
-   markedKey: string;
+   markedKey: IFrontendControlNode['id'];
    filter: {
       name: string;
       minDuration: number;
@@ -124,7 +124,7 @@ class RankedView extends Control<IOptions> {
          // @ts-ignore
          snapshot: descriptor(Array).required(),
          // @ts-ignore
-         markedKey: descriptor(String).required(),
+         markedKey: descriptor(Number).required(),
          // @ts-ignore
          filter: descriptor(Object).required(),
          readOnly: descriptor(Boolean),

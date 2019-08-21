@@ -48,7 +48,7 @@ function getMaxTreeDuration(
    snapshot: IOptions['snapshot'],
    markedKey?: IOptions['markedKey']
 ): number {
-   if (markedKey) {
+   if (typeof markedKey !== 'undefined') {
       const selectedNode = snapshot.find(({ id }) => id === markedKey);
 
       if (selectedNode) {
@@ -85,7 +85,7 @@ function getSubtreeWithSelectedNode(
       const result = [node];
 
       let currentParentId = node.parentId;
-      for (let i = selectedNodeIndex; i >= 0 && currentParentId; i--) {
+      for (let i = selectedNodeIndex; i >= 0 && typeof currentParentId !== 'undefined'; i--) {
          if (snapshot[i].id === currentParentId) {
             currentParentId = snapshot[i].parentId;
             result.unshift(snapshot[i]);
@@ -346,7 +346,7 @@ class Flamegraph extends Control<IOptions> {
 
    protected _afterUpdate(oldOptions: IOptions): void {
       if (
-         this._options.markedKey &&
+         typeof this._options.markedKey !== 'undefined' &&
          oldOptions.markedKey !== this._options.markedKey &&
          this._children[this._options.markedKey]
       ) {
@@ -401,7 +401,7 @@ class Flamegraph extends Control<IOptions> {
       stopPropagation: Event['stopPropagation'];
    }): void {
       const key = e.nativeEvent.key;
-      if (ARROWS.indexOf(key) !== -1 && this._options.markedKey) {
+      if (ARROWS.indexOf(key) !== -1 && typeof this._options.markedKey !== 'undefined') {
          const selectedItem = this._options.snapshot.find(
             ({ id }) => id === this._options.markedKey
          );
@@ -490,8 +490,7 @@ class Flamegraph extends Control<IOptions> {
       return {
          // @ts-ignore
          snapshot: descriptor(Array).required(),
-         // @ts-ignore
-         markedKey: descriptor(String),
+         markedKey: descriptor(Number),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

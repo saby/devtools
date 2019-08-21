@@ -16,47 +16,83 @@ function rethrowError(e: Error): void {
 export class Hook implements IWasabyDevHook {
    private _agent: Agent;
    private _messageQueue: Array<[string, ISerializable?]> = [];
+   private _isNewWasaby: boolean = false;
 
    constructor(agent: Agent) {
       this._agent = agent;
    }
 
    onStartCommit(
+      typeOfOperation: OperationType,
+      name: string,
+      oldNode?: object
+   ): number {
+      if (this._isNewWasaby) {
+         try {
+            return this._agent.onStartCommit(typeOfOperation, name, oldNode);
+         } catch (e) {
+            rethrowError(e);
+         }
+      }
+      return -1;
+   }
+
+   onEndCommit(
+      id: IBackendControlNode['id'],
       node: IBackendControlNode,
-      typeOfOperation: OperationType
+      parentId?: IBackendControlNode['parentId']
    ): void {
-      try {
-         this._agent.onStartCommit(node, typeOfOperation);
-      } catch (e) {
-         rethrowError(e);
+      if (this._isNewWasaby) {
+         try {
+            this._agent.onEndCommit(id, node, parentId);
+         } catch (e) {
+            rethrowError(e);
+         }
       }
    }
 
-   onEndCommit(node: IBackendControlNode): void {
-      try {
-         this._agent.onEndCommit(node);
-      } catch (e) {
-         rethrowError(e);
+   onStartLifecycle(id: IBackendControlNode['id']): void {
+      if (this._isNewWasaby) {
+         try {
+            this._agent.onStartLifecycle(id);
+         } catch (e) {
+            rethrowError(e);
+         }
       }
    }
 
-   onStartSync(rootId: IBackendControlNode['id'], instanceId: string): void {
-      try {
-         this._agent.onStartSync(rootId + instanceId);
-      } catch (e) {
-         rethrowError(e);
+   onEndLifecycle(currentNode: object, data: IBackendControlNode): void {
+      if (this._isNewWasaby) {
+         try {
+            this._agent.onEndLifecycle(currentNode, data);
+         } catch (e) {
+            rethrowError(e);
+         }
       }
    }
 
-   onEndSync(rootId: IBackendControlNode['id'], instanceId: string): void {
-      try {
-         this._agent.onEndSync(rootId + instanceId);
-      } catch (e) {
-         rethrowError(e);
+   onStartSync(rootId: string): void {
+      if (this._isNewWasaby) {
+         try {
+            this._agent.onStartSync(rootId);
+         } catch (e) {
+            rethrowError(e);
+         }
       }
    }
 
-   init(): void {
+   onEndSync(rootId: string): void {
+      if (this._isNewWasaby) {
+         try {
+            this._agent.onEndSync(rootId);
+         } catch (e) {
+            rethrowError(e);
+         }
+      }
+   }
+
+   init(isNewWasaby: boolean = false): void {
+      this._isNewWasaby = isNewWasaby;
       // TODO: поменять цвет иконки, создать вкладку в дев тулзах, загрузить плагины, навесить всякие обработчики
    }
 

@@ -3,14 +3,13 @@
       <Controls.buttons:Button caption="View template"
                                viewMode="link"
                                on:click="__viewTemplate()" />
+      <Controls.buttons:Button caption="View DOM element"
+                               viewMode="link"
+                               on:click="__viewContainer()" />
       <Controls.buttons:Button if="{{_options.isControl}}"
                                caption="View constructor"
                                viewMode="link"
                                on:click="__viewConstructor()" />
-      <Controls.buttons:Button if="{{_options.isControl}}"
-                               caption="View DOM element"
-                               viewMode="link"
-                               on:click="__viewContainer()" />
    </div>
    <ws:if data="{{ __hasData(_options.options) }}">
       <Elements.Details.Pane.Pane caption="Options"
@@ -33,16 +32,16 @@
                                      on:expandedChanged="__forwardExpanded('_stateExpanded')"
                                      expanded="{{_options.stateExpanded}}"/>
       </ws:if>
-      <ws:if data="{{ __hasData(_options.events) }}">
-         <Elements.Details.Pane.Pane caption="Events"
-                                data="{{_options.events}}"
-                                canStoreAsGlobal="{{false}}"
-                                controlId="{{ _options.id }}"
-                                on:viewFunctionSource="__viewFunctionSource()"
-                                on:storeAsGlobal="__storeAsGlobal()"
-                                on:expandedChanged="__forwardExpanded('_eventsExpanded')"
-                                expanded="{{_options.eventsExpanded}}"/>
-      </ws:if>
+   </ws:if>
+   <ws:if data="{{ __hasData(_options.events) }}">
+      <Elements.Details.Pane.Pane caption="Events"
+                                  data="{{_options.events}}"
+                                  canStoreAsGlobal="{{false}}"
+                                  controlId="{{ _options.id }}"
+                                  on:viewFunctionSource="__viewFunctionSource()"
+                                  on:storeAsGlobal="__storeAsGlobal()"
+                                  on:expandedChanged="__forwardExpanded('_eventsExpanded')"
+                                  expanded="{{_options.eventsExpanded}}"/>
    </ws:if>
    <ws:if data="{{ __hasData(_options.attributes) }}">
       <Elements.Details.Pane.Pane caption="Attributes"

@@ -1,8 +1,8 @@
 interface ITemplateNode {
-   id: string;
+   id: number;
    name: string;
    template: Function;
-   container?: HTMLElement;
+   container: IWasabyElement;
    options?: {
       [key: string]: unknown;
       content?: object;
@@ -37,10 +37,13 @@ interface IControlNode extends ITemplateNode {
       _destroyed: boolean;
    };
    state?: object;
+   context?: object;
+   changedContext?: IControlNode['context'];
 }
 
 export interface IBackendControlNode extends IControlNode {
    selfDuration: number;
+   treeDuration: number;
    selfStartTime: number;
 }
 

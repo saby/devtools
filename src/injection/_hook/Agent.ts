@@ -9,22 +9,24 @@ import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
 import {
    endMark,
-   endSync,
+   endSyncMark,
    getControlType,
    getSyncList,
    startMark,
-   startSync,
-   updateSelfDurations
+   startSyncMark,
+   updateParentDuration
 } from './Utils';
 import Highlighter from './Highlighter';
 import { IWasabyDevHook } from './IHook';
 import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData';
 import isDeepEqual from './isDeepEqual';
 import deepClone from './deepClone';
+import getNodeId from './getNodeId';
 
 export interface IChangedNode {
    node: IBackendControlNode;
    operation: OperationType;
+   inProgress: boolean;
 }
 
 // TODO: утащить в нормальное место
@@ -71,6 +73,29 @@ function getObjectDiff(obj1?: object, obj2?: object): object | undefined {
 }
 
 class Agent {
+   /**
+    * This map is needed because framework can't generate unique keys, so we use virtual nodes instead of keys.
+    * But because we can't use virtual nodes on the devtools side, we have to map every node to a number.
+    */
+   private vNodeToId: WeakMap<
+      object,
+      IBackendControlNode['id']
+   > = new WeakMap();
+   /**
+    * This map is just used to speed up search for virtual node by dom node.
+    */
+   private domToIds: WeakMap<
+      Element,
+      Array<IBackendControlNode['id']>
+   > = new WeakMap();
+   /**
+    * This map is the source of truth for devtools.
+    * This map updates after every synchronization and makes following assumptions:
+    * 1) All elements have a unique key.
+    * 2) A parent node gets inserted earlier than it's children. They don't have to be close to each other.
+    * 3) Order of insertion is the order of children in element's tree (this is bad, but we don't have a way to
+    * get the position of a child).
+    */
    private elements: Map<
       IBackendControlNode['id'],
       IBackendControlNode
@@ -101,8 +126,6 @@ class Agent {
     * This is used to track which root gets synchronized, so we can batch updates by root.
     */
    private rootStack: string[] = [];
-
-   private unfinishedNodes: Set<IChangedNode> = new Set();
 
    private isDevtoolsOpened: boolean = false;
 
@@ -207,76 +230,96 @@ class Agent {
    onStartSync(rootId: string): void {
       this.rootStack.push(rootId);
       this.changedRoots.set(rootId, new Map());
-      startSync(rootId);
+      startSyncMark(rootId);
    }
 
-   onStartCommit(node: IBackendControlNode, operation: OperationType): void {
-      const currentRootId = this.rootStack[this.rootStack.length - 1];
-      const currentRoot = this.changedRoots.get(currentRootId);
-      if (!currentRoot) {
-         throw new Error('Trying to change nonexistent root');
+   onStartCommit(
+      operation: OperationType,
+      name: string,
+      oldNode?: object
+   ): number {
+      const currentRoot = this.__getCurrentRoot();
+      const id = this.__getNodeId(oldNode);
+
+      // TODO: если нода уже есть, то это асинхронное построение, можно это отдельной операцией показывать
+      startMark(name, id, operation);
+      // TODO: спилить currentModuleName
+      this.currentModuleName = name;
+
+      if (currentRoot.has(id)) {
+         const changedNode = currentRoot.get(id) as IChangedNode;
+         changedNode.node.selfStartTime = performance.now();
+         changedNode.operation = operation;
+         changedNode.inProgress = true;
+      } else {
+         currentRoot.set(id, {
+            /**
+             * TODO: придумать как тут не игнорить ts
+             */
+            node: {
+               id,
+               name,
+               selfStartTime: performance.now(),
+               selfDuration: 0,
+               treeDuration: 0
+            },
+            inProgress: true,
+            operation
+         });
       }
-
-      this.currentModuleName = node.name;
-      const id = node.id + currentRootId;
-      startMark(node.name, operation, id);
-
-      currentRoot.set(id, {
-         node: {
-            ...node,
-            selfStartTime: performance.now(),
-            selfDuration: 0
-         },
-         operation
-      });
-      this.unfinishedNodes.add(currentRoot.get(id) as IChangedNode);
+      return id;
    }
 
-   onEndCommit(node: IBackendControlNode): void {
-      const currentRootId = this.rootStack[this.rootStack.length - 1];
-      const id = node.id + currentRootId;
-      const currentRoot = this.changedRoots.get(currentRootId);
-      if (!currentRoot) {
-         throw new Error('Trying to change nonexistent root');
-      }
+   onEndCommit(
+      id: IBackendControlNode['id'],
+      node: IBackendControlNode,
+      parentId?: IBackendControlNode['parentId']
+   ): void {
+      const currentRoot = this.__getCurrentRoot();
       const changedNode = currentRoot.get(id);
       if (!changedNode) {
          throw new Error('Trying to change nonexistent node');
       }
+      endMark(changedNode.node.name, id, changedNode.operation);
+      changedNode.inProgress = false;
+      const commitDuration = performance.now() - changedNode.node.selfStartTime;
+      changedNode.node.selfDuration += commitDuration;
+      updateParentDuration(currentRoot, commitDuration, parentId);
+      this.vNodeToId.set(node, id);
+   }
 
-      /**
-       * Sometimes, commit finishes only after children of the node were committed.
-       * In order to get correct duration, we have to subtract children durations.
-       *
-       * So, we're doing this:
-       * 1) When commit starts, we initialize duration with 0 and add node to a set of unfinished nodes.
-       * 2) When commit ends, we calculate selfDuration of a node.
-       * 3) Then, we subtract duration of the current node from every unfinished node.
-       *
-       * This way, some nodes are going to have negative duration at the end of their commit.
-       * This is a sum of durations of their children.
-       *
-       * So, the formula to calculate selfDuration is:
-       */
-      const selfDuration =
-         changedNode.node.selfDuration +
-         performance.now() -
-         changedNode.node.selfStartTime;
+   onStartLifecycle(id: IBackendControlNode['id']): void {
+      const currentRoot = this.__getCurrentRoot();
+      const changedNode = currentRoot.get(id);
+      if (!changedNode) {
+         throw new Error('Trying to change nonexistent node');
+      }
+      startMark(changedNode.node.name, id);
+      changedNode.node.selfStartTime = performance.now();
+      changedNode.inProgress = true;
+   }
 
-      endMark(changedNode.node.name, changedNode.operation, id);
+   onEndLifecycle(currentNode: object, data: IBackendControlNode): void {
+      const currentRoot = this.__getCurrentRoot();
+      const id = data.id;
+      const changedNode = currentRoot.get(id);
+      if (!changedNode) {
+         throw new Error('Trying to change nonexistent node');
+      }
+      endMark(data.name, data.id);
+      changedNode.inProgress = false;
+      this.vNodeToId.set(currentNode, id);
 
-      this.unfinishedNodes.delete(changedNode);
-      changedNode.node = {
-         ...changedNode.node,
-         ...node,
-         id,
-         selfDuration,
-         parentId: changedNode.node.parentId
-            ? changedNode.node.parentId + currentRootId
-            : undefined
-      };
+      const lifecycleDuration =
+         performance.now() - changedNode.node.selfStartTime;
+      const selfDuration = changedNode.node.selfDuration + lifecycleDuration;
+      const treeDuration = changedNode.node.treeDuration;
 
-      updateSelfDurations(this.unfinishedNodes, selfDuration);
+      changedNode.node = data;
+      changedNode.node.selfDuration = selfDuration;
+      changedNode.node.treeDuration = treeDuration;
+
+      updateParentDuration(currentRoot, lifecycleDuration, data.parentId);
    }
 
    onEndSync(rootId: string): void {
@@ -284,20 +327,33 @@ class Agent {
       if (!changes) {
          throw new Error('Trying to change nonexistent root');
       }
-      endSync(rootId);
+      endSyncMark(rootId);
       changes.forEach(({ operation, node }) => {
+         if (node.selfDuration - node.treeDuration < 0) {
+            throw new Error(`Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`);
+         }
+         node.selfDuration -= node.treeDuration;
          switch (operation) {
             case OperationType.DELETE:
-               this.__handleRemove(node);
+               this.__handleRemove(node as IBackendControlNode);
                break;
             case OperationType.CREATE:
-               this.__handleAdd(node);
+               this.__handleAdd(node as IBackendControlNode);
                break;
             case OperationType.REORDER:
                break;
             case OperationType.UPDATE:
-               this.__handleUpdate(node);
+               this.__handleUpdate(node as IBackendControlNode);
                break;
+         }
+      });
+      /**
+       * TODO: в слое совместимости иногда попапы закрываются в обход синхронизатора,
+       * чистим их при ближайшей синхронизации
+       */
+      this.elements.forEach((element) => {
+         if (element.instance && element.instance._destroyed) {
+            this.__handleRemove(element);
          }
       });
       const id = guid();
@@ -317,6 +373,7 @@ class Agent {
    }
 
    private __handleAdd(node: IBackendControlNode): void {
+      this.__updateDomToIds(OperationType.CREATE, node.container, node.id);
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -350,52 +407,28 @@ class Agent {
    }
 
    private __handleRemove(node: IBackendControlNode): void {
-      this.elements.delete(node.id);
       this.__removeChildren(node.id);
-
-      // TODO: удалить после того как ключи будут браться из инферно
-      if (node.id.indexOf('popup') !== -1) {
-         this.elements.forEach((element, key) => {
-            if (element.instance && element.instance._destroyed) {
-               this.elements.delete(key);
-               this.__removeChildren(key);
-
-               if (this.isDevtoolsOpened) {
-                  const message: IOperationEvent['args'] = [
-                     OperationType.DELETE,
-                     key
-                  ];
-                  window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
-               }
-            }
-         });
-      }
-
-      if (this.isDevtoolsOpened) {
-         const message: IOperationEvent['args'] = [
-            OperationType.DELETE,
-            node.id
-         ];
-         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
-      }
+      this.__removeNode(node);
    }
 
    private __removeChildren(id: IBackendControlNode['id']): void {
-      const parents: Array<IBackendControlNode['parentId']> = [];
+      const parents: Set<IBackendControlNode['parentId']> = new Set();
       this.elements.forEach((element, key) => {
-         if (
-            element.parentId === id ||
-            parents.indexOf(element.parentId) !== -1
-         ) {
-            this.elements.delete(key);
-            parents.push(key);
-            const message: IOperationEvent['args'] = [
-               OperationType.DELETE,
-               key
-            ];
-            window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
+         if (element.parentId === id || parents.has(element.parentId)) {
+            parents.add(key);
+            this.__removeNode(element);
          }
       });
+   }
+
+   private __removeNode({ id, container }: IBackendControlNode): void {
+      this.__updateDomToIds(OperationType.DELETE, container, id);
+      this.elements.delete(id);
+
+      if (this.isDevtoolsOpened) {
+         const message: IOperationEvent['args'] = [OperationType.DELETE, id];
+         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
+      }
    }
 
    private __inspectElement({
@@ -507,8 +540,8 @@ class Agent {
 
    private __viewContainer(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
-      if (node && node.instance) {
-         window.__WASABY_DEV_HOOK__.__container = node.instance._container;
+      if (node) {
+         window.__WASABY_DEV_HOOK__.__container = node.container;
       }
    }
 
@@ -563,11 +596,8 @@ class Agent {
    private __highlightElement(id?: IBackendControlNode['id']): void {
       if (id) {
          const node = this.elements.get(id);
-         if (node && node.instance && node.instance._container) {
-            this.highlighter.highlightElement(
-               node.instance._container,
-               node.name
-            );
+         if (node && node.container) {
+            this.highlighter.highlightElement(node.container, node.name);
             return;
          }
       }
@@ -592,56 +622,16 @@ class Agent {
    }
 
    private __findControlByDomNode(
-      element: IWasabyElement
+      element: Element
    ): IBackendControlNode | undefined {
       let currentElement = element;
 
-      /*
-      TODO: сейчас на странице могут быть элементы с одинаковыми ключами,
-      для этого я к ключу каждого элемента добавляю id корня, в котором он находится
-      Потом ключи будут браться из инферно и будут уникальными, и все костыли с приклеиванием rootId можно будет убрать
-       */
-      function getRootId(elem: IWasabyElement): string {
-         let currentRoot: IWasabyElement | null = elem;
-         while (currentRoot) {
-            if (
-               currentRoot.controlNodes &&
-               currentRoot.controlNodes[currentRoot.controlNodes.length - 1]
-                  .key === '_'
-            ) {
-               return (
-                  '_' +
-                  currentRoot.controlNodes[currentRoot.controlNodes.length - 1]
-                     .id
-               );
-            }
-            currentRoot = currentRoot.parentElement as IWasabyElement;
-         }
-         return '_inst_1';
-      }
-      const rootId = getRootId(element);
-
       while (currentElement) {
-         if (currentElement.controlNodes) {
-            if (
-               this.idClosestToPreviousSelectedElement &&
-               currentElement.controlNodes.find(
-                  (node) =>
-                     node.key + rootId ===
-                     this.idClosestToPreviousSelectedElement
-               )
-            ) {
-               return this.elements.get(
-                  this.idClosestToPreviousSelectedElement
-               );
-            }
-            return this.elements.get(
-               currentElement.controlNodes[
-                  currentElement.controlNodes.length - 1
-               ].key + rootId
-            );
+         const nodes = this.domToIds.get(currentElement);
+         if (nodes) {
+            return this.elements.get(nodes[nodes.length - 1]);
          }
-         currentElement = currentElement.parentElement as IWasabyElement;
+         currentElement = currentElement.parentElement as Element;
       }
       return;
    }
@@ -659,45 +649,31 @@ class Agent {
    private __getEvents(
       id: IBackendControlNode['id']
    ): Record<string, Array<{ function: Function; arguments: unknown[] }>> {
-      /*
-      TODO: пока только для контролов, потому что я не имею доступа к контейнерам шаблонов
-       */
       const EVENT_NAME_OFFSET = 3;
       const node = this.elements.get(id);
       const events: Record<
          string,
          Array<{ function: Function; arguments: unknown[] }>
       > = {};
-      if (
-         node &&
-         node.instance &&
-         node.instance._container &&
-         node.instance._container.eventProperties
-      ) {
-         Object.keys(node.instance._container.eventProperties).forEach(
-            (key) => {
-               if (node.instance) {
-                  // ts for some reason forgets about previous check
-                  events[
-                     key.slice(EVENT_NAME_OFFSET)
-                  ] = node.instance._container.eventProperties[key].map(
-                     (handler) => {
-                        if (handler.fn.control[handler.value]) {
-                           return {
-                              function: handler.fn.control[handler.value],
-                              arguments: handler.args
-                           };
-                        } else {
-                           return {
-                              function: handler.fn,
-                              arguments: handler.args
-                           };
-                        }
-                     }
-                  );
+      if (node && node.container.eventProperties) {
+         const eventProperties = node.container.eventProperties;
+         Object.keys(eventProperties).forEach((key) => {
+            events[key.slice(EVENT_NAME_OFFSET)] = eventProperties[key].map(
+               (handler) => {
+                  if (handler.fn.control[handler.value]) {
+                     return {
+                        function: handler.fn.control[handler.value],
+                        arguments: handler.args
+                     };
+                  } else {
+                     return {
+                        function: handler.fn,
+                        arguments: handler.args
+                     };
+                  }
                }
-            }
-         );
+            );
+         });
       }
       return events;
    }
@@ -726,6 +702,57 @@ class Agent {
       this.initialIdToDuration.clear();
       this.changedNodesBySynchronization.clear();
       this.channel.dispatch('profilingData', profilingData);
+   }
+
+   private __getNodeId(node?: object): number {
+      if (node) {
+         if (this.vNodeToId.has(node)) {
+            return this.vNodeToId.get(node) as number;
+         } else {
+            throw new Error(
+               'startCommit for this node was called several times in a row without calling endCommit.'
+            );
+         }
+      }
+      return getNodeId();
+   }
+
+   private __updateDomToIds(
+      operation: OperationType,
+      dom: Element,
+      id: IBackendControlNode['id']
+   ): void {
+      const ids = this.domToIds.get(dom);
+      switch (operation) {
+         case OperationType.DELETE:
+            if (ids) {
+               if (ids.length === 1) {
+                  this.domToIds.delete(dom);
+               } else {
+                  const index = ids.indexOf(id);
+                  ids.splice(index, 1);
+               }
+            } else {
+               throw new Error('Trying to delete nonexistent node');
+            }
+            break;
+         case OperationType.CREATE:
+            if (ids) {
+               ids.push(id);
+            } else {
+               this.domToIds.set(dom, [id]);
+            }
+            break;
+      }
+   }
+
+   private __getCurrentRoot(): Map<IBackendControlNode['id'], IChangedNode> {
+      const currentRootId = this.rootStack[this.rootStack.length - 1];
+      const currentRoot = this.changedRoots.get(currentRootId);
+      if (!currentRoot) {
+         throw new Error('Trying to change nonexistent root');
+      }
+      return currentRoot;
    }
 }
 
