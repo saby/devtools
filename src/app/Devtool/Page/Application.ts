@@ -41,6 +41,15 @@ export default class Application<TState = void>
             pagingVisible: false
         });
     }
+    protected _afterMount(): void {
+        document.body.onresize = (event: Event) => {
+            this._resizePage(new SyntheticEvent(event));
+        };
+    }
+    protected _beforeUnmount(): void {
+        document.body.onresize = null;
+    }
+    
     protected _beforeUpdate(cfg: IApplicationOptions) {
         if (this._scrollContext.pagingVisible !== cfg.pagingVisible) {
             this._scrollContext.pagingVisible = cfg.pagingVisible;
@@ -52,25 +61,25 @@ export default class Application<TState = void>
             ScrollData: this._scrollContext
         };
     }
-    protected _scrollPage(ev: Event) {
+    protected _scrollPage(ev: SyntheticEvent<Event>) {
         this._children.scrollDetect.start(ev);
     }
-    protected _resizePage(ev: Event) {
+    protected _resizePage(ev: SyntheticEvent<Event>) {
         this._children.resizeDetect.start(ev);
     }
-    protected _mousemovePage(ev: Event) {
+    protected _mousemovePage(ev: SyntheticEvent<Event>) {
         this._children.mousemoveDetect.start(ev);
     }
-    protected _touchmovePage(ev: Event) {
+    protected _touchmovePage(ev: SyntheticEvent<Event>) {
         this._children.touchmoveDetect.start(ev);
     }
-    protected _touchendPage(ev: Event) {
+    protected _touchendPage(ev: SyntheticEvent<Event>) {
         this._children.touchendDetect.start(ev);
     }
-    protected _mousedownPage(ev: Event) {
+    protected _mousedownPage(ev: SyntheticEvent<Event>) {
         this._children.mousedownDetect.start(ev);
     }
-    protected _mouseupPage(ev: Event) {
+    protected _mouseupPage(ev: SyntheticEvent<Event>) {
         this._children.mouseupDetect.start(ev);
     }
     protected _keyPressHandler(event: SyntheticEvent<Event>) {
