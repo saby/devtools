@@ -37,14 +37,10 @@ export class Hook implements IWasabyDevHook {
       return -1;
    }
 
-   onEndCommit(
-      id: IBackendControlNode['id'],
-      node: IBackendControlNode,
-      parentId?: IBackendControlNode['parentId']
-   ): void {
+   onEndCommit(id: IBackendControlNode['id'], node: IBackendControlNode): void {
       if (this._isNewWasaby) {
          try {
-            this._agent.onEndCommit(id, node, parentId);
+            this._agent.onEndCommit(id, node);
          } catch (e) {
             rethrowError(e);
          }

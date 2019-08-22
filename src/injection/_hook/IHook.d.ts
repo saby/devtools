@@ -14,8 +14,7 @@ export interface IWasabyDevHook {
    onStartLifecycle: (id: IBackendControlNode['id']) => void;
    onEndCommit: (
       id: IBackendControlNode['id'],
-      node: IBackendControlNode,
-      parentId?: IBackendControlNode['parentId']
+      node: IBackendControlNode
    ) => void;
    onEndLifecycle: (currentNode: object, data: IBackendControlNode) => void;
    onStartSync: (rootId: string) => void;

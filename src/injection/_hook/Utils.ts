@@ -79,11 +79,12 @@ export function endMark(
 export function updateParentDuration(
    currentRoot: Map<IBackendControlNode['id'], IChangedNode>,
    childDuration: number,
+   componentsStack: Array<IBackendControlNode['id']>,
    parentId?: IBackendControlNode['parentId']
 ): void {
-   if (typeof parentId !== 'undefined') {
+   if (typeof parentId !== 'undefined' && componentsStack.includes(parentId)) {
       const parent = currentRoot.get(parentId);
-      if (parent && parent.inProgress) {
+      if (parent) {
          parent.node.treeDuration += childDuration;
       }
    }

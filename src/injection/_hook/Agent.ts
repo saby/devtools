@@ -26,7 +26,6 @@ import getNodeId from './getNodeId';
 export interface IChangedNode {
    node: IBackendControlNode;
    operation: OperationType;
-   inProgress: boolean;
 }
 
 // TODO: утащить в нормальное место
@@ -126,6 +125,8 @@ class Agent {
     * This is used to track which root gets synchronized, so we can batch updates by root.
     */
    private rootStack: string[] = [];
+
+   private componentsStack: Array<IBackendControlNode['id']> = [];
 
    private isDevtoolsOpened: boolean = false;
 
@@ -250,7 +251,6 @@ class Agent {
          const changedNode = currentRoot.get(id) as IChangedNode;
          changedNode.node.selfStartTime = performance.now();
          changedNode.operation = operation;
-         changedNode.inProgress = true;
       } else {
          currentRoot.set(id, {
             /**
@@ -261,19 +261,19 @@ class Agent {
                name,
                selfStartTime: performance.now(),
                selfDuration: 0,
-               treeDuration: 0
+               treeDuration: 0,
+               parentId: this.__getParentId(id)
             },
-            inProgress: true,
             operation
          });
       }
+      this.componentsStack.push(id);
       return id;
    }
 
    onEndCommit(
       id: IBackendControlNode['id'],
-      node: IBackendControlNode,
-      parentId?: IBackendControlNode['parentId']
+      node: IBackendControlNode
    ): void {
       const currentRoot = this.__getCurrentRoot();
       const changedNode = currentRoot.get(id);
@@ -281,10 +281,10 @@ class Agent {
          throw new Error('Trying to change nonexistent node');
       }
       endMark(changedNode.node.name, id, changedNode.operation);
-      changedNode.inProgress = false;
       const commitDuration = performance.now() - changedNode.node.selfStartTime;
       changedNode.node.selfDuration += commitDuration;
-      updateParentDuration(currentRoot, commitDuration, parentId);
+      this.componentsStack.pop();
+      updateParentDuration(currentRoot, commitDuration, this.componentsStack, changedNode.node.parentId);
       this.vNodeToId.set(node, id);
    }
 
@@ -296,7 +296,7 @@ class Agent {
       }
       startMark(changedNode.node.name, id);
       changedNode.node.selfStartTime = performance.now();
-      changedNode.inProgress = true;
+      this.componentsStack.push(id);
    }
 
    onEndLifecycle(currentNode: object, data: IBackendControlNode): void {
@@ -307,19 +307,21 @@ class Agent {
          throw new Error('Trying to change nonexistent node');
       }
       endMark(data.name, data.id);
-      changedNode.inProgress = false;
       this.vNodeToId.set(currentNode, id);
 
       const lifecycleDuration =
          performance.now() - changedNode.node.selfStartTime;
       const selfDuration = changedNode.node.selfDuration + lifecycleDuration;
       const treeDuration = changedNode.node.treeDuration;
+      const parentId = changedNode.node.parentId;
 
       changedNode.node = data;
       changedNode.node.selfDuration = selfDuration;
       changedNode.node.treeDuration = treeDuration;
+      changedNode.node.parentId = parentId;
 
-      updateParentDuration(currentRoot, lifecycleDuration, data.parentId);
+      this.componentsStack.pop();
+      updateParentDuration(currentRoot, lifecycleDuration, this.componentsStack, parentId);
    }
 
    onEndSync(rootId: string): void {
@@ -330,7 +332,9 @@ class Agent {
       endSyncMark(rootId);
       changes.forEach(({ operation, node }) => {
          if (node.selfDuration - node.treeDuration < 0) {
-            throw new Error(`Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`);
+            throw new Error(
+               `Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`
+            );
          }
          node.selfDuration -= node.treeDuration;
          switch (operation) {
@@ -739,8 +743,14 @@ class Agent {
          case OperationType.CREATE:
             if (ids) {
                ids.push(id);
-            } else {
+            } else if (dom) {
                this.domToIds.set(dom, [id]);
+            } else {
+               const root = this.__getCurrentRoot();
+               const changedNode = root.get(id) as IChangedNode;
+               console.error(
+                  `${changedNode.node.name} with id ${changedNode.node.id} was mounted but doesn't have container.`
+               );
             }
             break;
       }
@@ -753,6 +763,18 @@ class Agent {
          throw new Error('Trying to change nonexistent root');
       }
       return currentRoot;
+   }
+
+   private __getParentId(id: IBackendControlNode['id']): IBackendControlNode['id'] | undefined {
+      const element = this.elements.get(id);
+      if (element) {
+         return element.parentId;
+      }
+      const componentsStack = this.componentsStack;
+      if (componentsStack && componentsStack.length) {
+         return componentsStack[componentsStack.length - 1];
+      }
+      return;
    }
 }
 
