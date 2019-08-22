@@ -20,7 +20,12 @@ const fileFormat = (prefix: string, ext: string): IRequirePlugin<void | string> 
     };
 };
 
-export const cdn: IRequirePlugin<string> = (moduleName: string) => moduleName.replace('cdn!', '/cdn/');
+export const cdn: IRequirePlugin<void | string> = (moduleName: string): void | string => {
+    if (moduleName.startsWith('cdn!')) {
+        return ;
+    }
+    return moduleName.replace('cdn!', '/cdn/');
+};
 
 export const json: IRequirePlugin<void | string> = fileFormat('json!', '.json');
 
@@ -38,25 +43,26 @@ export const tmpl: IRequirePlugin<void | string> = fileFormat('tmpl!', '.tmpl');
 
 export const text: IRequirePlugin<void | string> = fileFormat('text!', '');
 
-
-/*
- * Та же самая проблема, что и с темами css
- */
-export const i18n: IRequirePlugin<void | string> = (
-    moduleName: string,
-    require: IRequire,
-    isRelease: boolean
-): void | string => {
-    const prefix = 'i18n!';
-    if (!moduleName.includes(prefix)) {
-        return ;
+export const i18n: IRequirePlugin<void | string> = (() => {
+    const langMatch = document.cookie.match(/lang=([A-z-]+)/);
+    const lang = langMatch && langMatch[1] || 'ru-RU';
+    const postfix = `/lang/${ lang }/${ lang }.json`;
+    return (
+        moduleName: string,
+        require: IRequire,
+        isRelease: boolean
+    ): void | string => {
+        const prefix = 'i18n!';
+        if (!moduleName.includes(prefix)) {
+            return ;
+        }
+        const module = moduleName.replace(prefix, '').split('/')[0];
+        if (!module) {
+            return ;
+        }
+        return module + postfix;
     }
-    const module = moduleName.replace(prefix, '').split('/')[0];
-    if (!module) {
-        return ;
-    }
-    return module + '/lang/';
-};
+})();
 
 // закрывающий плагин, если не нашли другие то считаем что файл js по умолчанию
 export const js: IRequirePlugin<void | string> = fileFormat('', '.js');
