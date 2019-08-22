@@ -1,25 +1,30 @@
-import { ModuleStorage } from "./Module";
-import { FileStorage } from "./File";
+import { ModuleStorage } from "../storage/Module";
+import { FileStorage } from "../storage/File";
 import { IModule } from "Extension/Plugins/DependencyWatcher/IModule";
-import { IFile, IFileFilter } from 'Extension/Plugins/DependencyWatcher/IFile';
-import { IItem, IItemFilter, ITransferItem, UpdateItemParam } from "Extension/Plugins/DependencyWatcher/IItem";
+import { IFile } from 'Extension/Plugins/DependencyWatcher/IFile';
+import { IRPCModule, IRPCModeuleFilter, ITransferRPCModule, UpdateItemParam } from "Extension/Plugins/DependencyWatcher/IRPCModule";
 import { getFileName } from "../require/getFileName";
 import { Require } from "../Require";
 import { DependencyType } from "Extension/Plugins/DependencyWatcher/const";
 import itemsSort from "Extension/Plugins/DependencyWatcher/data/sort/itemsSort";
 import itemFilters from "Extension/Plugins/DependencyWatcher/data/filter/itemFilters";
 import { ILogger } from "Extension/Logger/ILogger";
-import { Query } from './Query';
+import { Query } from '../storage/Query';
 import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
 import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
 import { QueryParam, QueryResult } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
 import { isRelease } from '../require/isRelease';
+import { IUpdate } from '../storage/IUpdate';
 
 let _toArray = (set: Set<IModule>): number[] => {
     return [...set].map(module => module.id)
 };
 
-export class Item extends Query<IItem, IItemFilter> {
+/**
+ * Класс - обёртка над хранилищем модулей и файлов, необходимый для постоения списка модулей,
+ * расширеными данными файлов, в которых они хранятся (путь до файла, размер)
+ */
+export class Module extends Query<IRPCModule, IRPCModeuleFilter> implements IUpdate<IRPCModule> {
     constructor(
         private __modules: ModuleStorage,
         private __files: FileStorage,
@@ -28,40 +33,24 @@ export class Item extends Query<IItem, IItemFilter> {
     ) {
         super();
     }
-    query(queryParams: Partial<QueryParam<IItem, IItemFilter>>): QueryResult<number> {
+    query(queryParams: Partial<QueryParam<IRPCModule, IRPCModeuleFilter>>): QueryResult<number> {
         this.__beforeQuery(queryParams);
         const _queryParams = this.__prepareParams(queryParams);
         return super.query(_queryParams);
     }
-    protected _getItems(keys?: number[]): IItem[] {
-        let modules = this.__modules.getModules(keys);
-        modules.forEach((module: IModule) => {
-            this.__addFileId(module);
-            this.__addDefined(module);
+
+    updateItems(params: UpdateItemParam[]): boolean[] {
+        return params.map((param) => {
+            return this.__updateItem(param);
         });
-        return modules.map<IItem>((module: IModule) => {
-            const file = <IFile> this.__files.getItem( <number> module.fileId);
-            const {
-                  size,
-                  path,
-            } = file;
-            const { defined, initialized, id, name, fileId, dependent, dependencies } = module;
-            return <IItem> {
-                defined, initialized, id, name, fileId, dependent, dependencies,
-                size, path,
-                fileName: file.name
-            }
-        });
-    }
-    protected _getFilters(): Partial<Record<keyof IItemFilter, FilterFunctionGetter<any, IItem>>> {
-        return itemFilters;
-    }
-    protected _getSorting(): Record<keyof IItem, SortFunction<IItem>> {
-        return itemsSort;
     }
 
-    getItems(keys: number[]): ITransferItem[] {
-        return this._getItems(keys).map((item: IItem) => {
+    hasUpdates(keys: number[]): boolean[] {
+        return this.__modules.hasUpdates(keys);
+        // TODO Пройтись по модулям, которые не обновлялись и проверить не обновились ли файлы, в которых они лежат
+    }
+    getItems(keys: number[]): ITransferRPCModule[] {
+        return this._getItems(keys).map((item: IRPCModule) => {
             let { dependent, dependencies } = item;
             return {
                 ...item,
@@ -76,9 +65,44 @@ export class Item extends Query<IItem, IItemFilter> {
             }
         })
     }
-    updateItem(param: UpdateItemParam): boolean {
+    openSource(id: number): boolean {
+        return this.__modules.openSource(id);
+    }
+    /// region Query
+    protected _getItems(keys?: number[]): IRPCModule[] {
+        let modules = this.__modules.getItems(keys);
+        modules.forEach((module: IModule) => {
+            this.__addFileId(module);
+            this.__addDefined(module);
+        });
+        return modules.map<IRPCModule>((module: IModule) => {
+            const file = <IFile> this.__files.getItem( <number> module.fileId);
+            const {
+                  size,
+                  path,
+            } = file;
+            const { defined, initialized, id, name, fileId, dependent, dependencies } = module;
+            return <IRPCModule> {
+                defined, initialized, id, name, fileId, dependent, dependencies,
+                size, path,
+                fileName: file.name
+            }
+        });
+    }
+    protected _getFilters(): Partial<Record<keyof IRPCModeuleFilter, FilterFunctionGetter<any, IRPCModule>>> {
+        return itemFilters;
+    }
+    protected _getSorting(): Record<keyof IRPCModule, SortFunction<IRPCModule>> {
+        return itemsSort;
+    }
+    /// endregion Query
+    /// region IUpdate
+    private __updateItem(param: UpdateItemParam): boolean {
         const module = this.__modules.getItem(param.id);
         if (!module) {
+            return false;
+        }
+        if (Object.keys(param).length == 1) {
             return false;
         }
         const { fileName, size, path } = param;
@@ -93,17 +117,14 @@ export class Item extends Query<IItem, IItemFilter> {
         file.size = size || file.size;
         file.path = path || file.path;
         return true;
+        // TODO update Module fields
     }
-    updateItems(params: UpdateItemParam[]): boolean[] {
-        return params.map((param) => {
-            return this.updateItem(param);
-        });
-    }
+    /// endregion IUpdate
     private __updateFileId() {
         const _keys = this.__modules.query({
             where: { files: [Number.MIN_SAFE_INTEGER] }
         }).data;
-        const modules = this.__modules.getModules(_keys);
+        const modules = this.__modules.getItems(_keys);
         modules.forEach(this.__addFileId.bind(this));
     }
     private __addFileId(module: IModule) {
@@ -121,14 +142,14 @@ export class Item extends Query<IItem, IItemFilter> {
         module.fileId = file.id;
     }
     private __updateDefined() {
-        this.__modules.getModules().forEach(this.__addDefined.bind(this));
+        this.__modules.getItems().forEach(this.__addDefined.bind(this));
     }
     private __addDefined(module: IModule) {
         if (!module.initialized) {
             module.initialized = this.__require.getOrigin().defined(module.name);
         }
         if (module.initialized && !module.defined) {
-            this.__logger.warn('');
+            // тут не AMD модули пришли в ответ
             module.defined = true;
         }
     }
@@ -137,7 +158,7 @@ export class Item extends Query<IItem, IItemFilter> {
      * Предпроход по данным перед отправкой с целью заполнения недостающих данных
      * @private
      */
-    private __beforeQuery({ where, sortBy }: Partial<QueryParam<IItem, IItemFilter>>): void {
+    private __beforeQuery({ where, sortBy }: Partial<QueryParam<IRPCModule, IRPCModeuleFilter>>): void {
         // Если фильтрация по файлам или сортировка по имени файла, то проставляем файлы модулям, у которых их нет
         if (
             where && (
@@ -159,7 +180,7 @@ export class Item extends Query<IItem, IItemFilter> {
      * если в фильтре указаны файлы, то получаем сразу модули файла, вместо перебора
      * @private
      */
-    private __prepareParams(params: Partial<QueryParam<IItem, IItemFilter>>): Partial<QueryParam<IItem, IItemFilter>> {
+    private __prepareParams(params: Partial<QueryParam<IRPCModule, IRPCModeuleFilter>>): Partial<QueryParam<IRPCModule, IRPCModeuleFilter>> {
         const { keys, where } = params;
         if (keys && keys.length || !where) {
             return params;

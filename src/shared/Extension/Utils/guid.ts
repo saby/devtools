@@ -1,4 +1,4 @@
-let guid = (): string => {
+export const guid = (): string => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
         // tslint:disable-next-line:no-bitwise
         const r = Math.random() * 16 | 0;
@@ -7,5 +7,3 @@ let guid = (): string => {
         return v.toString(16);
     });
 };
-
-export { guid };

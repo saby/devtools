@@ -5,8 +5,7 @@ import { ModuleStorage } from "./storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
 import { Require } from "./Require";
 import { FileStorage } from "./storage/File";
-import { isRelease } from "./require/isRelease";
-import { Item } from "./storage/Item";
+import { Module as RPCModulesStorage } from "./rpcStorage/Module";
 
 interface Config extends IConfigWithStorage{
     rpc: RPC;
@@ -26,24 +25,26 @@ export class RPCResponse {
         this.__files = fileStorage;
         this.__logger = logger;
         this.__require = require;
-        this.__items = new Item(this.__modules, this.__files, this.__require, logger.create('ItemStorage'));
-        rpc.registerMethod(RPCMethodNames.openSource, this.__modules.openSource.bind(this.__modules));
-        rpc.registerMethod(RPCMethodNames.isRelease, this.isRelease.bind(this));
-
-        rpc.registerMethod(RPCMethodNames.queryItems, this.__items.query.bind(this.__items));
-        rpc.registerMethod(RPCMethodNames.getItems, this.__items.getItems.bind(this.__items));
-        rpc.registerMethod(RPCMethodNames.updateItems, this.__items.updateItems.bind(this.__items));
+        this.__rpcModules = new RPCModulesStorage(
+            this.__modules,
+            this.__files,
+            this.__require,
+            logger.create('RPCModulesStorage')
+        );
+        rpc.registerMethod(RPCMethodNames.moduleQuery, this.__rpcModules.query.bind(this.__rpcModules));
+        rpc.registerMethod(RPCMethodNames.moduleGetItems, this.__rpcModules.getItems.bind(this.__rpcModules));
+        rpc.registerMethod(RPCMethodNames.moduleHasUpdates, this.__rpcModules.hasUpdates.bind(this.__rpcModules));
+        rpc.registerMethod(RPCMethodNames.moduleUpdateItems, this.__rpcModules.updateItems.bind(this.__rpcModules));
+        rpc.registerMethod(RPCMethodNames.moduleOpenSource, this.__rpcModules.openSource.bind(this.__rpcModules));
     
-        rpc.registerMethod(RPCMethodNames.hasUpdates, this.__modules.hasUpdates.bind(this.__modules));
-        rpc.registerMethod(RPCMethodNames.queryFiles, this.__files.query.bind(this.__files));
-        rpc.registerMethod(RPCMethodNames.getFiles, this.__files.getItems.bind(this.__files));
+        rpc.registerMethod(RPCMethodNames.fileQuery, this.__files.query.bind(this.__files));
+        rpc.registerMethod(RPCMethodNames.fileGetItems, this.__files.getItems.bind(this.__files));
+        rpc.registerMethod(RPCMethodNames.fileHasUpdates, this.__files.hasUpdates.bind(this.__files));
+        rpc.registerMethod(RPCMethodNames.fileUpdateItems, this.__files.updateItems.bind(this.__files));
     }
-    private __modules: ModuleStorage;
-    private __files: FileStorage;
-    private __logger: ILogger;
-    private __require: Require;
-    private __items: Item;
-    private isRelease(): boolean {
-        return isRelease(this.__require.getConfig().buildMode);
-    }
+    private readonly __modules: ModuleStorage;
+    private readonly __files: FileStorage;
+    private readonly __logger: ILogger;
+    private readonly __require: Require;
+    private readonly __rpcModules: RPCModulesStorage;
 }

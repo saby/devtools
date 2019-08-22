@@ -4,7 +4,7 @@ import { css } from "Extension/Plugins/DependencyWatcher/data/filter/css";
 import { json } from "Extension/Plugins/DependencyWatcher/data/filter/json";
 import { i18n } from "Extension/Plugins/DependencyWatcher/data/filter/i18n";
 import ignoreWrap from "Extension/Plugins/DependencyWatcher/data/filter/ignoreWrap";
-import { IModule, IModuleFilter, ModuleInfo } from 'Extension/Plugins/DependencyWatcher/IModule';
+import { IModule, IModuleFilter, IModuleInfo } from 'Extension/Plugins/DependencyWatcher/IModule';
 import { getForFiles } from "Extension/Plugins/DependencyWatcher/data/filter/getForFiles";
 import { dependentOnFiles } from 'Extension/Plugins/DependencyWatcher/data/filter/dependentOnFiles';
 

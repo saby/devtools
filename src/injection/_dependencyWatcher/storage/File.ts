@@ -6,11 +6,11 @@ import getResourceFromPerformance from "./file/getResourceFromPerformance";
 import findInPath from "./file/findInPath";
 import fileFilters from "Extension/Plugins/DependencyWatcher/data/filter/fileFilters";
 import filesSort from "Extension/Plugins/DependencyWatcher/data/sort/filesSort";
-import { Query } from './Query';
 import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
 import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
+import { Update } from './Update';
 
-export class FileStorage  extends Query<IFile, IFileFilter> {
+export class FileStorage  extends Update<IFile, IFileFilter> {
     private readonly __storage: Storage<IFile, string> = new Storage('path');
     private __getNew(): IFile[] {
         return getResourceFromPerformance().filter(({ path }) => {
@@ -23,7 +23,7 @@ export class FileStorage  extends Query<IFile, IFileFilter> {
         return this._getItems(keys);
     }
     getItem(key: number): IFile | void {
-        return this.__storage.getItemById(key);
+        return this._getItem(key);
     }
     find(partOfName: string): IFile | void {
         return findInPath(partOfName, this.__storage.getItems()) ||
@@ -49,6 +49,10 @@ export class FileStorage  extends Query<IFile, IFileFilter> {
     }
     protected _getSorting(): Record<keyof IFile, SortFunction<IFile>> {
         return filesSort;
+    }
+    
+    protected _getItem(id: number): void | IFile {
+        return this.__storage.getItemById(id);
     }
 }
 

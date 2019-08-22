@@ -1,15 +1,12 @@
 import applyWhere from 'Extension/Plugins/DependencyWatcher/data/applyWhere';
 import applySort from 'Extension/Plugins/DependencyWatcher/data/applySort';
 import { applyPaging } from 'Extension/Plugins/DependencyWatcher/data/applyPaging';
-import { QueryParam, QueryResult } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
+import { IQuery, QueryParam, QueryResult } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
 import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
 import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
+import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
 
-interface Id {
-    id: number;
-}
-
-export abstract class Query<TItem extends Id, TFilter extends object> {
+export abstract class Query<TItem extends IId, TFilter extends object> implements IQuery<TItem, TFilter> {
     query({
         keys,
         where = {},

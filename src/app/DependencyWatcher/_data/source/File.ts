@@ -1,7 +1,7 @@
 import { DataSet, Query as TypesQuery } from 'Types/source';
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 import { getQueryParam } from './list/getQueryParam';
-import { IItemInfo } from 'Extension/Plugins/DependencyWatcher/IItem';
+import { IRPCModuleInfo } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
 import { File as FileStorage } from '../storage/File';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { Compatibility, ICompatibilityConfig } from './Compatibility';
@@ -22,7 +22,7 @@ export class File extends Compatibility {
     }
     query(query: TypesQuery): Promise<DataSet> {
         this.__logger.log('start query');
-        const queryParam = getQueryParam<IItemInfo>(
+        const queryParam = getQueryParam<IRPCModuleInfo>(
             query,
             undefined
         );

@@ -1,12 +1,12 @@
 import { ICompatibilityConfig } from "./Compatibility";
-import { Item } from "../storage/Item";
+import { Module } from "../storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
-import { IItemFilter, IItemInfo } from "Extension/Plugins/DependencyWatcher/IItem";
+import { IRPCModeuleFilter, IRPCModuleInfo } from "Extension/Plugins/DependencyWatcher/IRPCModule";
 import { DefaultFilters, IgnoreFilters } from "./list/getQueryParam";
 
 export interface IListConfig extends ICompatibilityConfig {
-    itemStorage: Item;
-    ignoreFilters?: IgnoreFilters<IItemFilter>;
-    defaultFilters?: DefaultFilters<IItemFilter>;
+    itemStorage: Module;
+    ignoreFilters?: IgnoreFilters<IRPCModeuleFilter>;
+    defaultFilters?: DefaultFilters<IRPCModeuleFilter>;
     logger: ILogger;
 }

@@ -1,28 +1,28 @@
 import { QueryParam, QueryResult } from "Extension/Plugins/DependencyWatcher/data/IQuery";
-import { IItem, IItemFilter, ITransferItem, UpdateItemParam } from "Extension/Plugins/DependencyWatcher/IItem";
+import { IRPCModule, IRPCModeuleFilter, ITransferRPCModule, UpdateItemParam } from "Extension/Plugins/DependencyWatcher/IRPCModule";
 import { RPCMethodNames } from "Extension/Plugins/DependencyWatcher/const";
 import { RPC } from "Extension/Event/RPC";
 
 interface ItemQueryResult extends QueryResult<number> {
 
 }
-interface ItemQueryParam extends Partial<QueryParam<IItem, IItemFilter>> {
+interface ItemQueryParam extends Partial<QueryParam<IRPCModule, IRPCModeuleFilter>> {
 
 }
 
-export class Item {
-    private __items: Map<number, ITransferItem> = new Map();
+export class Module {
+    private __items: Map<number, ITransferRPCModule> = new Map();
     constructor(private _rpc: RPC) {}
     query(queryParams: ItemQueryParam = {}): Promise<ItemQueryResult> {
         return this._rpc.execute<ItemQueryResult, ItemQueryParam>({
-            methodName: RPCMethodNames.queryItems,
+            methodName: RPCMethodNames.moduleQuery,
             args: queryParams
         });
     }
-    getItems(keys: number[]): Promise<ITransferItem[]> {
+    getItems(keys: number[]): Promise<ITransferRPCModule[]> {
         return this.__updateCache(keys).then(() => {
             return keys.map((id: number) => {
-                return <ITransferItem> this.__items.get(id);
+                return <ITransferRPCModule> this.__items.get(id);
             });
         })
     }
@@ -31,15 +31,8 @@ export class Item {
             this.__updateItem(param);
         });
         return this._rpc.execute<boolean[], UpdateItemParam[]>({
-            methodName: RPCMethodNames.updateItems,
+            methodName: RPCMethodNames.moduleUpdateItems,
             args: params
-        });
-    }
-    updateItem(param: UpdateItemParam): Promise<boolean> {
-        this.__updateItem(param);
-        return this._rpc.execute<boolean, UpdateItemParam>({
-            methodName: RPCMethodNames.updateItem,
-            args: param
         });
     }
     private __updateItem(param: UpdateItemParam) {
@@ -56,7 +49,7 @@ export class Item {
             return Promise.resolve();
         }
         return this._rpc.execute<boolean[], number[]>({
-            methodName: RPCMethodNames.hasUpdates,
+            methodName: RPCMethodNames.moduleHasUpdates,
             args: keys
         }).then((updated: boolean[]) => {
             const needKeys = [];
@@ -68,12 +61,12 @@ export class Item {
             if (!needKeys.length) {
                 return [];
             }
-            return this._rpc.execute<ITransferItem[], number[]>({
-                methodName: RPCMethodNames.getItems,
+            return this._rpc.execute<ITransferRPCModule[], number[]>({
+                methodName: RPCMethodNames.moduleGetItems,
                 args: needKeys
             });
-        }).then((items: ITransferItem[]) => {
-            items.forEach((item: ITransferItem) => {
+        }).then((items: ITransferRPCModule[]) => {
+            items.forEach((item: ITransferRPCModule) => {
                this.__items.set(item.id, item);
             });
         });

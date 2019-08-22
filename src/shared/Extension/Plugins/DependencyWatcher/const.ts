@@ -7,22 +7,17 @@ export enum EventNames {
 }
 
 export enum RPCMethodNames {
-    // Modules
-    getModules = 'getModules',
-    hasUpdates = 'hasUpdates',
-    openSource = 'openSource',
-    // Items
-    getItems = 'getItems',
-    queryItems = 'queryItems',
-    updateItem = 'updateItem',
-    updateItems = 'updateItems',
-    // File
-    getFiles = 'getFiles',
-    queryFiles = 'queryFiles',
-    updateFile = 'updateFile',
-    updateFiles = 'updateFiles',
-    // other
-    isRelease = 'isRelease',
+    //
+    moduleGetItems = 'module.getItems',
+    moduleHasUpdates = 'module.hasUpdates',
+    moduleQuery = 'module.query',
+    moduleUpdateItems = 'module.updateItems',
+    moduleOpenSource = 'module.openSource',
+    //
+    fileGetItems = 'file.getItems',
+    fileHasUpdates = 'file.hasUpdates',
+    fileQuery = 'file.query',
+    fileUpdateItems = 'file.updateItems',
 }
 
 export const GLOBAL_MODULE_NAME = '~> page <~';

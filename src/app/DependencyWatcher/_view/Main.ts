@@ -15,7 +15,7 @@ import { ConsoleLogger } from 'Extension/Logger/Console';
 import { navigation } from './list/navigation';
 import { columns } from './list/column';
 import { headers } from './list/header';
-import { IItemFilter } from 'Extension/Plugins/DependencyWatcher/IItem';
+import { IRPCModeuleFilter } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
 import { FilterItem, getButtonSource } from './list/getButtonSource';
 import { getItemActions, ItemAction, ItemActionNames, visibilityCallback } from './list/getItemActions';
 import { ViewMode } from './main/ViewMode';
@@ -36,7 +36,7 @@ export default class Main extends Control {
     protected readonly _itemActionVisibilityCallback = visibilityCallback;
     protected readonly _modeSource: Memory = tabs;
     protected _filterButtonSource: FilterItem[];
-    protected _filter: source.IWhere<IItemFilter>;
+    protected _filter: source.IWhere<IRPCModeuleFilter>;
     protected _source: source.ListAbstract;
     protected _root?: string;
     protected _searchValue?: string;
@@ -122,7 +122,7 @@ export default class Main extends Control {
             },
             [ItemActionNames.openSource]: (model: Model) => {
                 this.__rpc.execute<boolean, number>({
-                    methodName: RPCMethodNames.openSource,
+                    methodName: RPCMethodNames.moduleOpenSource,
                     args: model.get('itemId')
                 }).then((result: boolean) => {
                     if (!result) {
@@ -136,7 +136,7 @@ export default class Main extends Control {
         });
     }
 
-    private __setFilter(filter: source.IWhere<IItemFilter>) {
+    private __setFilter(filter: source.IWhere<IRPCModeuleFilter>) {
         const id = Math.random();
         this._filter = {
             ...filter,
@@ -149,7 +149,7 @@ export default class Main extends Control {
 
     private __initSourceConfig() {
         this.__sourceConfig = {
-            itemStorage: new storage.Item(this.__rpc),
+            itemStorage: new storage.Module(this.__rpc),
             defaultFilters: {
                 css:  false,
                 json: false,
@@ -163,10 +163,10 @@ export default class Main extends Control {
             parentProperty: 'parent'
         }
     }
-    protected _filterChanged(event: unknown, filter: source.IWhere<IItemFilter>) {
+    protected _filterChanged(event: unknown, filter: source.IWhere<IRPCModeuleFilter>) {
         // TODO 86d9e478a7d3 - очистка значений, которые внесли руками в FilterButtonSource при изменении фильтра
-        const keys: Array<keyof source.IWhere<IItemFilter>> = ['files', 'dependentOnFiles'];
-        const updated = keys.some((resetId) => {
+        const keys: Array<keyof source.IWhere<IRPCModeuleFilter>> = ['files', 'dependentOnFiles'];
+        const updated                                             = keys.some((resetId) => {
             if (filter.hasOwnProperty(resetId) &&
                 Array.isArray(filter[resetId]) &&
                 (<number[]> filter[resetId]).length
@@ -179,7 +179,7 @@ export default class Main extends Control {
             this._filterButtonSource = [...this._filterButtonSource];
         }
     }
-    protected _setFilterValue<T>(id: keyof source.IWhere<IItemFilter>, value?: T, textValue?: string): boolean {
+    protected _setFilterValue<T>(id: keyof source.IWhere<IRPCModeuleFilter>, value?: T, textValue?: string): boolean {
         // TODO 86d9e478a7d3 - прокидывание данных в items внутри filterButtonSource
         const item = this._filterButtonSource.find(({ name }) => {
             return name == id

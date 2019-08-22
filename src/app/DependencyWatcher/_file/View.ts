@@ -8,7 +8,7 @@ import { source, storage } from '../data';
 import { INamedLogger } from 'Extension/Logger/ILogger';
 import { ConsoleLogger } from 'Extension/Logger/Console';
 import { navigation } from './navigation';
-import { IItemFilter } from 'Extension/Plugins/DependencyWatcher/IItem';
+import { IRPCModeuleFilter } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
 // import { FilterItem, getButtonSource } from './list/getButtonSource';
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 
@@ -21,7 +21,7 @@ export default class Main extends Control {
     protected readonly _children: IChildren;
     protected readonly _navigation = navigation;
     // protected _filterButtonSource: FilterItem[];
-    protected _filter: source.IWhere<IItemFilter>;
+    protected _filter: source.IWhere<IRPCModeuleFilter>;
     protected _source: source.ListAbstract;
     private readonly __rpc: RPC;
     
@@ -42,7 +42,7 @@ export default class Main extends Control {
     
     private __initSourceConfig() {
         this.__sourceConfig = {
-            itemStorage: new storage.Item(this.__rpc),
+            itemStorage: new storage.Module(this.__rpc),
             defaultFilters: {
                 css:  false,
                 json: false,

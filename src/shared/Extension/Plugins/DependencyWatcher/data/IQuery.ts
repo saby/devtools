@@ -1,3 +1,5 @@
+import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
+
 export interface Paging {
     limit: number;
     offset: number;
@@ -16,4 +18,8 @@ export interface QueryParam<
 export interface QueryResult<TData> {
     data: TData[];
     hasMore: boolean;
+}
+
+export interface IQuery<TItem extends IId, TFilter extends object> {
+    query(params: Partial<QueryParam<TItem, TFilter>>): QueryResult<number>
 }

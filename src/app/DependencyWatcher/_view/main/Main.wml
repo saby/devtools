@@ -50,7 +50,6 @@
                 header="{{ _headers }}"
                 columnScroll="{{ true }}"
                 displayProperty="name"
-                itemActionsPosition="outside"
                 contextMenuVisibility="{{ true }}"
                 itemActions="{{ _itemActions }}"
                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"

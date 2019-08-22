@@ -1,5 +1,5 @@
 import { SortFunction, SortResult } from "./Sort";
-import { ModuleInfo } from "Extension/Plugins/DependencyWatcher/IModule";
+import { IModuleInfo } from "Extension/Plugins/DependencyWatcher/IModule";
 
 /**
  * Удаление префиксов плагинов из имени, чтобы сортировка происходила по "чистому" имени модуля

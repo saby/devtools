@@ -1,9 +1,9 @@
 import { IDependencies } from "Extension/Plugins/DependencyWatcher/IModule";
 import { ListAbstract } from "./ListAbstract";
-import { ITransferItem } from "Extension/Plugins/DependencyWatcher/IItem";
+import { ITransferRPCModule } from "Extension/Plugins/DependencyWatcher/IRPCModule";
 
 export class Dependent extends ListAbstract {
-    protected _getChildren(item: ITransferItem): IDependencies<number[]> {
+    protected _getChildren(item: ITransferRPCModule): IDependencies<number[]> {
         return item.dependent;
     }
     

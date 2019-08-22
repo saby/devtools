@@ -15,7 +15,7 @@ export class File {
     constructor(private _rpc: RPC) {}
     query(queryParams: FileQueryParam = {}): Promise<FileQueryResult> {
         return this._rpc.execute<FileQueryResult, FileQueryParam>({
-            methodName: RPCMethodNames.queryFiles,
+            methodName: RPCMethodNames.fileQuery,
             args: queryParams
         });
     }
@@ -34,7 +34,7 @@ export class File {
             return !this.__files.has(key);
         });
         return this._rpc.execute<ITransportFile[], number[]>({
-            methodName: RPCMethodNames.getFiles,
+            methodName: RPCMethodNames.fileGetItems,
             args: needKeys
         }).then((items: ITransportFile[]) => {
             items.forEach((item: ITransportFile) => {

@@ -1,7 +1,7 @@
 import { SortResult } from "./Sort";
-import { ModuleInfo } from "Extension/Plugins/DependencyWatcher/IModule";
+import { IModuleInfo } from "Extension/Plugins/DependencyWatcher/IModule";
 
-const used = <T extends ModuleInfo>(first: T, secont: T): SortResult => {
+const used = <T extends IModuleInfo>(first: T, secont: T): SortResult => {
     if (first.initialized == secont.initialized) {
         if (first.defined == secont.defined) {
             return SortResult.equal;

@@ -1,12 +1,12 @@
-import { Item } from '../storage/Item';
+import { Module } from '../storage/Module';
 import { DataSet, Query as TypesQuery } from 'Types/source';
 import {
-    IItem,
-    IItemFilter,
-    IItemInfo,
-    ITransferItem,
+    IRPCModule,
+    IRPCModeuleFilter,
+    IRPCModuleInfo,
+    ITransferRPCModule,
     UpdateItemParam
-} from 'Extension/Plugins/DependencyWatcher/IItem';
+} from 'Extension/Plugins/DependencyWatcher/IRPCModule';
 import { QueryParam, QueryResult } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
 import { IListItem } from '../IListItem';
 import { hierarchyId } from '../util';
@@ -23,14 +23,14 @@ import { getSizes } from './util/getSizes';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { Lang, revert } from 'Extension/Utils/kbLayout';
 
-let filterGlobal = (item: ITransferItem): boolean => {
+let filterGlobal = (item: ITransferRPCModule): boolean => {
     return item.name !== GLOBAL_MODULE_NAME;
 };
 
 export abstract class ListAbstract extends Compatibility {
-    private __items: Item;
-    private __defaultFilters: DefaultFilters<IItemFilter>;
-    private __ignoreFilters: IgnoreFilters<IItemFilter>;
+    private __items: Module;
+    private __defaultFilters: DefaultFilters<IRPCModeuleFilter>;
+    private __ignoreFilters: IgnoreFilters<IRPCModeuleFilter>;
     private __logger: ILogger;
     constructor(config: IListConfig) {
         super(config);
@@ -42,7 +42,7 @@ export abstract class ListAbstract extends Compatibility {
 
     query(query: TypesQuery): Promise<DataSet> {
         this.__logger.log('start query');
-        const queryParam = getQueryParam<IItemFilter>(
+        const queryParam = getQueryParam<IRPCModeuleFilter>(
             query,
             undefined,
             this.__ignoreFilters,
@@ -89,7 +89,7 @@ export abstract class ListAbstract extends Compatibility {
         });
     }
 
-    private __callQuery(param: QueryParam<IItem, IItemFilter>, parent?: string | string[]) {
+    private __callQuery(param: QueryParam<IRPCModule, IRPCModeuleFilter>, parent?: string | string[]) {
         if (!parent) {
             return this.__query(param);
         }
@@ -106,7 +106,7 @@ export abstract class ListAbstract extends Compatibility {
         return this.__queryItem(ItemId, parent, param);
     }
 
-    private __query(param: QueryParam<IItem, IItemFilter>): Promise<QueryResult<IListItem>> {
+    private __query(param: QueryParam<IRPCModule, IRPCModeuleFilter>): Promise<QueryResult<IListItem>> {
         this.__logger.log('query without parent');
         let _hasMore: boolean;
         return this.__beforeQuery(param).then(() => {
@@ -114,9 +114,9 @@ export abstract class ListAbstract extends Compatibility {
         }).then(({ data, hasMore }) => {
             _hasMore = hasMore;
             return this.__items.getItems(data);
-        }).then((items: ITransferItem[]) => {
+        }).then((items: ITransferRPCModule[]) => {
             return this.__updateSizes(items).then(() => items);
-        }).then((items: ITransferItem[]) => {
+        }).then((items: ITransferRPCModule[]) => {
             return {
                 hasMore: _hasMore,
                 data: items.filter(filterGlobal).map(item => this.__createItem(item))
@@ -127,10 +127,10 @@ export abstract class ListAbstract extends Compatibility {
     private __queryItem(
         itemId: number,
         listItemId: string,
-        param: QueryParam<IItem, IItemFilter>
+        param: QueryParam<IRPCModule, IRPCModeuleFilter>
     ): Promise<QueryResult<IListItem>> {
         this.__logger.log(`query with parent: ${ listItemId }`);
-        return this.__items.getItems([itemId]).then(([ item ]: ITransferItem[]) => {
+        return this.__items.getItems([itemId]).then(([ item ]: ITransferRPCModule[]) => {
             if (!item) {
                 throw new Error('Не удалось получить данные узела');
             }
@@ -142,9 +142,9 @@ export abstract class ListAbstract extends Compatibility {
             }).then(({ data, hasMore }) => {
                 _hasMore = hasMore;
                 return this.__items.getItems(data);
-            }).then((items: ITransferItem[]) => {
+            }).then((items: ITransferRPCModule[]) => {
                 return this.__updateSizes(items).then(() => items);
-            }).then((items: ITransferItem[]) => {
+            }).then((items: ITransferRPCModule[]) => {
                 return {
                     hasMore: _hasMore,
                     data: items.map((item) => this.__createItem(
@@ -159,7 +159,7 @@ export abstract class ListAbstract extends Compatibility {
 
     private __queryItems(
         parents: (string | undefined)[],
-        param: QueryParam<IItem, IWhere<IItemInfo>>
+        param: QueryParam<IRPCModule, IWhere<IRPCModuleInfo>>
     ): Promise<QueryResult<IListItem>> {
         this.__logger.log(`query with parents: ${ parents } (on update event called)`);
         const querySteps = parents.map((parent?: string) => {
@@ -178,7 +178,7 @@ export abstract class ListAbstract extends Compatibility {
     }
 
     private __createItem(
-        item: ITransferItem,
+        item: ITransferRPCModule,
         parent?: string,
         isDynamic: boolean = false
     ): IListItem {
@@ -197,7 +197,7 @@ export abstract class ListAbstract extends Compatibility {
      *
      */
     private __updateSizePromise?: Promise<void>;
-    private __beforeQuery(param: QueryParam<IItem, IItemFilter>): Promise<void> {
+    private __beforeQuery(param: QueryParam<IRPCModule, IRPCModeuleFilter>): Promise<void> {
         const { where, sortBy, offset } = param;
         if (
             typeof sortBy.size == 'undefined' ||
@@ -213,7 +213,7 @@ export abstract class ListAbstract extends Compatibility {
                 return this.__beforeQuery(param);
             });
         }
-        const _param: Partial<QueryParam<IItem, IItemFilter>> = {
+        const _param: Partial<QueryParam<IRPCModule, IRPCModeuleFilter>> = {
             where: {
                 ...where,
                 withoutSize: true,
@@ -222,7 +222,7 @@ export abstract class ListAbstract extends Compatibility {
         this.__logger.log(`query items without size`);
         this.__updateSizePromise = this.__items.query(_param).then(({ data }) => {
             return this.__items.getItems(data);
-        }).then((items: ITransferItem[]) => {
+        }).then((items: ITransferRPCModule[]) => {
             this.__logger.log(`success query items without size: ${ items.length }`);
             return this.__updateSizes(items);
         }).then(() => {
@@ -232,10 +232,10 @@ export abstract class ListAbstract extends Compatibility {
         return this.__updateSizePromise;
     }
 
-    private __updateSizes(items: ITransferItem[]): Promise<boolean[]> {
+    private __updateSizes(items: ITransferRPCModule[]): Promise<boolean[]> {
         return getSizes().then((sizes: Record<string, number>) => {
             const updates: UpdateItemParam[] = [];
-            items.forEach((item: ITransferItem) => {
+            items.forEach((item: ITransferRPCModule) => {
                 if (item.size) {
                     return;
                 }
@@ -268,7 +268,7 @@ export abstract class ListAbstract extends Compatibility {
         for (let i = 0; i < keys.length; i++) {
             parents[keys[i]] = hierarchyId.create(keys[i], parents[keys[i -1]])
         }
-        return this.__items.getItems(keys).then((items: ITransferItem[]) => {
+        return this.__items.getItems(keys).then((items: ITransferRPCModule[]) => {
             const listItems: IListItem[] = [];
             for (let i = 0; i < items.length; i++) {
                 const parent = listItems[i-1];
@@ -281,5 +281,5 @@ export abstract class ListAbstract extends Compatibility {
         });
     }
     
-    protected abstract _getChildren(item: ITransferItem): IDependencies<number[]>;
+    protected abstract _getChildren(item: ITransferRPCModule): IDependencies<number[]>;
 }

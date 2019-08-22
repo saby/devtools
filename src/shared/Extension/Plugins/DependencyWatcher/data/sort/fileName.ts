@@ -1,7 +1,7 @@
 import { SortFunction, SortResult } from "./Sort";
-import { IItemInfo } from "Extension/Plugins/DependencyWatcher/IItem";
+import { IRPCModuleInfo } from "Extension/Plugins/DependencyWatcher/IRPCModule";
 
-const fileName: SortFunction<IItemInfo> = <T extends IItemInfo>(firstItem: T, secondItem: T): SortResult => {
+const fileName: SortFunction<IRPCModuleInfo> = <T extends IRPCModuleInfo>(firstItem: T, secondItem: T): SortResult => {
     const first: string = firstItem.fileName || '';
     const second: string = secondItem.fileName || '';
     return first.localeCompare(

@@ -1,31 +1,24 @@
-import { Id as ModuleId } from "Extension/Plugins/DependencyWatcher/IModule";
-
-export type FileId = number;
-export type StackStep = [FileId, ModuleId];
-export interface Stack extends Array<StackStep> {}
+import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
 
 export interface IFileInfo {
     size: number;
     name: string;
     path: string;
 }
+
 export interface IFileModules {
     modules: Set<number>;
 }
+
 export interface ITransportModules {
     modules: number[];
 }
 
-export interface IFileId {
-    id: FileId;
+export interface IFile extends IFileInfo, IFileModules, IId {
+
 }
 
-export interface IFile extends IFileInfo, IFileModules, IFileId {
-    // isBundle?: boolean;
-    // stack: Stack;
-}
-
-export interface ITransportFile extends IFileInfo, ITransportModules, IFileId {
+export interface ITransportFile extends IFileInfo, ITransportModules, IId {
 
 }
 
@@ -34,7 +27,7 @@ export interface IFileFilter {
     name: string;
 }
 
-export type UpdateFileParam = IFileId & {
+export type UpdateFileParam = IId & {
     // id: number;
     [key in keyof IFileInfo]: IFileInfo[key];
 }
