@@ -38,3 +38,6 @@ export enum DependencyType {
     static = "static",
     dynamic = "dynamic"
 }
+
+export const RESOURCE_ROOT = '/resources/';
+export const CDN_ROOT = '/cdn/';

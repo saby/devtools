@@ -1,3 +1,5 @@
+import { isResource } from 'Extension/Plugins/DependencyWatcher/util/isResource';
+
 interface HARResponse {
     content: {
         mimeType: string
@@ -17,6 +19,7 @@ interface HAREntry {
 interface HAR {
     entries: HAREntry[]
 }
+
 interface Sizes  extends Record<string, number> {
 
 }
@@ -24,7 +27,7 @@ interface Sizes  extends Record<string, number> {
 const mapHARToSizesRecord = (har: HAR): Sizes => {
     const result: Sizes = Object.create(null);
     for (const { request, response } of har.entries) {
-        if (!request.url.includes('resources') && !request.url.includes('cdn')) {
+        if (!isResource(request.url)) {
             continue;
         }
         result[request.url] = response._transferSize || response.content.size;

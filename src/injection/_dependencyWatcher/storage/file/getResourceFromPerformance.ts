@@ -1,3 +1,5 @@
+import { isResource } from 'Extension/Plugins/DependencyWatcher/util/isResource';
+
 export interface ResourceTiming {
     path: string,
     transferSize: number,
@@ -8,7 +10,7 @@ export interface ResourceTiming {
 const getResourceFromPerformance = (): ResourceTiming[] => {
     let resourceTimingList = <PerformanceResourceTiming[]> performance.getEntriesByType('resource');
     return resourceTimingList.filter(({ name }) => {
-        return name.includes('/resources/') || name.includes('/cdn/');
+        return isResource(name)
     }).map((entry: PerformanceResourceTiming) => {
         return {
             path: entry.name,
