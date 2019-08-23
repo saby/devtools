@@ -219,21 +219,26 @@ class Profiler extends Control<IOptions> {
    }
 
    private __updateSelectedCommitChanges(): void {
-      const changes = getChangesDescription(
-         this._profilingData,
-         this._selectedSynchronizationId,
-         this._selectedCommitId
-      );
-
-      if (changes) {
-         // TODO: если есть selectedCommitId, а изменений нет, то нода не перерисовывалась
-         this._selectedCommitChanges = {
-            updateReason: changes.updateReason,
-            changedOptions: changes.changedOptions,
-            changedAttributes: changes.changedAttributes
-         };
-      } else {
+      if (isNaN(this._selectedCommitId)) {
          this._selectedCommitChanges = undefined;
+      } else {
+         const changes = getChangesDescription(
+            this._profilingData,
+            this._selectedSynchronizationId,
+            this._selectedCommitId
+         );
+
+         if (changes) {
+            this._selectedCommitChanges = {
+               updateReason: changes.updateReason,
+               changedOptions: changes.changedOptions,
+               changedAttributes: changes.changedAttributes
+            };
+         } else {
+            this._selectedCommitChanges = {
+               updateReason: 'unchanged'
+            };
+         }
       }
    }
 

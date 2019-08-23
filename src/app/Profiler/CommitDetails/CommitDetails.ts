@@ -6,11 +6,9 @@ import 'css!Profiler/CommitDetails/CommitDetails';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 interface IOptions extends IControlOptions {
-   changesDescription?: {
-      changedOptions?: string[];
-      changedAttributes?: string[];
-      updateReason?: ControlUpdateReason;
-   };
+   updateReason: ControlUpdateReason;
+   changedOptions?: string[];
+   changedAttributes?: string[];
 }
 
 class CommitDetails extends Control<IOptions> {
@@ -18,7 +16,9 @@ class CommitDetails extends Control<IOptions> {
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
-         changesDescription: descriptor(Object),
+         updateReason: descriptor(String).required(),
+         changedOptions: descriptor(Array),
+         changedAttributes: descriptor(Array),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };
