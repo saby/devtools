@@ -2,7 +2,33 @@
    width: 100%;
    display: flex;
    flex-direction: column;
-   overflow: hidden;
+   overflow-x: auto;
+}
+
+/*
+TODO: пока нет горизонтального скролл контейнера делаем нечто очень похожее на него
+сделают по этой задаче: https://online.sbis.ru/opendoc.html?guid=f6171d86-08f1-4503-b8fc-b0b82ec528b7
+ */
+.Elements__treeContainer {
+   .controls-Scroll {
+      overflow-x: auto;
+   }
+   .controls-Scroll__content_scroll {
+      overflow-x: auto;
+   }
+   .controls-Scroll__content_hideNativeScrollbar {
+      &::-webkit-scrollbar {
+         height: 8px;
+      }
+      &::-webkit-scrollbar-thumb {
+         height: 200%;
+         border-radius: 5px;
+         background-color: rgba(0, 0, 0, 0.1);
+      }
+      &::-webkit-scrollbar-thumb:hover {
+         background-color: rgba(0, 0, 0, 0.15);
+      }
+   }
 }
 
 .Elements__tree {
@@ -11,6 +37,7 @@
 
 .Elements__node {
    cursor: pointer;
+   white-space: nowrap;
 }
 
 .Elements__node:hover {
