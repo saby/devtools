@@ -42,6 +42,7 @@
          <ws:if data="{{_inspectedItem}}">
             <Elements.Details.Details scope="{{_inspectedItem}}"
                                       store="{{_options.store}}"
+                                      inspectedItem="{{ _inspectedItem }}"
                                       on:expandedChanged="__onDetailsTabExpanded()"
                                       optionsExpanded="{{_optionsExpanded}}"
                                       stateExpanded="{{_stateExpanded}}"

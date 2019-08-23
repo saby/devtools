@@ -320,8 +320,8 @@ class Elements extends Control {
                      return;
                   }
                   this._inspectedItem[key] = value;
-                  this._forceUpdate();
                });
+               this._inspectedItem = { ...this._inspectedItem };
                break;
          }
       }
