@@ -3,7 +3,8 @@ import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import * as template from 'wml!Profiler/ReasonTag/ReasonTag';
 import 'css!Profiler/ReasonTag/ReasonTag';
 import { descriptor } from 'Types/entity';
-import { ControlUpdateReason, getBackgroundColorBasedOnReason } from '../Utils';
+import { getBackgroundColorBasedOnReason } from '../Utils';
+import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 interface IOptions extends IControlOptions {
    updateReason?: ControlUpdateReason;
@@ -28,7 +29,8 @@ class ReasonTag extends Control<IOptions> {
             'selfUpdated',
             'parentUpdated',
             'unchanged',
-            'destroyed'
+            'destroyed',
+            'forceUpdated'
          ]),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)

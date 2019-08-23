@@ -1,8 +1,9 @@
 import { IBackendControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 export interface IChangesDescription {
    selfDuration: number;
-   isFirstRender: boolean;
+   updateReason: ControlUpdateReason;
    changedOptions?: string[];
    changedAttributes?: string[];
 }

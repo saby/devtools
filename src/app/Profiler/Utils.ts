@@ -9,6 +9,7 @@ import {
    IFrontendSynchronizationDescription
 } from 'Extension/Plugins/Elements/IProfilingData';
 import Flamegraph from './Flamegraph/Flamegraph';
+import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 export function applyOperations(
    initialElements: Store['_elements'],
@@ -173,19 +174,14 @@ export function getBackgroundColorBasedOnTiming(
    return colors[Math.round(index)];
 }
 
-export type ControlUpdateReason =
-   | 'mounted'
-   | 'selfUpdated'
-   | 'parentUpdated'
-   | 'unchanged'
-   | 'destroyed';
-
 export function getBackgroundColorBasedOnReason(
    updateReason: ControlUpdateReason
-): '#e2e2e2' | '#ffab66' | '#e6d174' | '#b3e6e6' | '#000' {
+): '#e2e2e2' | '#ffab66' | '#e6d174' | '#b3e6e6' | '#000' | '#baf7c8' {
    switch (updateReason) {
       case 'mounted':
          return '#ffab66';
+      case 'forceUpdated':
+         return '#baf7c8';
       case 'selfUpdated':
          return '#e6d174';
       case 'parentUpdated':
@@ -214,6 +210,7 @@ export function getSynchronizationOverview(
       selfUpdatedCount: 0,
       parentUpdatedCount: 0,
       unchangedCount: 0,
+      forceUpdatedCount: 0,
       destroyedCount,
       screenshotURL
    };
@@ -231,6 +228,9 @@ export function getSynchronizationOverview(
             break;
          case 'unchanged':
             result.unchangedCount++;
+            break;
+         case 'forceUpdated':
+            result.forceUpdatedCount++;
             break;
       }
    });

@@ -15,6 +15,12 @@
                     caption="Mounted"
                     count="{{ _options.mountedCount }}" />
     </ws:if>
+    <ws:if data="{{ _options.forceUpdatedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="forceUpdated"
+                    caption="Force updated"
+                    count="{{ _options.forceUpdatedCount }}" />
+    </ws:if>
     <ws:if data="{{ _options.selfUpdatedCount > 0 }}">
         <ws:partial template="row"
                     updateReason="selfUpdated"

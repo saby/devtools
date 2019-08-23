@@ -9,7 +9,6 @@ import RankedView from './RankedView/RankedView';
 import SynchronizationsList from './SynchronizationsList/SynchronizationsList';
 import {
    applyOperations,
-   ControlUpdateReason,
    convertProfilingData,
    getActualDurations,
    getChanges,
@@ -37,33 +36,13 @@ function masterFilter(item: { selfDuration: number }): boolean {
    return item.selfDuration !== 0;
 }
 
-function getElementState(
-   changesDescription?: IChangesDescription
-): ControlUpdateReason {
-   if (changesDescription) {
-      if (changesDescription.isFirstRender) {
-         return 'mounted';
-      }
-
-      if (
-         changesDescription.changedOptions ||
-         changesDescription.changedAttributes
-      ) {
-         return 'selfUpdated';
-      }
-
-      return 'parentUpdated';
-   }
-
-   return 'unchanged';
-}
-
 export interface ISynchronizationOverview {
    mountedCount: number;
    selfUpdatedCount: number;
    parentUpdatedCount: number;
    unchangedCount: number;
    destroyedCount: number;
+   forceUpdatedCount: number;
    screenshotURL?: string;
 }
 
@@ -108,7 +87,7 @@ class Profiler extends Control<IOptions> {
    protected _detailFilter: RankedView['_options']['filter'] = {
       minDuration: 0,
       name: '',
-      displayReasons: ['mounted', 'selfUpdated', 'parentUpdated']
+      displayReasons: ['mounted', 'selfUpdated', 'parentUpdated', 'forceUpdated']
    };
 
    protected _currentOperations: Array<IOperationEvent['args']>;
@@ -200,9 +179,10 @@ class Profiler extends Control<IOptions> {
          );
 
          const dataWithSelfDurations = elements.map((element) => {
+            const changesForElement = changes.get(element.id);
             return {
                ...element,
-               updateReason: getElementState(changes.get(element.id)),
+               updateReason: changesForElement ? changesForElement.updateReason : 'unchanged',
                selfDuration: getSelfDuration(
                   this._profilingData,
                   synchronizationKey,
@@ -246,8 +226,9 @@ class Profiler extends Control<IOptions> {
       );
 
       if (changes) {
+         // TODO: если есть selectedCommitId, а изменений нет, то нода не перерисовывалась
          this._selectedCommitChanges = {
-            isFirstRender: changes.isFirstRender,
+            updateReason: changes.updateReason,
             changedOptions: changes.changedOptions,
             changedAttributes: changes.changedAttributes
          };

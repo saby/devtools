@@ -11,7 +11,7 @@ import reasonTemplate = require('wml!Profiler/RankedView/reasonTemplate');
 // @ts-ignore
 import groupTemplate = require('wml!Profiler/RankedView/groupTemplate');
 import { getBackgroundColorBasedOnTiming } from '../Utils';
-import { ControlUpdateReason } from '../Utils';
+import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 interface IRankedViewControlNode extends IFrontendControlNode {
    selfDuration: number;

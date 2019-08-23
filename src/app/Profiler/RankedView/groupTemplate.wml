@@ -3,11 +3,14 @@
         <ws:if data="{{ itemData.item === 'mounted' }}">
             Mounted
         </ws:if>
-        <ws:if data="{{ itemData.item === 'selfUpdated' }}">
+        <ws:else data="{{ itemData.item === 'selfUpdated' }}">
             Updated
-        </ws:if>
-        <ws:if data="{{ itemData.item === 'parentUpdated' }}">
+        </ws:else>
+        <ws:else data="{{ itemData.item === 'parentUpdated' }}">
             Parent updated
-        </ws:if>
+        </ws:else>
+        <ws:else data="{{ itemData.item === 'forceUpdated' }}">
+            Force updated
+        </ws:else>
     </ws:contentTemplate>
 </ws:partial>

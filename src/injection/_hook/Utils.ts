@@ -6,6 +6,7 @@ import {
    IBackendSynchronizationDescription,
    IChangesDescription
 } from 'Extension/Plugins/Elements/IProfilingData';
+import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 function operationToString(
    operation?: OperationType
@@ -109,12 +110,39 @@ function processChanges(value?: object): string[] | undefined {
    return result;
 }
 
-function getChangesDescription({
-   operation,
-   node
-}: IChangedNode): IChangesDescription {
+function getUpdateReason(
+   { operation, node }: IChangedNode,
+   parentUpdated: boolean = false
+): Exclude<ControlUpdateReason, 'unchanged'> {
+   if (operation === OperationType.CREATE) {
+      return 'mounted';
+   }
+
+   if (operation === OperationType.DELETE) {
+      return 'destroyed';
+   }
+
+   if (node.changedOptions || node.changedAttributes) {
+      return 'selfUpdated';
+   }
+
+   if (parentUpdated) {
+      return 'parentUpdated';
+   }
+
+   return 'forceUpdated';
+}
+
+function getChangesDescription(
+   changedNode: IChangedNode,
+   changedNodesMap: Map<IBackendControlNode['id'], IChangedNode>
+): IChangesDescription {
+   const { node }: IChangedNode = changedNode;
    return {
-      isFirstRender: operation === OperationType.CREATE,
+      updateReason: getUpdateReason(
+         changedNode,
+         typeof node.parentId === 'number' && changedNodesMap.has(node.parentId)
+      ),
       changedOptions: processChanges(node.changedOptions),
       changedAttributes: processChanges(node.changedAttributes),
       selfDuration: node.selfDuration
@@ -122,10 +150,11 @@ function getChangesDescription({
 }
 
 function getChanges(
-   changedNodesEntries: Array<[IBackendControlNode['id'], IChangedNode]>
+   changedNodesEntries: Array<[IBackendControlNode['id'], IChangedNode]>,
+   changedNodesMap: Map<IBackendControlNode['id'], IChangedNode>
 ): IBackendSynchronizationDescription['changes'] {
    return changedNodesEntries.map(([commitKey, changedNode]) => {
-      return [commitKey, getChangesDescription(changedNode)];
+      return [commitKey, getChangesDescription(changedNode, changedNodesMap)];
    });
 }
 
@@ -146,7 +175,7 @@ export function getSyncList(
          key,
          {
             selfDuration: getSynchronizationDuration(entries),
-            changes: getChanges(entries)
+            changes: getChanges(entries, value)
          }
       ];
    });
