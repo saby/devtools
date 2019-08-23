@@ -14,9 +14,6 @@ export class InjectHook implements IPlugin {
          value: new Hook(this._agent)
       });
    }
-   getCurrentModuleName(): string {
-      return this._agent.getCurrentModuleName();
-   }
    static getName() {
       return 'InjectHook';
    }

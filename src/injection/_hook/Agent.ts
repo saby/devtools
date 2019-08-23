@@ -144,8 +144,6 @@ class Agent {
 
    private selectedNodePreviousState?: object;
 
-   private currentModuleName: string = '';
-
    private initialIdToDuration: Map<
       IBackendControlNode['id'],
       number
@@ -244,8 +242,6 @@ class Agent {
 
       // TODO: если нода уже есть, то это асинхронное построение, можно это отдельной операцией показывать
       startMark(name, id, operation);
-      // TODO: спилить currentModuleName
-      this.currentModuleName = name;
 
       if (currentRoot.has(id)) {
          const changedNode = currentRoot.get(id) as IChangedNode;
@@ -370,10 +366,6 @@ class Agent {
       }
       this.changedRoots.delete(rootId);
       this.rootStack.pop();
-   }
-
-   getCurrentModuleName(): string {
-      return this.currentModuleName;
    }
 
    private __handleAdd(node: IBackendControlNode): void {
