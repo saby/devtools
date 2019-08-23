@@ -29,5 +29,5 @@
             searchValue="{{ _options.item.textValue }}"
         />
     </ws:selectorTemplate>
-    <ws:suggestTemplate templateName="wml!DependencyWatcher/_template/filter/file/suggest"/>
+    <ws:suggestTemplate templateName="wml!DependencyWatcher/_module/filter/file/suggest"/>
 </Controls.lookup:Input>

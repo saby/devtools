@@ -1,7 +1,7 @@
 // @ts-ignore
 import * as Control from 'Core/Control';
 // @ts-ignore
-import * as template from 'wml!DependencyWatcher/_view/list/column/Size';
+import * as template from 'wml!DependencyWatcher/_module/column/Size';
 import { Model } from 'Types/entity';
 
 interface IConfig {

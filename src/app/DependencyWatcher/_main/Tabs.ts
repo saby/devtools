@@ -1,7 +1,7 @@
 import { ViewMode } from './ViewMode';
-import { source } from '../../data';
+import { source } from '../data';
 import { Memory } from 'Types/source';
-import { IListConfig } from '../../_data/source/IList';
+import { IListConfig } from '../_data/source/IList';
 
 interface IDescription {
     caption: string;
@@ -31,6 +31,7 @@ const dependentTab: ITab = {
 
 export const tabs = new Memory({
     data: [ dependencyTab, dependentTab ],
+    // @ts-ignore
     idProperty: 'id'
 });
 

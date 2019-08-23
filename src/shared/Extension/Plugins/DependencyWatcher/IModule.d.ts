@@ -36,6 +36,13 @@ interface IModule extends ModuleData<Set<IModule>> {
     data?: any;
 }
 
+/**
+ * @interface ITransferModule
+ * Сериализуемый интерфейс модуля, который мы можем гонять через сообщения по разным контекстам.
+ * В отличии от оригинального зависимости/зависимые в нём не являются набором прямых ссылок друг на друга,
+ * а представлены в виде массива идентификаторов
+ * И нету самого содержание модуля
+ */
 export interface ITransferModule extends ModuleData<Array<number>> {
 }
 

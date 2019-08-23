@@ -1,4 +1,6 @@
-import { source } from 'app/DependencyWatcher/data';
+import { source } from '../data';
+//@ts-ignore
+import { rk } from 'Core/i18n';
 
 export interface FilterItem<TValue = unknown> {
     name: string;
@@ -23,8 +25,8 @@ type FilterItems<T = unknown> = {
 export const json: FilterItemAdditional<boolean> = {
     name: 'json',
     textValue: 'json!',
-    itemText: 'Файлы конфигурации',
-    additionalText: 'Включая файлы конфигураций',
+    itemText: rk('Файлы конфигурации'),
+    additionalText: rk('Включая файлы конфигураций'),
     value: false,
     resetValue: false,
     visibility : false,
@@ -33,8 +35,8 @@ export const json: FilterItemAdditional<boolean> = {
 export const i18n: FilterItemAdditional<boolean> = {
     name: 'i18n',
     textValue: 'i18n!',
-    itemText: 'Файлы локализациии',
-    additionalText: 'Включая файлы локализациий',
+    itemText: rk('Файлы локализациии'),
+    additionalText: rk('Включая файлы локализациий'),
     value: false,
     resetValue: false,
     visibility : false,
@@ -43,8 +45,8 @@ export const i18n: FilterItemAdditional<boolean> = {
 export const css: FilterItemAdditional<boolean> = {
     name: 'css',
     textValue: 'css!',
-    itemText: 'Файлы стилей',
-    additionalText: 'Включая файлы стилей',
+    itemText: rk('Файлы стилей'),
+    additionalText: rk('Включая файлы стилей'),
     value: false,
     resetValue: false,
     visibility : false,

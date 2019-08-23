@@ -6,7 +6,7 @@
 </ws:template>
 <ws:template name="fileInput">
     <span style="width:120px">{{ caption }}</span>
-    <DependencyWatcher._template.filter.file.input
+    <DependencyWatcher._module.filter.file.input
         textPrefix="{{ textPrefix }}"
         bind:item="item"
         attr:style="width: 334px"

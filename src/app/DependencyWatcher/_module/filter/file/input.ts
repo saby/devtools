@@ -1,7 +1,7 @@
 // @ts-ignore
 import * as Control from 'Core/Control';
 // @ts-ignore
-import * as template from 'wml!DependencyWatcher/_template/filter/file/input';
+import * as template from 'wml!DependencyWatcher/_module/filter/file/input';
 
 interface Options {
     textPrefix?: string;

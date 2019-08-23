@@ -1,7 +1,7 @@
 // @ts-ignore
 import { rk } from 'Core/i18n';
-import { IListItem } from "../../data";
-import { IHeader, IHeaders } from '../../interface/IHeaders';
+import { IListItem } from "../data";
+import { IHeader, IHeaders } from '../interface/IHeaders';
 
 export const name: IHeader<IListItem> = {
      title: rk('name'),

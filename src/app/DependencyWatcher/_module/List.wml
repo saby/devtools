@@ -2,7 +2,7 @@
     filterButtonSource="{{ _filterButtonSource }}"
     filter="{{ _filter }}"
     on:filterChanged="_filterChanged()"
-    source="{{ _source }}"
+    source="{{ _options.source }}"
     keyProperty="id"
     parentProperty="parent"
     navigation="{{ _navigation }}"
@@ -16,17 +16,7 @@
 >
     <ws:search>
         <span class="DependencyWatcher_Page__head">
-            <Controls.dropdown:Button
-                displayProperty="caption"
-                viewMode="link"
-                caption="{{ _modeCaption }}"
-                tooltip="{[Режим отображения]}: {{ _modeTitle }}"
-                source="{{ _modeSource }}"
-                keyProperty="id"
-                navigation="{{ null }}"
-                filter="{{ null }}"
-                on:menuItemActivate="_changeView()"
-            />
+            <ws:partial template="{{ _options.headButton }}" />
             <Controls.search:Input
                 bind:value="_searchValue"
             />
@@ -34,7 +24,7 @@
     </ws:search>
     <ws:filterButton>
         <Controls.filter:View
-            detailPanelTemplateName="DependencyWatcher/template:filter.Panel"
+            detailPanelTemplateName="DependencyWatcher/_module/filter:Panel"
         />
     </ws:filterButton>
     <ws:content>
@@ -55,7 +45,9 @@
                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
             >
                 <ws:emptyTemplate>
-                    <ws:partial template="DependencyWatcher/template:list.EmptyPage"/>
+                    <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
+                        <ws:contentTemplate>{[Не найдено]}</ws:contentTemplate>
+                    </ws:partial>
                 </ws:emptyTemplate>
             </Controls.explorer:View>
         </Controls.scroll:Container>
