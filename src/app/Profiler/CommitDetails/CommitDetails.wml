@@ -4,30 +4,32 @@
                               size="s"
                               style="secondary" />
       <div class="CommitDetails__changesContainer">
-         <ws:if data="{{ _options.changesDescription.isFirstRender }}">
-            <div>This was the first time this control was rendered.</div>
-         </ws:if>
-         <ws:else>
-            <ws:if data="{{ _options.changesDescription.changedOptions }}">
-               <div>
-                  Changed options:
-                  <ws:for data="item in _options.changesDescription.changedOptions">
-                     <div class="CommitDetails__changedValueName">{{ item }}</div>
-                  </ws:for>
-               </div>
+         <Controls.scroll:Container>
+            <ws:if data="{{ _options.changesDescription.isFirstRender }}">
+               <div>This was the first time this control was rendered.</div>
             </ws:if>
-            <ws:if data="{{ _options.changesDescription.changedAttributes }}">
-               <div>
-                  Changed attributes:
-                  <ws:for data="item in _options.changesDescription.changedAttributes">
-                     <div class="CommitDetails__changedValueName">{{ item }}</div>
-                  </ws:for>
-               </div>
-            </ws:if>
-            <ws:if data="{{ !_options.changesDescription.changedOptions && !_options.changesDescription.changedAttributes }}">
-               <div>The parent control re-rendered.</div>
-            </ws:if>
-         </ws:else>
+            <ws:else>
+               <ws:if data="{{ _options.changesDescription.changedOptions }}">
+                  <div>
+                     Changed options:
+                     <ws:for data="item in _options.changesDescription.changedOptions">
+                        <div class="CommitDetails__changedValueName">{{ item }}</div>
+                     </ws:for>
+                  </div>
+               </ws:if>
+               <ws:if data="{{ _options.changesDescription.changedAttributes }}">
+                  <div>
+                     Changed attributes:
+                     <ws:for data="item in _options.changesDescription.changedAttributes">
+                        <div class="CommitDetails__changedValueName">{{ item }}</div>
+                     </ws:for>
+                  </div>
+               </ws:if>
+               <ws:if data="{{ !_options.changesDescription.changedOptions && !_options.changesDescription.changedAttributes }}">
+                  <div>The parent control re-rendered.</div>
+               </ws:if>
+            </ws:else>
+         </Controls.scroll:Container>
       </div>
    </ws:if>
    <ws:else>
