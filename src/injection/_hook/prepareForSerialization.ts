@@ -1,13 +1,37 @@
 import { decycle } from 'Extension/Utils/decycle';
 
+function isJqueryElement(value: unknown): boolean {
+   return (
+      typeof value === 'object' &&
+      value !== null &&
+      typeof value.length === 'number' &&
+      value.length > 0 &&
+      value[0] instanceof Element
+   );
+}
+
 function replaceFunctions<T>(value: T): T | string {
    if (typeof value === 'function') {
       return `function ${value.name.replace('bound ', '')}`;
    }
+   if (value instanceof Element) {
+      // TODO: надо их вообще вырезать, либо делать какую-то подсветку
+      return value.tagName;
+   }
+   if (isJqueryElement(value)) {
+      // TODO: надо их вообще вырезать, либо делать какую-то подсветку
+      return value[0].tagName;
+   }
    return value;
 }
 
-const IGNORE_FIELDS = ['_logicParent', '_events', 'controlNode', '_container', '__lastGetterPath'];
+const IGNORE_FIELDS = [
+   '_logicParent',
+   '_events',
+   'controlNode',
+   '_container',
+   '__lastGetterPath'
+];
 
 export default function prepareForSerialization(value: object): object {
    return decycle(value, {
