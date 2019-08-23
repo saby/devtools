@@ -1,6 +1,6 @@
 import Store, { applyOperation } from '../Elements/Store';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import Profiler from './Profiler';
+import Profiler, { ISynchronizationOverview } from './Profiler';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import {
    IBackendProfilingData,
@@ -8,6 +8,7 @@ import {
    IFrontendProfilingData,
    IFrontendSynchronizationDescription
 } from 'Extension/Plugins/Elements/IProfilingData';
+import Flamegraph from './Flamegraph/Flamegraph';
 
 export function applyOperations(
    initialElements: Store['_elements'],
@@ -201,4 +202,38 @@ export function formatTime(value: number): string {
    const PRECISION = 2;
    const roundedValue = value.toFixed(PRECISION);
    return value >= SECOND ? `${roundedValue}s` : `${roundedValue}ms`;
+}
+
+export function getSynchronizationOverview(
+   snapshot: Flamegraph['_options']['snapshot'],
+   destroyedCount: number = 0,
+   screenshotURL?: string
+): ISynchronizationOverview {
+   const result: ISynchronizationOverview = {
+      mountedCount: 0,
+      selfUpdatedCount: 0,
+      parentUpdatedCount: 0,
+      unchangedCount: 0,
+      destroyedCount,
+      screenshotURL
+   };
+
+   snapshot.forEach(({ updateReason }) => {
+      switch (updateReason) {
+         case 'mounted':
+            result.mountedCount++;
+            break;
+         case 'selfUpdated':
+            result.selfUpdatedCount++;
+            break;
+         case 'parentUpdated':
+            result.parentUpdatedCount++;
+            break;
+         case 'unchanged':
+            result.unchangedCount++;
+            break;
+      }
+   });
+
+   return result;
 }

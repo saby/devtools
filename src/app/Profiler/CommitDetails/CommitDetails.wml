@@ -35,13 +35,4 @@
    <ws:else>
       <div>This control didn't re-render during this synchronization.</div>
    </ws:else>
-   <ws:if data="{{ _options.changesDescription.screenshotURL }}">
-      <Controls.heading:Title caption="Screenshot of the page at the end of synchronization:"
-                              size="s"
-                              style="secondary" />
-      <img src="{{ _options.changesDescription.screenshotURL }}"
-           alt="Screenshot of the page right after synchronization."
-           on:click="__zoomImage()"
-           attr:class="CommitDetails__image" />
-   </ws:if>
 </div>

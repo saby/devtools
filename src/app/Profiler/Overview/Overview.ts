@@ -10,10 +10,19 @@ interface IOptions extends IControlOptions {
    parentUpdatedCount: number;
    unchangedCount: number;
    destroyedCount: number;
+   screenshotURL?: string;
 }
 
 class Overview extends Control<IOptions> {
    protected _template: TemplateFunction = template;
+
+   private __zoomImage(): void {
+      if (this._options.screenshotURL) {
+         chrome.tabs.create({
+            url: this._options.screenshotURL
+         });
+      }
+   }
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
@@ -22,6 +31,7 @@ class Overview extends Control<IOptions> {
          parentUpdatedCount: descriptor(Number).required(),
          unchangedCount: descriptor(Number).required(),
          destroyedCount: descriptor(Number).required(),
+         screenshotURL: descriptor(String),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

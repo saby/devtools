@@ -9,7 +9,6 @@ interface IOptions extends IControlOptions {
       changedOptions?: string[];
       changedAttributes?: string[];
       isFirstRender?: boolean;
-      screenshotURL?: string;
    };
 }
 

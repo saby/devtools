@@ -70,7 +70,8 @@
                                             selfUpdatedCount="{{ _synchronizationOverview.selfUpdatedCount }}"
                                             parentUpdatedCount="{{ _synchronizationOverview.parentUpdatedCount }}"
                                             unchangedCount="{{ _synchronizationOverview.unchangedCount }}"
-                                            destroyedCount="{{ _synchronizationOverview.destroyedCount }}" />
+                                            destroyedCount="{{ _synchronizationOverview.destroyedCount }}"
+                                            screenshotURL="{{ _synchronizationOverview.screenshotURL }}" />
             </ws:else>
         </ws:if>
         <ws:else>

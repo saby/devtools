@@ -14,7 +14,8 @@ import {
    getActualDurations,
    getChanges,
    getChangesDescription,
-   getSelfDuration
+   getSelfDuration,
+   getSynchronizationOverview
 } from './Utils';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import Controller from '../Search/Controller';
@@ -23,10 +24,10 @@ import {
    IChangesDescription,
    IFrontendProfilingData
 } from 'Extension/Plugins/Elements/IProfilingData';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 // @ts-ignore
 import template = require('wml!Profiler/Profiler');
 import Tab = chrome.tabs.Tab;
-import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
 interface IOptions extends IControlOptions {
    store: Store;
@@ -57,44 +58,13 @@ function getElementState(
    return 'unchanged';
 }
 
-interface ISynchronizationOverview {
+export interface ISynchronizationOverview {
    mountedCount: number;
    selfUpdatedCount: number;
    parentUpdatedCount: number;
    unchangedCount: number;
    destroyedCount: number;
-}
-
-function getSynchronizationOverview(
-   snapshot: Flamegraph['_options']['snapshot'],
-   destroyedCount: number = 0
-): ISynchronizationOverview {
-   const result = {
-      mountedCount: 0,
-      selfUpdatedCount: 0,
-      parentUpdatedCount: 0,
-      unchangedCount: 0,
-      destroyedCount
-   };
-
-   snapshot.forEach(({ updateReason }) => {
-      switch (updateReason) {
-         case 'mounted':
-            result.mountedCount++;
-            break;
-         case 'selfUpdated':
-            result.selfUpdatedCount++;
-            break;
-         case 'parentUpdated':
-            result.parentUpdatedCount++;
-            break;
-         case 'unchanged':
-            result.unchangedCount++;
-            break;
-      }
-   });
-
-   return result;
+   screenshotURL?: string;
 }
 
 class Profiler extends Control<IOptions> {
@@ -259,7 +229,8 @@ class Profiler extends Control<IOptions> {
 
       this._synchronizationOverview = getSynchronizationOverview(
          snapshot,
-         this._destroyedCountBySynchronization.get(synchronizationKey)
+         this._destroyedCountBySynchronization.get(synchronizationKey),
+         this._screenshotBySynchronization.get(synchronizationKey)
       );
       this._snapshot = snapshot;
       this.__updateSelectedCommitChanges();
@@ -278,10 +249,7 @@ class Profiler extends Control<IOptions> {
          this._selectedCommitChanges = {
             isFirstRender: changes.isFirstRender,
             changedOptions: changes.changedOptions,
-            changedAttributes: changes.changedAttributes,
-            screenshotURL: this._screenshotBySynchronization.get(
-               this._selectedSynchronizationId
-            )
+            changedAttributes: changes.changedAttributes
          };
       } else {
          this._selectedCommitChanges = undefined;
