@@ -22,6 +22,7 @@
         <Controls.switchableArea:View bind:selectedKey="_activeTab">
             <ws:items>
                 <ws:Array>
+                    <ws:Object id="Elements">
                         <ws:itemTemplate>
                             <Controls.Container.Async
                                 templateName="Elements/Elements"
@@ -52,7 +53,6 @@
                             />
                         </ws:itemTemplate>
                     </ws:Object>
-                    <ws:Object id="Elements">
                 </ws:Array>
             </ws:items>
         </Controls.switchableArea:View>
