@@ -16,15 +16,10 @@ let logger = new ConsoleLogger('Wasaby');
 logger.log('main component loaded');
 class Extension extends Control {
    protected _template: Function = template;
-   protected _activeTab: string = 'Dependencies';
+   protected _activeTab: string = 'Elements';
    protected _tabsSource: Memory = new Memory({
       idProperty: '',
       data: [
-         {
-            id: 'Dependencies',
-            title: 'Dependencies',
-            align: 'left'
-         },
          {
             id: 'Elements',
             title: 'Elements',
@@ -33,6 +28,11 @@ class Extension extends Control {
          {
             id: 'Profiler',
             title: 'Profiler',
+            align: 'left'
+         },
+         {
+            id: 'Dependencies',
+            title: 'Dependencies',
             align: 'left'
          }
       ]
