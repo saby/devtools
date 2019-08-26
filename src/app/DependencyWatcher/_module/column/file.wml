@@ -1,0 +1,16 @@
+<Controls.popup:InfoboxTarget>
+    <ws:content>
+        <span class="DependencyFilter__Items_file">{{ itemData.item['fileName'] }}</span>
+    </ws:content>
+    <ws:template>
+            <ws:for data="key, item in itemData.item['stack']">
+                <ws:if data="{{ key == 0 }}">
+                    <div title="{{ item.path }}">{{ item.fileName || item.path }}</div>
+                </ws:if>
+                <ws:else>
+                    <div title="{{ item.moduleName }}">{{ item.fileName || item.path  }}</div>
+                </ws:else>
+            </ws:for>
+        <div>{{ itemData.item['path'] }}</div>
+    </ws:template>
+</Controls.popup:InfoboxTarget>

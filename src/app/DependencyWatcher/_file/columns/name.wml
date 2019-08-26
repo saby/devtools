@@ -1,0 +1,5 @@
+<Controls.grid:ColumnTemplate
+    displayProperty="name"
+    itemData="{{ itemData }}"
+    attr:title="{{ itemData.item.get('path') }}"
+/>

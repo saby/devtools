@@ -1,59 +1,58 @@
 import { Storage } from "./Storage";
-import { IFile } from "Extension/Plugins/DependencyWatcher/IFile";
+import { IFile, IFileFilter } from "Extension/Plugins/DependencyWatcher/IFile";
 import { getId } from "./getId";
+import getFileName from "./file/getFileName";
+import getResourceFromPerformance from "./file/getResourceFromPerformance";
+import findInPath from "./file/findInPath";
+import fileFilters from "Extension/Plugins/DependencyWatcher/data/filter/fileFilters";
+import filesSort from "Extension/Plugins/DependencyWatcher/data/sort/filesSort";
+import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
+import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
+import { Update } from './Update';
 
-interface ResourceTiming {
-    name: string,
-    transferSize: number,
-    decodedBodySize: number,
-    encodedBodySize: number
-}
-
-const getResourceTiming = (): ResourceTiming[] => {
-    let resourceTimingList = <PerformanceResourceTiming[]> performance.getEntriesByType('resource');
-    return resourceTimingList.filter(({ name }) => {
-        return name.includes('/resources/') || name.includes('/cdn/');
-    }).map((entry: PerformanceResourceTiming) => {
-        return {
-            name: entry.name,
-            transferSize: entry.transferSize,
-            decodedBodySize: entry.decodedBodySize,
-            encodedBodySize: entry.encodedBodySize
-        };
-    });
-};
-
-const findByName = (name: string, files: Set<IFile>): IFile | void => {
-    for ( const file of files ) {
-        if (file.name.includes(name)) {
-            return file;
-        }
+export class FileStorage  extends Update<IFile, IFileFilter> {
+    private readonly __storage: Storage<IFile, string> = new Storage('path');
+    private __getNew(): IFile[] {
+        return getResourceFromPerformance().filter(({ path }) => {
+            return !this.__storage.hasIndex(path);
+        }).map<IFile>(({ path, transferSize, decodedBodySize, encodedBodySize }) => {
+            return this.create(path, transferSize | decodedBodySize);
+        });
     }
-};
-
-export class FileStorage extends Storage<IFile> {
-    private __getNew(): Set<IFile> {
-        return new Set(getResourceTiming().filter(({ name }) => {
-            return !this.hasName(name);
-        }).map<IFile>(({ name, transferSize, decodedBodySize, encodedBodySize }) => {
-            return this.create(name, transferSize | decodedBodySize);
-        }));
+    getItems(keys?: number[]): IFile[] {
+        return this._getItems(keys);
+    }
+    getItem(key: number): IFile | void {
+        return this._getItem(key);
     }
     find(partOfName: string): IFile | void {
-        return findByName(partOfName, this.getItems()) ||
-            findByName(partOfName, this.__getNew());
+        return findInPath(partOfName, this.__storage.getItems()) ||
+            findInPath(partOfName, this.__getNew());
     }
-    create(name: string, size: number, isBundle?: boolean): IFile {
-        const file = {
-            name,
+    create(path: string, size: number): IFile {
+        const file: IFile = {
+            path,
             size,
-            isBundle,
+            name: getFileName(path),
             id: getId(),
-            modules: new Set<number>()
+            modules: new Set<number>(),
+            // stack: []
         };
-        this.add(file);
+        this.__storage.add(file);
         return file;
     }
+    protected _getItems(keys?: number[]): IFile[] {
+        return this.__storage.getItemsById(keys);
+    }
+    protected _getFilters(): Partial<Record<keyof IFileFilter, FilterFunctionGetter<any, IFile>>> {
+        return fileFilters;
+    }
+    protected _getSorting(): Record<keyof IFile, SortFunction<IFile>> {
+        return filesSort;
+    }
     
+    protected _getItem(id: number): void | IFile {
+        return this.__storage.getItemById(id);
+    }
 }
 

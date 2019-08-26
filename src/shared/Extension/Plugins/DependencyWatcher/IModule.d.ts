@@ -1,4 +1,5 @@
 import { DependencyType } from './const'
+import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
 
 export type Dependencies = Record<string, Array<string>>;
 
@@ -11,30 +12,45 @@ export interface ModuleDependencies<TCollection> {
     dependent: IDependencies<TCollection>;
 }
 
-export interface ModuleId {
-    id: number;
-}
-
-export interface ModuleInfo {
+/**
+ * @interface ModuleInfo
+ * @property {String} name Имя модуля
+ * @property {Number} fileId Идентификатор файла
+ * @property {Boolean} defined Был ли объявлен define модуля (По нему мы понимаем что модульзагружен)
+ * @property {Boolean} initialized Был ли модуль инициализирован (Для понимания что модуль испольуется или был втянут в бандле просто так)
+ * @property {Number} [size] Размер модуля (вручную посчитанный размер, может не соответствовать размеру файла)
+ */
+export interface IModuleInfo {
     name: string
-    fileId?: number;
+    fileId: number;
+    defined: boolean;
+    initialized: boolean;
+    // size?: number;
 }
 
-interface ModuleData<TCollection> extends ModuleInfo, ModuleId, ModuleDependencies<TCollection> {
-
-}
-
-interface Module extends ModuleData<Set<Module>> {
-
-}
-
-export interface TransferModule extends ModuleData<Array<number>> {
-}
-
-export interface ModulesMap<TModule extends ModuleInfo = Module> extends Map<string, TModule> {
+interface ModuleData<TCollection> extends IModuleInfo, IId, ModuleDependencies<TCollection> {
 
 }
 
-export interface ModulesRecord<TModule extends ModuleInfo = Module> extends Record<string, TModule>{
+interface IModule extends ModuleData<Set<IModule>> {
+    data?: any;
+}
 
+/**
+ * @interface ITransferModule
+ * Сериализуемый интерфейс модуля, который мы можем гонять через сообщения по разным контекстам.
+ * В отличии от оригинального зависимости/зависимые в нём не являются набором прямых ссылок друг на друга,
+ * а представлены в виде массива идентификаторов
+ * И нету самого содержание модуля
+ */
+export interface ITransferModule extends ModuleData<Array<number>> {
+}
+
+export interface IModuleFilter {
+    css: boolean;
+    json: boolean;
+    i18n: boolean;
+    name: string;
+    files: number[];
+    dependentOnFiles: number[];
 }

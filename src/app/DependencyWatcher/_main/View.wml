@@ -1,0 +1,20 @@
+<DependencyWatcher.module:List
+    name="moduleList"
+    source="{{ _source }}"
+    fileSource="{{ _fileSource }}"
+    on:openSource="_openSource()"
+>
+    <ws:headButton>
+        <Controls.dropdown:Button
+            displayProperty="caption"
+            viewMode="link"
+            caption="{{ _modeCaption }}"
+            tooltip="{[Режим отображения]}: {{ _modeTitle }}"
+            source="{{ _modeSource }}"
+            keyProperty="id"
+            navigation="{{ null }}"
+            filter="{{ null }}"
+            on:menuItemActivate="_changeView()"
+        />
+    </ws:headButton>
+</DependencyWatcher.module:List>

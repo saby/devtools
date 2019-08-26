@@ -1,9 +1,9 @@
-import { wrapDefineDynamic } from './define/dynamic';
 import { IConfigWithStorage } from "./IConfig";
 import { IDefine } from "./define/IDefine";
 import { IDescriptor } from "./IDescriptor";
 import { ModuleStorage } from "./storage/Module";
 import { ILogger } from "Extension/Logger/ILogger";
+import { proxyDefine } from "./define/proxy";
 
 export class Define implements IDescriptor {
     constructor({ logger, moduleStorage }: IConfigWithStorage) {
@@ -18,13 +18,16 @@ export class Define implements IDescriptor {
         let _this = this;
         return {
             set(value: IDefine) {
-                _this.__define = value;
-                _this.__proxy = wrapDefineDynamic(_this.__define, _this.__storage, _this.__logger);
+                if (!_this.__define) {
+                    _this.__define = value;
+                    _this.__proxy = proxyDefine(_this.__define, _this.__storage, _this.__logger);
+                } else {
+                    _this.__proxy = value;
+                }
             },
             get(): IDefine | void {
                 return _this.__proxy;
             }
         }
-    
     }
 }

@@ -25,7 +25,7 @@
                     <ws:Object id="Dependencies">
                         <ws:itemTemplate>
                             <Controls.Container.Async
-                                templateName="DependencyWatcher/view:Main"
+                                templateName="DependencyWatcher/main:View"
                             />
                         </ws:itemTemplate>
                     </ws:Object>

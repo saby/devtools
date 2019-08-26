@@ -45,7 +45,7 @@ export class DependencyWatcher implements IPlugin {
         this.__defineProperty(require, REQUIRE).catch(() => {
             try {
                 const defined = { ...GLOBAL[REQUIRE].s.contexts._.defined };
-                this.__logger.log(`Не удалось вовремя переопределить require, возможны проблемы с модулями: ${ Object.keys(defined).toString() }`)
+                this.__logger.warn(`Не удалось вовремя переопределить require, возможны проблемы с модулями: ${ Object.keys(defined).toString() }`)
             } catch (error) {
                 this.__logger.error(error);
             }
@@ -62,7 +62,7 @@ export class DependencyWatcher implements IPlugin {
     }
     private __defineProperty(desc: IDescriptor, name: string): Promise<void> {
         const descriptor = desc.getDescriptor();
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             try {
                 Object.defineProperties(GLOBAL, {
                     [name]: descriptor,
@@ -71,7 +71,7 @@ export class DependencyWatcher implements IPlugin {
             } catch (e) {
                 reject(e);
             }
-        }).catch((error) => {
+        }).catch<void>((error: Error) => {
             // @ts-ignore
             descriptor.set(GLOBAL[name]);
             // @ts-ignore

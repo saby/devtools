@@ -1,3 +1,0 @@
-<DependencyWatcher._view.list.decorator.Path
-    path="{{ itemData.item['fileName'] }}"
-/>

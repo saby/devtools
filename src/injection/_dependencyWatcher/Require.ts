@@ -33,7 +33,7 @@ export class Require implements IDescriptor {
             }
         }
     };
-    getRequire(): IRequire {
+    getOrigin(): IRequire {
         return  this.__require;
     }
     getConfig<T extends IRequireInitObject>(): T {

@@ -1,19 +1,23 @@
 export const PLUGIN_NAME = 'dependency-watcher';
 
 export enum EventNames {
-    addDependency = "addDependency",
     define = "define",
     require = "require",
     update = "update"
 }
 
-export enum RPCMethods {
-    getBundles = 'getBundles',
-    getModules = 'getModules',
-    getNewModules = 'getNewModules',
-    setSize = 'setSize',
-    getFiles = 'getFiles',
-    isRelease = 'isRelease',
+export enum RPCMethodNames {
+    //
+    moduleGetItems = 'module.getItems',
+    moduleHasUpdates = 'module.hasUpdates',
+    moduleQuery = 'module.query',
+    moduleUpdateItems = 'module.updateItems',
+    moduleOpenSource = 'module.openSource',
+    //
+    fileGetItems = 'file.getItems',
+    fileHasUpdates = 'file.hasUpdates',
+    fileQuery = 'file.query',
+    fileUpdateItems = 'file.updateItems',
 }
 
 export const GLOBAL_MODULE_NAME = '~> page <~';
@@ -29,3 +33,6 @@ export enum DependencyType {
     static = "static",
     dynamic = "dynamic"
 }
+
+export const RESOURCE_ROOT = '/resources/';
+export const CDN_ROOT = '/cdn/';

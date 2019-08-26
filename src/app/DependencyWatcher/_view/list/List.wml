@@ -1,9 +1,0 @@
-<DependencyWatcher._view.list.DataContainer
-    Source="{{ __source }}"
-    sourceConfig="{{ _options.sourceConfig }}"
-    navigation="{{ __navigation }}"
-    column="{{ __column }}"
-    itemTemplate="{{ __itemTemplate }}"
-    modeController="{{ _options.modeController }}"
-    name="dataContainer"
-/>

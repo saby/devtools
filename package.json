@@ -24,21 +24,22 @@
       "tslint": "^5.15.0"
    },
    "dependencies": {
-      "cdn": "git+https://github.com/saby/wasaby-cdn.git#rc-19.510",
+      "cdn": "git+https://github.com/saby/wasaby-cdn.git#rc-19.520",
       "gulp": "^4.0.0",
       "rollup": "^1.6.0",
       "rollup-plugin-terser": "^5.0.0",
       "rollup-plugin-typescript": "^1.0.0",
       "tslib": "^1.9.3",
       "typescript": "^3.4.3",
-      "rmi": "git+https://git.sbis.ru/sbis/rmi.git#rc-19.510",
-      "saby-i18n": "git+https://github.com/saby/i18n.git#rc-19.510",
-      "saby-types": "git+https://github.com/saby/Types.git#rc-19.510",
-      "saby-typescript": "git+https://github.com/saby/TypeScript.git#rc-19.510",
-      "sbis3-builder": "git+https://github.com/saby/Builder.git#rc-19.510",
-      "sbis3-controls": "git+http://git.sbis.ru/sbis/controls.git#rc-19.510",
-      "saby-ui": "git+https://github.com/saby/UI.git#rc-19.510",
-      "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-19.510",
-      "wasaby-app": "git+https://github.com/saby/wasaby-app.git#rc-19.510"
+      "rmi": "git+https://git.sbis.ru/sbis/rmi.git#rc-19.520",
+      "saby-i18n": "git+https://github.com/saby/i18n.git#rc-19.520",
+      "saby-types": "git+https://github.com/saby/Types.git#rc-19.520",
+      "saby-typescript": "git+https://github.com/saby/TypeScript.git#rc-19.520",
+      "sbis3-builder": "git+https://github.com/saby/Builder.git#rc-19.520",
+      "sbis3-controls": "git+http://git.sbis.ru/sbis/controls.git#rc-19.520",
+      "saby-ui": "git+https://github.com/saby/UI.git#rc-19.520",
+      "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-19.520",
+      "wasaby-app": "git+https://github.com/saby/wasaby-app.git#rc-19.520",
+      "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-19.520"
    }
 }

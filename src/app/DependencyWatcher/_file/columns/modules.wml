@@ -1,0 +1,3 @@
+<div>
+    {{ itemData.item.get('modules').length }}
+</div>

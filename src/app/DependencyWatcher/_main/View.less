@@ -1,0 +1,30 @@
+@height-tab-button-panel: 31px;
+@height-search-panel: 48px;
+@height-head-panels: @height-tab-button-panel + @height-search-panel;
+
+.DependencyWatcher_Page {
+
+}
+.DependencyWatcher_Page__scroll {
+  max-height: calc(100vh - @height-head-panels);
+  width: 100vw;
+}
+
+.DependencyWatcher_Page__head > div {
+  margin-right: 12px;
+}
+
+.DependencyWatcher_Page__head > div:last-child {
+  margin-right: 0;
+}
+
+.DependencyWatcher_item__notUsed {
+  text-decoration: line-through;
+}
+
+.DependencyWatcher_item__dynamic {
+  color: #cccccc;
+}
+.DependencyFilter__Items_file {
+  font-size: 15px;
+}
