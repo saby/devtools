@@ -328,9 +328,7 @@ class Agent {
       endSyncMark(rootId);
       changes.forEach(({ operation, node }) => {
          if (node.selfDuration - node.treeDuration < 0) {
-            throw new Error(
-               `Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`
-            );
+            console.error(`Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`);
          }
          node.selfDuration -= node.treeDuration;
          switch (operation) {
@@ -728,8 +726,6 @@ class Agent {
                   const index = ids.indexOf(id);
                   ids.splice(index, 1);
                }
-            } else {
-               throw new Error('Trying to delete nonexistent node');
             }
             break;
          case OperationType.CREATE:
