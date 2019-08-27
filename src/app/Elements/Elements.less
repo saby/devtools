@@ -31,8 +31,13 @@ TODO: пока нет горизонтального скролл контейн
    }
 }
 
-.Elements__tree {
+.Elements__treeWrapper {
    height: 100%;
+}
+
+.Elements__tree {
+   width: min-content;
+   min-width: 100%;
 }
 
 .Elements__node {
@@ -62,4 +67,8 @@ TODO: пока нет горизонтального скролл контейн
 
 .Elements__headElement {
    margin-right: 6px;
+}
+
+.Elements__node_childless {
+   padding-left: 16px;
 }

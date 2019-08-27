@@ -58,7 +58,7 @@ class Breadcrumbs extends Control<IOptions> {
       const selectedChild = this._children[this._options.selectedItemId];
       if (selectedChild instanceof HTMLElement) {
          selectedChild.scrollIntoView({
-            inline: 'nearest'
+            inline: 'end'
          });
       }
    }

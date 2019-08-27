@@ -18,18 +18,20 @@
       <ws:if data="{{_model.getVisibleItems().length > 0}}">
          <div attr:class="Elements__treeContainer"
               on:keydown="_onListKeyDown()">
-            <Controls.scroll:Container attr:class="Elements__tree">
-               <ws:for data="element in _model.getVisibleItems()">
-                  <ws:partial template="wml!Elements/Node"
-                              attr:key="{{element.id}}"
-                              attr:name="{{element.id}}"
-                              on:mouseenter="__highlightElement(element.id)"
-                              on:mouseleave="__highlightElement()"
-                              on:click="_onItemClick(element.id)"
-                              selectedItemId="{{ _selectedItemId }}"
-                              searchValue="{{ _searchValue }}"
-                              scope="{{ element }}" />
-               </ws:for>
+            <Controls.scroll:Container attr:class="Elements__treeWrapper">
+                <div attr:class="Elements__tree">
+                    <ws:for data="element in _model.getVisibleItems()">
+                        <ws:partial template="wml!Elements/Node"
+                                    attr:key="{{element.id}}"
+                                    attr:name="{{element.id}}"
+                                    on:mouseenter="__highlightElement(element.id)"
+                                    on:mouseleave="__highlightElement()"
+                                    on:click="_onItemClick(element.id)"
+                                    selectedItemId="{{ _selectedItemId }}"
+                                    searchValue="{{ _searchValue }}"
+                                    scope="{{ element }}" />
+                    </ws:for>
+                </div>
             </Controls.scroll:Container>
             <ws:if data="{{_path}}">
                <Elements.Breadcrumbs.Breadcrumbs items="{{_path}}"

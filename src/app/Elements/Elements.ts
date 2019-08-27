@@ -95,11 +95,15 @@ class Elements extends Control {
 
    _afterUpdate(): void {
       if (this._scrollToId) {
-         if (this._children[this._scrollToId]) {
-            this._children[this._scrollToId].scrollIntoView({
-               block: 'nearest',
-               inline: 'nearest'
-            });
+         const child = this._children[this._scrollToId] as HTMLElement;
+         if (child) {
+            const text = child.querySelector('.Elements__name');
+            if (text) {
+               text.scrollIntoView({
+                  block: 'nearest',
+                  inline: 'nearest'
+               });
+            }
          }
          this._scrollToId = undefined;
       }
