@@ -9,6 +9,31 @@ function isJQueryElement(
    return element.hasOwnProperty('length');
 }
 
+const CAPTION_HEIGHT = 22;
+
+function calculateCaptionPosition({ top, height, bottom }: ClientRect): {
+   x: number,
+   y: number
+} {
+   const result = {
+      x: 0,
+      y: -CAPTION_HEIGHT
+   };
+   const scrollTop = document.documentElement.offsetHeight;
+
+   if (top > scrollTop) {
+      result.y = scrollTop - top - CAPTION_HEIGHT;
+   } else if (top < CAPTION_HEIGHT) {
+      if (bottom > scrollTop - CAPTION_HEIGHT) {
+         result.y = 0;
+      } else {
+         result.y = height;
+      }
+   }
+
+   return result;
+}
+
 class Overlay {
    private overlay: HTMLDivElement;
    private caption: HTMLSpanElement;
@@ -24,6 +49,9 @@ class Overlay {
       caption.style.pointerEvents = 'none';
       caption.style.background = '#fff';
       caption.style.padding = '2px';
+      caption.style.border = '1px solid #ccc';
+      caption.style.boxSizing = 'border-box';
+      caption.style.position = 'absolute';
       overlay.appendChild(caption);
 
       this.caption = caption;
@@ -36,16 +64,19 @@ class Overlay {
          ? container[0].tagName.toLowerCase()
          : container.tagName.toLowerCase()
    ): void {
-      const { top, left, height, width }: ClientRect = isJQueryElement(
+      const targetPosition = isJQueryElement(
          container
       )
          ? container[0].getBoundingClientRect()
          : container.getBoundingClientRect();
+      const captionPosition = calculateCaptionPosition(targetPosition);
+      this.caption.style.left = `${captionPosition.x}px`;
+      this.caption.style.top = `${captionPosition.y}px`;
       this.caption.textContent = tooltipText;
-      this.overlay.style.top = `${top}px`;
-      this.overlay.style.height = `${height}px`;
-      this.overlay.style.width = `${width}px`;
-      this.overlay.style.left = `${left}px`;
+      this.overlay.style.top = `${targetPosition.top}px`;
+      this.overlay.style.height = `${targetPosition.height}px`;
+      this.overlay.style.width = `${targetPosition.width}px`;
+      this.overlay.style.left = `${targetPosition.left}px`;
       document.body.appendChild(this.overlay);
    }
 

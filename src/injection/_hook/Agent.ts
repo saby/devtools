@@ -590,7 +590,7 @@ class Agent {
    }
 
    private __highlightElement(id?: IBackendControlNode['id']): void {
-      if (id) {
+      if (typeof id !== 'undefined') {
          const node = this.elements.get(id);
          if (node && node.container) {
             this.highlighter.highlightElement(node.container, node.name);
