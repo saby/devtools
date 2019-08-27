@@ -5,16 +5,18 @@ import { descriptor } from 'Types/entity';
 import 'css!Profiler/CommitDetails/CommitDetails';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
-interface IOptions extends IControlOptions {
+export interface ICommitDetailsOptions {
    updateReason: ControlUpdateReason;
    changedOptions?: string[];
    changedAttributes?: string[];
 }
 
-class CommitDetails extends Control<IOptions> {
+type Options = IControlOptions & ICommitDetailsOptions;
+
+class CommitDetails extends Control<Options> {
    protected _template: TemplateFunction = template;
 
-   static getOptionTypes(): Record<keyof IOptions, unknown> {
+   static getOptionTypes(): Record<keyof Options, unknown> {
       return {
          updateReason: descriptor(String).required(),
          changedOptions: descriptor(Array),

@@ -2,7 +2,7 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { Memory } from 'Types/source';
 import Store from 'Elements/Store';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
-import CommitDetails from 'Profiler/CommitDetails/CommitDetails';
+import { ICommitDetailsOptions } from 'Profiler/CommitDetails/CommitDetails';
 import 'css!Profiler/Profiler';
 import Flamegraph from './Flamegraph/Flamegraph';
 import RankedView from './RankedView/RankedView';
@@ -110,7 +110,7 @@ class Profiler extends Control<IOptions> {
 
    protected _selectedCommitId?: IFrontendControlNode['id'];
 
-   protected _selectedCommitChanges: CommitDetails['_options']['changesDescription'];
+   protected _selectedCommitChanges?: ICommitDetailsOptions;
 
    protected _saveScreenshots: boolean = false;
 
