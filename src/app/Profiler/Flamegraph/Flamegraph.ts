@@ -1,14 +1,9 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
-import {
-   IFrontendControlNode
-} from 'Extension/Plugins/Elements/IControlNode';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import 'css!Profiler/Flamegraph/Flamegraph';
 import { getWidth } from './Utils';
-import {
-   formatTime,
-   getBackgroundColorBasedOnReason
-} from '../Utils';
+import { formatTime, getBackgroundColorBasedOnReason } from '../Utils';
 // @ts-ignore
 import template = require('wml!Profiler/Flamegraph/Flamegraph');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
@@ -85,7 +80,11 @@ function getSubtreeWithSelectedNode(
       const result = [node];
 
       let currentParentId = node.parentId;
-      for (let i = selectedNodeIndex; i >= 0 && typeof currentParentId !== 'undefined'; i--) {
+      for (
+         let i = selectedNodeIndex;
+         i >= 0 && typeof currentParentId !== 'undefined';
+         i--
+      ) {
          if (snapshot[i].id === currentParentId) {
             currentParentId = snapshot[i].parentId;
             result.unshift(snapshot[i]);
@@ -95,7 +94,10 @@ function getSubtreeWithSelectedNode(
       const parents = new Set();
       parents.add(node.id);
       for (let i = selectedNodeIndex; i < snapshot.length; i++) {
-         if (typeof snapshot[i].parentId !== 'undefined' && parents.has(snapshot[i].parentId)) {
+         if (
+            typeof snapshot[i].parentId !== 'undefined' &&
+            parents.has(snapshot[i].parentId)
+         ) {
             parents.add(snapshot[i].id);
             result.push(snapshot[i]);
          }
@@ -170,12 +172,7 @@ function getLeftOffset(
 
    let lastElementWithTheSameParent;
    if (previousNodesOnThisDepth.length > 0) {
-      /**
-       * TODO: очередные костыли из-за кривых ключей
-       * если глубина 0, то считаем, что все предыдущие элементы имеют того же родителя
-       */
       if (
-         depth === 0 ||
          previousNodesOnThisDepth[previousNodesOnThisDepth.length - 1]
             .parentId === parentId
       ) {
@@ -350,7 +347,9 @@ class Flamegraph extends Control<IOptions> {
          oldOptions.markedKey !== this._options.markedKey &&
          this._children[this._options.markedKey]
       ) {
-         (this._children[this._options.markedKey] as HTMLElement).scrollIntoView({
+         (this._children[
+            this._options.markedKey
+         ] as HTMLElement).scrollIntoView({
             block: 'nearest',
             inline: 'nearest'
          });
@@ -401,7 +400,10 @@ class Flamegraph extends Control<IOptions> {
       stopPropagation: Event['stopPropagation'];
    }): void {
       const key = e.nativeEvent.key;
-      if (ARROWS.indexOf(key) !== -1 && typeof this._options.markedKey !== 'undefined') {
+      if (
+         ARROWS.indexOf(key) !== -1 &&
+         typeof this._options.markedKey !== 'undefined'
+      ) {
          const selectedItem = this._options.snapshot.find(
             ({ id }) => id === this._options.markedKey
          );
