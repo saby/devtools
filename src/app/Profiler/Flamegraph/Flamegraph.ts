@@ -399,30 +399,34 @@ class Flamegraph extends Control<IOptions> {
       nativeEvent: KeyboardEvent;
       stopPropagation: Event['stopPropagation'];
    }): void {
-      const key = e.nativeEvent.key;
-      if (
-         ARROWS.indexOf(key) !== -1 &&
-         typeof this._options.markedKey !== 'undefined'
-      ) {
-         const selectedItem = this._options.snapshot.find(
-            ({ id }) => id === this._options.markedKey
-         );
-         if (selectedItem) {
-            e.stopPropagation();
-            switch (key) {
-               case 'ArrowDown':
-                  this.__handleArrowDown(selectedItem);
-                  break;
-               case 'ArrowLeft':
-                  this.__handleArrowLeft(selectedItem);
-                  break;
-               case 'ArrowRight':
-                  this.__handleArrowRight(selectedItem);
-                  break;
-               case 'ArrowUp':
-                  this.__handleArrowUp(selectedItem);
-                  break;
+      if (typeof this._options.markedKey !== 'undefined') {
+         const key = e.nativeEvent.key;
+         if (ARROWS.indexOf(key) !== -1) {
+            const selectedItem = this._options.snapshot.find(
+               ({ id }) => id === this._options.markedKey
+            );
+            if (selectedItem) {
+               e.stopPropagation();
+               switch (key) {
+                  case 'ArrowDown':
+                     this.__handleArrowDown(selectedItem);
+                     break;
+                  case 'ArrowLeft':
+                     this.__handleArrowLeft(selectedItem);
+                     break;
+                  case 'ArrowRight':
+                     this.__handleArrowRight(selectedItem);
+                     break;
+                  case 'ArrowUp':
+                     this.__handleArrowUp(selectedItem);
+                     break;
+               }
             }
+         }
+
+         if (key === 'Escape') {
+            e.stopPropagation();
+            this._notify('markedKeyChanged');
          }
       }
    }

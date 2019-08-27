@@ -1,7 +1,7 @@
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
 interface IResult {
-   id: IFrontendControlNode['id'];
+   id?: IFrontendControlNode['id'];
    index: number;
    total: number;
 }
@@ -18,7 +18,7 @@ class Controller {
    updateSearch(
       items: object[],
       value: string,
-      selectedItemId: IFrontendControlNode['id'] = NaN
+      selectedItemId?: IFrontendControlNode['id']
    ): IResult {
       let id = selectedItemId;
       if (value) {
@@ -41,7 +41,7 @@ class Controller {
             }
          }
       } else {
-         id = NaN;
+         id = undefined;
          this._searchResults = [];
          this._lastFoundItemIndex = 0;
       }

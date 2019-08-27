@@ -108,7 +108,7 @@ class Profiler extends Control<IOptions> {
 
    protected _selectedSynchronizationId: string = '';
 
-   protected _selectedCommitId: IFrontendControlNode['id'] = NaN;
+   protected _selectedCommitId?: IFrontendControlNode['id'];
 
    protected _selectedCommitChanges: CommitDetails['_options']['changesDescription'];
 
@@ -219,7 +219,7 @@ class Profiler extends Control<IOptions> {
    }
 
    private __updateSelectedCommitChanges(): void {
-      if (isNaN(this._selectedCommitId)) {
+      if (typeof this._selectedCommitId === 'undefined') {
          this._selectedCommitChanges = undefined;
       } else {
          const changes = getChangesDescription(
@@ -247,7 +247,7 @@ class Profiler extends Control<IOptions> {
       this.__setSynchronization(this._selectedSynchronizationId);
    }
 
-   private __detailMarkedKeyChanged(e: Event, id: IFrontendControlNode['id'] = NaN): void {
+   private __detailMarkedKeyChanged(e: Event, id?: IFrontendControlNode['id']): void {
       this._selectedCommitId = id;
       this.__updateSelectedCommitChanges();
    }
@@ -344,7 +344,7 @@ class Profiler extends Control<IOptions> {
             this._synchronizations = undefined;
             this._snapshot = undefined;
             this._selectedCommitChanges = undefined;
-            this._selectedCommitId = NaN;
+            this._selectedCommitId = undefined;
             this._selectedSynchronizationId = '';
             this._elementsSnapshot = this._options.store.getElements().slice();
          } else {
@@ -377,7 +377,7 @@ class Profiler extends Control<IOptions> {
          this._selectedCommitId
       );
 
-      if (searchResult.id) {
+      if (typeof searchResult.id !== 'undefined') {
          this._selectedCommitId = searchResult.id;
          this.__updateSelectedCommitChanges();
       }
@@ -392,7 +392,7 @@ class Profiler extends Control<IOptions> {
             e.nativeEvent.shiftKey
          );
 
-         if (searchResult.id) {
+         if (typeof searchResult.id !== 'undefined') {
             this._selectedCommitId = searchResult.id;
             this.__updateSelectedCommitChanges();
          }
