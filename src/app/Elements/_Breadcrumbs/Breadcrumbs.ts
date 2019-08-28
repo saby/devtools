@@ -1,9 +1,9 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
-import template = require('wml!Elements/Breadcrumbs/Breadcrumbs');
+import template = require('wml!Elements/_Breadcrumbs/Breadcrumbs');
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
-import 'css!Elements/Breadcrumbs/Breadcrumbs';
+import 'css!Elements/_Breadcrumbs/Breadcrumbs';
 
 interface IOptions extends IControlOptions {
    items: Array<{

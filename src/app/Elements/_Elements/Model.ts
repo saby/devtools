@@ -1,6 +1,6 @@
-import Store from './Store';
+import Store from '../_store/Store';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
+import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
 // @ts-ignore
 import * as ArraySimpleValuesUtil from 'Controls/Utils/ArraySimpleValuesUtil';
 

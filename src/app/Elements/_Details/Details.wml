@@ -12,7 +12,7 @@
                                on:click="__viewConstructor()" />
    </div>
    <ws:if data="{{ __hasData(_options.options) }}">
-      <Elements.Details.Pane.Pane caption="Options"
+      <Elements._Details.Pane.Pane caption="Options"
                                   data="{{ _options.options }}"
                                   changedData="{{ _options.changedOptions }}"
                                   controlId="{{ _options.id }}"
@@ -23,7 +23,7 @@
    </ws:if>
    <ws:if data="{{_options.isControl}}">
       <ws:if data="{{ __hasData(_options.state) }}">
-         <Elements.Details.Pane.Pane caption="State"
+         <Elements._Details.Pane.Pane caption="State"
                                      data="{{ _options.state }}"
                                      changedData="{{ _options.changedState }}"
                                      controlId="{{ _options.id }}"
@@ -34,7 +34,7 @@
       </ws:if>
    </ws:if>
    <ws:if data="{{ __hasData(_options.events) }}">
-      <Elements.Details.Pane.Pane caption="Events"
+      <Elements._Details.Pane.Pane caption="Events"
                                   data="{{_options.events}}"
                                   canStoreAsGlobal="{{false}}"
                                   controlId="{{ _options.id }}"
@@ -44,7 +44,7 @@
                                   expanded="{{_options.eventsExpanded}}"/>
    </ws:if>
    <ws:if data="{{ __hasData(_options.attributes) }}">
-      <Elements.Details.Pane.Pane caption="Attributes"
+      <Elements._Details.Pane.Pane caption="Attributes"
                                   data="{{ _options.attributes }}"
                                   changedData="{{ _options.changedAttributes }}"
                                   controlId="{{ _options.id }}"

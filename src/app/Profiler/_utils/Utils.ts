@@ -1,4 +1,4 @@
-import Store, { applyOperation } from '../../Elements/Store';
+import { Store, applyOperation } from 'Elements/elements';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import Profiler, { ISynchronizationOverview } from '../_Profiler/Profiler';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';

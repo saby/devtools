@@ -1,16 +1,16 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
-import template = require('wml!Elements/Details/Pane/Pane');
+import template = require('wml!Elements/_Details/Pane/Pane');
 import { descriptor, Model } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
 import { TEMPLATES } from './const';
 import { Source } from './Source';
 // @ts-ignore
-import columnTemplate = require('wml!Elements/Details/Pane/columnTemplate');
-import { highlightUpdate } from '../../highlightUpdate';
+import columnTemplate = require('wml!Elements/_Details/Pane/columnTemplate');
+import { highlightUpdate } from '../../_utils/highlightUpdate';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
-import 'css!Elements/Details/Pane/Pane';
+import 'css!Elements/_Details/Pane/Pane';
 
 interface IOptions extends IControlOptions {
    caption: string;

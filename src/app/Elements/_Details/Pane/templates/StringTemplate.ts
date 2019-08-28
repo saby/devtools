@@ -1,8 +1,8 @@
 import Control = require('Core/Control');
-import template = require('wml!Elements/Details/Pane/templates/StringTemplate');
+import template = require('wml!Elements/_Details/Pane/templates/StringTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
-import 'css!Elements/Details/Pane/templates/StringTemplate';
+import 'css!Elements/_Details/Pane/templates/StringTemplate';
 
 interface IOptions extends ITemplateOptions {
    value: string;

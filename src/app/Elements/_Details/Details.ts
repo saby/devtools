@@ -1,11 +1,11 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 // @ts-ignore
-import template = require('wml!Elements/Details/Details');
+import template = require('wml!Elements/_Details/Details');
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
-import Store from 'Elements/Store';
+import Store from '../_store/Store';
 
-import 'css!Elements/Details/Details';
+import 'css!Elements/_Details/Details';
 
 interface IOptions extends IControlOptions {
    id: IFrontendControlNode['id'];

@@ -1,18 +1,18 @@
 // @ts-ignore
 import Control = require('Core/Control');
 // @ts-ignore
-import template = require('wml!Elements/Elements');
+import template = require('wml!Elements/_Elements/Elements');
 import {
    IBackendControlNode,
    IFrontendControlNode
 } from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
-import { IOptions as BreadcrumbsOptions } from './Breadcrumbs/Breadcrumbs';
-import { highlightUpdate } from './highlightUpdate';
-import retrocycle from './retrocycle';
-import 'css!Elements/Elements';
-import Store from './Store';
+import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
+import { highlightUpdate } from '../_utils/highlightUpdate';
+import retrocycle from '../retrocycle';
+import 'css!Elements/_Elements/Elements';
+import Store from '../_store/Store';
 import Model from './Model';
 import { throttle } from 'Types/function';
 import Controller from 'Search/Controller';

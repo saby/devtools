@@ -1,4 +1,4 @@
-import { ContentChannel } from '../Devtool/Event/ContentChannel';
+import { ContentChannel } from '../../Devtool/Event/ContentChannel';
 import {
    IBackendControlNode,
    IFrontendControlNode

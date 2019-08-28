@@ -10,7 +10,7 @@ import 'css!Devtool/Page/Page';
 // TODO: пока не подключили application берём шрифты отсюда
 import 'css!Controls/Application/Application';
 import { ConsoleLogger } from "Extension/Logger/Console";
-import Store from 'Elements/Store';
+import { Store } from 'Elements/elements';
 
 let logger = new ConsoleLogger('Wasaby');
 logger.log('main component loaded');

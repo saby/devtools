@@ -25,7 +25,7 @@
                     <ws:Object id="Elements">
                         <ws:itemTemplate>
                             <Controls.Container.Async
-                                templateName="Elements/Elements"
+                                templateName="Elements/elements:Elements"
                             >
                                 <ws:templateOptions
                                     store="{{_store}}"

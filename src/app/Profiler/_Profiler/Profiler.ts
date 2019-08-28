@@ -1,6 +1,6 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { Memory } from 'Types/source';
-import Store from 'Elements/Store';
+import { Store } from 'Elements/elements';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { ICommitDetailsOptions } from 'Profiler/_CommitDetails/CommitDetails';
 import 'css!Profiler/_Profiler/Profiler';
