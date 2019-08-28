@@ -22,6 +22,7 @@ import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData
 import isDeepEqual from './isDeepEqual';
 import deepClone from './deepClone';
 import getNodeId from './getNodeId';
+import { INamedLogger } from 'Extension/Logger/ILogger';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -149,7 +150,10 @@ class Agent {
       number
    > = new Map();
 
-   constructor() {
+   private logger: INamedLogger;
+
+   constructor(config: { logger: INamedLogger }) {
+      this.logger = config.logger;
       this.channel.addListener(
          'devtoolsInitialized',
          this.__onDevtoolsOpened.bind(this)
@@ -267,20 +271,23 @@ class Agent {
       return id;
    }
 
-   onEndCommit(
-      id: IBackendControlNode['id'],
-      node: IBackendControlNode
-   ): void {
+   onEndCommit(id: IBackendControlNode['id'], node: IBackendControlNode): void {
       const currentRoot = this.__getCurrentRoot();
       const changedNode = currentRoot.get(id);
       if (!changedNode) {
-         throw new Error('Trying to change nonexistent node');
+         this.logger.error(new Error('Trying to change nonexistent node'));
+         return;
       }
       endMark(changedNode.node.name, id, changedNode.operation);
       const commitDuration = performance.now() - changedNode.node.selfStartTime;
       changedNode.node.selfDuration += commitDuration;
       this.componentsStack.pop();
-      updateParentDuration(currentRoot, commitDuration, this.componentsStack, changedNode.node.parentId);
+      updateParentDuration(
+         currentRoot,
+         commitDuration,
+         this.componentsStack,
+         changedNode.node.parentId
+      );
       this.vNodeToId.set(node, id);
    }
 
@@ -288,7 +295,8 @@ class Agent {
       const currentRoot = this.__getCurrentRoot();
       const changedNode = currentRoot.get(id);
       if (!changedNode) {
-         throw new Error('Trying to change nonexistent node');
+         this.logger.error(new Error('Trying to change nonexistent node'));
+         return;
       }
       startMark(changedNode.node.name, id);
       changedNode.node.selfStartTime = performance.now();
@@ -300,7 +308,8 @@ class Agent {
       const id = data.id;
       const changedNode = currentRoot.get(id);
       if (!changedNode) {
-         throw new Error('Trying to change nonexistent node');
+         this.logger.error(new Error('Trying to change nonexistent node'));
+         return;
       }
       endMark(data.name, data.id);
       this.vNodeToId.set(currentNode, id);
@@ -317,18 +326,26 @@ class Agent {
       changedNode.node.parentId = parentId;
 
       this.componentsStack.pop();
-      updateParentDuration(currentRoot, lifecycleDuration, this.componentsStack, parentId);
+      updateParentDuration(
+         currentRoot,
+         lifecycleDuration,
+         this.componentsStack,
+         parentId
+      );
    }
 
    onEndSync(rootId: string): void {
       const changes = this.changedRoots.get(rootId);
       if (!changes) {
-         throw new Error('Trying to change nonexistent root');
+         this.logger.error(new Error('Trying to change nonexistent root'));
+         return;
       }
       endSyncMark(rootId);
       changes.forEach(({ operation, node }) => {
          if (node.selfDuration - node.treeDuration < 0) {
-            console.error(`Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`);
+            this.logger.warn(
+               `Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`
+            );
          }
          node.selfDuration -= node.treeDuration;
          switch (operation) {
@@ -703,9 +720,12 @@ class Agent {
          if (this.vNodeToId.has(node)) {
             return this.vNodeToId.get(node) as number;
          } else {
-            throw new Error(
-               'startCommit for this node was called several times in a row without calling endCommit.'
+            this.logger.error(
+               new Error(
+                  'startCommit for this node was called several times in a row without calling endCommit.'
+               )
             );
+            return -1;
          }
       }
       return getNodeId();
@@ -736,8 +756,10 @@ class Agent {
             } else {
                const root = this.__getCurrentRoot();
                const changedNode = root.get(id) as IChangedNode;
-               console.error(
-                  `${changedNode.node.name} with id ${changedNode.node.id} was mounted but doesn't have container.`
+               this.logger.error(
+                  new Error(
+                     `${changedNode.node.name} with id ${changedNode.node.id} was mounted but doesn't have container.`
+                  )
                );
             }
             break;
@@ -753,7 +775,9 @@ class Agent {
       return currentRoot;
    }
 
-   private __getParentId(id: IBackendControlNode['id']): IBackendControlNode['id'] | undefined {
+   private __getParentId(
+      id: IBackendControlNode['id']
+   ): IBackendControlNode['id'] | undefined {
       const element = this.elements.get(id);
       if (element) {
          return element.parentId;

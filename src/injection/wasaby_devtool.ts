@@ -4,8 +4,7 @@ import { InjectHook } from './InjectHook';
 import { DevtoolChannel } from './_devtool/Channel';
 import { GlobalMessages } from 'Extension/const';
 import { globalChannel } from './_devtool/globalChannel';
-import { ConsoleLogger } from "Extension/Logger/Console";
-// import { logger } from './_devtool/logger';
+import { ConsoleLogger } from 'Extension/Logger/Console';
 
 const ALL_PLUGINS: IPluginConstructor[] = [
     DependencyWatcher,
