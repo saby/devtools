@@ -2,7 +2,7 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
 import template = require('wml!Profiler/_TimeRender/TimeRender');
 import { descriptor } from 'Types/entity';
-import 'css!Profiler/_TimeRender/TimeRender';
+import 'css!Profiler/profiler';
 import { formatTime } from '../_utils/Utils';
 
 interface IOptions extends IControlOptions {

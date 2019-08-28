@@ -10,7 +10,7 @@ import columnTemplate = require('wml!Elements/_Details/Pane/columnTemplate');
 import { highlightUpdate } from '../../_utils/highlightUpdate';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
-import 'css!Elements/_Details/Pane/Pane';
+import 'css!Elements/elements';
 
 interface IOptions extends IControlOptions {
    caption: string;

@@ -5,7 +5,7 @@ import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import Store from '../_store/Store';
 
-import 'css!Elements/_Details/Details';
+import 'css!Elements/elements';
 
 interface IOptions extends IControlOptions {
    id: IFrontendControlNode['id'];

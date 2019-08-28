@@ -2,7 +2,7 @@ import Control = require('Core/Control');
 import template = require('wml!Elements/_Details/Pane/templates/NumberTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
-import 'css!Elements/_Details/Pane/templates/NumberTemplate';
+import 'css!Elements/elements';
 
 interface IOptions extends ITemplateOptions {
    value: number;

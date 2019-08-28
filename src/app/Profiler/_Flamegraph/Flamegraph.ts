@@ -1,7 +1,7 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import 'css!Profiler/_Flamegraph/Flamegraph';
+import 'css!Profiler/profiler';
 import { getWidth } from './Utils';
 import { formatTime, getBackgroundColorBasedOnReason } from '../_utils/Utils';
 // @ts-ignore

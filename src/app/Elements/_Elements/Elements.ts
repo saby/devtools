@@ -11,7 +11,7 @@ import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
 import { highlightUpdate } from '../_utils/highlightUpdate';
 import retrocycle from '../retrocycle';
-import 'css!Elements/_Elements/Elements';
+import 'css!Elements/elements';
 import Store from '../_store/Store';
 import Model from './Model';
 import { throttle } from 'Types/function';

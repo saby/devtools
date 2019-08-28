@@ -3,7 +3,7 @@ import * as Control from 'Core/Control';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_main/View';
 import { RPC } from 'Extension/Event/RPC';
-import 'css!DependencyWatcher/_main/View';
+import 'css!DependencyWatcher/main';
 import { IEventEmitter } from 'Extension/Event/IEventEmitter';
 import { EventNames, PLUGIN_NAME, RPCMethodNames } from 'Extension/Plugins/DependencyWatcher/const';
 import { ContentChannel } from '../../Devtool/Event/ContentChannel';

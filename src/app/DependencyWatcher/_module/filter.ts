@@ -5,6 +5,6 @@ import * as itemTemplate from 'wml!DependencyWatcher/_module/filter/itemTemplate
 import * as Panel from 'wml!DependencyWatcher/_module/filter/Panel';
 //@ts-ignore
 import * as additionalTemplate from 'wml!DependencyWatcher/_module/filter/additionalTemplate';
-import 'css!DependencyWatcher/_module/filter/style';
+import 'css!DependencyWatcher/module';
 
 export { file, itemTemplate, additionalTemplate, Panel }

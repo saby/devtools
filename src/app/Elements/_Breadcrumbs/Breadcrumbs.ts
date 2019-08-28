@@ -3,7 +3,7 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import template = require('wml!Elements/_Breadcrumbs/Breadcrumbs');
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
-import 'css!Elements/_Breadcrumbs/Breadcrumbs';
+import 'css!Elements/elements';
 
 interface IOptions extends IControlOptions {
    items: Array<{
