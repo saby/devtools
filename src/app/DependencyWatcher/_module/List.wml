@@ -24,7 +24,7 @@
     </ws:search>
     <ws:filterButton>
         <Controls.filter:View
-            detailPanelTemplateName="DependencyWatcher/_module/filter:Panel"
+            detailPanelTemplateName="DependencyWatcher/module:filter.Panel"
         />
     </ws:filterButton>
     <ws:content>
