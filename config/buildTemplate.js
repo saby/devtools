@@ -101,6 +101,8 @@ const EXTENSION_MODULES = [
 
 const MODULES = [].concat(WASABY_MODULES, EXTENSION_MODULES);
 
+const browsersList = ['Chrome>=60'];
+
 module.exports = {
   "cache":  resolve(logs.root, "builder-ui/builder-json-cache"),
   "output": output.resource,
@@ -114,5 +116,6 @@ module.exports = {
   "minimize": minimize,
   "wml": true,
   "joinedMeta": true,
-  "modules": MODULES
+  "modules": MODULES,
+  "autoprefixer": { browsers: browsersList, remove: true }
 };

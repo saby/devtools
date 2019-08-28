@@ -35,7 +35,7 @@
       "saby-i18n": "git+https://github.com/saby/i18n.git#rc-19.520",
       "saby-types": "git+https://github.com/saby/Types.git#rc-19.520",
       "saby-typescript": "git+https://github.com/saby/TypeScript.git#rc-19.520",
-      "sbis3-builder": "git+https://github.com/saby/Builder.git#rc-19.520",
+      "sbis3-builder": "git+https://github.com/saby/Builder.git#rc-19.700",
       "sbis3-controls": "git+http://git.sbis.ru/sbis/controls.git#rc-19.520",
       "saby-ui": "git+https://github.com/saby/UI.git#rc-19.520",
       "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-19.520",
