@@ -1,4 +1,4 @@
-import { IWasabyDevHook } from './IHook';
+import { IWasabyDevHook } from 'Types/IHook';
 import { IBackendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';

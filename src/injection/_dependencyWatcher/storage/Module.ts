@@ -95,8 +95,7 @@ export class ModuleStorage extends Update<IModule, IModuleFilter, UpdateParam<IM
         if (!module.defined) {
             return false;
         }
-        // TODO нужен нормальный подход шарить какие-то данные
-        // @ts-ignore
+        // TODO: открывать все файлы через одно место
         window.__WASABY_DEV_MODULE__ = module.data;
         return true;
     }

@@ -1,4 +1,5 @@
-import Control = require('Core/Control');
+import { Control, TemplateFunction } from 'UI/Base';
+// @ts-ignore
 import template = require('wml!Elements/_Details/Pane/templates/ObjectTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
@@ -9,12 +10,12 @@ interface IOptions extends ITemplateOptions {
 }
 
 class ObjectTemplate extends Control {
-   protected _template: Function = template;
+   protected _template: TemplateFunction = template;
    protected readonly _options: Readonly<IOptions>;
    protected _caption: string;
 
    constructor(options: Readonly<IOptions>) {
-      super();
+      super(options);
       this._caption = this.__getCaption(options.value);
    }
 

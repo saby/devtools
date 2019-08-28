@@ -14,7 +14,7 @@ function createPanelIfNeeded(): void {
          'devtool/app-index.html',
          (panel: chrome.devtools.panels.ExtensionPanel): void => {
             panelCreated = true;
-            let elementsPanel;
+            let elementsPanel: Window['elementsPanel'];
             let loadInterval: number;
             panel.onShown.addListener((window) => {
                if (window.elementsPanel) {

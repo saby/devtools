@@ -5,7 +5,6 @@ import Agent from './_hook/Agent';
 export class InjectHook implements IPlugin {
    private _agent: Agent;
    constructor(config: IPluginConfig) {
-      // @ts-ignore
       if (window.__WASABY_DEV_HOOK__) {
          return;
       }

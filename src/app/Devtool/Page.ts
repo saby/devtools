@@ -18,7 +18,7 @@ class Extension extends Control {
    protected _template: Function = template;
    protected _activeTab: string = 'Elements';
    protected _tabsSource: Memory = new Memory({
-      idProperty: '',
+      keyProperty: 'id',
       data: [
          {
             id: 'Elements',
