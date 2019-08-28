@@ -1,6 +1,6 @@
-import Store, { applyOperation } from '../Elements/Store';
+import Store, { applyOperation } from '../../Elements/Store';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import Profiler, { ISynchronizationOverview } from './Profiler';
+import Profiler, { ISynchronizationOverview } from '../_Profiler/Profiler';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import {
    IBackendProfilingData,
@@ -8,7 +8,7 @@ import {
    IFrontendProfilingData,
    IFrontendSynchronizationDescription
 } from 'Extension/Plugins/Elements/IProfilingData';
-import Flamegraph from './Flamegraph/Flamegraph';
+import Flamegraph from '../_Flamegraph/Flamegraph';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 export function applyOperations(

@@ -1,6 +1,6 @@
 <ws:template name="row">
     <div class="Overview__row">
-        <Profiler.ReasonTag.ReasonTag updateReason="{{ updateReason }}"
+        <Profiler._ReasonTag.ReasonTag updateReason="{{ updateReason }}"
                                       attr:class="Overview__reasonTag" />{{ caption }}: {{ count }}
     </div>
 </ws:template>

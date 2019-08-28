@@ -40,7 +40,7 @@
             <Controls.masterDetail:Base attr:class="Profiler__masterDetail">
                 <ws:master>
                     <Controls.scroll:Container attr:class="Profiler__master">
-                        <Profiler.SynchronizationsList.SynchronizationsList synchronizations="{{ _synchronizations }}"
+                        <Profiler._SynchronizationsList.SynchronizationsList synchronizations="{{ _synchronizations }}"
                                                                             markedKey="{{ _selectedSynchronizationId }}"
                                                                             filter="{{ _masterFilter }}"
                                                                             on:markedKeyChanged="__masterMarkedKeyChanged()"/>
@@ -48,13 +48,13 @@
                 </ws:master>
                 <ws:detail>
                     <ws:if data="{{ _selectedTab === 'Flamegraph' }}">
-                        <Profiler.Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
+                        <Profiler._Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
                                                         markedKey="{{ _selectedCommitId }}"
                                                         on:markedKeyChanged="__detailMarkedKeyChanged()"
                                                         attr:class="Profiler__detail"/>
                     </ws:if>
                     <ws:else>
-                        <Profiler.RankedView.RankedView snapshot="{{ _snapshot }}"
+                        <Profiler._RankedView.RankedView snapshot="{{ _snapshot }}"
                                                         markedKey="{{ _selectedCommitId }}"
                                                         filter="{{ _detailFilter }}"
                                                         on:markedKeyChanged="__detailMarkedKeyChanged()"
@@ -63,12 +63,12 @@
                 </ws:detail>
             </Controls.masterDetail:Base>
             <ws:if data="{{ _selectedCommitChanges }}">
-                <Profiler.CommitDetails.CommitDetails updateReason="{{ _selectedCommitChanges.updateReason }}"
+                <Profiler._CommitDetails.CommitDetails updateReason="{{ _selectedCommitChanges.updateReason }}"
                                                       changedOptions="{{ _selectedCommitChanges.changedOptions }}"
                                                       changedAttributes="{{ _selectedCommitChanges.changedAttributes }}"/>
             </ws:if>
             <ws:else>
-                <Profiler.Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"
+                <Profiler._Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"
                                             selfUpdatedCount="{{ _synchronizationOverview.selfUpdatedCount }}"
                                             parentUpdatedCount="{{ _synchronizationOverview.parentUpdatedCount }}"
                                             unchangedCount="{{ _synchronizationOverview.unchangedCount }}"

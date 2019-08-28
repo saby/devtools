@@ -1,8 +1,8 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
-import template = require('wml!Profiler/CommitDetails/CommitDetails');
+import template = require('wml!Profiler/_CommitDetails/CommitDetails');
 import { descriptor } from 'Types/entity';
-import 'css!Profiler/CommitDetails/CommitDetails';
+import 'css!Profiler/_CommitDetails/CommitDetails';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 export interface ICommitDetailsOptions {

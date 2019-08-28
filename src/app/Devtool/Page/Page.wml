@@ -37,7 +37,7 @@
                     <ws:Object id="Profiler">
                         <ws:itemTemplate>
                             <Controls.Container.Async
-                                templateName="Profiler/Profiler"
+                                templateName="Profiler/profiler:Profiler"
                             >
                                 <ws:templateOptions
                                     store="{{_store}}"

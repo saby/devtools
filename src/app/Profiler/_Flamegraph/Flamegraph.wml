@@ -4,7 +4,7 @@
         <ws:for data="rowData in _depthToItemData">
             <div class="Flamegraph__row">
                 <ws:for data="index, itemData in rowData">
-                    <ws:partial template="wml!Profiler/Flamegraph/Node"
+                    <ws:partial template="wml!Profiler/_Flamegraph/Node"
                                 itemData="{{ itemData }}"
                                 attr:key="{{ itemData.id }}"
                                 attr:name="{{ itemData.id }}"

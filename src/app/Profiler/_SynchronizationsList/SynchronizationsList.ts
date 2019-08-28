@@ -2,10 +2,10 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
 import { Memory } from 'Types/source';
 // @ts-ignore
-import synchronizationTemplate = require('wml!Profiler/SynchronizationsList/synchronizationTemplate');
+import synchronizationTemplate = require('wml!Profiler/_SynchronizationsList/synchronizationTemplate');
 // @ts-ignore
-import template = require('wml!Profiler/SynchronizationsList/SynchronizationsList');
-import { getBackgroundColorBasedOnTiming } from '../Utils';
+import template = require('wml!Profiler/_SynchronizationsList/SynchronizationsList');
+import { getBackgroundColorBasedOnTiming } from '../_utils/Utils';
 
 interface ISynchronizationsList {
    id: string;

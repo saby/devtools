@@ -1,9 +1,9 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 // @ts-ignore
-import * as template from 'wml!Profiler/ReasonTag/ReasonTag';
-import 'css!Profiler/ReasonTag/ReasonTag';
+import * as template from 'wml!Profiler/_ReasonTag/ReasonTag';
+import 'css!Profiler/_ReasonTag/ReasonTag';
 import { descriptor } from 'Types/entity';
-import { getBackgroundColorBasedOnReason } from '../Utils';
+import { getBackgroundColorBasedOnReason } from '../_utils/Utils';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 interface IOptions extends IControlOptions {

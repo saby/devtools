@@ -2,15 +2,15 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { Memory } from 'Types/source';
 // @ts-ignore
-import template = require('wml!Profiler/RankedView/RankedView');
+import template = require('wml!Profiler/_RankedView/RankedView');
 import { descriptor, Model } from 'Types/entity';
 // @ts-ignore
-import commitTimeTemplate = require('wml!Profiler/RankedView/commitTimeTemplate');
+import commitTimeTemplate = require('wml!Profiler/_RankedView/commitTimeTemplate');
 // @ts-ignore
-import reasonTemplate = require('wml!Profiler/RankedView/reasonTemplate');
+import reasonTemplate = require('wml!Profiler/_RankedView/reasonTemplate');
 // @ts-ignore
-import groupTemplate = require('wml!Profiler/RankedView/groupTemplate');
-import { getBackgroundColorBasedOnTiming } from '../Utils';
+import groupTemplate = require('wml!Profiler/_RankedView/groupTemplate');
+import { getBackgroundColorBasedOnTiming } from '../_utils/Utils';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 interface IRankedViewControlNode extends IFrontendControlNode {

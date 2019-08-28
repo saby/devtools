@@ -1,7 +1,7 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 // @ts-ignore
 import template = require('wml!Elements/Breadcrumbs/Breadcrumbs');
-import { IFrontendControlNode } from 'shared/Extension/Plugins/Elements/IControlNode';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import 'css!Elements/Breadcrumbs/Breadcrumbs';
 

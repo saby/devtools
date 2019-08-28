@@ -1,7 +1,7 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 // @ts-ignore
-import * as template from 'wml!Profiler/Overview/Overview';
-import 'css!Profiler/Overview/Overview';
+import * as template from 'wml!Profiler/_Overview/Overview';
+import 'css!Profiler/_Overview/Overview';
 import { descriptor } from 'Types/entity';
 
 interface IOptions extends IControlOptions {

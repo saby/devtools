@@ -1,11 +1,11 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import 'css!Profiler/Flamegraph/Flamegraph';
+import 'css!Profiler/_Flamegraph/Flamegraph';
 import { getWidth } from './Utils';
-import { formatTime, getBackgroundColorBasedOnReason } from '../Utils';
+import { formatTime, getBackgroundColorBasedOnReason } from '../_utils/Utils';
 // @ts-ignore
-import template = require('wml!Profiler/Flamegraph/Flamegraph');
+import template = require('wml!Profiler/_Flamegraph/Flamegraph');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 interface IFlamegraphControlNode extends IFrontendControlNode {

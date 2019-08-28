@@ -2,11 +2,11 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { Memory } from 'Types/source';
 import Store from 'Elements/Store';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
-import { ICommitDetailsOptions } from 'Profiler/CommitDetails/CommitDetails';
-import 'css!Profiler/Profiler';
-import Flamegraph from './Flamegraph/Flamegraph';
-import RankedView from './RankedView/RankedView';
-import SynchronizationsList from './SynchronizationsList/SynchronizationsList';
+import { ICommitDetailsOptions } from 'Profiler/_CommitDetails/CommitDetails';
+import 'css!Profiler/_Profiler/Profiler';
+import Flamegraph from '../_Flamegraph/Flamegraph';
+import RankedView from '../_RankedView/RankedView';
+import SynchronizationsList from '../_SynchronizationsList/SynchronizationsList';
 import {
    applyOperations,
    convertProfilingData,
@@ -15,17 +15,16 @@ import {
    getChangesDescription,
    getSelfDuration,
    getSynchronizationOverview
-} from './Utils';
+} from '../_utils/Utils';
 import { OperationType } from 'Extension/Plugins/Elements/const';
-import Controller from '../Search/Controller';
+import Controller from '../../Search/Controller';
 import {
    IBackendProfilingData,
-   IChangesDescription,
    IFrontendProfilingData
 } from 'Extension/Plugins/Elements/IProfilingData';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 // @ts-ignore
-import template = require('wml!Profiler/Profiler');
+import template = require('wml!Profiler/_Profiler/Profiler');
 import Tab = chrome.tabs.Tab;
 
 interface IOptions extends IControlOptions {
