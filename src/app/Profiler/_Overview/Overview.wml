@@ -45,13 +45,4 @@
                     caption="Unchanged"
                     count="{{ _options.unchangedCount }}" />
     </ws:if>
-    <ws:if data="{{ _options.screenshotURL }}">
-        <Controls.heading:Title caption="Screenshot of the page at the end of synchronization:"
-                                size="s"
-                                style="secondary" />
-        <img src="{{ _options.screenshotURL }}"
-             alt="Screenshot of the page at the end of synchronization."
-             on:click="__zoomImage()"
-             attr:class="Overview__image" />
-    </ws:if>
 </div>

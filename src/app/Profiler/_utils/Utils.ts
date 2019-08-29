@@ -202,8 +202,7 @@ export function formatTime(value: number): string {
 
 export function getSynchronizationOverview(
    snapshot: Flamegraph['_options']['snapshot'],
-   destroyedCount: number = 0,
-   screenshotURL?: string
+   destroyedCount: number = 0
 ): ISynchronizationOverview {
    const result: ISynchronizationOverview = {
       mountedCount: 0,
@@ -211,8 +210,7 @@ export function getSynchronizationOverview(
       parentUpdatedCount: 0,
       unchangedCount: 0,
       forceUpdatedCount: 0,
-      destroyedCount,
-      screenshotURL
+      destroyedCount
    };
 
    snapshot.forEach(({ updateReason }) => {

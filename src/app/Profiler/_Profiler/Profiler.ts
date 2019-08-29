@@ -42,7 +42,6 @@ export interface ISynchronizationOverview {
    unchangedCount: number;
    destroyedCount: number;
    forceUpdatedCount: number;
-   screenshotURL?: string;
 }
 
 class Profiler extends Control<IOptions> {
@@ -70,8 +69,6 @@ class Profiler extends Control<IOptions> {
       string,
       Flamegraph['_options']['snapshot']
    > = new Map();
-
-   protected _screenshotBySynchronization: Map<string, string> = new Map();
 
    protected _elementsSnapshot: Store['_elements'] = [];
 
@@ -111,8 +108,6 @@ class Profiler extends Control<IOptions> {
 
    protected _selectedCommitChanges?: ICommitDetailsOptions;
 
-   protected _saveScreenshots: boolean = false;
-
    protected _searchValue: string = '';
 
    protected _searchController: Controller = new Controller('name');
@@ -138,15 +133,6 @@ class Profiler extends Control<IOptions> {
       );
       options.store.toggleDevtoolsOpened(true);
       options.store.dispatch('getProfilingStatus');
-   }
-
-   protected _beforeMount(): Promise<void> {
-      return new Promise((resolve) => {
-         chrome.storage.sync.get(['saveScreenshots'], (result) => {
-            this._saveScreenshots = !!result.saveScreenshots;
-            resolve();
-         });
-      });
    }
 
    private __setProfilingData(profilingData: IBackendProfilingData): void {
@@ -208,8 +194,7 @@ class Profiler extends Control<IOptions> {
 
       this._synchronizationOverview = getSynchronizationOverview(
          snapshot,
-         this._destroyedCountBySynchronization.get(synchronizationKey),
-         this._screenshotBySynchronization.get(synchronizationKey)
+         this._destroyedCountBySynchronization.get(synchronizationKey)
       );
       this._snapshot = snapshot;
       this.__updateSelectedCommitChanges();
@@ -305,25 +290,6 @@ class Profiler extends Control<IOptions> {
       if (this._isProfiling) {
          this._changesBySynchronization.set(id, this._currentOperations);
          this._currentOperations = [];
-
-         if (this._saveScreenshots) {
-            /**
-             * captureVisibleTab defaults windowId to currentWindow.
-             * Unfortunately, currentWindow inside undocked devtools is the devtools window itself.
-             * To work around this, we find the inspected tab and get windowId from it.
-             */
-            chrome.tabs.query({}, (tabs) => {
-               const inspectedTab = tabs.find((tab) => {
-                  return tab.id === chrome.devtools.inspectedWindow.tabId;
-               }) as Tab;
-               chrome.tabs.captureVisibleTab(
-                  inspectedTab.windowId,
-                  (dataUrl) => {
-                     this._screenshotBySynchronization.set(id, dataUrl);
-                  }
-               );
-            });
-         }
       }
    }
 
@@ -337,7 +303,6 @@ class Profiler extends Control<IOptions> {
          if (status) {
             this._changesBySynchronization.clear();
             this._elementsBySynchronization.clear();
-            this._screenshotBySynchronization.clear();
             this._snapshotBySynchronization.clear();
             this._currentOperations = [];
             this._synchronizations = undefined;
@@ -351,12 +316,6 @@ class Profiler extends Control<IOptions> {
             this._options.store.dispatch('getProfilingData');
          }
       }
-   }
-
-   private __toggleSaveScreenshots(e: Event, saveScreenshots: boolean): void {
-      chrome.storage.sync.set({
-         saveScreenshots
-      });
    }
 
    private __reloadAndProfile(): void {

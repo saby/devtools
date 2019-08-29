@@ -12,11 +12,6 @@
                                  tooltip="Reload the page and start recording"
                                  attr:class="Profiler__headElement"
                                  on:click="__reloadAndProfile()"/>
-        <Controls.toggle:Checkbox caption="Screenshots"
-                                  readOnly="{{ _isProfiling }}"
-                                  tooltip="Save screenshots during recording"
-                                  on:valueChanged="__toggleSaveScreenshots()"
-                                  bind:value="_saveScreenshots"/>
         <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
             <Controls.toggle:RadioGroup source="{{ _radioGroupSource }}"
                                         direction="horizontal"
@@ -73,8 +68,7 @@
                                             parentUpdatedCount="{{ _synchronizationOverview.parentUpdatedCount }}"
                                             unchangedCount="{{ _synchronizationOverview.unchangedCount }}"
                                             destroyedCount="{{ _synchronizationOverview.destroyedCount }}"
-                                            forceUpdatedCount="{{ _synchronizationOverview.forceUpdatedCount }}"
-                                            screenshotURL="{{ _synchronizationOverview.screenshotURL }}" />
+                                            forceUpdatedCount="{{ _synchronizationOverview.forceUpdatedCount }}" />
             </ws:else>
         </ws:if>
         <ws:else>
