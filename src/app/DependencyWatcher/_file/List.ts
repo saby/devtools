@@ -18,15 +18,8 @@ interface IOptions extends IControlOptions {
 
 export class List extends Control<IOptions> {
    protected readonly _template: TemplateFunction = template;
-   protected _column: IColumns<ITransportFile>;
-   protected _headers: IHeaders<ITransportFile>;
-   protected _navigation: object;
    protected _sorting?: Sorting;
    protected _beforeMount(options: IOptions): void {
-      // TODO: скорее всего здесь перекладывание на инстанс не нужно
-      this._navigation = options.navigation;
-      this._headers = options.headers;
-      this._column = options.columns;
       this._sorting = options.sorting;
    }
 
