@@ -20,6 +20,8 @@ export class Hook implements IWasabyDevHook {
 
    constructor(agent: Agent) {
       this._agent = agent;
+      // TODO: убрать после того как откажемся от поддержки 610 версии. Там есть проверка на hasOwnProperty
+      this.onStartLifecycle = this._onStartLifecycle.bind(this);
    }
 
    onStartCommit(
@@ -47,7 +49,7 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onStartLifecycle(id: IBackendControlNode['id']): void {
+   _onStartLifecycle(id: IBackendControlNode['id']): void {
       if (this._isNewWasaby) {
          try {
             this._agent.onStartLifecycle(id);
