@@ -35,8 +35,8 @@ export const json: FilterItemAdditional<boolean> = {
 export const i18n: FilterItemAdditional<boolean> = {
     name: 'i18n',
     textValue: 'i18n!',
-    itemText: rk('Файлы локализациии'),
-    additionalText: rk('Включая файлы локализациий'),
+    itemText: rk('Файлы локализации'),
+    additionalText: rk('Включая файлы локализаций'),
     value: false,
     resetValue: false,
     visibility : false,

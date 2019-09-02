@@ -1,5 +1,5 @@
 <Layout.Selector.Stack
-    headingCaption="Выберите файл"
+    headingCaption="{[Выберите файл]}"
     selectedItems="{{ _options.selectedItems }}"
     attr:class="DependencyFilter__FilePanel"
     theme="default-Layout"

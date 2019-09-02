@@ -117,5 +117,7 @@ module.exports = {
   "wml": true,
   "joinedMeta": true,
   "modules": MODULES,
-  "autoprefixer": { browsers: browsersList, remove: true }
+  "autoprefixer": { browsers: browsersList, remove: true },
+  "localization": ["en-US"],
+  "default-localization": "en-US"
 };
