@@ -1,33 +1,37 @@
-import { IConfigWithStorage } from "./IConfig";
-import { IDefine } from "./define/IDefine";
-import { IDescriptor } from "./IDescriptor";
-import { ModuleStorage } from "./storage/Module";
-import { ILogger } from "Extension/Logger/ILogger";
-import { proxyDefine } from "./define/proxy";
+import { IConfigWithStorage } from './IConfig';
+import { IDefine } from './define/IDefine';
+import { IDescriptor } from './IDescriptor';
+import { ModuleStorage } from './storage/Module';
+import { ILogger } from 'Extension/Logger/ILogger';
+import { proxyDefine } from './define/proxy';
 
 export class Define implements IDescriptor {
-    constructor({ logger, moduleStorage }: IConfigWithStorage) {
-        this.__storage = moduleStorage;
-        this.__logger = logger;
-    }
-    private __storage: ModuleStorage;
-    private __logger: ILogger;
-    private __define: IDefine;
-    private __proxy: IDefine;
-    getDescriptor(): PropertyDescriptor {
-        let _this = this;
-        return {
-            set(value: IDefine) {
-                if (!_this.__define) {
-                    _this.__define = value;
-                    _this.__proxy = proxyDefine(_this.__define, _this.__storage, _this.__logger);
-                } else {
-                    _this.__proxy = value;
-                }
-            },
-            get(): IDefine | void {
-                return _this.__proxy;
+   private _storage: ModuleStorage;
+   private _logger: ILogger;
+   private _define: IDefine;
+   private _proxy: IDefine;
+   constructor({ logger, moduleStorage }: IConfigWithStorage) {
+      this._storage = moduleStorage;
+      this._logger = logger;
+   }
+   getDescriptor(): PropertyDescriptor {
+      const _this = this;
+      return {
+         set(value: IDefine): void {
+            if (!_this._define) {
+               _this._define = value;
+               _this._proxy = proxyDefine(
+                  _this._define,
+                  _this._storage,
+                  _this._logger
+               );
+            } else {
+               _this._proxy = value;
             }
-        }
-    }
+         },
+         get(): IDefine | void {
+            return _this._proxy;
+         }
+      };
+   }
 }

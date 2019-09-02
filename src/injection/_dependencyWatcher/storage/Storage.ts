@@ -1,11 +1,11 @@
-import { IStorage, Item } from "./IStorage";
+import { IStorage, IItem } from "./IStorage";
 
-export class Storage<TItem extends Item = Item, TIndex = unknown> implements IStorage<TItem, TIndex> {
+export class Storage<TItem extends IItem = IItem, TIndex = unknown> implements IStorage<TItem, TIndex> {
     protected _idMap: Map<number, TItem> = new Map();
     protected _indexMap: Map<TIndex, TItem> = new Map();
     protected _allItems: Set<TItem> = new Set();
     constructor(public readonly indexField: keyof TItem) {
-    
+
     }
     getItemById(id: number): TItem | void  {
         return this._idMap.get(id);
@@ -41,7 +41,7 @@ export class Storage<TItem extends Item = Item, TIndex = unknown> implements ISt
             );
         });
     }
-    
+
     has(item: TItem): boolean {
         return this._allItems.has(item);
     }

@@ -1,7 +1,7 @@
-<ws:if data="{{ _options.itemData.item['size'] }}">
+<ws:if data="{{ _options.itemData.item.size }}">
     <span
         attr:style="width: 100%"
-        title="{{ _options.itemData.item['size'] }} {[байт]}"
+        title="{{ _options.itemData.item.size }} {[байт]}"
     >
         {{ _size }} {{ _unit }}
     </span>
@@ -14,7 +14,7 @@
             <span>-----</span>
         </ws:content>
         <ws:template>
-            <ws:if data="{{ !_options.itemData.item['defined'] }}">
+            <ws:if data="{{ !_options.itemData.item.defined }}">
                 <span>{[Модуль не загружен]}</span>
             </ws:if>
             <ws:else>

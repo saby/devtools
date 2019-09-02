@@ -7,14 +7,14 @@
 type ReplaceFunction<T = any> = (name: string, origin: T) => T;
 
 interface IR1 {
-    moduleName: string;
-    dependencies: string[];
-    args: any[];
+   moduleName: string;
+   dependencies: string[];
+   args: any[];
 }
 
 interface IR2 extends IR1 {
-    dependencyName: string;
-    getReplacement<T = any>(name: string, origin: T): T;
+   dependencyName: string;
+   getReplacement<T = any>(name: string, origin: T): T;
 }
 
 /**
@@ -24,25 +24,25 @@ interface IR2 extends IR1 {
  * @param {Array.<String>} dependencies Список зависимостей модуля
  * @param {ReplaceFunction} getReplacement Список зависимостей модуля
  */
-export let replaceDependency = ({
-     moduleName,
-     dependencyName,
-     dependencies,
-     args,
-     getReplacement
- }: IR2 ) => {
-    if (!dependencies.includes(dependencyName)) {
-        return
-    }
-    let index = dependencies.indexOf(dependencyName);
-    let origin = args[index];
-    args[index] = getReplacement(moduleName, origin);
-};
+export function replaceDependency({
+   moduleName,
+   dependencyName,
+   dependencies,
+   args,
+   getReplacement
+}: IR2): void {
+   if (!dependencies.includes(dependencyName)) {
+      return;
+   }
+   const index = dependencies.indexOf(dependencyName);
+   const origin = args[index];
+   args[index] = getReplacement(moduleName, origin);
+}
 
 interface IR3 extends IR1 {
-    proxyModules: {
-        [dependencyName: string]: ReplaceFunction
-    };
+   proxyModules: {
+      [dependencyName: string]: ReplaceFunction;
+   };
 }
 
 /**
@@ -52,24 +52,24 @@ interface IR3 extends IR1 {
  * @param {Array.<*>} args Массив аргументов
  * @param {Array.<String>} dependencies Список зависимостей модуля
  */
-export let replaceDependencies = ({
+export function replaceDependencies({
    moduleName,
    proxyModules,
    args,
    dependencies
-}: IR3) => {
-    if (Object.keys(proxyModules).includes(moduleName)) {
-        return args;
-    }
-    let newArgs = [...args];
-    for (let dependencyName in proxyModules) {
-        replaceDependency({
-            moduleName,
-            dependencyName,
-            dependencies,
-            args: newArgs,
-            getReplacement: proxyModules[dependencyName]
-        })
-    }
-    return newArgs;
-};
+}: IR3): unknown[] {
+   if (Object.keys(proxyModules).includes(moduleName)) {
+      return args;
+   }
+   const newArgs = [...args];
+   for (const dependencyName in proxyModules) {
+      replaceDependency({
+         moduleName,
+         dependencyName,
+         dependencies,
+         args: newArgs,
+         getReplacement: proxyModules[dependencyName]
+      });
+   }
+   return newArgs;
+}

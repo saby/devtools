@@ -1,7 +1,7 @@
-import { TYPESCRIPT_HELPERS_MODULE } from "Extension/Plugins/DependencyWatcher/const";
+import { TYPESCRIPT_HELPERS_MODULE } from 'Extension/Plugins/DependencyWatcher/const';
 
-const filterHelpers = (module: string): boolean => {
-    return !TYPESCRIPT_HELPERS_MODULE.includes(module);
-};
+function filterHelpers(module: string): boolean {
+   return !TYPESCRIPT_HELPERS_MODULE.includes(module);
+}
 
 export default filterHelpers;

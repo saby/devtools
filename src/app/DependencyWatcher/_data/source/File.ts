@@ -8,65 +8,68 @@ import { Compatibility, ICompatibilityConfig } from './Compatibility';
 import { Lang, revert } from 'Extension/Utils/kbLayout';
 
 export interface IFileConfig extends ICompatibilityConfig {
-    fileStorage: FileStorage;
-    logger: ILogger;
+   fileStorage: FileStorage;
+   logger: ILogger;
 }
 
 export class File extends Compatibility {
-    private __files: FileStorage;
-    private __logger: ILogger;
-    constructor(config: IFileConfig) {
-        super(config);
-        this.__files = config.fileStorage;
-        this.__logger = config.logger;
-    }
-    query(query: TypesQuery): Promise<DataSet> {
-        this.__logger.log('start query');
-        const queryParam = getQueryParam<IRPCModuleInfo>(
-            query,
-            undefined
-        );
-        let switchedStr: string | undefined;
-        return this.__files.query(queryParam).then(({ data, hasMore }) => {
+   private _files: FileStorage;
+   private _logger: ILogger;
+   constructor(config: IFileConfig) {
+      super(config);
+      this._files = config.fileStorage;
+      this._logger = config.logger;
+   }
+   query(query: TypesQuery): Promise<DataSet> {
+      this._logger.log('start query');
+      const queryParam = getQueryParam<IRPCModuleInfo>(query, undefined);
+      let switchedStr: string | undefined;
+      return this._files
+         .query(queryParam)
+         .then(({ data, hasMore }) => {
             // Если есть результат или строка поиска пустая, возвращаем как есть
             if (data.length || !queryParam.where.name) {
-                return { data, hasMore };
+               return { data, hasMore };
             }
             switchedStr = revert(queryParam.where.name, Lang.ru, Lang.en);
             // если ничего не поменялось, то тоже возвращаем как есть
-            if (switchedStr == queryParam.where.name) {
-                switchedStr = undefined;
-                return { data, hasMore };
+            if (switchedStr === queryParam.where.name) {
+               switchedStr = undefined;
+               return { data, hasMore };
             }
             queryParam.where.name = switchedStr;
-            return this.__files.query(queryParam);
-        }).then(({ data, hasMore }) => {
-            this.__logger.log(`query success`);
-            this.__logger.log(`get items`);
-            return this.__files.getItems(data).then((files: ITransportFile[]) => {
-                this.__logger.log(`get items - success`);
-                return new DataSet({
-                    rawData: {
+            return this._files.query(queryParam);
+         })
+         .then(({ data, hasMore }) => {
+            this._logger.log('query success');
+            this._logger.log('get items');
+            return this._files
+               .getItems(data)
+               .then((files: ITransportFile[]) => {
+                  this._logger.log('get items - success');
+                  return new DataSet({
+                     rawData: {
                         data: files.map((f) => {
-                            return {
-                                ...f,
-                                title: f.name
-                            }
+                           return {
+                              ...f,
+                              title: f.name
+                           };
                         }),
                         meta: {
-                            more: hasMore,
-                            switchedStr
+                           more: hasMore,
+                           switchedStr
                         }
-                    },
-                    itemsProperty: 'data',
-                    metaProperty: 'meta',
-                    //@ts-ignore
-                    idProperty: 'id'
-                });
-            });
-        }).catch((error: Error) => {
-            this.__logger.error(error);
+                     },
+                     itemsProperty: 'data',
+                     metaProperty: 'meta',
+                     // @ts-ignore
+                     idProperty: 'id'
+                  });
+               });
+         })
+         .catch((error: Error) => {
+            this._logger.error(error);
             throw error;
-        });
-    }
+         });
+   }
 }

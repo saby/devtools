@@ -6,6 +6,8 @@ declare global {
    interface Window {
       __WASABY_DEV_HOOK__: IWasabyDevHook;
       __WASABY_START_PROFILING?: boolean;
+      // TODO: скорее всего лишнее поле
+      __WASABY_DEV_MODULE__?: Function;
       $wasaby?: IBackendControlNode;
       $tmp?: unknown;
       wasabyDevtoolsOptions?: {

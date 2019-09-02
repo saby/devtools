@@ -1,11 +1,14 @@
-// @ts-ignore
-import * as Control from 'Core/Control';
+import { Control, TemplateFunction } from 'UI/Base';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_main/View';
 import { RPC } from 'Extension/Event/RPC';
 import 'css!DependencyWatcher/main';
 import { IEventEmitter } from 'Extension/Event/IEventEmitter';
-import { EventNames, PLUGIN_NAME, RPCMethodNames } from 'Extension/Plugins/DependencyWatcher/const';
+import {
+   EventNames,
+   PLUGIN_NAME,
+   RPCMethodNames
+} from 'Extension/Plugins/DependencyWatcher/const';
 import { ContentChannel } from '../../Devtool/Event/ContentChannel';
 import { Memory } from 'Types/source';
 import { Model } from 'Types/entity';
@@ -17,103 +20,96 @@ import { getTabConfig, tabs } from './Tabs';
 import { List } from '../module';
 
 interface IChildren {
-    moduleList: List;
+   moduleList: List;
 }
 
 export default class View extends Control {
-    protected readonly _template = template;
-    protected readonly _children: IChildren;
-    protected readonly _modeSource: Memory = tabs;
-    protected _source: source.ListAbstract;
-    protected _fileSource: source.File;
-    protected _modeCaption: string;
-    protected _modeTitle: string;
-    private __viewMode: ViewMode;
-    private readonly __rpc: RPC;
-    
-    private __sourceConfig: source.IListConfig;
-    private __logger: INamedLogger = new ConsoleLogger('DependencyWatcher');
-    private __channel: IEventEmitter = new ContentChannel(PLUGIN_NAME);
+   protected readonly _template: TemplateFunction = template;
+   protected readonly _children: IChildren;
+   protected readonly _modeSource: Memory = tabs;
+   protected _source: source.ListAbstract;
+   protected _fileSource: source.File;
+   protected _modeCaption: string;
+   protected _modeTitle: string;
+   private _viewMode: ViewMode;
+   private readonly _rpc: RPC;
 
-    constructor(...args: unknown[]) {
-        super(...args);
-        this.__rpc = new RPC({ channel: this.__channel });
-        this._fileSource = new source.File({
-            logger: this.__logger.create('FileSource'),
-            idProperty: 'id',
-            fileStorage: new storage.File(this.__rpc)
-        });
-        this.__addListener();
-        this.__initSourceConfig();
-        this.__changeView(ViewMode.dependent);
-    }
-    private __changeView(mode: ViewMode) {
-        if (this.__viewMode == mode) {
-            return;
-        }
-        this.__viewMode = mode;
-        const config = getTabConfig(mode);
-        this._modeCaption = config.caption;
-        this._modeTitle = config.title;
-        this._source = new config.Source(this.__sourceConfig);
-        // this._searchValue = '';
-        // this._root = undefined;
-    }
-    protected _changeView(event: unknown, model: Model) {
-        const mode: ViewMode = model.getId();
-        this.__changeView(mode);
-    }
-    private __addListener() {
-        this.__onUpdateHandler = this.__onUpdate.bind(this);
-        this.__channel.addListener(EventNames.update, this.__onUpdateHandler);
-    }
-    private __onUpdateHandler: () => void;
-    private __onUpdate(...args: unknown[]) {
-        if (this._children.moduleList) {
-            this._children.moduleList.reload();
-        }
-    }
-    protected _beforeUnmount() {
-        this.__channel.removeListener(EventNames.update, this.__onUpdateHandler);
-        this.__channel.destructor();
-        delete this.__channel;
-    }
+   private _sourceConfig: source.IListConfig;
+   private _logger: INamedLogger = new ConsoleLogger('DependencyWatcher');
+   private _channel: IEventEmitter = new ContentChannel(PLUGIN_NAME);
+   private _onUpdateHandler: () => void;
 
-    protected _openSource(event: Event, id: number) {
-        this.__rpc.execute<boolean, number>({
+   constructor(options: object) {
+      super(options);
+      this._rpc = new RPC({ channel: this._channel });
+      this._fileSource = new source.File({
+         logger: this._logger.create('FileSource'),
+         idProperty: 'id',
+         fileStorage: new storage.File(this._rpc)
+      });
+      this.__addListener();
+      this.__initSourceConfig();
+      this.__changeView(ViewMode.dependent);
+   }
+   private __changeView(mode: ViewMode): void {
+      if (this._viewMode === mode) {
+         return;
+      }
+      this._viewMode = mode;
+      const config = getTabConfig(mode);
+      this._modeCaption = config.caption;
+      this._modeTitle = config.title;
+      this._source = new config.Source(this._sourceConfig);
+   }
+   protected _changeView(event: unknown, model: Model): void {
+      const mode: ViewMode = model.getId();
+      this.__changeView(mode);
+   }
+   private __addListener(): void {
+      this._onUpdateHandler = this.__onUpdate.bind(this);
+      this._channel.addListener(EventNames.update, this._onUpdateHandler);
+   }
+
+   private __onUpdate(): void {
+      if (this._children.moduleList) {
+         this._children.moduleList.reload();
+      }
+   }
+   protected _beforeUnmount(): void {
+      this._channel.removeListener(EventNames.update, this._onUpdateHandler);
+      this._channel.destructor();
+      delete this._channel;
+   }
+
+   protected _openSource(event: Event, id: number): void {
+      this._rpc
+         .execute<boolean, number>({
             methodName: RPCMethodNames.moduleOpenSource,
             args: id
-        }).then((result: boolean) => {
+         })
+         .then((result: boolean) => {
             if (!result) {
-                return;
+               return;
             }
             chrome.devtools.inspectedWindow.eval(
-                'inspect(window.__WASABY_DEV_MODULE__)'
+               'inspect(window.__WASABY_DEV_MODULE__)'
             );
-        })
-    }
-    private __initSourceConfig() {
-        this.__sourceConfig = {
-            itemStorage: new storage.Module(this.__rpc),
-            defaultFilters: {
-                css:  false,
-                json: false,
-                i18n: false
-            },
-            ignoreFilters: {
-                parent: ['files', 'dependentOnFiles']
-            },
-            logger: this.__logger.create('source'),
-            idProperty: 'id',
-            parentProperty: 'parent'
-        }
-    }
+         });
+   }
+   private __initSourceConfig(): void {
+      this._sourceConfig = {
+         itemStorage: new storage.Module(this._rpc),
+         defaultFilters: {
+            css: false,
+            json: false,
+            i18n: false
+         },
+         ignoreFilters: {
+            parent: ['files', 'dependentOnFiles']
+         },
+         logger: this._logger.create('source'),
+         idProperty: 'id',
+         parentProperty: 'parent'
+      };
+   }
 }
-/*
- * TODO 86d9e478a7d3
- *  Костыль для прокидывания поля фильтрации в filter.Controller > filter.Button сверху
- *  В текущей реализации он либо не отрисует значение фильтра, либо затрёт значение, т.к. оно выставлено не самим фильтром
- *  (в зависимости от параметров FilterButtonSource)
- *  Убрать после задачи:
- *  https://online.sbis.ru/opendoc.html?guid=bdbdae9b-a626-42a7-bda8-86d9e478a7d3
- */

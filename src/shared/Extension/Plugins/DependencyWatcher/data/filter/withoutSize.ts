@@ -1,17 +1,21 @@
-import { FilterFunction, FilterFunctionGetter } from "./Filter";
-interface Size {
-    size: number;
+import { FilterFunction, FilterFunctionGetter } from './Filter';
+interface ISize {
+   size: number;
 }
 
-const filter: FilterFunction<Size> = <T extends Size>(item: T): boolean => {
-    return !item.size;
+const filter: FilterFunction<ISize> = <T extends ISize>(item: T): boolean => {
+   return !item.size;
 };
 
-const withoutSizeGetter: FilterFunctionGetter<boolean, Size> = <T extends Size>(withoutSize: boolean) => {
-    if (withoutSize) {
-        return filter;
-    }
-    return () => true;
+const withoutSizeGetter: FilterFunctionGetter<boolean, ISize> = <
+   T extends ISize
+>(
+   withoutSize: boolean
+) => {
+   if (withoutSize) {
+      return filter;
+   }
+   return () => true;
 };
 
 export default withoutSizeGetter;

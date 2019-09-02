@@ -1,10 +1,13 @@
-import { FilterFunction, FilterFunctionGetter } from "./Filter";
-import { getForFiles } from "./getForFiles";
+import { FilterFunction, FilterFunctionGetter } from './Filter';
+import { getForFiles } from './getForFiles';
 
-interface WithFileId {
-    fileId?: number;
+interface IWithFileId {
+   fileId?: number;
 }
 
-export let getForFile: FilterFunctionGetter<number | undefined, WithFileId> = (key?: number): FilterFunction<WithFileId> => {
-    return getForFiles(typeof key == 'number'? [key]: key);
+export let getForFile: FilterFunctionGetter<number | undefined, IWithFileId> = (
+   key?: number
+): FilterFunction<IWithFileId> => {
+    // TODO: double equals
+   return getForFiles(typeof key == 'number' ? [key] : key);
 };

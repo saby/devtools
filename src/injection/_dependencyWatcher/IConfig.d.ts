@@ -1,10 +1,10 @@
-import { ModuleStorage } from "./storage/Module";
-import { INamedLogger } from "Extension/Logger/ILogger";
+import { ModuleStorage } from './storage/Module';
+import { INamedLogger } from 'Extension/Logger/ILogger';
 
 export interface IConfig {
-    logger: INamedLogger;
+   logger: INamedLogger;
 }
 
 export interface IConfigWithStorage extends IConfig {
-    moduleStorage: ModuleStorage;
+   moduleStorage: ModuleStorage;
 }
