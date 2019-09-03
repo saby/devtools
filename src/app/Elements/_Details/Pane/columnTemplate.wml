@@ -3,6 +3,7 @@
       <ws:partial template="{{ itemData.column.getTemplate(itemData.item.value) }}"
                   value="{{ itemData.item.value }}"
                   name="{{ itemData.item.name }}"
-                  key="{{ itemData.item.key }}"/>
+                  key="{{ itemData.item.key }}"
+                  itemData="{{ itemData }}"/>
    </ws:contentTemplate>
 </ws:partial>

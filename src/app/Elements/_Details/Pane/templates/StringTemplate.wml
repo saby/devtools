@@ -5,7 +5,13 @@
                                on:click="__viewFunctionSource()" />
    </ws:if>
    <ws:else>
-      "<span attr:class="StringTemplate__value">{{_options.value}}</span>"
+      <ws:if data="{{ _options.itemData.isEditing }}">
+         <Controls.input:Text bind:value="_options.itemData.item.value"
+                              selectOnClick="{{ true }}" />
+      </ws:if>
+      <ws:else>
+         "<span attr:class="StringTemplate__value">{{_options.value}}</span>"
+      </ws:else>
    </ws:else>
 </ws:template>
 

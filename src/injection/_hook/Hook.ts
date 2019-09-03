@@ -3,6 +3,8 @@ import { IBackendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
 import Agent from './Agent';
+import { INamedLogger } from 'Extension/Logger/ILogger';
+import { IRenderer } from 'Extension/Plugins/Elements/IRenderer';
 
 /**
  * Rethrows error asynchronously to avoid breaking the calling code.
@@ -16,10 +18,10 @@ function rethrowError(e: Error): void {
 export class Hook implements IWasabyDevHook {
    private _agent: Agent;
    private _messageQueue: Array<[string, ISerializable?]> = [];
-   private _isNewWasaby: boolean = false;
+   private _logger: INamedLogger;
 
-   constructor(agent: Agent) {
-      this._agent = agent;
+   constructor(logger: INamedLogger) {
+      this._logger = logger;
       // TODO: убрать после того как откажемся от поддержки 610 версии. Там есть проверка на hasOwnProperty
       this.onStartLifecycle = this._onStartLifecycle.bind(this);
    }
@@ -29,7 +31,7 @@ export class Hook implements IWasabyDevHook {
       name: string,
       oldNode?: object
    ): number {
-      if (this._isNewWasaby) {
+      if (this._agent) {
          try {
             return this._agent.onStartCommit(typeOfOperation, name, oldNode);
          } catch (e) {
@@ -40,7 +42,7 @@ export class Hook implements IWasabyDevHook {
    }
 
    onEndCommit(id: IBackendControlNode['id'], node: IBackendControlNode): void {
-      if (this._isNewWasaby) {
+      if (this._agent) {
          try {
             this._agent.onEndCommit(id, node);
          } catch (e) {
@@ -50,7 +52,7 @@ export class Hook implements IWasabyDevHook {
    }
 
    _onStartLifecycle(id: IBackendControlNode['id']): void {
-      if (this._isNewWasaby) {
+      if (this._agent) {
          try {
             this._agent.onStartLifecycle(id);
          } catch (e) {
@@ -60,7 +62,7 @@ export class Hook implements IWasabyDevHook {
    }
 
    onEndLifecycle(currentNode: object, data: IBackendControlNode): void {
-      if (this._isNewWasaby) {
+      if (this._agent) {
          try {
             this._agent.onEndLifecycle(currentNode, data);
          } catch (e) {
@@ -70,7 +72,7 @@ export class Hook implements IWasabyDevHook {
    }
 
    onStartSync(rootId: string): void {
-      if (this._isNewWasaby) {
+      if (this._agent) {
          try {
             this._agent.onStartSync(rootId);
          } catch (e) {
@@ -80,7 +82,7 @@ export class Hook implements IWasabyDevHook {
    }
 
    onEndSync(rootId: string): void {
-      if (this._isNewWasaby) {
+      if (this._agent) {
          try {
             this._agent.onEndSync(rootId);
          } catch (e) {
@@ -89,8 +91,13 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   init(isNewWasaby: boolean = false): void {
-      this._isNewWasaby = isNewWasaby;
+   init(renderer?: IRenderer): void {
+      if (renderer) {
+         this._agent = new Agent({
+            logger: this._logger,
+            renderer
+         });
+      }
       // TODO: поменять цвет иконки, создать вкладку в дев тулзах, загрузить плагины, навесить всякие обработчики
    }
 

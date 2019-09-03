@@ -9,6 +9,10 @@ import { Source } from './Source';
 import columnTemplate = require('wml!Elements/_Details/Pane/columnTemplate');
 import { highlightUpdate } from '../../_utils/highlightUpdate';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import './templates/StringTemplate';
+import './templates/NumberTemplate';
+import './templates/ObjectTemplate';
+import './templates/BooleanTemplate';
 
 import 'css!Elements/elements';
 
@@ -17,6 +21,7 @@ interface IOptions extends IControlOptions {
    data: object;
    expanded: boolean;
    controlId: IFrontendControlNode['id'];
+   isControl: boolean;
    changedData?: object;
    canStoreAsGlobal?: boolean;
 }
@@ -28,17 +33,18 @@ const enum ShowType {
 }
 
 interface IItemAction {
-   id: 'storeAsGlobal';
+   id: 'storeAsGlobal' | 'editValue' | 'revertValue';
    showType: ShowType;
    title: string;
    style?: string;
    handler?: (item: Model) => void;
+   icon?: string;
 }
 
-import './templates/StringTemplate';
-import './templates/NumberTemplate';
-import './templates/ObjectTemplate';
-import './templates/BooleanTemplate';
+interface IEditingConfig {
+   sequentialEditing: boolean;
+   toolbarVisibility: boolean;
+}
 
 function getSource(initialData: IOptions['data']): Source {
    const data = Object.entries(initialData).map(([key, value]) => {
@@ -56,6 +62,31 @@ function getSource(initialData: IOptions['data']): Source {
    });
 }
 
+function getPath(item: Model): string[] {
+   return item
+      .get('key')
+      .split('---')
+      .reverse();
+}
+
+function getEditingConfig(isControl: boolean): IEditingConfig | undefined {
+   return isControl
+      ? {
+           sequentialEditing: false,
+           toolbarVisibility: true
+        }
+      : undefined;
+}
+
+function isEditable(value: unknown): boolean {
+   const type = typeof value;
+   return (
+      type === 'number' ||
+      type === 'boolean' ||
+      (type === 'string' && !(value as string).startsWith('function '))
+   );
+}
+
 class Pane extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected _source: Source;
@@ -66,6 +97,8 @@ class Pane extends Control<IOptions> {
       name?: string;
       parent?: string | Array<string | null>;
    } = {};
+   protected _editingConfig?: IEditingConfig;
+   protected _editingItem?: Model;
 
    protected _beforeMount(options: IOptions): void {
       this._source = getSource(options.data);
@@ -81,9 +114,24 @@ class Pane extends Control<IOptions> {
             showType: ShowType.MENU,
             title: 'Store as global variable',
             handler: this.__storeAsGlobal.bind(this)
+         },
+         {
+            id: 'editValue',
+            icon: 'icon-Edit',
+            showType: ShowType.MENU_TOOLBAR,
+            title: 'Edit',
+            handler: this.__editValue.bind(this)
+         },
+         {
+            id: 'revertValue',
+            icon: 'icon-Undo2',
+            showType: ShowType.MENU_TOOLBAR,
+            title: 'Reset',
+            handler: this.__revertValue.bind(this)
          }
       ];
       this._visibilityCallback = this._itemActionVisibilityCallback.bind(this);
+      this._editingConfig = getEditingConfig(options.isControl);
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
@@ -112,6 +160,9 @@ class Pane extends Control<IOptions> {
       }
       if (this._options.data !== newOptions.data) {
          this._source = getSource(newOptions.data);
+      }
+      if (this._options.isControl !== newOptions.isControl) {
+         this._editingConfig = getEditingConfig(newOptions.isControl);
       }
    }
 
@@ -142,7 +193,18 @@ class Pane extends Control<IOptions> {
       item: Model
    ): boolean {
       const value = item.get('value');
+      if (item === this._editingItem) {
+         return false;
+      }
       switch (action.id) {
+         case 'editValue':
+            return this._options.isControl && isEditable(value);
+         case 'revertValue':
+            return (
+               this._options.isControl &&
+               isEditable(value) &&
+               item.getState() === 'Changed'
+            );
          case 'storeAsGlobal':
             return (
                !!this._options.canStoreAsGlobal &&
@@ -172,15 +234,38 @@ class Pane extends Control<IOptions> {
    }
 
    private __storeAsGlobal(item: Model): void {
-      const path = item
-         .get('key')
-         .split('---')
-         .reverse();
+      const path = getPath(item);
       if (this._options.canStoreAsGlobal) {
          this._notify('storeAsGlobal', [
             path.concat(this._options.caption.toLowerCase())
          ]);
       }
+   }
+
+   private __beforeBeginEdit(e: Event, { item }: { item: Model }): void {
+      this._editingItem = item;
+   }
+
+   private __beforeEndEdit(e: Event, item: Model, commit: boolean): void {
+      /**
+       * TODO: перейти на событие afterEndEdit после выполнения задачи:
+       * https://online.sbis.ru/opendoc.html?guid=a17c70e8-0cbf-4685-bfd1-423bba9ef3d4
+       */
+      if (commit) {
+         this._notify('setNodeOption', [getPath(item), item.get('value')]);
+         this._editingItem = undefined;
+      }
+   }
+
+   private __editValue(item: Model): void {
+      this._children.list.beginEdit({
+         item
+      });
+   }
+
+   private __revertValue(item: Model): void {
+      item.rejectChanges(item.getChanged());
+      this._notify('revertNodeOption', [getPath(item)]);
    }
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
@@ -189,6 +274,7 @@ class Pane extends Control<IOptions> {
          data: descriptor(Object).required(),
          expanded: descriptor(Boolean).required(),
          controlId: descriptor(Number).required(),
+         isControl: descriptor(Boolean).required(),
          changedData: descriptor(Object, null),
          canStoreAsGlobal: descriptor(Boolean),
          readOnly: descriptor(Boolean),

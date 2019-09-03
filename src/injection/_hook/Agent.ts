@@ -22,6 +22,11 @@ import isDeepEqual from './isDeepEqual';
 import deepClone from './deepClone';
 import getNodeId from './getNodeId';
 import { INamedLogger } from 'Extension/Logger/ILogger';
+import {
+   IRenderer,
+   NodeOption,
+   NodeOptionType
+} from 'Extension/Plugins/Elements/IRenderer';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -137,8 +142,11 @@ class Agent {
 
    private logger: INamedLogger;
 
-   constructor(config: { logger: INamedLogger }) {
+   private renderer: IRenderer;
+
+   constructor(config: { logger: INamedLogger; renderer: IRenderer }) {
       this.logger = config.logger;
+      this.renderer = config.renderer;
       this.channel.addListener(
          'devtoolsInitialized',
          this.__onDevtoolsOpened.bind(this)
@@ -187,6 +195,14 @@ class Agent {
       this.channel.addListener(
          'getProfilingStatus',
          this.__getProfilingStatus.bind(this)
+      );
+      this.channel.addListener(
+         'setNodeOption',
+         this.__setNodeOption.bind(this)
+      );
+      this.channel.addListener(
+         'revertNodeOption',
+         this.__revertNodeOption.bind(this)
       );
       if (window.__WASABY_START_PROFILING) {
          this.__toggleProfiling(window.__WASABY_START_PROFILING);
@@ -309,6 +325,7 @@ class Agent {
       changedNode.node.selfDuration = selfDuration;
       changedNode.node.treeDuration = treeDuration;
       changedNode.node.parentId = parentId;
+      changedNode.node.vNode = currentNode;
 
       this.componentsStack.pop();
       updateParentDuration(
@@ -772,6 +789,38 @@ class Agent {
          return componentsStack[componentsStack.length - 1];
       }
       return;
+   }
+
+   private __setNodeOption({
+      id,
+      optionType,
+      path,
+      value
+   }: {
+      id: IBackendControlNode['id'];
+      optionType: NodeOptionType;
+      path: string[];
+      value: NodeOption;
+   }): void {
+      const element = this.elements.get(id);
+      if (element) {
+         this.renderer.setNodeOption(element.vNode, optionType, path, value);
+      }
+   }
+
+   private __revertNodeOption({
+      id,
+      optionType,
+      path
+   }: {
+      id: IBackendControlNode['id'];
+      optionType: NodeOptionType;
+      path: string[];
+   }): void {
+      const element = this.elements.get(id);
+      if (element) {
+         this.renderer.revertNodeOption(element.vNode, optionType, path);
+      }
    }
 }
 

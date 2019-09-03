@@ -17,7 +17,8 @@ class BooleanTemplate extends Control {
       return {
          value: descriptor(Boolean).required(),
          name: descriptor(String, Number).required(),
-         key: descriptor(String).required()
+         key: descriptor(String).required(),
+         itemData: descriptor(Object)
       };
    }
 }

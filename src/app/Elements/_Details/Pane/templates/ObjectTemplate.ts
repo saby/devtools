@@ -39,7 +39,8 @@ class ObjectTemplate extends Control {
       return {
          value: descriptor(Object, null).required(),
          name: descriptor(String, Number).required(),
-         key: descriptor(String).required()
+         key: descriptor(String).required(),
+         itemData: descriptor(Object)
       };
    }
 }
