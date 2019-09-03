@@ -1,8 +1,4 @@
-<Controls.popup:InfoboxTarget>
-    <ws:content>
-        <span class="DependencyFilter__Items_file">{{ itemData.item.fileName }}</span>
-    </ws:content>
-    <ws:template>
-        <div>{{ itemData.item.path }}</div>
-    </ws:template>
-</Controls.popup:InfoboxTarget>
+<Controls.buttons:Button caption="{{ _options.itemData.item.fileName }}"
+                         tooltip="{{ _options.itemData.item.path }}"
+                         viewMode="link"
+                         on:click="__openResource()"/>

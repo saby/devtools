@@ -1,8 +1,7 @@
 import SizeTemplate from './column/Size';
+import FileTemplate from './column/File';
 import { IListItem } from '../data';
 import { IColumn } from '../interface/IColumn';
-// @ts-ignore
-import * as fileTemplate from 'wml!DependencyWatcher/_module/column/file';
 // @ts-ignore
 import * as usedTemplate from 'wml!DependencyWatcher/_module/column/used';
 // @ts-ignore
@@ -12,12 +11,10 @@ interface IListItemColumn extends IColumn<IListItem> {}
 
 const name: Partial<IListItemColumn> = {
    displayProperty: 'name'
-   // template: ColumnTemplate
-   // template: cfg.itemTemplate || nameTemplate
 };
 const fileName: Partial<IListItemColumn> = {
    displayProperty: 'fileName',
-   template: fileTemplate
+   template: FileTemplate
 };
 const isDynamic: Partial<IListItemColumn> = {
    width: '30px',
