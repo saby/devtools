@@ -22,8 +22,10 @@
                 <span>
                     {[Попробуйте перезагрузить страницу]}
                     <Controls.buttons:Button
-                        icon="icon-small icon-Refresh icon-primary"
+                        icon="icon-Refresh"
                         viewMode="link"
+                        iconStyle="primary"
+                        iconSize="s"
                         on:click="_reloadPage()"
                     />
                 </span>

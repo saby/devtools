@@ -11,9 +11,10 @@
                 attr:class="Devtool_Page__tabButtons"
         >
             <ws:tabSpaceTemplate>
-                <Controls.buttons:Button icon="icon-Settings icon-small"
+                <Controls.buttons:Button icon="icon-Settings"
                                          tooltip="Options"
                                          viewMode="link"
+                                         iconSize="s"
                                          attr:class="Devtool_Page__settings"
                                          on:click="__openOptionsPage()" />
             </ws:tabSpaceTemplate>

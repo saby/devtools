@@ -1,12 +1,14 @@
 <Devtool.Layout.Browser>
     <ws:headTemplate>
-        <Controls.buttons:Button icon="icon-Rec icon-small"
+        <Controls.buttons:Button icon="icon-Rec"
+                                 iconSize="s"
                                  iconStyle="{{ _isProfiling ? 'danger' : 'secondary' }}"
                                  viewMode="link"
                                  tooltip="{{ _isProfiling ? 'Stop recording' : 'Start recording' }}"
                                  attr:class="Profiler__headElement"
                                  on:click="__toggleProfiling()"/>
-        <Controls.buttons:Button icon="icon-Refresh icon-small"
+        <Controls.buttons:Button icon="icon-Refresh"
+                                 iconSize="s"
                                  viewMode="link"
                                  readOnly="{{ _isProfiling }}"
                                  tooltip="Reload the page and start recording"
@@ -89,17 +91,19 @@
                             <div>There were no synchronizations during the last profiling session.</div>
                         </ws:if>
                         <div>
-                            Click the record button <Controls.buttons:Button icon="icon-Rec icon-small"
-                                                     iconStyle="secondary"
-                                                     viewMode="toolButton"
-                                                     tooltip="Start recording"
-                                                     on:click="__toggleProfiling()"/> to start recording.
+                            Click the record button <Controls.buttons:Button icon="icon-Rec"
+                                                                             iconSize="s"
+                                                                             iconStyle="secondary"
+                                                                             viewMode="toolButton"
+                                                                             tooltip="Start recording"
+                                                                             on:click="__toggleProfiling()"/> to start recording.
                         </div>
                         <div>
-                            Click the reload button <Controls.buttons:Button icon="icon-Refresh icon-small"
-                                                     viewMode="toolButton"
-                                                     tooltip="Reload the page and start recording"
-                                                     on:click="__reloadAndProfile()"/> to reload the page and start recording.
+                            Click the reload button <Controls.buttons:Button icon="icon-Refresh"
+                                                                             iconSize="s"
+                                                                             viewMode="toolButton"
+                                                                             tooltip="Reload the page and start recording"
+                                                                             on:click="__reloadAndProfile()"/> to reload the page and start recording.
                         </div>
                     </div>
                 </ws:else>
