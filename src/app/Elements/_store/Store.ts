@@ -135,7 +135,7 @@ function addNode(
       );
       let lastChildIndex = parentIndex + 1;
       if (parentIndex === -1) {
-         throw new Error(`Can't find the parent. Element id: ${id}, parentId: ${parentId}`);
+         throw new Error(`Can't find the parent. Element id: ${id}, parentId: ${parentId}, name: ${name}`);
       } else {
          while (
             elements[lastChildIndex] &&
