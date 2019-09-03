@@ -14,5 +14,8 @@
                 {{_options.name}}
             </ws:else>
         </span>
+        <ws:if data="{{_options.selectedItemId === _options.id}}">
+            <span attr:class="Elements__hint">== $wasaby</span>
+        </ws:if>
     </div>
 </div>
