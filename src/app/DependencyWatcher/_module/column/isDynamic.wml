@@ -10,6 +10,3 @@
         </ws:template>
     </Controls.popup:InfoboxTarget>
 </ws:if>
-<ws:else>
-    <invisible-node />
-</ws:else>
