@@ -1,4 +1,4 @@
-import SizeTemplate from './column/Size';
+import { Size } from 'DependencyWatcher/columns';
 import FileTemplate from './column/File';
 import { IListItem } from '../data';
 import { IColumn } from '../interface/IColumn';
@@ -30,7 +30,7 @@ const size: Partial<IListItemColumn> = {
    displayProperty: 'size',
    width: '100px',
    align: 'right',
-   template: SizeTemplate
+   template: Size
 };
 
 export const columns: Array<Partial<IListItemColumn>> = [
