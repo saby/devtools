@@ -11,13 +11,8 @@ interface IOptions extends IControlOptions {
 
 export default class Size extends Control<IOptions> {
    protected _template: TemplateFunction = template;
-   protected __openResource(e: Event): void {
+   protected __openResource(e: Event, item: Model): void {
       e.stopPropagation();
-      // the third argument is a callback and it is actually optional
-      // @ts-ignore
-      chrome.devtools.panels.openResource(
-         this._options.itemData.item.get('path'),
-         1
-      );
+      this._notify('openSource', [item.get('itemId')], { bubbling: true });
    }
 }

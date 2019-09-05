@@ -1,4 +1,4 @@
 <Controls.buttons:Button caption="{{ _options.itemData.item.fileName }}"
                          tooltip="{{ _options.itemData.item.path }}"
                          viewMode="link"
-                         on:click="__openResource()"/>
+                         on:click="__openResource(_options.itemData.item)"/>

@@ -27,16 +27,6 @@ export interface IItemAction {
    visibilityCallback?(model: Model): boolean;
 }
 
-const openFile: IItemAction = {
-   id: ItemActionNames.openSource,
-   title: 'Перейти к файлу',
-   showType: ShowType.menuAndToolbar,
-   icon: 'icon-Publish2',
-   iconStyle: 'secondary',
-   visibilityCallback(model: Model): boolean {
-      return model.get('name') !== GLOBAL_MODULE_NAME && !!model.get('defined');
-   }
-};
 const dependentOnFile: IItemAction = {
    id: ItemActionNames.dependentOnFile,
    title: 'Отобразить модули, зависящие от файла',
@@ -52,8 +42,7 @@ const file: IItemAction = {
 
 const ALL_ACTIONS: Map<ItemActionNames, IItemAction> = new Map([
    [ItemActionNames.file, file],
-   [ItemActionNames.dependentOnFile, dependentOnFile],
-   [ItemActionNames.openSource, openFile]
+   [ItemActionNames.dependentOnFile, dependentOnFile]
 ]);
 
 export const getItemActions = (

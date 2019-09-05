@@ -36,8 +36,7 @@ export function getFileName(
    isRelease: boolean,
    bundles: Record<string, string[]>
 ): string {
-   // TODO: double equals
-   if (moduleName == GLOBAL_MODULE_NAME) {
+   if (moduleName === GLOBAL_MODULE_NAME) {
       return location.href;
    }
    const bundle = getBundle(moduleName, bundles, isRelease);

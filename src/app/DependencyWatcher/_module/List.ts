@@ -102,9 +102,6 @@ export default class List extends Control<IOptions> {
             );
             this._setFilterValue('files');
             this._filterButtonSource = [...this._filterButtonSource];
-         },
-         [ItemActionNames.openSource]: (model: Model) => {
-            this._notify('openSource', [model.get('itemId')]);
          }
       });
    }
