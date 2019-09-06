@@ -21,6 +21,19 @@ export default class Input extends Control<IOptions> {
       );
       this._selectedKeys = options.item.value || [];
    }
+   protected _beforeUpdate(newOptions: IOptions): void {
+      // TODO: в теории Controls.filterPopup:DetailPanel должен стрелять событием при нажатии на кнопку "По умолчанию"
+      if (this._options.item.textValue !== newOptions.item.textValue) {
+         this._textValue = (newOptions.item.textValue || '').replace(
+            `${newOptions.textPrefix}: `,
+            ''
+         );
+      }
+      if (this._options.item.value !== newOptions.item.value) {
+         this._selectedKeys = newOptions.item.value || [];
+      }
+   }
+
    // TODO: разобраться зачем тут stopPropagation, если их убрать - отваливается фильтр
    protected _selectedKeysChanged(event: Event, keys: number[]): void {
       this._selectedKeys = keys;
