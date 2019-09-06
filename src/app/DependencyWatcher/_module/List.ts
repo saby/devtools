@@ -2,6 +2,7 @@ import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_module/List';
 import { Model } from 'Types/entity';
+import { RecordSet } from 'Types/collection';
 import { IListItem, source } from '../data';
 import { columns } from './column';
 import { headers } from './header';
@@ -56,17 +57,20 @@ export default class List extends Control<IOptions> {
       model: Model
    ) => boolean = visibilityCallback;
    protected _filterButtonSource: IFilterItem[];
-   protected _filter: source.IWhere<IRPCModuleFilter>;
+   protected _filter?: source.IWhere<IRPCModuleFilter>;
    protected _root?: string;
    protected _searchValue?: string;
    protected _sorting?: object;
    protected _itemActions: IItemAction[];
+   protected _dataLoadCallback: (items: RecordSet) => void;
+   protected _filterChanged: boolean = false;
    constructor(options: IOptions) {
       super(options);
       this._filterButtonSource = getButtonSource({
          fileSource: options.fileSource
       });
       this.__setItemActions();
+      this._dataLoadCallback = this.__dataLoadCallback.bind(this);
    }
    reload(): void {
       if (this._children.listView) {
@@ -81,13 +85,6 @@ export default class List extends Control<IOptions> {
                files: [model.get('fileId')]
             });
             this._root = undefined;
-            this._setFilterValue(
-               'files',
-               [model.get('fileId')],
-               `file: ${model.get('fileName')}`
-            );
-            this._setFilterValue('dependentOnFiles');
-            this._filterButtonSource = [...this._filterButtonSource];
          },
          [ItemActionNames.dependentOnFile]: (model: Model) => {
             this.__setFilter({
@@ -95,62 +92,37 @@ export default class List extends Control<IOptions> {
                files: [model.get('fileId')]
             });
             this._root = undefined;
-            this._setFilterValue(
-               'dependentOnFiles',
-               [model.get('fileId')],
-               `depend on: ${model.get('fileName')}`
-            );
-            this._setFilterValue('files');
-            this._filterButtonSource = [...this._filterButtonSource];
          }
       });
    }
 
    private __setFilter(filter: source.IWhere<IRPCModuleFilter>): void {
-      const id = Math.random();
-      this._filter = {
-         ...filter,
-         getVersion(): number {
-            return id;
-         }
-      };
+      this._filter = { ...filter };
+      if (this._filter.files && !this._filter.files.length) {
+         delete this._filter.files;
+      }
+      if (this._filter.dependentOnFiles && !this._filter.dependentOnFiles.length) {
+         delete this._filter.dependentOnFiles;
+      }
+      this._filterChanged = true;
    }
 
-   protected _filterChanged(
+   protected _onFilterChanged(
       event: unknown,
       filter: source.IWhere<IRPCModuleFilter>
    ): void {
-      // TODO 86d9e478a7d3 - очистка значений, которые внесли руками в FilterButtonSource при изменении фильтра
-      const keys: Array<keyof source.IWhere<IRPCModuleFilter>> = [
-         'files',
-         'dependentOnFiles'
-      ];
-      const updated = keys.some((resetId) => {
-         if (
-            filter.hasOwnProperty(resetId) &&
-            Array.isArray(filter[resetId]) &&
-            (filter[resetId] as number[]).length
-         ) {
-            return false;
-         }
-         return this._setFilterValue(resetId);
-      });
-      if (updated) {
-         this._filterButtonSource = [...this._filterButtonSource];
-      }
+      this.__setFilter(filter);
    }
    protected _setFilterValue<T>(
       id: keyof source.IWhere<IRPCModuleFilter>,
       value?: T,
       textValue: string = ''
    ): boolean {
-      // TODO 86d9e478a7d3 - прокидывание данных в items внутри filterButtonSource
       const item = this._filterButtonSource.find(({ name }) => name === id);
       if (!item || value === item.value) {
          return false;
       }
       if (!value) {
-         // reset
          if (
             item.value === item.resetValue ||
             (Array.isArray(item.value) && !item.value.length)
@@ -162,12 +134,42 @@ export default class List extends Control<IOptions> {
       item.textValue = textValue;
       return true;
    }
+   private __dataLoadCallback(items: RecordSet): void {
+      if (this._filterChanged) {
+         this._filterChanged = false;
+         const keys: Array<keyof source.IWhere<IRPCModuleFilter>> = [
+            'files',
+            'dependentOnFiles'
+         ];
+         let updated = false;
+         keys.forEach((key) => {
+            if (this._filter && this._filter[key] && (this._filter[key] as number[]).length) {
+               const fileId = (this._filter[key] as number[])[0];
+               const count = items.getCount();
+               let item;
+               for (let i = 0; i < count; i++) {
+                  item = items.at(i);
+                  if (item.get('fileId') === fileId) {
+                     break;
+                  }
+               }
+               if (item) {
+                  const fileName = item.get('fileName');
+                  const result = this._setFilterValue(key, [fileId], fileName);
+                  if (result) {
+                     updated = true;
+                  }
+               }
+            } else {
+               const result = this._setFilterValue(key);
+               if (result) {
+                  updated = true;
+               }
+            }
+         });
+         if (updated) {
+            this._filterButtonSource = [...this._filterButtonSource];
+         }
+      }
+   }
 }
-/*
- * TODO 86d9e478a7d3
- *  Костыль для прокидывания поля фильтрации в filter.Controller > filter.Button сверху
- *  В текущей реализации он либо не отрисует значение фильтра, либо затрёт значение, т.к. оно выставлено не самим фильтром
- *  (в зависимости от параметров FilterButtonSource)
- *  Убрать после задачи:
- *  https://online.sbis.ru/opendoc.html?guid=bdbdae9b-a626-42a7-bda8-86d9e478a7d3
- */
