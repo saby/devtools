@@ -6,6 +6,7 @@ import { descriptor } from 'Types/entity';
 import Store from '../_store/Store';
 
 import 'css!Elements/elements';
+import { NodeOptionType } from 'Extension/Plugins/Elements/IRenderer';
 
 interface IOptions extends IControlOptions {
    id: IFrontendControlNode['id'];
@@ -83,6 +84,32 @@ class Details extends Control<IOptions> {
       value: boolean
    ): void {
       this._notify('expandedChanged', [eventName, value]);
+   }
+
+   private __setNodeOption(
+      e: Event,
+      optionType: NodeOptionType,
+      path: string[],
+      value: string
+   ): void {
+      this._options.store.dispatch('setNodeOption', {
+         id: this._options.id,
+         optionType,
+         path,
+         value
+      });
+   }
+
+   private __revertNodeOption(
+      e: Event,
+      optionType: NodeOptionType,
+      path: string[]
+   ): void {
+      this._options.store.dispatch('revertNodeOption', {
+         id: this._options.id,
+         optionType,
+         path
+      });
    }
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {

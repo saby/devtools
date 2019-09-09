@@ -24,8 +24,15 @@ class Model {
    private _expandedItems: Set<IFrontendControlNode['id']> = new Set();
    private _version: number = 0;
    private _itemsChanged: boolean = false;
+   private _itemsReordered: boolean = false;
 
    setItems(items: Model['_items']): void {
+      if (this._itemsReordered) {
+         this._itemsReordered = false;
+         this._itemsChanged = true;
+         this._items = items.slice();
+         this.__nextVersion();
+      }
       const diff = ArraySimpleValuesUtil.getArrayDifference(this._items, items);
       if (diff.added.length > 0 || diff.removed.length > 0) {
          this._items = items.slice();
@@ -48,6 +55,10 @@ class Model {
             );
          }
       }
+   }
+
+   onOrderChanged(): void {
+      this._itemsReordered = true;
    }
 
    toggleExpanded(

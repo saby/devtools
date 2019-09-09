@@ -27,7 +27,10 @@
                                                    itemActions="{{ _itemActions }}"
                                                    itemActionVisibilityCallback="{{ _visibilityCallback }}"
                                                    markerVisibility="hidden"
-                                                   on:viewFunctionSource="__viewFunctionSource()">
+                                                   editingConfig="{{ _editingConfig }}"
+                                                   on:viewFunctionSource="__viewFunctionSource()"
+                                                   on:beforeBeginEdit="__beforeBeginEdit()"
+                                                   on:beforeEndEdit="__beforeEndEdit()">
                                <ws:itemTemplate>
                                    <ws:partial template="Controls/treeGrid:ItemTemplate"
                                                expanderSize="s" />

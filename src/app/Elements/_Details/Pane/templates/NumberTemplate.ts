@@ -17,7 +17,8 @@ class NumberTemplate extends Control {
       return {
          value: descriptor(Number).required(),
          name: descriptor(String, Number).required(),
-         key: descriptor(String).required()
+         key: descriptor(String).required(),
+         itemData: descriptor(Object)
       };
    }
 }

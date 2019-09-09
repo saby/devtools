@@ -19,6 +19,7 @@ export function applyOperation(
          removeNode(elements, args[1]);
          break;
       case OperationType.REORDER:
+         reorderChildren(elements, args[1], args.slice(2));
          break;
       case OperationType.UPDATE:
          break;
@@ -135,12 +136,14 @@ function addNode(
       );
       let lastChildIndex = parentIndex + 1;
       if (parentIndex === -1) {
-         throw new Error(`Can't find the parent. Element id: ${id}, parentId: ${parentId}`);
+         throw new Error(
+            `Can't find the parent. Element id: ${id}, parentId: ${parentId}, name: ${name}`
+         );
       } else {
          while (
             elements[lastChildIndex] &&
             elements[lastChildIndex].depth > elements[parentIndex].depth
-            ) {
+         ) {
             lastChildIndex++;
          }
       }
@@ -152,6 +155,73 @@ function addNode(
          depth: getDepth(elements, parentId)
       });
    }
+}
+
+function reorderChildren(
+   elements: Store['_elements'],
+   parentId: IBackendControlNode['id'],
+   newOrder: Array<IBackendControlNode['id']>
+): void {
+   const childrenIds = elements
+      .filter((child) => child.parentId === parentId)
+      .map(({ id }) => id);
+   const movedChildrenIds = getMovedChildrenIds(childrenIds, newOrder);
+
+   if (movedChildrenIds) {
+      const firstMovedChildId = childrenIds.find((id) =>
+         movedChildrenIds.includes(id)
+      );
+      const firstMovedChildIndex = elements.findIndex(
+         ({ id }) => id === firstMovedChildId
+      );
+
+      // TODO: попробовать делать не spliceSubtree, а sliceSubtree, а потом заменять. Это должно быть быстрее
+      const newChildren: Store['_elements'] = [];
+      movedChildrenIds.forEach((childId) => {
+         newChildren.push(...spliceSubtree(elements, childId));
+      });
+
+      elements.splice(firstMovedChildIndex, 0, ...newChildren);
+   }
+}
+
+function getMovedChildrenIds(
+   childrenIds: Array<IBackendControlNode['id']>,
+   newOrder: Array<IBackendControlNode['id']>
+): Array<IBackendControlNode['id']> {
+   // Skip items at the beginning that didn't change position
+   let startIndex = 0;
+   for (let i = 0; i < newOrder.length; i++) {
+      startIndex = i;
+      if (childrenIds[i] !== newOrder[i]) {
+         break;
+      }
+   }
+   // Skip items at the end that didn't change position
+   let endIndex = newOrder.length;
+   for (let i = newOrder.length - 1; i >= 0 && i >= startIndex; i--) {
+      endIndex = i;
+      if (childrenIds[i] !== newOrder[i]) {
+         break;
+      }
+   }
+   return newOrder.slice(startIndex, endIndex + 1);
+}
+
+function spliceSubtree(
+   elements: Store['_elements'],
+   rootId: IBackendControlNode['id']
+): Store['_elements'] {
+   const startIndex = elements.findIndex(({ id }) => id === rootId);
+   const depth = elements[startIndex].depth;
+   let endIndex = elements.length;
+   for (let i = startIndex + 1; i < elements.length; i++) {
+      if (elements[i].depth <= depth) {
+         endIndex = i;
+         break;
+      }
+   }
+   return elements.splice(startIndex, endIndex - startIndex);
 }
 
 function getClassByControlType(controlType: ControlType): string {

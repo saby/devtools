@@ -25,6 +25,5 @@ type OperationPayload =
    | [
         OperationType.REORDER,
         IBackendControlNode['id'],
-        number,
         ...Array<IBackendControlNode['id']>
      ];

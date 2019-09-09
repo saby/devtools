@@ -1,3 +1,10 @@
 <span>
-   <span attr:class="NumberTemplate__fieldName">{{_options.name}}</span>: <span attr:class="NumberTemplate__value">{{_options.value}}</span>
+   <span attr:class="NumberTemplate__fieldName">{{_options.name}}</span>:
+   <ws:if data="{{ _options.itemData.isEditing }}">
+      <Controls.input:Number bind:value="_options.itemData.item.value"
+                             selectOnClick="{{ true }}" />
+   </ws:if>
+   <ws:else>
+       <span attr:class="NumberTemplate__value"> {{_options.value}}</span>
+   </ws:else>
 </span>

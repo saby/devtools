@@ -16,9 +16,12 @@
                                   data="{{ _options.options }}"
                                   changedData="{{ _options.changedOptions }}"
                                   controlId="{{ _options.id }}"
+                                  isControl="{{ _options.isControl }}"
                                   on:viewFunctionSource="__viewFunctionSource()"
                                   on:storeAsGlobal="__storeAsGlobal()"
                                   on:expandedChanged="__forwardExpanded('_optionsExpanded')"
+                                  on:setNodeOption="__setNodeOption(1)"
+                                  on:revertNodeOption="__revertNodeOption(1)"
                                   expanded="{{_options.optionsExpanded}}"/>
    </ws:if>
    <ws:if data="{{_options.isControl}}">
@@ -27,9 +30,12 @@
                                      data="{{ _options.state }}"
                                      changedData="{{ _options.changedState }}"
                                      controlId="{{ _options.id }}"
+                                     isControl="{{ _options.isControl }}"
                                      on:viewFunctionSource="__viewFunctionSource()"
                                      on:storeAsGlobal="__storeAsGlobal()"
                                      on:expandedChanged="__forwardExpanded('_stateExpanded')"
+                                     on:setNodeOption="__setNodeOption(2)"
+                                     on:revertNodeOption="__revertNodeOption(2)"
                                      expanded="{{_options.stateExpanded}}"/>
       </ws:if>
    </ws:if>
@@ -38,6 +44,7 @@
                                   data="{{_options.events}}"
                                   canStoreAsGlobal="{{false}}"
                                   controlId="{{ _options.id }}"
+                                  isControl="{{ _options.isControl }}"
                                   on:viewFunctionSource="__viewFunctionSource()"
                                   on:storeAsGlobal="__storeAsGlobal()"
                                   on:expandedChanged="__forwardExpanded('_eventsExpanded')"
@@ -48,7 +55,10 @@
                                   data="{{ _options.attributes }}"
                                   changedData="{{ _options.changedAttributes }}"
                                   controlId="{{ _options.id }}"
+                                  isControl="{{ _options.isControl }}"
                                   on:expandedChanged="__forwardExpanded('_attributesExpanded')"
+                                  on:setNodeOption="__setNodeOption(0)"
+                                  on:revertNodeOption="__revertNodeOption(0)"
                                   expanded="{{_options.attributesExpanded}}"/>
    </ws:if>
 </div>

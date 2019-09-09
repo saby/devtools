@@ -45,6 +45,7 @@ export interface IBackendControlNode extends IControlNode {
    selfDuration: number;
    treeDuration: number;
    selfStartTime: number;
+   vNode: object;
 }
 
 export interface IFrontendControlNode {
