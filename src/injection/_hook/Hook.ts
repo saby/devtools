@@ -91,6 +91,16 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
+   onReorder(node: object, newOrder: object[]): void {
+      if (this._agent) {
+         try {
+            this._agent.onReorder(node, newOrder);
+         } catch (e) {
+            rethrowError(e);
+         }
+      }
+   }
+
    init(renderer?: IRenderer): void {
       if (renderer) {
          this._agent = new Agent({

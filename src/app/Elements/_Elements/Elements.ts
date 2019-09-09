@@ -2,10 +2,7 @@
 import Control = require('Core/Control');
 // @ts-ignore
 import template = require('wml!Elements/_Elements/Elements');
-import {
-   IBackendControlNode,
-   IFrontendControlNode
-} from 'Extension/Plugins/Elements/IControlNode';
+import { IBackendControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
@@ -195,6 +192,9 @@ class Elements extends Control {
                break;
             case OperationType.DELETE:
                this._itemsChanged = true;
+               break;
+            case OperationType.REORDER:
+               this._model.onOrderChanged();
                break;
          }
       }

@@ -113,6 +113,15 @@ class Agent {
       Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
    /**
+    * TODO: реордер это вообще отдельная операция сейчас, надо подумать как её нормально делать
+    *
+    * пока буду хранить здесь, но вообще нужно подумать
+    */
+   private reorderedNodes: Map<
+      object,
+      object[]
+   > = new Map();
+   /**
     * This is used to track which root gets synchronized, so we can batch updates by root.
     */
    private rootStack: string[] = [];
@@ -336,6 +345,17 @@ class Agent {
       );
    }
 
+   onReorder(node: object, newOrder: object[]): void {
+      /**
+       * TODO: сложный баг
+       * расширение хранит информацию в Map, который гарантирует, что порядок элементов это порядок вставки
+       * т.е. если девтулзы не ловят события в данный момент, то перестановка потеряется
+       *
+       * или если открыть и закрыть девтулзы, то порядок будет неправильным
+       */
+      this.reorderedNodes.set(node, newOrder);
+   }
+
    onEndSync(rootId: string): void {
       const changes = this.changedRoots.get(rootId);
       if (!changes) {
@@ -352,18 +372,31 @@ class Agent {
          node.selfDuration -= node.treeDuration;
          switch (operation) {
             case OperationType.DELETE:
-               this.__handleRemove(node as IBackendControlNode);
+               this.__handleRemove(node);
                break;
             case OperationType.CREATE:
-               this.__handleAdd(node as IBackendControlNode);
-               break;
-            case OperationType.REORDER:
+               this.__handleAdd(node);
                break;
             case OperationType.UPDATE:
-               this.__handleUpdate(node as IBackendControlNode);
+               this.__handleUpdate(node);
                break;
          }
       });
+      if (this.reorderedNodes.size) {
+         if (this.isDevtoolsOpened) {
+            this.reorderedNodes.forEach((newOrder, node) => {
+               const parentId = this.__getNodeId(node);
+               const childrenIds = newOrder.map((child) => this.__getNodeId(child));
+               const message: IOperationEvent['args'] = [
+                  OperationType.REORDER,
+                  parentId,
+                  ...childrenIds
+               ];
+               window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
+            });
+         }
+         this.reorderedNodes.clear();
+      }
       /**
        * TODO: в слое совместимости иногда попапы закрываются в обход синхронизатора,
        * чистим их при ближайшей синхронизации
