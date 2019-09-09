@@ -42,7 +42,6 @@
                 displayProperty="name"
                 contextMenuVisibility="{{ true }}"
                 itemActions="{{ _itemActions }}"
-                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
                 dataLoadCallback="{{ _dataLoadCallback }}"
             >
                 <ws:emptyTemplate>

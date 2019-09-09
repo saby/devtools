@@ -62,18 +62,3 @@ export const getItemActions = (
    }
    return result;
 };
-
-export const visibilityCallback = (
-   { id }: IItemAction,
-   model: Model
-): boolean => {
-   // TODO: тут что-то сильно не то происходит
-   const item = ALL_ACTIONS.get(id);
-   if (!item) {
-      return true;
-   }
-   if (typeof item.visibilityCallback !== 'function') {
-      return true;
-   }
-   return item.visibilityCallback(model);
-};

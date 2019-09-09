@@ -11,8 +11,7 @@ import { IFilterItem, getButtonSource } from './getButtonSource';
 import {
    getItemActions,
    IItemAction,
-   ItemActionNames,
-   visibilityCallback
+   ItemActionNames
 } from './getItemActions';
 import { IColumn } from '../interface/IColumn';
 import { IHeaders } from '../interface/IHeaders';
@@ -52,10 +51,6 @@ export default class List extends Control<IOptions> {
          mode: 'totalCount'
       }
    };
-   protected readonly _itemActionVisibilityCallback: (
-      action: IItemAction,
-      model: Model
-   ) => boolean = visibilityCallback;
    protected _filterButtonSource: IFilterItem[];
    protected _filter?: source.IWhere<IRPCModuleFilter>;
    protected _root?: string;
