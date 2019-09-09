@@ -103,6 +103,7 @@ const MODULES = [].concat(WASABY_MODULES, EXTENSION_MODULES);
 
 const browsersList = ['Chrome>=60'];
 
+// TODO: поставить oldThemes: false после https://online.sbis.ru/opendoc.html?guid=5ed54ee2-0e05-49a8-b860-7cb22197d536
 module.exports = {
   "cache":  resolve(logs.root, "builder-ui/builder-json-cache"),
   "output": output.resource,
