@@ -40,7 +40,6 @@
                 header="{{ _headers }}"
                 columnScroll="{{ true }}"
                 displayProperty="name"
-                contextMenuVisibility="{{ true }}"
                 itemActions="{{ _itemActions }}"
                 dataLoadCallback="{{ _dataLoadCallback }}"
             >
