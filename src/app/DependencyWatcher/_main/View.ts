@@ -33,6 +33,7 @@ export default class View extends Control {
    protected _modeTitle: string;
    private _viewMode: ViewMode;
    private readonly _rpc: RPC;
+   private _isRecording: boolean = true;
 
    private _sourceConfig: source.IListConfig;
    private _logger: INamedLogger = new ConsoleLogger('DependencyWatcher');
@@ -71,7 +72,7 @@ export default class View extends Control {
    }
 
    private __onUpdate(): void {
-      if (this._children.moduleList) {
+      if (this._children.moduleList && this._isRecording) {
          this._children.moduleList.reload();
       }
    }
@@ -111,5 +112,8 @@ export default class View extends Control {
          idProperty: 'id',
          parentProperty: 'parent'
       };
+   }
+   private __toggleRecording(): void {
+     this._isRecording = !this._isRecording;
    }
 }
