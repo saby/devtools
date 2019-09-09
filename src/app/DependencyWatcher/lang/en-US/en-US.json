@@ -12,5 +12,11 @@
   "Файлы локализации": "Localization files",
   "Включая файлы конфигураций": "Including configuration files",
   "Файлы конфигурации": "Configuration files",
-  "Выберите файл": "Select a file"
+  "Выберите файл": "Select a file",
+  "Отобразить модули, зависящие от файла": "Show dependants of this module",
+  "Отобразить модули файла": "Show modules of this file",
+  "Незагруженный модуль": "Module is not loaded",
+  "Модуль является зависимостью неиспользуемого модуля в бандле": "This module is a dependency of an unused module in a bundle",
+  "Неиспользуемый модуль": "Unused module",
+  "Попробуйте отфильтровать данные по файлу, чтобы посмотреть кто его загрузил": "Try filtering data by module name to see who downloaded it"
 }

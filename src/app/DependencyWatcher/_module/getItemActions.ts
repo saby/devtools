@@ -1,5 +1,6 @@
+// @ts-ignore
+import { rk } from 'Core/i18n';
 import { Model } from 'Types/entity';
-import { GLOBAL_MODULE_NAME } from 'Extension/Plugins/DependencyWatcher/const';
 
 export enum ItemActionNames {
    file = 'fileId',
@@ -29,13 +30,13 @@ export interface IItemAction {
 
 const dependentOnFile: IItemAction = {
    id: ItemActionNames.dependentOnFile,
-   title: 'Отобразить модули, зависящие от файла',
+   title: rk('Отобразить модули, зависящие от файла'),
    icon: 'icon-RelatedDocumentsUp',
    showType: ShowType.menu
 };
 const file: IItemAction = {
    id: ItemActionNames.file,
-   title: 'Отобразить модули файла',
+   title: rk('Отобразить модули файла'),
    icon: 'icon-RelatedDocumentsDown',
    showType: ShowType.menu
 };
