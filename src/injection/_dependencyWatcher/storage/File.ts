@@ -10,6 +10,10 @@ import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/f
 import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
 import { Update } from './Update';
 
+/**
+ * File storage.
+ * A file is a physical file, containing one or more modules.
+ */
 export class FileStorage extends Update<IFile, IFileFilter> {
    private readonly _storage: Storage<IFile, string> = new Storage('path');
    private __getNew(): IFile[] {

@@ -22,7 +22,7 @@ export class Require implements IDescriptor {
       return {
          set(value: IRequire | IRequireInitObject): void {
             if (typeof value === 'function') {
-               _this._require = value as IRequire;
+               _this._require = value;
                _this._proxy = proxyRequire(_this._require, storage, logger);
             } else {
                _this._init = value;

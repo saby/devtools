@@ -3,7 +3,7 @@ type IDeps = string | string[];
 interface IRequireConfig {}
 
 export interface ILocalRequire {
-   <T>(dep: string): T;
+   (dep: string): object;
    (): ILocalRequire;
    (deps: string[], callback?: Function, errback?: Function): ILocalRequire;
 }

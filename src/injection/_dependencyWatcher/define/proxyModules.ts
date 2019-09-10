@@ -1,43 +1,35 @@
 import { REQUIRE } from '../const';
 import { ILocalRequire } from '../require/IRequire';
 import { ModuleStorage } from '../storage/Module';
-import { ILogger } from 'Extension/Logger/ILogger';
 
-type ReplaceFunction<T = any> = (name: string, origin: T) => T;
+type ReplaceFunction<T extends object> = (name: string, origin: T) => T;
 
 interface IProxyObject {
-    require: ReplaceFunction<ILocalRequire>;
-    'Core/library': ReplaceFunction<any>;
-    'Core/moduleStubs': ReplaceFunction<any>;
+   require: ReplaceFunction<ILocalRequire>;
+   'Core/library': ReplaceFunction<object>;
+   'Core/moduleStubs': ReplaceFunction<object>;
 }
 
-export function getProxyModules(storage: ModuleStorage, logger: ILogger): IProxyObject {
-   const proxyRequire: ReplaceFunction<ILocalRequire> = (
-      name: string,
-      require: ILocalRequire
-   ) => {
+export function getProxyModules(storage: ModuleStorage): IProxyObject {
+   function proxyRequire(name: string, require: ILocalRequire): ILocalRequire {
       return new Proxy(require, {
          apply(
-            target: any,
-            thisArg: any,
+            target: ILocalRequire,
+            thisArg: unknown,
             argArray: Array<string | string[]>
-         ): any {
+         ): object | void {
             storage.require(name, argArray[0]);
             return target.apply(thisArg, argArray);
          }
       });
-   };
+   }
 
-   const proxyModuleStubs: ReplaceFunction<any> = (
+   function proxyModuleStubs<T extends object>(
       name: string,
-      moduleStubs
-   ) => {
+      moduleStubs: T
+   ): T {
       return new Proxy(moduleStubs, {
-         get(
-            target: any,
-            property: string | number | symbol,
-            receiver: any
-         ): any {
+         get(target: T, property: string | number | symbol): unknown {
             if (property === 'requireModule' || property === 'require') {
                return (mods: string | string[]) => {
                   storage.require(name, mods);
@@ -47,15 +39,11 @@ export function getProxyModules(storage: ModuleStorage, logger: ILogger): IProxy
             return target[property];
          }
       });
-   };
+   }
 
-   const proxyLibrary: ReplaceFunction<any> = (name: string, library) => {
+   function proxyLibrary<T extends object>(name: string, library: T): T {
       return new Proxy(library, {
-         get(
-            target: any,
-            property: string | number | symbol,
-            receiver: any
-         ): any {
+         get(target: T, property: string | number | symbol): unknown {
             if (property === 'load') {
                return (module: string, loader?: unknown) => {
                   storage.require(name, target.parse(module).name);
@@ -65,7 +53,7 @@ export function getProxyModules(storage: ModuleStorage, logger: ILogger): IProxy
             return target[property];
          }
       });
-   };
+   }
 
    return {
       [REQUIRE]: proxyRequire,

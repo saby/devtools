@@ -2,18 +2,23 @@ type ArgsWithoutDependency = [string, Function];
 
 type ArgsWithDependency = [string, string[], Function];
 
+type AnonymousModule = [Function];
+
+type AnonymousModuleWithDependencies = [string[], Function];
+
 interface IPluginOption {
    load: Function;
 }
 type ArgsInitPluginOptionOnly = [IPluginOption];
 type ArgsInitPluginWithName = [string, IPluginOption];
-type ArgsInitPluginConstructor = [string, IPluginOption];
 
 type ArgsInitPlugin = ArgsInitPluginOptionOnly | ArgsInitPluginWithName;
 
-type Args<T = any> =
+export type DefineArgs =
    | ArgsWithDependency
    | ArgsWithoutDependency
-   | ArgsInitPlugin;
+   | ArgsInitPlugin
+   | AnonymousModule
+   | AnonymousModuleWithDependencies;
 
-export type IDefine<T = any> = (...args: Array<Args<T>>) => void;
+export type IDefine = (...args: DefineArgs[]) => void;

@@ -21,7 +21,7 @@ export enum RPCMethodNames {
 
 export const GLOBAL_MODULE_NAME = '~> page <~';
 
-export const TYPESCRIPT_HELPERS_MODULE = [
+export const TYPESCRIPT_HELPERS_MODULES = [
    'module',
    'require',
    'exports',

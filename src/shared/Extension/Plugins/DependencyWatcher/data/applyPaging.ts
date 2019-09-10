@@ -6,10 +6,10 @@ export function applyPaging<TItems = unknown>(
    data: TItems[];
    hasMore: boolean;
 } {
-   const len = items.length;
-   const data = items.slice(offset, limits ? limits + offset : items.length);
+   const itemsLength = items.length;
+   const data = items.slice(offset, limits ? limits + offset : itemsLength);
    return {
       data,
-      hasMore: len > data.length + offset
+      hasMore: itemsLength > data.length + offset
    };
 }

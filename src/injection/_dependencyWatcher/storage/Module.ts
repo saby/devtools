@@ -21,19 +21,21 @@ const noop = () => {
    /* nope */
 };
 
-function mapIgnoredPlugins(module: string): string {
-   ignoredPlugins.forEach((plugin: IRequirePlugin) => {
-      module = plugin(module);
+function removeIgnoredPrefixes(module: string): string {
+   let cleanModuleName = module;
+   ignoredPlugins.forEach((replacer) => {
+      cleanModuleName = replacer(cleanModuleName);
    });
-   return module;
+   return cleanModuleName;
 }
 
 type UpdateHandler = (moduleId: number) => void;
 
 /**
- * Хранилище модулей
+ * Module storage.
+ * A module is an object or function returned by define().
  * @class
- * @param {(moduleId: number) => void} Обработчик события обновления
+ * @param {(moduleId: number) => void} Update event handler
  */
 export class ModuleStorage extends Update<
    IModule,
@@ -61,9 +63,6 @@ export class ModuleStorage extends Update<
       this.__addDeps(module, dependencies, DependencyType.static);
    }
 
-   /**
-    * Инициализации модуля
-    */
    initModule(name: string): void {
       const module = this.__get(name);
       module.initialized = true;
@@ -73,16 +72,12 @@ export class ModuleStorage extends Update<
       }
    }
 
-   require(
-      name: string,
-      dependencies: string | string[],
-      type: DependencyType = DependencyType.dynamic
-   ): void {
+   require(name: string, dependencies: string | string[]): void {
       const module = this.__get(name);
       this.__addDeps(
          module,
          Array.isArray(dependencies) ? dependencies : [dependencies],
-         type
+         DependencyType.dynamic
       );
    }
 
@@ -92,11 +87,11 @@ export class ModuleStorage extends Update<
 
    getItems(keys?: number[]): IModule[] {
       this._wasRead = true;
-      return this._storage.getItemsById(keys);
+      return this._getItems(keys);
    }
 
    openSource(id: number): boolean {
-      const module = this._storage.getItemById(id);
+      const module = this._getItem(id);
       if (!module) {
          return false;
       }
@@ -124,7 +119,7 @@ export class ModuleStorage extends Update<
       const _dependencies = dependencies
          .filter(filterHelpers)
          .filter((dependency) => !!dependency)
-         .map(mapIgnoredPlugins)
+         .map(removeIgnoredPrefixes)
          .map(
             (dependency: string): IModule => {
                return this.__get(dependency);
@@ -140,10 +135,7 @@ export class ModuleStorage extends Update<
       } else {
          updates = addStatic(module, _dependencies);
       }
-      /*
-       * Кидаем собыетие об обновлении только после того как модули будут хоть раз вычитаны
-       * Нет смысла забивать канал сообщениями, если вкладка не открыта
-       */
+
       if (this._wasRead && updates.length) {
          this._markUpdated(module.id);
          updates.forEach(({ id }: IModule) => {

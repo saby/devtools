@@ -2,9 +2,8 @@ import { SortResult } from './Sort';
 import { IModuleInfo } from 'Extension/Plugins/DependencyWatcher/IModule';
 
 const used = <T extends IModuleInfo>(first: T, second: T): SortResult => {
-    // TODO: double equals
-   if (first.initialized == second.initialized) {
-      if (first.defined == second.defined) {
+   if (first.initialized === second.initialized) {
+      if (first.defined === second.defined) {
          return SortResult.equal;
       }
       if (first.defined) {

@@ -4,16 +4,16 @@ import { IEventEmitter } from 'Extension/Event/IEventEmitter';
 interface IConfig {
    channel: IEventEmitter;
 }
-export type Method<TResult = any, TArgs = any> = (
+type Method<TResult = unknown, TArgs = unknown> = (
    args: TArgs
 ) => Promise<TResult> | TResult;
 
-interface IMessageRequest<T = any> {
+interface IMessageRequest<T = unknown> {
    methodName: string;
    args: T;
    id: string;
 }
-interface IMessageResponse<T = any> {
+interface IMessageResponse<T = unknown> {
    id: string;
    result?: T;
    error?: {
@@ -23,7 +23,6 @@ interface IMessageResponse<T = any> {
 }
 
 const SEC = 1000;
-const MIN = 60 * SEC;
 const DEFAULT_TIMEOUT = 10 * SEC;
 
 interface IExecuteConfig<TArgs> {
@@ -32,18 +31,18 @@ interface IExecuteConfig<TArgs> {
    args?: TArgs;
 }
 
-interface IWaitingRequests {
+interface IWaitingRequest {
    methodName: string;
-   resolve(result: any): void;
+   resolve(result: unknown): void;
 }
 interface IRPCError extends Error {
    methodName: string;
    code: number;
 }
 
-const getDefaultMessage = (method: string, code: number) => {
+function getDefaultMessage(method: string, code: number): string {
    return `RPC call method "${method}" error[${code}]`;
-};
+}
 
 /**
  * RPC источник данных, работающий поверх канала сообщений
@@ -51,7 +50,7 @@ const getDefaultMessage = (method: string, code: number) => {
 export class RPC {
    private _methods: Map<string, Method> = new Map();
    private _channel: IEventEmitter;
-   private _waitingRequests: Map<string, IWaitingRequests> = new Map();
+   private _waitingRequests: Map<string, IWaitingRequest> = new Map();
    private _waitingTimeout: Map<string, number> = new Map();
    private _requestEvent: string = 'data-request';
    private _responseEvent: string = 'data-response';
@@ -107,7 +106,7 @@ export class RPC {
          return;
       }
 
-      const { resolve, methodName } = waiting;
+      const { resolve, methodName }: IWaitingRequest = waiting;
       this._waitingRequests.delete(id);
       window.clearTimeout(this._waitingTimeout.get(id));
       this._waitingTimeout.delete(id);
@@ -149,12 +148,12 @@ export class RPC {
             message,
             code
          }
-      } as IMessageResponse);
+      });
    }
-   private __responseResult(id: string, result: any): void {
+   private __responseResult(id: string, result: unknown): void {
       this._channel.dispatch(this._responseEvent, {
          id,
          result
-      } as IMessageResponse);
+      });
    }
 }

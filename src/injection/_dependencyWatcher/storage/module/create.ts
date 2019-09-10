@@ -18,8 +18,7 @@ function create(name: string): IModule {
          dynamic: new Set()
       }
    };
-   // TODO: double equals
-   if (name == GLOBAL_MODULE_NAME) {
+   if (name === GLOBAL_MODULE_NAME) {
       module.defined = true;
       module.initialized = true;
    }

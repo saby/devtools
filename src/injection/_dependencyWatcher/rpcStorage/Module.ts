@@ -13,7 +13,6 @@ import { Require } from '../Require';
 import { DependencyType } from 'Extension/Plugins/DependencyWatcher/const';
 import itemsSort from 'Extension/Plugins/DependencyWatcher/data/sort/itemsSort';
 import itemFilters from 'Extension/Plugins/DependencyWatcher/data/filter/itemFilters';
-import { ILogger } from 'Extension/Logger/ILogger';
 import { Query } from '../storage/Query';
 import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
 import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
@@ -24,9 +23,9 @@ import {
 import { isRelease } from '../require/isRelease';
 import { IUpdate } from '../storage/IUpdate';
 
-const _toArray = (set: Set<IModule>): number[] => {
+function setToIdArray(set: Set<IModule>): number[] {
    return [...set].map((module) => module.id);
-};
+}
 
 /**
  * Класс - обёртка над хранилищем модулей и файлов, необходимый для постоения списка модулей,
@@ -35,10 +34,9 @@ const _toArray = (set: Set<IModule>): number[] => {
 export class Module extends Query<IRPCModule, IRPCModuleFilter>
    implements IUpdate<IRPCModule> {
    constructor(
-      private _modules: ModuleStorage,
+      private _moduleStorage: ModuleStorage,
       private _files: FileStorage,
-      private _require: Require,
-      private _logger: ILogger
+      private _require: Require
    ) {
       super();
    }
@@ -57,7 +55,7 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
    }
 
    hasUpdates(keys: number[]): boolean[] {
-      return this._modules.hasUpdates(keys);
+      return this._moduleStorage.hasUpdates(keys);
       // TODO Пройтись по модулям, которые не обновлялись и проверить не обновились ли файлы, в которых они лежат
    }
    getItems(keys: number[]): ITransferRPCModule[] {
@@ -66,22 +64,22 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
          return {
             ...item,
             dependent: {
-               [DependencyType.static]: _toArray(dependent.static),
-               [DependencyType.dynamic]: _toArray(dependent.dynamic)
+               [DependencyType.static]: setToIdArray(dependent.static),
+               [DependencyType.dynamic]: setToIdArray(dependent.dynamic)
             },
             dependencies: {
-               [DependencyType.static]: _toArray(dependencies.static),
-               [DependencyType.dynamic]: _toArray(dependencies.dynamic)
+               [DependencyType.static]: setToIdArray(dependencies.static),
+               [DependencyType.dynamic]: setToIdArray(dependencies.dynamic)
             }
          };
       });
    }
    openSource(id: number): boolean {
-      return this._modules.openSource(id);
+      return this._moduleStorage.openSource(id);
    }
    /// region Query
    protected _getItems(keys?: number[]): IRPCModule[] {
-      const modules = this._modules.getItems(keys);
+      const modules = this._moduleStorage.getItems(keys);
       modules.forEach((module: IModule) => {
          this.__addFileId(module);
          this.__addDefined(module);
@@ -124,7 +122,7 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
    /// endregion Query
    /// region IUpdate
    private __updateItem(param: UpdateItemParam): boolean {
-      const module = this._modules.getItem(param.id);
+      const module = this._moduleStorage.getItem(param.id);
       if (!module) {
          return false;
       }
@@ -147,10 +145,10 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
    }
    /// endregion IUpdate
    private __updateFileId(): void {
-      const _keys = this._modules.query({
+      const _keys = this._moduleStorage.query({
          where: { files: [Number.MIN_SAFE_INTEGER] }
       }).data;
-      const modules = this._modules.getItems(_keys);
+      const modules = this._moduleStorage.getItems(_keys);
       modules.forEach(this.__addFileId.bind(this));
    }
    private __addFileId(module: IModule): void {
@@ -169,7 +167,7 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
       module.fileId = file.id;
    }
    private __updateDefined(): void {
-      this._modules.getItems().forEach(this.__addDefined.bind(this));
+      this._moduleStorage.getItems().forEach(this.__addDefined.bind(this));
    }
    private __addDefined(module: IModule): void {
       if (!module.initialized) {
@@ -237,18 +235,18 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
          keys: _keys
       };
    }
-   private __gitForFiles(files: number[]): number[] {
+   private __gitForFiles(fileIds: number[]): number[] {
       return this._files
-         .getItems(files)
+         .getItems(fileIds)
          .map((file: IFile) => {
             return Array.from(file.modules);
          })
          .reduce((prev: number[], cur: number[]) => {
-            return [...prev, ...cur];
+            return prev.concat(cur);
          });
    }
    private __getDependentOnFiles(files: number[], keys?: number[]): number[] {
-      return this._modules.query({
+      return this._moduleStorage.query({
          keys,
          where: {
             dependentOnFiles: files

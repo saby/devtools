@@ -24,7 +24,7 @@ interface IR2 extends IR1 {
  * @param {Array.<String>} dependencies Список зависимостей модуля
  * @param {ReplaceFunction} getReplacement Список зависимостей модуля
  */
-export function replaceDependency({
+function replaceDependency({
    moduleName,
    dependencyName,
    dependencies,
@@ -58,7 +58,7 @@ export function replaceDependencies({
    args,
    dependencies
 }: IR3): unknown[] {
-   if (Object.keys(proxyModules).includes(moduleName)) {
+   if (proxyModules.hasOwnProperty(moduleName)) {
       return args;
    }
    const newArgs = [...args];

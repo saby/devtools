@@ -1,8 +1,6 @@
 import { DependencyType } from './const';
 import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
 
-export type Dependencies = Record<string, string[]>;
-
 interface IDependencies<TCollection>
    extends Record<DependencyType, TCollection> {}
 
@@ -17,7 +15,6 @@ interface IModuleDependencies<TCollection> {
  * @property {Number} fileId Идентификатор файла
  * @property {Boolean} defined Был ли объявлен define модуля (По нему мы понимаем что модульзагружен)
  * @property {Boolean} initialized Был ли модуль инициализирован (Для понимания что модуль испольуется или был втянут в бандле просто так)
- * @property {Number} [size] Размер модуля (вручную посчитанный размер, может не соответствовать размеру файла)
  */
 export interface IModuleInfo {
    name: string;

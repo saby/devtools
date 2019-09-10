@@ -23,7 +23,7 @@ function applyWhere<TItem, TFilter extends object>(
    filterFunctionGetters: Partial<
       Record<keyof TFilter, FilterFunctionGetter<any, TItem>>
    >
-) {
+): TItem[] {
    const filterFunctions: Array<FilterFunction<TItem>> = getFilterFunctions(
       where,
       filterFunctionGetters
