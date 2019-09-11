@@ -8,11 +8,7 @@ import { columns } from './column';
 import { headers } from './header';
 import { IRPCModuleFilter } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
 import { IFilterItem, getButtonSource } from './getButtonSource';
-import {
-   getItemActions,
-   IItemAction,
-   ItemActionNames
-} from './getItemActions';
+import { getItemActions, IItemAction, ItemActionNames } from './getItemActions';
 import { IColumn } from '../interface/IColumn';
 import { IHeaders } from '../interface/IHeaders';
 
@@ -96,7 +92,10 @@ export default class List extends Control<IOptions> {
       if (this._filter.files && !this._filter.files.length) {
          delete this._filter.files;
       }
-      if (this._filter.dependentOnFiles && !this._filter.dependentOnFiles.length) {
+      if (
+         this._filter.dependentOnFiles &&
+         !this._filter.dependentOnFiles.length
+      ) {
          delete this._filter.dependentOnFiles;
       }
       this._filterChanged = true;
@@ -138,7 +137,11 @@ export default class List extends Control<IOptions> {
          ];
          let updated = false;
          keys.forEach((key) => {
-            if (this._filter && this._filter[key] && (this._filter[key] as number[]).length) {
+            if (
+               this._filter &&
+               this._filter[key] &&
+               (this._filter[key] as number[]).length
+            ) {
                const fileId = (this._filter[key] as number[])[0];
                const count = items.getCount();
                let item;
