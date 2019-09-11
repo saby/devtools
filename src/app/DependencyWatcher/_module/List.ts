@@ -76,6 +76,17 @@ export default class List extends Control<IOptions> {
                files: [model.get('fileId')]
             });
             this._root = undefined;
+            /**
+             * TODO: здесь не должно быть setFilterValue, но без него операции над записью становятся одноразовыми
+             * Там какая-то запутанная схема, и первый раз стреляет dataLoadCallback, а второй раз нет
+             * setFilterValue зовётся только из dataLoadCallback. Возможно стоит перетащить это в setFilter
+             */
+            this._setFilterValue(
+               'files',
+               [model.get('fileId')],
+               model.get('fileName')
+            );
+            this._setFilterValue('dependentOnFiles');
          },
          [ItemActionNames.dependentOnFile]: (model: Model) => {
             this.__setFilter({
@@ -83,6 +94,17 @@ export default class List extends Control<IOptions> {
                files: [model.get('fileId')]
             });
             this._root = undefined;
+            /**
+             * TODO: здесь не должно быть setFilterValue, но без него операции над записью становятся одноразовыми
+             * Там какая-то запутанная схема, и первый раз стреляет dataLoadCallback, а второй раз нет
+             * setFilterValue зовётся только из dataLoadCallback. Возможно стоит перетащить это в setFilter
+             */
+            this._setFilterValue(
+               'dependentOnFiles',
+               [model.get('fileId')],
+               model.get('fileName')
+            );
+            this._setFilterValue('files');
          }
       });
    }
