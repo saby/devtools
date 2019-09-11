@@ -2,6 +2,8 @@ import { ViewMode } from './ViewMode';
 import { source } from '../data';
 import { Memory } from 'Types/source';
 import { IListConfig } from '../_data/source/IList';
+// @ts-ignore
+import { rk } from 'Core/i18n';
 
 interface IDescription {
    caption: string;
@@ -18,13 +20,13 @@ interface ITabConfig extends IDescription {
 const dependencyTab: ITab = {
    id: ViewMode.dependency,
    caption: 'Dependency',
-   title: 'Зависимости модулей'
+   title: rk('Зависимости модулей')
 };
 
 const dependentTab: ITab = {
    id: ViewMode.dependent,
    caption: 'Dependent',
-   title: 'Зависимые модули'
+   title: rk('Зависимые модули')
 };
 
 export const tabs = new Memory({
