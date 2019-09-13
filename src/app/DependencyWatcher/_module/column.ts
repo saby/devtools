@@ -1,47 +1,42 @@
-import SizeTemplate from "./column/Size";
-import { IListItem } from "../data";
+import { Size } from 'DependencyWatcher/columns';
+import FileTemplate from './column/File';
+import { IListItem } from '../data';
 import { IColumn } from '../interface/IColumn';
-//@ts-ignore
-import * as fileTemplate from 'wml!DependencyWatcher/_module/column/file';
-//@ts-ignore
+// @ts-ignore
 import * as usedTemplate from 'wml!DependencyWatcher/_module/column/used';
-//@ts-ignore
+// @ts-ignore
 import * as isDynamicTemplate from 'wml!DependencyWatcher/_module/column/isDynamic';
 
-interface IListItemColumn extends IColumn<IListItem> {
+interface IListItemColumn extends IColumn<IListItem> {}
 
-}
-
-export const name: Partial<IListItemColumn> = {
-     displayProperty: 'name',
-     // template: ColumnTemplate
-     // template: cfg.itemTemplate || nameTemplate
+const name: Partial<IListItemColumn> = {
+   displayProperty: 'name'
 };
-export const fileName: Partial<IListItemColumn> = {
-    displayProperty: 'fileName',
-    template: fileTemplate
+const fileName: Partial<IListItemColumn> = {
+   displayProperty: 'fileName',
+   template: FileTemplate
 };
-export const isDynamic: Partial<IListItemColumn> = {
-    width: '30px',
-    align: 'center',
-    template: isDynamicTemplate
+const isDynamic: Partial<IListItemColumn> = {
+   width: '30px',
+   align: 'center',
+   template: isDynamicTemplate
 };
-export const used: Partial<IListItemColumn> = {
-    width: '55px',
-    align: 'center',
-    template: usedTemplate
+const used: Partial<IListItemColumn> = {
+   width: '55px',
+   align: 'center',
+   template: usedTemplate
 };
-export const size: Partial<IListItemColumn> = {
-    displayProperty: 'size',
-    width: '100px',
-    align: 'right',
-    template: SizeTemplate
+const size: Partial<IListItemColumn> = {
+   displayProperty: 'size',
+   width: '100px',
+   align: 'right',
+   template: Size
 };
 
-export const columns: Partial<IListItemColumn>[] = [
-    name,
-    fileName,
-    isDynamic,
-    used,
-    size
+export const columns: Array<Partial<IListItemColumn>> = [
+   name,
+   fileName,
+   isDynamic,
+   used,
+   size
 ];

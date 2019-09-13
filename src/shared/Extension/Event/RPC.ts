@@ -1,154 +1,159 @@
 import { guid } from 'Extension/Utils/guid';
-import { IEventEmitter } from "Extension/Event/IEventEmitter";
+import { IEventEmitter } from 'Extension/Event/IEventEmitter';
 
 interface IConfig {
-    channel: IEventEmitter
+   channel: IEventEmitter;
 }
-export type Method<TResult = any, TArgs = any> = (args: TArgs) => Promise<TResult> | TResult;
+type Method<TResult = unknown, TArgs = unknown> = (
+   args: TArgs
+) => Promise<TResult> | TResult;
 
-interface IMessageRequest<T = any> {
-    methodName: string;
-    args: T;
-    id: string;
+interface IMessageRequest<T = unknown> {
+   methodName: string;
+   args: T;
+   id: string;
 }
-interface IMessageResponse<T = any> {
-    id: string;
-    result?: T;
-    error?: {
-        message?: string;
-        code: number;
-    };
+interface IMessageResponse<T = unknown> {
+   id: string;
+   result?: T;
+   error?: {
+      message?: string;
+      code: number;
+   };
 }
 
 const SEC = 1000;
-const MIN = 60 * SEC;
 const DEFAULT_TIMEOUT = 10 * SEC;
 
 interface IExecuteConfig<TArgs> {
-    timeout?: number
-    methodName: string;
-    args?: TArgs;
+   timeout?: number;
+   methodName: string;
+   args?: TArgs;
 }
 
-interface WaitingRequests {
-    resolve(result: any): void;
-    methodName: string;
+interface IWaitingRequest {
+   methodName: string;
+   resolve(result: unknown): void;
 }
-interface RPCError extends Error {
-    methodName: string;
-    code: number;
+interface IRPCError extends Error {
+   methodName: string;
+   code: number;
 }
 
-const getDefaultMessage = (method: string, code: number) => {
-    return `RPC call method "${ method }" error[${ code }]`;
-};
+function getDefaultMessage(method: string, code: number): string {
+   return `RPC call method "${method}" error[${code}]`;
+}
 
 /**
  * RPC источник данных, работающий поверх канала сообщений
  */
 export class RPC {
-    private __methods: Map<string, Method> = new Map();
-    private __channel: IEventEmitter;
-    private __waitingRequests: Map<string, WaitingRequests > = new Map();
-    private __waitingTimeout: Map<string, number> = new Map();
-    private __requestEvent = 'data-request';
-    private __responseEvent = 'data-response';
-    
-    constructor(cfg: IConfig) {
-        this.__channel = cfg.channel;
-        this.__onRequest = this.__requestHandler.bind(this);
-        this.__onResponse = this.__responseHandler.bind(this);
-        this.__channel.addListener(this.__requestEvent, this.__onRequest);
-        this.__channel.addListener(this.__responseEvent, this.__onResponse);
-    }
-    destructor() {
-        this.__channel.removeListener(this.__requestEvent, this.__onRequest);
-        this.__channel.removeListener(this.__responseEvent, this.__onResponse);
-        delete this.__onRequest;
-        delete this.__onResponse;
-    }
-    execute<TRes, TArg = void>({
-       methodName,
-       args,
-       timeout = DEFAULT_TIMEOUT
-    } : IExecuteConfig<TArg>): Promise<TRes> {
-        return new Promise<TRes>((resolve, reject) => {
-            let id: string = guid();
-            this.__waitingRequests.set(id, { resolve, methodName });
-            // @ts-ignore
-            let timer: number = setTimeout(() => {
-                reject(new Error('timeout'));
-                this.__waitingRequests.delete(id);
-                this.__waitingTimeout.delete(id);
-            }, timeout);
-            this.__waitingTimeout.set(id,timer);
-            this.__channel.dispatch(this. __requestEvent, <IMessageRequest<TArg>> {
-                methodName,
-                id,
-                args
-            });
-        })
-    }
-    registerMethod<TRes, TArg>(methodName: string, method: Method<TRes, TArg>): void {
-        if (this.__methods.has(methodName)) {
-            throw new Error(`method "${ methodName }"`);
-        }
-        this.__methods.set(methodName, method);
-    }
-    private __responseHandler({ id, error, result }: IMessageResponse) {
-        const waiting = this.__waitingRequests.get(id);
-        if (!waiting) {
-            return;
-        }
+   private _methods: Map<string, Method> = new Map();
+   private _channel: IEventEmitter;
+   private _waitingRequests: Map<string, IWaitingRequest> = new Map();
+   private _waitingTimeout: Map<string, number> = new Map();
+   private _requestEvent: string = 'data-request';
+   private _responseEvent: string = 'data-response';
+   private _onResponse: (response: IMessageResponse) => void;
+   private _onRequest: (request: IMessageRequest) => void;
 
-        const { resolve, methodName } = waiting;
-        this.__waitingRequests.delete(id);
-        clearTimeout(this.__waitingTimeout.get(id));
-        this.__waitingTimeout.delete(id);
+   constructor(cfg: IConfig) {
+      this._channel = cfg.channel;
+      this._onRequest = this.__requestHandler.bind(this);
+      this._onResponse = this.__responseHandler.bind(this);
+      this._channel.addListener(this._requestEvent, this._onRequest);
+      this._channel.addListener(this._responseEvent, this._onResponse);
+   }
+   destructor(): void {
+      this._channel.removeListener(this._requestEvent, this._onRequest);
+      this._channel.removeListener(this._responseEvent, this._onResponse);
+      delete this._onRequest;
+      delete this._onResponse;
+   }
+   execute<TRes, TArg = void>({
+      methodName,
+      args,
+      timeout = DEFAULT_TIMEOUT
+   }: IExecuteConfig<TArg>): Promise<TRes> {
+      return new Promise<TRes>((resolve, reject) => {
+         const id: string = guid();
+         this._waitingRequests.set(id, { resolve, methodName });
+         const timer: number = window.setTimeout(() => {
+            reject(new Error('timeout'));
+            this._waitingRequests.delete(id);
+            this._waitingTimeout.delete(id);
+         }, timeout);
+         this._waitingTimeout.set(id, timer);
+         this._channel.dispatch(this._requestEvent, {
+            methodName,
+            id,
+            args
+         } as IMessageRequest<TArg>);
+      });
+   }
+   registerMethod<TRes, TArg>(
+      methodName: string,
+      method: Method<TRes, TArg>
+   ): void {
+      if (this._methods.has(methodName)) {
+         throw new Error(`method "${methodName}"`);
+      }
+      this._methods.set(methodName, method);
+   }
+   private __responseHandler({ id, error, result }: IMessageResponse): void {
+      const waiting = this._waitingRequests.get(id);
+      if (!waiting) {
+         return;
+      }
 
-        if (!error) {
-            resolve(result);
-            return;
-        }
-        let resultError = <RPCError> new Error(
-            error.message ||
-            getDefaultMessage(methodName, error.code)
-        );
-        resultError.code = error.code;
-        resultError.methodName = methodName;
-        resolve(Promise.reject(resultError));
-    }
-    private __onResponse: (response: IMessageResponse) => void;
-    private __requestHandler({ methodName, args, id }: IMessageRequest) {
-        let method = this.__methods.get(methodName);
-    
-        if (typeof method !== 'function') {
-            return this.__responseError(id, 404);
-        }
-        let resultPromise = method(args);
-        if (!(resultPromise instanceof Promise)) {
-            return this.__responseResult(id, resultPromise);
-        }
-        resultPromise.then((result) => {
+      const { resolve, methodName }: IWaitingRequest = waiting;
+      this._waitingRequests.delete(id);
+      window.clearTimeout(this._waitingTimeout.get(id));
+      this._waitingTimeout.delete(id);
+
+      if (!error) {
+         resolve(result);
+         return;
+      }
+      const resultError = new Error(
+         error.message || getDefaultMessage(methodName, error.code)
+      ) as IRPCError;
+      resultError.code = error.code;
+      resultError.methodName = methodName;
+      resolve(Promise.reject(resultError));
+   }
+   private __requestHandler({ methodName, args, id }: IMessageRequest): void {
+      const method = this._methods.get(methodName);
+
+      if (typeof method !== 'function') {
+         return this.__responseError(id, 404);
+      }
+      const resultPromise = method(args);
+      if (!(resultPromise instanceof Promise)) {
+         return this.__responseResult(id, resultPromise);
+      }
+      resultPromise.then(
+         (result) => {
             return this.__responseResult(id, result);
-        }, (message) => {
+         },
+         (message) => {
             return this.__responseError(id, 500, message);
-        })
-    }
-    private __onRequest: (request: IMessageRequest) => void;
-    private __responseError(id: string, code: number, message?: string){
-        this.__channel.dispatch(this.__responseEvent, <IMessageResponse>{
-            id,
-            error: {
-                message,
-                code
-            }
-        });
-    };
-    private __responseResult(id: string, result: any){
-        this.__channel.dispatch(this.__responseEvent, <IMessageResponse>{
-            id,
-            result
-        });
-    };
+         }
+      );
+   }
+   private __responseError(id: string, code: number, message?: string): void {
+      this._channel.dispatch(this._responseEvent, {
+         id,
+         error: {
+            message,
+            code
+         }
+      });
+   }
+   private __responseResult(id: string, result: unknown): void {
+      this._channel.dispatch(this._responseEvent, {
+         id,
+         result
+      });
+   }
 }

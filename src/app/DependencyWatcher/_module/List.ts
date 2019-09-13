@@ -1,137 +1,195 @@
-// @ts-ignore
-import * as Control from 'Core/Control';
+import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_module/List';
 import { Model } from 'Types/entity';
+import { RecordSet } from 'Types/collection';
 import { IListItem, source } from '../data';
-import { navigation } from './navigation';
 import { columns } from './column';
 import { headers } from './header';
-import { IRPCModeuleFilter } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
-import { FilterItem, getButtonSource } from './getButtonSource';
-import { getItemActions, ItemAction, ItemActionNames, visibilityCallback } from './getItemActions';
+import { IRPCModuleFilter } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
+import { IFilterItem, getButtonSource } from './getButtonSource';
+import { getItemActions, IItemAction, ItemActionNames } from './getItemActions';
 import { IColumn } from '../interface/IColumn';
 import { IHeaders } from '../interface/IHeaders';
 
 interface IChildren {
-    listView: Control;
+   listView: {
+      reload: () => void;
+   };
 }
 
-interface Config {
-    source: source.ListAbstract;
-    fileSource: source.File;
+interface IOptions extends IControlOptions {
+   source: source.ListAbstract;
+   fileSource: source.File;
 }
 
-export default class List extends Control {
-    protected readonly _template = template;
-    protected readonly _children: IChildren;
-    protected readonly _column: Partial<IColumn<IListItem>>[] = columns;
-    protected readonly _headers: IHeaders<IListItem> = headers;
-    protected readonly _navigation = navigation;
-    protected readonly _itemActionVisibilityCallback = visibilityCallback;
-    protected _filterButtonSource: FilterItem[];
-    protected _filter: source.IWhere<IRPCModeuleFilter>;
-    protected _root?: string;
-    protected _searchValue?: string;
-    protected _sorting?: object;
-    protected _itemActions: ItemAction[];
-    protected _notify: (eventName: string, args: unknown[]) => unknown;
-    constructor(config: Config) {
-        super(config);
-        this._filterButtonSource = getButtonSource({
-            fileSource: config.fileSource
-        });
-        this.__setItemActions();
-    }
-    reload() {
-        if (this._children.listView) {
-            this._children.listView.reload();
-        }
-    }
-    private __setItemActions() {
-        this._itemActions = getItemActions({
-            [ItemActionNames.file]: (model: Model) => {
-                this.__setFilter({
-                    parent: undefined,
-                    'files': [model.get('fileId')]
-                });
-                this._root = undefined;
-                this._setFilterValue('files', [model.get('fileId')], `file: ${ model.get('fileName') }`);
-                this._setFilterValue('dependentOnFiles');
-                this._filterButtonSource = [...this._filterButtonSource];
-            },
-            [ItemActionNames.dependentOnFile]: (model: Model) => {
-                this.__setFilter({
-                    parent: undefined,
-                    'files': [model.get('fileId')]
-                });
-                this._root = undefined;
-                this._setFilterValue('dependentOnFiles', [model.get('fileId')], `depend on: ${ model.get('fileName') }`);
-                this._setFilterValue('files');
-                this._filterButtonSource = [...this._filterButtonSource];
-            },
-            [ItemActionNames.openSource]: (model: Model) => {
-                this._notify('openSource', [model.get('itemId')]);
-            }
-        });
-    }
-    
-    private __setFilter(filter: source.IWhere<IRPCModeuleFilter>) {
-        const id = Math.random();
-        this._filter = {
-            ...filter,
-            //@ts-ignore
-            getVersion() {
-                return id;
-            }
-        }
-    }
+interface INavigation {
+   source: 'page' | 'position';
+   view: 'infinity' | 'pages' | 'demand';
+   sourceConfig: {
+      pageSize: number;
+      page: number;
+      mode: 'totalCount';
+   };
+}
 
-    protected _filterChanged(event: unknown, filter: source.IWhere<IRPCModeuleFilter>) {
-        // TODO 86d9e478a7d3 - очистка значений, которые внесли руками в FilterButtonSource при изменении фильтра
-        const keys: Array<keyof source.IWhere<IRPCModeuleFilter>> = ['files', 'dependentOnFiles'];
-        const updated                                             = keys.some((resetId) => {
-            if (filter.hasOwnProperty(resetId) &&
-                Array.isArray(filter[resetId]) &&
-                (<number[]> filter[resetId]).length
-            ) {
-                return false;
-            }
-            return this._setFilterValue(resetId);
-        });
-        if (updated) {
-            this._filterButtonSource = [...this._filterButtonSource];
-        }
-    }
-    protected _setFilterValue<T>(id: keyof source.IWhere<IRPCModeuleFilter>, value?: T, textValue?: string): boolean {
-        // TODO 86d9e478a7d3 - прокидывание данных в items внутри filterButtonSource
-        const item = this._filterButtonSource.find(({ name }) => {
-            return name == id
-        });
-        if (!item ||
-            value == item.value
-        ) {
+export default class List extends Control<IOptions> {
+   protected readonly _template: TemplateFunction = template;
+   protected readonly _children: IChildren;
+   protected readonly _column: Array<Partial<IColumn<IListItem>>> = columns;
+   protected readonly _headers: IHeaders<IListItem> = headers;
+   protected readonly _navigation: INavigation = {
+      source: 'page',
+      view: 'infinity',
+      sourceConfig: {
+         pageSize: 50,
+         page: 0,
+         mode: 'totalCount'
+      }
+   };
+   protected _filterButtonSource: IFilterItem[];
+   protected _filter?: source.IWhere<IRPCModuleFilter>;
+   protected _root?: string;
+   protected _searchValue?: string;
+   protected _sorting?: object;
+   protected _itemActions: IItemAction[];
+   protected _dataLoadCallback: (items: RecordSet) => void;
+   protected _filterChanged: boolean = false;
+   constructor(options: IOptions) {
+      super(options);
+      this._filterButtonSource = getButtonSource({
+         fileSource: options.fileSource
+      });
+      this.__setItemActions();
+      this._dataLoadCallback = this.__dataLoadCallback.bind(this);
+   }
+   reload(): void {
+      if (this._children.listView) {
+         this._children.listView.reload();
+      }
+   }
+   private __setItemActions(): void {
+      this._itemActions = getItemActions({
+         [ItemActionNames.file]: (model: Model) => {
+            this.__setFilter({
+               parent: undefined,
+               files: [model.get('fileId')]
+            });
+            this._root = undefined;
+            /**
+             * TODO: здесь не должно быть setFilterValue, но без него операции над записью становятся одноразовыми
+             * Там какая-то запутанная схема, и первый раз стреляет dataLoadCallback, а второй раз нет
+             * setFilterValue зовётся только из dataLoadCallback. Возможно стоит перетащить это в setFilter
+             */
+            this._setFilterValue(
+               'files',
+               [model.get('fileId')],
+               model.get('fileName')
+            );
+            this._setFilterValue('dependentOnFiles');
+         },
+         [ItemActionNames.dependentOnFile]: (model: Model) => {
+            this.__setFilter({
+               parent: undefined,
+               files: [model.get('fileId')]
+            });
+            this._root = undefined;
+            /**
+             * TODO: здесь не должно быть setFilterValue, но без него операции над записью становятся одноразовыми
+             * Там какая-то запутанная схема, и первый раз стреляет dataLoadCallback, а второй раз нет
+             * setFilterValue зовётся только из dataLoadCallback. Возможно стоит перетащить это в setFilter
+             */
+            this._setFilterValue(
+               'dependentOnFiles',
+               [model.get('fileId')],
+               model.get('fileName')
+            );
+            this._setFilterValue('files');
+         }
+      });
+   }
+
+   private __setFilter(filter: source.IWhere<IRPCModuleFilter>): void {
+      this._filter = { ...filter };
+      if (this._filter.files && !this._filter.files.length) {
+         delete this._filter.files;
+      }
+      if (
+         this._filter.dependentOnFiles &&
+         !this._filter.dependentOnFiles.length
+      ) {
+         delete this._filter.dependentOnFiles;
+      }
+      this._filterChanged = true;
+   }
+
+   protected _onFilterChanged(
+      event: unknown,
+      filter: source.IWhere<IRPCModuleFilter>
+   ): void {
+      this.__setFilter(filter);
+   }
+   protected _setFilterValue<T>(
+      id: keyof source.IWhere<IRPCModuleFilter>,
+      value?: T,
+      textValue: string = ''
+   ): boolean {
+      const item = this._filterButtonSource.find(({ name }) => name === id);
+      if (!item || value === item.value) {
+         return false;
+      }
+      if (!value) {
+         if (
+            item.value === item.resetValue ||
+            (Array.isArray(item.value) && !item.value.length)
+         ) {
             return false;
-        }
-        if (!value) {
-            // reset
+         }
+      }
+      item.value = value || item.resetValue;
+      item.textValue = textValue;
+      return true;
+   }
+   private __dataLoadCallback(items: RecordSet): void {
+      if (this._filterChanged) {
+         this._filterChanged = false;
+         const keys: Array<keyof source.IWhere<IRPCModuleFilter>> = [
+            'files',
+            'dependentOnFiles'
+         ];
+         let updated = false;
+         keys.forEach((key) => {
             if (
-                item.value == item.resetValue ||
-                Array.isArray(item.value) && !item.value.length
+               this._filter &&
+               this._filter[key] &&
+               (this._filter[key] as number[]).length
             ) {
-                return false
+               const fileId = (this._filter[key] as number[])[0];
+               const count = items.getCount();
+               let item;
+               for (let i = 0; i < count; i++) {
+                  item = items.at(i);
+                  if (item.get('fileId') === fileId) {
+                     break;
+                  }
+               }
+               if (item) {
+                  const fileName = item.get('fileName');
+                  const result = this._setFilterValue(key, [fileId], fileName);
+                  if (result) {
+                     updated = true;
+                  }
+               }
+            } else {
+               const result = this._setFilterValue(key);
+               if (result) {
+                  updated = true;
+               }
             }
-        }
-        item.value = value || item.resetValue;
-        item.textValue = textValue || '';
-        return true;
-    }
+         });
+         if (updated) {
+            this._filterButtonSource = [...this._filterButtonSource];
+         }
+      }
+   }
 }
-/*
- * TODO 86d9e478a7d3
- *  Костыль для прокидывания поля фильтрации в filter.Controller > filter.Button сверху
- *  В текущей реализации он либо не отрисует значение фильтра, либо затрёт значение, т.к. оно выставлено не самим фильтром
- *  (в зависимости от параметров FilterButtonSource)
- *  Убрать после задачи:
- *  https://online.sbis.ru/opendoc.html?guid=bdbdae9b-a626-42a7-bda8-86d9e478a7d3
- */

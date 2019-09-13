@@ -1,10 +1,10 @@
 import * as file from './filter/file';
-//@ts-ignore
+// @ts-ignore
 import * as itemTemplate from 'wml!DependencyWatcher/_module/filter/itemTemplate';
-//@ts-ignore
+// @ts-ignore
 import * as Panel from 'wml!DependencyWatcher/_module/filter/Panel';
-//@ts-ignore
+// @ts-ignore
 import * as additionalTemplate from 'wml!DependencyWatcher/_module/filter/additionalTemplate';
 import 'css!DependencyWatcher/module';
 
-export { file, itemTemplate, additionalTemplate, Panel }
+export { file, itemTemplate, additionalTemplate, Panel };

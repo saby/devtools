@@ -1,7 +1,7 @@
 <Layout.Browser
     filterButtonSource="{{ _filterButtonSource }}"
     filter="{{ _filter }}"
-    on:filterChanged="_filterChanged()"
+    on:filterChanged="_onFilterChanged()"
     source="{{ _options.source }}"
     keyProperty="id"
     parentProperty="parent"
@@ -13,6 +13,7 @@
     root="{{ _root }}"
     theme="default-Layout"
     searchValue="{{ _searchValue }}"
+    dataLoadCallback="{{ _dataLoadCallback }}"
 >
     <ws:search>
         <span class="DependencyWatcher_Page__head">
@@ -40,9 +41,7 @@
                 header="{{ _headers }}"
                 columnScroll="{{ true }}"
                 displayProperty="name"
-                contextMenuVisibility="{{ true }}"
                 itemActions="{{ _itemActions }}"
-                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
             >
                 <ws:emptyTemplate>
                     <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">

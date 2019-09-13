@@ -1,7 +1,7 @@
-<ws:if data="{{ !itemData.item['initialized'] }}">
+<ws:if data="{{ !itemData.item.initialized }}">
     <Controls.popup:InfoboxTarget attr:style="width: 100%;">
         <ws:content>
-            <ws:if data="{{ !itemData.item['defined'] }}">
+            <ws:if data="{{ !itemData.item.defined }}">
                 <div class="icon-small icon-Alert icon-disabled"></div>
             </ws:if>
             <ws:else>
@@ -9,17 +9,14 @@
             </ws:else>
         </ws:content>
         <ws:template>
-            <ws:if data="{{ !itemData.item['defined'] }}">
+            <ws:if data="{{ !itemData.item.defined }}">
                 <h1>{[Незагруженный модуль]}</h1>
                 <span>{[Модуль является зависимостью неиспользуемого модуля в бандле]}</span>
             </ws:if>
             <ws:else>
                 <h1>{[Неиспользуемый модуль]}</h1>
-                <span>{[Попробуйте отфильтровать данные по файлу и посмотреть кто его загрузил]}</span>
+                <span>{[Попробуйте отфильтровать данные по файлу, чтобы посмотреть кто его загрузил]}</span>
             </ws:else>
         </ws:template>
     </Controls.popup:InfoboxTarget>
 </ws:if>
-<ws:else>
-    <invisible-node />
-</ws:else>

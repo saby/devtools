@@ -1,4 +1,4 @@
-<ws:if data="{{ itemData.item['isDynamic'] }}">
+<ws:if data="{{ itemData.item.isDynamic }}">
     <Controls.popup:InfoboxTarget attr:style="width: 100%;">
         <ws:content>
             <div class="icon-small icon-Info icon-disabled"></div>
@@ -10,6 +10,3 @@
         </ws:template>
     </Controls.popup:InfoboxTarget>
 </ws:if>
-<ws:else>
-    <invisible-node />
-</ws:else>

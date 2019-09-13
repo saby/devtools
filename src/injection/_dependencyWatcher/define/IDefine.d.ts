@@ -1,35 +1,24 @@
-export type WithoutDependency<T> = {
-    name: string;
-    module: Function;
+type ArgsWithoutDependency = [string, Function];
+
+type ArgsWithDependency = [string, string[], Function];
+
+type AnonymousModule = [Function];
+
+type AnonymousModuleWithDependencies = [string[], Function];
+
+interface IPluginOption {
+   load: Function;
 }
-export type ArgsWithoutDependency = [
-    string,
-    Function
-];
+type ArgsInitPluginOptionOnly = [IPluginOption];
+type ArgsInitPluginWithName = [string, IPluginOption];
 
-export type ArgsWithDependency = [
-    string,
-    Array<string>,
-    Function
-];
+type ArgsInitPlugin = ArgsInitPluginOptionOnly | ArgsInitPluginWithName;
 
-type PluginOption = {
-    load: Function
-}
-export type ArgsInitPluginOptionOnly = [ PluginOption ]
-export type ArgsInitPluginWithName = [
-    string,
-    PluginOption
-]
-export type ArgsInitPluginConstructor = [
-    string,
-    PluginOption
-]
+export type DefineArgs =
+   | ArgsWithDependency
+   | ArgsWithoutDependency
+   | ArgsInitPlugin
+   | AnonymousModule
+   | AnonymousModuleWithDependencies;
 
-export type ArgsInitPlugin = ArgsInitPluginOptionOnly | ArgsInitPluginWithName;
-
-export type Args<T = any> = ArgsWithDependency | ArgsWithoutDependency | ArgsInitPlugin;
-
-export interface IDefine<T = any>{
-    (...args: Array<Args<T>>): void;
-}
+export type IDefine = (...args: DefineArgs[]) => void;

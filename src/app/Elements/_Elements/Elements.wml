@@ -1,6 +1,7 @@
 <Devtool.Layout.Browser>
     <ws:headTemplate>
-        <Controls.buttons:Button icon="icon-small icon-Handwrite1"
+        <Controls.buttons:Button icon="icon-Handwrite1"
+                                 iconSize="s"
                                  iconStyle="{{ _selectingFromPage ? 'primary' : 'secondary' }}"
                                  tooltip="Select an element from the page"
                                  viewMode="link"

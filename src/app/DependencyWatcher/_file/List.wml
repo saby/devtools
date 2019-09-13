@@ -3,9 +3,9 @@
     name="listView"
     bind:sorting="_sorting"
     displayProperty="name"
-    columns="{{ _column }}"
-    header="{{ _headers }}"
-    navigation="{{ _navigation }}"
+    columns="{{ _options.columns }}"
+    header="{{ _options.headers }}"
+    navigation="{{ _options.navigation }}"
     scope="{{ _options }}"
 >
     <ws:emptyTemplate>

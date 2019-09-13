@@ -1,6 +1,9 @@
-import { IDependencies } from "Extension/Plugins/DependencyWatcher/IModule";
+import { IDependencies } from 'Extension/Plugins/DependencyWatcher/IModule';
 
-export const hasChildren = (deps: IDependencies<number[]>): boolean | null => {
-    return (deps.dynamic && deps.dynamic.length > 0) ||
-        (deps.static && deps.static.length > 0) || null;
-};
+export function hasChildren(deps: IDependencies<number[]>): boolean | null {
+   return (
+      (deps.dynamic && deps.dynamic.length > 0) ||
+      (deps.static && deps.static.length > 0) ||
+      null
+   );
+}

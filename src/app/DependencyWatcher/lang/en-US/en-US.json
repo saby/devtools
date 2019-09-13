@@ -2,8 +2,7 @@
   "Не найдено": "No data",
   "Режим отображения": "View mode",
   "Модуль не загружен": "Module is not loaded",
-  "Не удалось получить размер файла": "Failed to get file size",
-  "Попробуйте перезагрузить страницу": "Try to reload the page",
+  "Не удалось получить размер файла. Попробуйте перезагрузить страницу.": "Failed to get file size. Try to reload the page.",
   "Модули файла": "Modules of file",
   "Зависят от файла": "File dependents",
   "": "",
@@ -13,6 +12,12 @@
   "Файлы локализации": "Localization files",
   "Включая файлы конфигураций": "Including configuration files",
   "Файлы конфигурации": "Configuration files",
-  "байт": "byte",
-  "Выберите файл": "Select a file"
+  "Выберите файл": "Select a file",
+  "Отобразить модули, зависящие от файла": "Show dependants of this module",
+  "Отобразить модули файла": "Show modules of this file",
+  "Незагруженный модуль": "Module is not loaded",
+  "Модуль является зависимостью неиспользуемого модуля в бандле": "This module is a dependency of an unused module in a bundle",
+  "Неиспользуемый модуль": "Unused module",
+  "Попробуйте отфильтровать данные по файлу, чтобы посмотреть кто его загрузил": "Try filtering data by module name to see who downloaded it",
+  "Динамическая зависимость модуля": "Dynamic dependency"
 }

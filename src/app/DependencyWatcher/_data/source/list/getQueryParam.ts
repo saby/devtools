@@ -1,48 +1,58 @@
-import { Query as TypesQuery } from "Types/source";
-import { QueryParam, SortBy } from "Extension/Plugins/DependencyWatcher/data/IQuery";
-import { IWhere, IWhereKey } from "./IWhere";
+import { Query as TypesQuery } from 'Types/source';
+import {
+   IQueryParam,
+   SortBy
+} from 'Extension/Plugins/DependencyWatcher/data/IQuery';
+import { IWhere, IWhereKey } from './IWhere';
 
-export type IgnoreFilters<TData extends object> = Partial<Record<IWhereKey<TData>, IWhereKey<TData>[]>>;
+export type IgnoreFilters<TData extends object> = Partial<
+   Record<IWhereKey<TData>, Array<IWhereKey<TData>>>
+>;
 
 export type DefaultFilters<TData extends object> = Partial<TData>;
 
-export const getQueryParam = <TData extends object>(
-    query: TypesQuery,
-    keys?: number[],
-    ignoreFilters: IgnoreFilters<TData> = {},
-    defaultFilters: DefaultFilters<TData> = {}
-): QueryParam<TData, IWhere<TData>> => {
-    const sortBy: SortBy<TData> = {};
-    query.getOrderBy().forEach((order) => {
-        sortBy[<keyof TData> order.getSelector()] = !!order.getOrder();
-    });
-    const queryWhere = <IWhere<TData> & { id?: number | number[]}> query.getWhere();
-    if (queryWhere.id) {
-        keys = Array.isArray(queryWhere.id)? queryWhere.id: [queryWhere.id];
-        delete queryWhere.id;
-    }
-    const where = <IWhere<TData>> {
-        ...defaultFilters,
-        ...queryWhere
-    };
-    for (let filterKey in ignoreFilters) {
-        if (!where.hasOwnProperty(filterKey) ||
-            where[ <IWhereKey<TData>> filterKey] === null ||
-            where[ <IWhereKey<TData>> filterKey] === undefined
-        ) {
-            continue;
-        }
-        let ignore = ignoreFilters[<IWhereKey<TData>> filterKey];
-        if (!ignore) {
-            continue;
-        }
-        ignore.forEach((ignore: IWhereKey<TData>) => {
-            delete where[ignore];
-        });
-    }
-    return {
-        keys, where, sortBy,
-        limit: query.getLimit(),
-        offset: query.getOffset()
-    }
-};
+export function getQueryParam<TData extends object>(
+   query: TypesQuery,
+   keys?: number[],
+   ignoreFilters: IgnoreFilters<TData> = {},
+   defaultFilters: DefaultFilters<TData> = {}
+): IQueryParam<TData, IWhere<TData>> {
+   const sortBy: SortBy<TData> = {};
+   query.getOrderBy().forEach((order) => {
+      sortBy[order.getSelector() as keyof TData] = !!order.getOrder();
+   });
+   const queryWhere = query.getWhere() as IWhere<TData> & {
+      id?: number | number[];
+   };
+   if (queryWhere.id) {
+      keys = Array.isArray(queryWhere.id) ? queryWhere.id : [queryWhere.id];
+      delete queryWhere.id;
+   }
+   const where = {
+      ...defaultFilters,
+      ...queryWhere
+   } as IWhere<TData>;
+   for (const filterKey in ignoreFilters) {
+      if (
+         !where.hasOwnProperty(filterKey) ||
+         where[filterKey as IWhereKey<TData>] === null ||
+         where[filterKey as IWhereKey<TData>] === undefined
+      ) {
+         continue;
+      }
+      const ignore = ignoreFilters[filterKey as IWhereKey<TData>];
+      if (!ignore) {
+         continue;
+      }
+      ignore.forEach((ignore: IWhereKey<TData>) => {
+         delete where[ignore];
+      });
+   }
+   return {
+      keys,
+      where,
+      sortBy,
+      limit: query.getLimit(),
+      offset: query.getOffset()
+   };
+}

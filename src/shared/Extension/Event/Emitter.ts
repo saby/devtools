@@ -50,6 +50,4 @@ class Emitter implements IEventEmitter {
    }
 }
 
-export {
-   Emitter
-};
+export { Emitter };

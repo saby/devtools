@@ -1,52 +1,63 @@
-import { REQUIRE } from "../const";
-import { ILocalRequire } from "../require/IRequire";
-import { ModuleStorage } from "../storage/Module";
-import { ILogger } from "Extension/Logger/ILogger";
+import { REQUIRE } from '../const';
+import { ILocalRequire } from '../require/IRequire';
+import { ModuleStorage } from '../storage/Module';
 
-type ReplaceFunction<T = any> = (name: string, origin: T) => T;
+type ReplaceFunction<T extends object> = (name: string, origin: T) => T;
 
-export let getProxyModules = (storage: ModuleStorage, logger: ILogger) => {
-    
-    let proxyRequire: ReplaceFunction<ILocalRequire> = (name: string, require: ILocalRequire) => {
-        return new Proxy(require, {
-            apply(target: any, thisArg: any, argArray: Array<string | string[]>): any {
-                storage.require(name, argArray[0]);
-                return target.apply(thisArg, argArray);
+interface IProxyObject {
+   require: ReplaceFunction<ILocalRequire>;
+   'Core/library': ReplaceFunction<object>;
+   'Core/moduleStubs': ReplaceFunction<object>;
+}
+
+export function getProxyModules(storage: ModuleStorage): IProxyObject {
+   function proxyRequire(name: string, require: ILocalRequire): ILocalRequire {
+      return new Proxy(require, {
+         apply(
+            target: ILocalRequire,
+            thisArg: unknown,
+            argArray: Array<string | string[]>
+         ): object | void {
+            storage.require(name, argArray[0]);
+            return target.apply(thisArg, argArray);
+         }
+      });
+   }
+
+   function proxyModuleStubs<T extends object>(
+      name: string,
+      moduleStubs: T
+   ): T {
+      return new Proxy(moduleStubs, {
+         get(target: T, property: string | number | symbol): unknown {
+            if (property === 'requireModule' || property === 'require') {
+               return (mods: string | string[]) => {
+                  storage.require(name, mods);
+                  return target[property].call(target, mods);
+               };
             }
-        });
-    };
-    
-    let proxyModuleStubs: ReplaceFunction<any> = (name: string, moduleStubs) => {
-        return new Proxy(moduleStubs, {
-            get(target: any, property: string | number | symbol, receiver: any): any {
-                if (property === 'requireModule' || property === 'require') {
-                    return (mods: string | string[]) => {
-                        storage.require(name, mods);
-                        return target[property].call(target, mods);
-                    };
-                }
-                return target[property];
+            return target[property];
+         }
+      });
+   }
+
+   function proxyLibrary<T extends object>(name: string, library: T): T {
+      return new Proxy(library, {
+         get(target: T, property: string | number | symbol): unknown {
+            if (property === 'load') {
+               return (module: string, loader?: unknown) => {
+                  storage.require(name, target.parse(module).name);
+                  return target[property].call(target, module, loader);
+               };
             }
-        })
-    };
-    
-    let proxyLibrary: ReplaceFunction<any> = (name: string, library) => {
-        return new Proxy(library, {
-            get(target: any, property: string | number | symbol, receiver: any): any {
-                if (property === 'load') {
-                    return (module: string, loader?: unknown) => {
-                        storage.require(name, target.parse(module).name);
-                        return target[property].call(target, module, loader);
-                    };
-                }
-                return target[property];
-            }
-        })
-    };
-    
-    return {
-        [REQUIRE]: proxyRequire,
-        'Core/library': proxyLibrary,
-        'Core/moduleStubs': proxyModuleStubs
-    };
-};
+            return target[property];
+         }
+      });
+   }
+
+   return {
+      [REQUIRE]: proxyRequire,
+      'Core/library': proxyLibrary,
+      'Core/moduleStubs': proxyModuleStubs
+   };
+}

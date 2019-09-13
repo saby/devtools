@@ -22,7 +22,7 @@ export class Source implements ICrud {
       name: string;
    }>;
    readonly '[Types/_source/ICrud]': boolean = true;
-   readonly _mixins: object = {
+   readonly _mixins: string[] = {
       '[Types/_source/ICrud]': true
    };
 

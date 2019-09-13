@@ -1,7 +1,9 @@
-import { FilterFunction } from "./Filter";
-interface Name {
-    name: string;
+import { FilterFunction } from './Filter';
+interface IName {
+   name: string;
 }
-export let json: FilterFunction<Name> = <T extends Name>(item: T): boolean => {
-    return !item.name.startsWith('json!') && !item.name.includes('.json');
+export let json: FilterFunction<IName> = <T extends IName>(
+   item: T
+): boolean => {
+   return !item.name.startsWith('json!') && !item.name.includes('.json');
 };

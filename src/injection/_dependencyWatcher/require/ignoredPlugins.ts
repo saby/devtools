@@ -1,22 +1,20 @@
-export interface IRequirePlugin<T = string> {
-    (module: string): T;
+export type IRequirePlugin<T = string> = (module: string) => T;
+
+function replacePrefix(prefix: string): IRequirePlugin {
+   return (module: string) => {
+      return module.replace(prefix, '');
+   };
 }
 
-let replacePrefix = (prefix: string): IRequirePlugin => {
-    return (module: string) => {
-        return module.replace(prefix, '');
-    };
-};
+const cdn: IRequirePlugin<string> = replacePrefix('cdn!');
 
-export let cdn: IRequirePlugin<string> = replacePrefix('cdn!');
+const browser: IRequirePlugin<string> = replacePrefix('browser!');
 
-export let browser: IRequirePlugin<string> = replacePrefix('browser!');
+const isBrowser: IRequirePlugin<string> = replacePrefix('is!browser?');
 
-export let isBrowser: IRequirePlugin<string> = replacePrefix('is!browser?');
+const optional: IRequirePlugin<string> = replacePrefix('optional!');
 
-export let optional: IRequirePlugin<string> = replacePrefix('optional!');
-
-export let preload: IRequirePlugin<string> = replacePrefix('preload!');
+const preload: IRequirePlugin<string> = replacePrefix('preload!');
 
 /*
 let allPlugins = {
@@ -43,6 +41,9 @@ let allPlugins = {
 };
 */
 
-export const ignoredPlugins: IRequirePlugin<string>[] = [
-    browser, optional, preload, isBrowser
+export const ignoredPlugins: Array<IRequirePlugin<string>> = [
+   browser,
+   optional,
+   preload,
+   isBrowser
 ];
