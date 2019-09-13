@@ -25,17 +25,19 @@ ALL_PLUGINS.forEach((Plugin: IPluginConstructor) => {
 });
 
 function onDocumentLoad(): void {
-   globalChannel.addListener(GlobalMessages.devtoolsInitialized, () => {
-      logger.log('Обнаружили оживление вкладки wasaby, сообщаем о том что страница живая');
+   if (document.readyState === 'complete') {
+      globalChannel.addListener(GlobalMessages.devtoolsInitialized, () => {
+         logger.log('Обнаружили оживление вкладки wasaby, сообщаем о том что страница живая');
+         globalChannel.dispatch(GlobalMessages.wasabyInitialized);
+      });
       globalChannel.dispatch(GlobalMessages.wasabyInitialized);
-   });
-   globalChannel.dispatch(GlobalMessages.wasabyInitialized);
-   logger.log('Страница построена, сообщаем о том что страница живая');
-   document.removeEventListener('DOMContentLoaded', onDocumentLoad);
+      logger.log('Страница построена, сообщаем о том что страница живая');
+      document.removeEventListener('readystatechange', onDocumentLoad);
+   }
 }
 
-if (document.readyState === 'loading') {
-   document.addEventListener('DOMContentLoaded', onDocumentLoad);
+if (document.readyState !== 'complete') {
+   document.addEventListener('readystatechange', onDocumentLoad);
 } else {
    onDocumentLoad();
 }
