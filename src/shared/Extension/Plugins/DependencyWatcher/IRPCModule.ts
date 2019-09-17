@@ -10,7 +10,6 @@ interface IFileInfo {
    fileName: string;
    path: string;
    size: number;
-   fileSize: number;
 }
 
 export interface IRPCModuleInfo extends IFileInfo, IModuleInfo {
