@@ -5,10 +5,9 @@ import { IFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 import {
    IRPCModule,
    IRPCModuleFilter,
-   ITransferRPCModule,
-   UpdateItemParam
+   ITransferRPCModule
 } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
-import { getFileName } from '../require/getFileName';
+import { getFileNames } from '../require/getFileNames';
 import { Require } from '../Require';
 import { DependencyType } from 'Extension/Plugins/DependencyWatcher/const';
 import itemsSort from 'Extension/Plugins/DependencyWatcher/data/sort/itemsSort';
@@ -43,20 +42,25 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
    query(
       queryParams: Partial<IQueryParam<IRPCModule, IRPCModuleFilter>>
    ): IQueryResult<number> {
-      this.__beforeQuery(queryParams);
       const _queryParams = this.__prepareParams(queryParams);
       return super.query(_queryParams);
    }
 
-   updateItems(params: UpdateItemParam[]): boolean[] {
-      return params.map((param) => {
-         return this.__updateItem(param);
-      });
-   }
-
    hasUpdates(keys: number[]): boolean[] {
-      return this._moduleStorage.hasUpdates(keys);
-      // TODO Пройтись по модулям, которые не обновлялись и проверить не обновились ли файлы, в которых они лежат
+      const items = this._getItems(keys);
+      const updatedItems = this._moduleStorage.hasUpdates(keys);
+      return items.map((item, index) => {
+         if (updatedItems[index]) {
+            return true;
+         } else {
+            const fileId = item.fileId;
+            if (fileId === Number.MIN_SAFE_INTEGER) {
+               return false;
+            } else {
+               return this._files.hasUpdates([fileId])[0];
+            }
+         }
+      });
    }
    getItems(keys: number[]): ITransferRPCModule[] {
       return this._getItems(keys).map((item: IRPCModule) => {
@@ -81,8 +85,8 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
    protected _getItems(keys?: number[]): IRPCModule[] {
       const modules = this._moduleStorage.getItems(keys);
       modules.forEach((module: IModule) => {
-         this.__addFileId(module);
-         this.__addDefined(module);
+         this.__setDefined(module);
+         this.__setFileId(module);
       });
       return modules.map<IRPCModule>(
          ({
@@ -94,8 +98,15 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
             dependent,
             dependencies
          }: IModule) => {
-            const file = this._files.getItem(fileId as number) as IFile;
-            const { size, path }: IFile = file;
+            const file = this._files.getItem(fileId);
+            let size = 0;
+            let path = '';
+            let fileName = '';
+            if (file) {
+               size = file.size;
+               path = file.path;
+               fileName = file.name;
+            }
             return {
                defined,
                initialized,
@@ -106,7 +117,7 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
                dependencies,
                size,
                path,
-               fileName: file.name
+               fileName
             } as IRPCModule;
          }
       );
@@ -120,85 +131,44 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
       return itemsSort;
    }
    /// endregion Query
-   /// region IUpdate
-   private __updateItem(param: UpdateItemParam): boolean {
-      const module = this._moduleStorage.getItem(param.id);
-      if (!module) {
-         return false;
-      }
-      if (Object.keys(param).length === 1) {
-         return false;
-      }
-      const { fileName, size, path }: UpdateItemParam = param;
-      if (!(fileName || size || path)) {
-         return false;
-      }
-      const file = this._files.getItem(module.fileId as number);
-      if (!file) {
-         return false;
-      }
-      file.name = fileName || file.name;
-      file.size = size || file.size;
-      file.path = path || file.path;
-      return true;
-      // TODO update Module fields
-   }
-   /// endregion IUpdate
-   private __updateFileId(): void {
-      const _keys = this._moduleStorage.query({
-         where: { files: [Number.MIN_SAFE_INTEGER] }
-      }).data;
-      const modules = this._moduleStorage.getItems(_keys);
-      modules.forEach(this.__addFileId.bind(this));
-   }
-   private __addFileId(module: IModule): void {
-      if (module.fileId !== Number.MIN_SAFE_INTEGER) {
+   private __setFileId(module: IModule): void {
+      /**
+       * If a module is defined, it should have a file, otherwise it's not loaded.
+       * It is important to avoid creating files for modules that are not loaded because it only leads to confusion.
+       * Generated paths are often wrong and don't serve a real purpose. Also, they can lead to duplication, because
+       * real paths and generated paths often don't have the same format.
+       */
+      if (module.fileId !== Number.MIN_SAFE_INTEGER || !module.defined) {
          return;
       }
-      const fileName = getFileName(
+      const requireConfig = this._require.getConfig();
+      const fileNames = getFileNames(
          module.name,
          this._require.getOrigin(),
-         isRelease(this._require.getConfig().buildMode),
-         this._require.getConfig().bundles
+         isRelease(requireConfig.buildMode),
+         requireConfig.bundles,
+         module.dependent.static
       );
-      const file: IFile =
-         this._files.find(fileName) || this._files.create(fileName, 0);
+      let file: IFile | void;
+      for (const fileName of fileNames) {
+         file = this._files.find(fileName);
+         if (file) {
+            break;
+         }
+      }
+      if (!file) {
+         return;
+      }
       file.modules.add(module.id);
       module.fileId = file.id;
    }
-   private __updateDefined(): void {
-      this._moduleStorage.getItems().forEach(this.__addDefined.bind(this));
-   }
-   private __addDefined(module: IModule): void {
+   private __setDefined(module: IModule): void {
       if (!module.initialized) {
          module.initialized = this._require.getOrigin().defined(module.name);
       }
       if (module.initialized && !module.defined) {
          // тут не AMD модули пришли в ответ
          module.defined = true;
-      }
-   }
-
-   /**
-    * Предпроход по данным перед отправкой с целью заполнения недостающих данных
-    * @private
-    */
-   private __beforeQuery({
-      where,
-      sortBy
-   }: Partial<IQueryParam<IRPCModule, IRPCModuleFilter>>): void {
-      // Если фильтрация по файлам или сортировка по имени файла, то проставляем файлы модулям, у которых их нет
-      if (
-         (where &&
-            ((where.files && where.files.length) ||
-               (where.dependentOnFiles && where.dependentOnFiles.length))) ||
-         (sortBy && typeof sortBy.fileName === 'boolean')
-      ) {
-         this.__updateFileId();
-      }
-      // Если сортировка по используемости модуля, то перепроверяем, что не пропустили
-      if (sortBy && typeof sortBy.initialized === 'boolean') {
-         this.__updateDefined();
       }
    }
 

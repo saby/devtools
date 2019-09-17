@@ -4,8 +4,7 @@ import {
    IRPCModule,
    IRPCModuleFilter,
    IRPCModuleInfo,
-   ITransferRPCModule,
-   UpdateItemParam
+   ITransferRPCModule
 } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
 import {
    IQueryParam,
@@ -26,7 +25,6 @@ import { GLOBAL_MODULE_NAME } from 'Extension/Plugins/DependencyWatcher/const';
 import { queue } from 'Extension/Utils/queue';
 import { RecordSet } from 'Types/collection';
 import { IListConfig } from './IList';
-import { getSizes } from './util/getSizes';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { Lang, revert } from 'Extension/Utils/kbLayout';
 
@@ -39,7 +37,6 @@ export abstract class ListAbstract extends Compatibility {
    private _defaultFilters: DefaultFilters<IRPCModuleFilter>;
    private _ignoreFilters: IgnoreFilters<IRPCModuleFilter>;
    private _logger: ILogger;
-   private _updateSizePromise?: Promise<void>;
    constructor(config: IListConfig) {
       super(config);
       this._items = config.itemStorage;
@@ -127,16 +124,11 @@ export abstract class ListAbstract extends Compatibility {
    ): Promise<IQueryResult<IListItem>> {
       this._logger.log('query without parent');
       let _hasMore: boolean;
-      return this.__beforeQuery(param)
-         .then(() => {
-            return this._items.query(param);
-         })
+      return this._items
+         .query(param)
          .then(({ data, hasMore }) => {
             _hasMore = hasMore;
             return this._items.getItems(data);
-         })
-         .then((items: ITransferRPCModule[]) => {
-            return this.__updateSizes(items).then(() => items);
          })
          .then((items: ITransferRPCModule[]) => {
             return {
@@ -170,9 +162,6 @@ export abstract class ListAbstract extends Compatibility {
                .then(({ data, hasMore }) => {
                   _hasMore = hasMore;
                   return this._items.getItems(data);
-               })
-               .then((items: ITransferRPCModule[]) => {
-                  return this.__updateSizes(items).then(() => items);
                })
                .then((items: ITransferRPCModule[]) => {
                   return {
@@ -243,81 +232,7 @@ export abstract class ListAbstract extends Compatibility {
          child: hasChildren(this._getChildren(item))
       };
    }
-   private __beforeQuery(
-      param: IQueryParam<IRPCModule, IRPCModuleFilter>
-   ): Promise<void> {
-      const {
-         where,
-         sortBy,
-         offset
-      }: IQueryParam<IRPCModule, IRPCModuleFilter> = param;
-      if (typeof sortBy.size === 'undefined' || offset !== 0) {
-         return Promise.resolve();
-      }
-      this._logger.log(
-         'query with sort by size & without offset: try to get items without size & set it them'
-      );
-      if (this._updateSizePromise) {
-         this._logger.log('previous request not finished, waiting him');
-         return this._updateSizePromise.then(() => {
-            this._logger.log(
-               'previous request are finished, try get size again'
-            );
-            return this.__beforeQuery(param);
-         });
-      }
-      const _param: Partial<IQueryParam<IRPCModule, IRPCModuleFilter>> = {
-         where: {
-            ...where,
-            withoutSize: true
-         }
-      };
-      this._logger.log('query items without size');
-      this._updateSizePromise = this._items
-         .query(_param)
-         .then(({ data }) => {
-            return this._items.getItems(data);
-         })
-         .then((items: ITransferRPCModule[]) => {
-            this._logger.log(
-               `success query items without size: ${items.length}`
-            );
-            return this.__updateSizes(items);
-         })
-         .then(() => {
-            this._logger.log('complete update items');
-            delete this._updateSizePromise;
-         });
-      return this._updateSizePromise;
-   }
 
-   private __updateSizes(items: ITransferRPCModule[]): Promise<boolean[]> {
-      return getSizes().then((sizes: Record<string, number>) => {
-         const updates: UpdateItemParam[] = [];
-         items.forEach((item: ITransferRPCModule) => {
-            if (item.size) {
-               return;
-            }
-            const _path = item.path.replace('.min.', '.');
-            for (const url in sizes) {
-               if (url.replace('.min.', '.').includes(_path)) {
-                  const update: UpdateItemParam = {
-                     id: item.id,
-                     size: sizes[url]
-                  };
-                  if (url > item.path) {
-                     update.path = url;
-                  }
-                  updates.push(update);
-                  delete sizes[url];
-                  return;
-               }
-            }
-         });
-         this._logger.log('update items');
-         return this._items.updateItems(updates);
-      });
-   }
    private __createPath(parent?: string | string[]): Promise<RecordSet | void> {
       if (!parent || Array.isArray(parent)) {
          return Promise.resolve();

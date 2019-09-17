@@ -5,8 +5,7 @@ import {
 import {
    IRPCModule,
    IRPCModuleFilter,
-   ITransferRPCModule,
-   UpdateItemParam
+   ITransferRPCModule
 } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
 import { RPCMethodNames } from 'Extension/Plugins/DependencyWatcher/const';
 import { RPC } from 'Extension/Event/RPC';
@@ -30,24 +29,6 @@ export class Module {
             return this._items.get(id) as ITransferRPCModule;
          });
       });
-   }
-   updateItems(params: UpdateItemParam[]): Promise<boolean[]> {
-      params.forEach((param) => {
-         this.__updateItem(param);
-      });
-      return this._rpc.execute<boolean[], UpdateItemParam[]>({
-         methodName: RPCMethodNames.moduleUpdateItems,
-         args: params
-      });
-   }
-   private __updateItem(param: UpdateItemParam): void {
-      const item = this._items.get(param.id);
-      if (!item) {
-         return;
-      }
-      item.fileName = param.fileName || item.fileName;
-      item.size = param.size || item.size;
-      item.path = param.path || item.path;
    }
    private __updateCache(keys: number[]): Promise<void> {
       if (!keys.length) {
