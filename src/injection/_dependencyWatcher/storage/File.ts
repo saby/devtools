@@ -1,8 +1,8 @@
 import { Storage } from './Storage';
 import { IFile, IFileFilter } from 'Extension/Plugins/DependencyWatcher/IFile';
 import { getId } from './getId';
-import getFileName from './file/getFileName';
-import getResourceFromPerformance from './file/getResourceFromPerformance';
+import getNormalizedFileName from './file/getNormalizedFileName';
+import getResourcesFromPerformance from './file/getResourcesFromPerformance';
 import findInPath from './file/findInPath';
 import fileFilters from 'Extension/Plugins/DependencyWatcher/data/filter/fileFilters';
 import filesSort from 'Extension/Plugins/DependencyWatcher/data/sort/filesSort';
@@ -16,14 +16,10 @@ import { Update } from './Update';
  */
 export class FileStorage extends Update<IFile, IFileFilter> {
    private readonly _storage: Storage<IFile, string> = new Storage('path');
-   private __getNew(): IFile[] {
-      return getResourceFromPerformance()
-         .filter(({ path }) => {
-            return !this._storage.hasIndex(path);
-         })
-         .map(({ path, transferSize, decodedBodySize }) => {
-            return this.create(path, transferSize | decodedBodySize);
-         });
+   private __getNewFiles(): IFile[] {
+      return getResourcesFromPerformance().map(([path, size]) => {
+         return this.createOrUpdate(path, size);
+      });
    }
    getItems(keys?: number[]): IFile[] {
       return this._getItems(keys);
@@ -34,19 +30,26 @@ export class FileStorage extends Update<IFile, IFileFilter> {
    find(partOfName: string): IFile | void {
       return (
          findInPath(partOfName, this._storage.getItems()) ||
-         findInPath(partOfName, this.__getNew())
+         findInPath(partOfName, this.__getNewFiles())
       );
    }
-   create(path: string, size: number): IFile {
-      const file: IFile = {
-         path,
-         size,
-         name: getFileName(path),
-         id: getId(),
-         modules: new Set<number>()
-      };
-      this._storage.add(file);
-      return file;
+   createOrUpdate(path: string, size: number): IFile {
+      if (this._storage.hasIndex(path)) {
+         const file = this._storage.getItemByIndex(path) as IFile;
+         file.size = size;
+         this._markUpdated(file.id);
+         return file;
+      } else {
+         const file: IFile = {
+            path,
+            size,
+            name: getNormalizedFileName(path),
+            id: getId(),
+            modules: new Set<number>()
+         };
+         this._storage.add(file);
+         return file;
+      }
    }
    protected _getItems(keys?: number[]): IFile[] {
       return this._storage.getItemsById(keys);

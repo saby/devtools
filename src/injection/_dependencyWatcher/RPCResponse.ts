@@ -8,11 +8,12 @@ import { Module as RPCModulesStorage } from './rpcStorage/Module';
 interface IConfig extends IConfigWithStorage {
    rpc: RPC;
    require: Require;
-   fileStorage: FileStorage;
 }
 
+// TODO: тут класс не нужен совсем
 export class RPCResponse {
-   constructor({ rpc, moduleStorage, fileStorage, require }: IConfig) {
+   constructor({ rpc, moduleStorage, require }: IConfig) {
+      const fileStorage = new FileStorage();
       const rpcModulesStorage = new RPCModulesStorage(
          moduleStorage,
          fileStorage,
@@ -31,10 +32,6 @@ export class RPCResponse {
          rpcModulesStorage.hasUpdates.bind(rpcModulesStorage)
       );
       rpc.registerMethod(
-         RPCMethodNames.moduleUpdateItems,
-         rpcModulesStorage.updateItems.bind(rpcModulesStorage)
-      );
-      rpc.registerMethod(
          RPCMethodNames.moduleOpenSource,
          rpcModulesStorage.openSource.bind(rpcModulesStorage)
       );
@@ -50,10 +47,6 @@ export class RPCResponse {
       rpc.registerMethod(
          RPCMethodNames.fileHasUpdates,
          fileStorage.hasUpdates.bind(fileStorage)
-      );
-      rpc.registerMethod(
-         RPCMethodNames.fileUpdateItems,
-         fileStorage.updateItems.bind(fileStorage)
       );
    }
 }

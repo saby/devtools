@@ -1,7 +1,6 @@
 import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
 
 export interface IUpdate<TUpdateParams extends IId> {
-   updateItems(params: TUpdateParams[]): boolean[];
    hasUpdates(keys: number[]): boolean[];
 }
 
