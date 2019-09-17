@@ -216,7 +216,7 @@ export abstract class ListAbstract extends Compatibility {
          fileId,
          path,
          size
-      } = item;
+      }: ITransferRPCModule = item;
       return {
          name,
          defined,
@@ -229,7 +229,7 @@ export abstract class ListAbstract extends Compatibility {
          parent: parent || null,
          itemId: id,
          id: hierarchyId.create(id, parent),
-         child: hasChildren(this._getChildren(item))
+         hasChildren: hasChildren(this._getChildren(item))
       };
    }
 
