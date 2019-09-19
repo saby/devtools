@@ -30,6 +30,8 @@ function getBundles(
    }
 }
 
+const localizationRegexp = /^[\d\w._]+_localization$/;
+
 export function getFileNames(
    moduleName: string,
    require: IRequire,
@@ -51,10 +53,32 @@ export function getFileNames(
          result.push(path);
       }
    }
-   if (staticDependents.size) {
-      staticDependents.forEach((value) => {
-         result = result.concat(getFileNames(value.name, require, isRelease, bundles, value.dependent.static));
-      });
+   /*
+   For some types of modules, it is impossible to infere file name of a module using only it's name.
+   So we're trying to get file names using it's static dependents, because most likely they're in the same file.
+    */
+   if (
+      moduleName.startsWith('i18n!') ||
+      moduleName.startsWith('css!') ||
+      moduleName.startsWith('wml!') ||
+      moduleName.startsWith('tmpl!') ||
+      localizationRegexp.test(moduleName)
+   ) {
+      if (staticDependents.size) {
+         for (const dependent of staticDependents) {
+            if (dependent.defined) {
+               result = result.concat(
+                  getFileNames(
+                     dependent.name,
+                     require,
+                     isRelease,
+                     bundles,
+                     dependent.dependent.static
+                  )
+               );
+            }
+         }
+      }
    }
    return result;
 }
