@@ -1,5 +1,8 @@
 import { IWasabyDevHook } from 'Types/IHook';
-import { IBackendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IBackendControlNode,
+   IWasabyElement
+} from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
 import Agent from './Agent';
@@ -19,11 +22,11 @@ export class Hook implements IWasabyDevHook {
    private _agent: Agent;
    private _messageQueue: Array<[string, ISerializable?]> = [];
    private _logger: INamedLogger;
+   private _initialized: boolean = false;
+   $0: IWasabyElement;
 
    constructor(logger: INamedLogger) {
       this._logger = logger;
-      // TODO: убрать после того как откажемся от поддержки 610 версии. Там есть проверка на hasOwnProperty
-      this.onStartLifecycle = this._onStartLifecycle.bind(this);
    }
 
    onStartCommit(
@@ -51,7 +54,7 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   _onStartLifecycle(id: IBackendControlNode['id']): void {
+   onStartLifecycle(id: IBackendControlNode['id']): void {
       if (this._agent) {
          try {
             this._agent.onStartLifecycle(id);
@@ -107,6 +110,7 @@ export class Hook implements IWasabyDevHook {
             logger: this._logger,
             renderer
          });
+         this._initialized = true;
       }
       // TODO: поменять цвет иконки, создать вкладку в дев тулзах, загрузить плагины, навесить всякие обработчики
    }
