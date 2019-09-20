@@ -13,7 +13,6 @@
     root="{{ _root }}"
     theme="default-Layout"
     searchValue="{{ _searchValue }}"
-    dataLoadCallback="{{ _dataLoadCallback }}"
 >
     <ws:search>
         <span class="DependencyWatcher_Page__head">
@@ -26,6 +25,7 @@
     <ws:filterButton>
         <Controls.filter:View
             detailPanelTemplateName="DependencyWatcher/module:filter.Panel"
+            on:itemsChanged="_onItemsChanged()"
         />
     </ws:filterButton>
     <ws:content>

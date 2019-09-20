@@ -59,7 +59,8 @@ const files: IFilterItem<number[]> = {
    value: [],
    resetValue: [],
    visibility: true,
-   viewMode: 'base'
+   viewMode: 'base',
+   textValue: ''
 };
 
 const dependentOnFiles: IFilterItem<number[]> = {
@@ -68,7 +69,8 @@ const dependentOnFiles: IFilterItem<number[]> = {
    value: [],
    resetValue: [],
    visibility: true,
-   viewMode: 'base'
+   viewMode: 'base',
+   textValue: ''
 };
 
 interface IFilterItemConfig {

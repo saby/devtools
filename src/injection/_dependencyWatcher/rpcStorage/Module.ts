@@ -188,15 +188,16 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
          return params;
       }
       let _keys: number[] | undefined;
-      if (Array.isArray(where.files) && where.files.length) {
-         _keys = this.__gitForFiles(where.files);
+      if (Array.isArray(where.files)) {
+         if (where.files.length) {
+            _keys = this.__gitForFiles(where.files);
+         }
          delete where.files;
       }
-      if (
-         Array.isArray(where.dependentOnFiles) &&
-         where.dependentOnFiles.length
-      ) {
-         _keys = this.__getDependentOnFiles(where.dependentOnFiles, _keys);
+      if (Array.isArray(where.dependentOnFiles)) {
+         if (where.dependentOnFiles.length) {
+            _keys = this.__getDependentOnFiles(where.dependentOnFiles, _keys);
+         }
          delete where.dependentOnFiles;
       }
 
