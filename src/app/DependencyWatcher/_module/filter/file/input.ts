@@ -1,0 +1,24 @@
+import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
+// @ts-ignore
+import * as template from 'wml!DependencyWatcher/_module/filter/file/input';
+// @ts-ignore
+import tmplNotify = require('Controls/Utils/tmplNotify');
+
+interface IOptions extends IControlOptions {
+   textValue: string;
+   value: number[];
+}
+
+/*
+This file is needed solely for filtering events from a lookup.
+Because of type mismatch, we can't directly use value from the lookup. It is a string in the lookup
+and an array in the filter.
+So we stop value changed event, and replace the name of the selectedKeysChanged event with valueChanged.
+ */
+export default class Input extends Control<IOptions> {
+   protected _template: TemplateFunction = template;
+   protected _notifyHandler: Function = tmplNotify;
+   private _onValueChanged(e: Event): void {
+      e.stopPropagation();
+   }
+}

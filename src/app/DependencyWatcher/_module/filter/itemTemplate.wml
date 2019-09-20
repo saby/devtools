@@ -6,10 +6,10 @@
 </ws:template>
 <ws:template name="fileInput">
     <span style="width:120px">{{ caption }}</span>
-    <Controls.lookup:Input
+    <DependencyWatcher._module.filter.file.input
             attr:style="width: 334px"
             bind:textValue="item.textValue"
-            bind:selectedKeys="item.value"
+            bind:value="item.value"
             displayProperty="name"
             keyProperty="id"
             searchParam="name"
@@ -36,7 +36,7 @@
             />
         </ws:selectorTemplate>
         <ws:suggestTemplate templateName="DependencyWatcher/module:suggest" />
-    </Controls.lookup:Input>
+    </DependencyWatcher._module.filter.file.input>
 </ws:template>
 
 <ws:template name="css">
