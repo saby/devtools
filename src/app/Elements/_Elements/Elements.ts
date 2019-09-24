@@ -212,7 +212,9 @@ class Elements extends Control {
    }
 
    private __selectElement(id: IFrontendControlNode['id']): void {
-      this._selectingFromPage = false;
+      if (this._selectingFromPage) {
+         this.__toggleSelectElementFromPage();
+      }
       if (this._model.getVisibleItems().length > 0) {
          this._model.expandParents(id);
          this._path = this._model.getPath(id);
