@@ -152,6 +152,7 @@ export default class List extends Control<IOptions> {
       }
       item.value = value || item.resetValue;
       item.textValue = textValue;
+      item.visibility = true;
       return true;
    }
 }
