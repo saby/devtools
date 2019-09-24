@@ -11,7 +11,6 @@ import {
    IQueryResult
 } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
 import { IListItem } from '../IListItem';
-import { hierarchyId } from '../util';
 import { IDependencies } from 'Extension/Plugins/DependencyWatcher/IModule';
 import { Compatibility } from './Compatibility';
 import { IWhere } from './list/IWhere';
@@ -27,6 +26,7 @@ import { RecordSet } from 'Types/collection';
 import { IListConfig } from './IList';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { Lang, revert } from 'Extension/Utils/kbLayout';
+import * as hierarchyId from '../util/hierarchyId';
 
 const filterGlobal = (item: ITransferRPCModule): boolean => {
    return item.name !== GLOBAL_MODULE_NAME;
@@ -215,7 +215,8 @@ export abstract class ListAbstract extends Compatibility {
          fileName,
          fileId,
          path,
-         size
+         size,
+         isDeprecated
       }: ITransferRPCModule = item;
       return {
          name,
@@ -226,6 +227,7 @@ export abstract class ListAbstract extends Compatibility {
          size,
          initialized,
          isDynamic,
+         isDeprecated,
          parent: parent || null,
          itemId: id,
          id: hierarchyId.create(id, parent),

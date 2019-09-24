@@ -103,10 +103,11 @@ export default class View extends Control {
          defaultFilters: {
             css: false,
             json: false,
-            i18n: false
+            i18n: false,
+            onlyDeprecated: false
          },
          ignoreFilters: {
-            parent: ['files', 'dependentOnFiles']
+            parent: ['files', 'dependentOnFiles', 'onlyDeprecated']
          },
          logger: this._logger.create('source'),
          idProperty: 'id',
@@ -114,6 +115,6 @@ export default class View extends Control {
       };
    }
    private __toggleRecording(): void {
-     this._isRecording = !this._isRecording;
+      this._isRecording = !this._isRecording;
    }
 }

@@ -1,12 +1,26 @@
-<ws:if data="{{ itemData.item.isDynamic }}">
-    <Controls.popup:InfoboxTarget attr:style="width: 100%;">
-        <ws:content>
-            <div class="icon-small icon-Info icon-disabled"></div>
-        </ws:content>
-        <ws:template>
-            <p>
+<ws:if data="{{ itemData.item.isDynamic || itemData.item.isDeprecated }}">
+    <ws:if data="{{ itemData.item.isDeprecated }}">
+        <Controls.popup:InfoboxTarget attr:style="width: 100%;">
+            <ws:content>
+                <div class="icon-small icon-Alert icon-error"></div>
+            </ws:content>
+            <ws:template>
+                <p>
+                <h1>{[Устаревший модуль]}</h1>
+                </p>
+            </ws:template>
+        </Controls.popup:InfoboxTarget>
+    </ws:if>
+    <ws:if data="{{ itemData.item.isDynamic }}">
+        <Controls.popup:InfoboxTarget attr:style="width: 100%;">
+            <ws:content>
+                <div class="icon-small icon-Info icon-disabled"></div>
+            </ws:content>
+            <ws:template>
+                <p>
                 <h1>{[Динамическая зависимость модуля]}</h1>
-            </p>
-        </ws:template>
-    </Controls.popup:InfoboxTarget>
+                </p>
+            </ws:template>
+        </Controls.popup:InfoboxTarget>
+    </ws:if>
 </ws:if>

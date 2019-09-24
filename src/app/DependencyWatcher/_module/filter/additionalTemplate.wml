@@ -10,4 +10,8 @@
     <Controls.filterPopup:Link caption="{{ item.additionalText }}"/>
 </ws:template>
 
+<ws:template name="onlyDeprecated">
+    <Controls.filterPopup:Link caption="{{ item.additionalText }}"/>
+</ws:template>
+
 <ws:partial template="{{ _options.item.id }}" item="{{ _options.item }}"/>

@@ -96,7 +96,8 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
             name,
             fileId,
             dependent,
-            dependencies
+            dependencies,
+            isDeprecated
          }: IModule) => {
             const file = this._files.getItem(fileId);
             let size = 0;
@@ -117,8 +118,9 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
                dependencies,
                size,
                path,
-               fileName
-            } as IRPCModule;
+               fileName,
+               isDeprecated
+            };
          }
       );
    }

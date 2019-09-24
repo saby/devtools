@@ -1,6 +1,7 @@
 import { IModule } from 'Extension/Plugins/DependencyWatcher/IModule';
 import { getId } from '../getId';
 import { GLOBAL_MODULE_NAME } from 'Extension/Plugins/DependencyWatcher/const';
+import isDeprecated from './isDeprecated';
 
 function create(name: string, parentDefined: boolean): IModule {
    const module: IModule = {
@@ -16,7 +17,8 @@ function create(name: string, parentDefined: boolean): IModule {
       dependent: {
          static: new Set(),
          dynamic: new Set()
-      }
+      },
+      isDeprecated: isDeprecated(name)
    };
    /*
    For some types of modules it is impossible to catch when they get defined or initialized,

@@ -51,6 +51,10 @@
     <ws:partial template="filterPopup" item="{{ item }}"/>
 </ws:template>
 
+<ws:template name="onlyDeprecated">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
 <ws:template name="files">
     <ws:partial template="fileInput" item="{{ item }}" caption="{[Модули файла]}" />
 </ws:template>

@@ -10,6 +10,7 @@ import {
 } from 'Extension/Plugins/DependencyWatcher/IModule';
 import { getForFiles } from 'Extension/Plugins/DependencyWatcher/data/filter/getForFiles';
 import { dependentOnFiles } from 'Extension/Plugins/DependencyWatcher/data/filter/dependentOnFiles';
+import { getDeprecated } from 'Extension/Plugins/DependencyWatcher/data/filter/getDeprecated';
 
 const moduleFilters: Partial<
    Record<keyof IModuleFilter, FilterFunctionGetter<any, IModule>>
@@ -19,7 +20,8 @@ const moduleFilters: Partial<
    css: ignoreWrap(css),
    json: ignoreWrap(json),
    i18n: ignoreWrap(i18n),
-   dependentOnFiles
+   dependentOnFiles,
+   onlyDeprecated: getDeprecated
 };
 
 export default moduleFilters;
