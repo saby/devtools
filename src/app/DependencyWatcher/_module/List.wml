@@ -15,12 +15,9 @@
     searchValue="{{ _searchValue }}"
 >
     <ws:search>
-        <span class="DependencyWatcher_Page__head">
-            <ws:partial template="{{ _options.headButton }}" />
-            <Controls.search:Input
+        <Controls.search:Input
                 bind:value="_searchValue"
-            />
-        </span>
+        />
     </ws:search>
     <ws:filterButton>
         <Controls.filter:View
@@ -28,6 +25,9 @@
             on:itemsChanged="_onItemsChanged()"
         />
     </ws:filterButton>
+    <ws:topTemplate>
+        <ws:partial template="{{ _options.headButton }}" />
+    </ws:topTemplate>
     <ws:content>
         <Controls.scroll:Container
             attr:class="DependencyWatcher_Page__scroll"
