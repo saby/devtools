@@ -16,7 +16,9 @@ export interface IFileInfo {
 
 export interface IFile extends IFileInfo, IFileModules, IId {}
 
-export interface ITransportFile extends IFileInfo, ITransportModules, IId {}
+export interface ITransportFile extends IFileInfo, ITransportModules, IId {
+   computedSize: string;
+}
 
 export interface IFileFilter {
    withoutSize: boolean;

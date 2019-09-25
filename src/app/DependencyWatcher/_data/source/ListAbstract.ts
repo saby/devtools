@@ -27,10 +27,11 @@ import { IListConfig } from './IList';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { Lang, revert } from 'Extension/Utils/kbLayout';
 import * as hierarchyId from '../util/hierarchyId';
+import getComputedSize from 'Extension/Utils/getComputedSize';
 
-const filterGlobal = (item: ITransferRPCModule): boolean => {
+function filterGlobal(item: ITransferRPCModule): boolean {
    return item.name !== GLOBAL_MODULE_NAME;
-};
+}
 
 export abstract class ListAbstract extends Compatibility {
    private _items: Module;
@@ -231,7 +232,8 @@ export abstract class ListAbstract extends Compatibility {
          parent: parent || null,
          itemId: id,
          id: hierarchyId.create(id, parent),
-         hasChildren: hasChildren(this._getChildren(item))
+         hasChildren: hasChildren(this._getChildren(item)),
+         computedSize: getComputedSize(size)
       };
    }
 

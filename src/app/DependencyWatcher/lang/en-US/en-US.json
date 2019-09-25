@@ -1,8 +1,6 @@
 {
   "Не найдено": "No data",
   "Режим отображения": "View mode",
-  "Модуль не загружен": "Module is not loaded",
-  "Не удалось получить размер файла. Попробуйте перезагрузить страницу.": "Failed to get file size. Try to reload the page.",
   "Модули файла": "Modules of file",
   "Зависят от файла": "File dependents",
   "": "",
