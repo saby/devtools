@@ -43,7 +43,7 @@ export class DependencyWatcher implements IPlugin {
          moduleStorage: this._storage
       });
 
-      this.__defineProperty(require, REQUIRE).catch(() => {
+      this.__defineProperty(require, REQUIRE).then(() => {
          try {
             let defined: object | undefined;
             if (GLOBAL[REQUIRE] && GLOBAL[REQUIRE].s && GLOBAL[REQUIRE].s.contexts && GLOBAL[REQUIRE].s.contexts._ && GLOBAL[REQUIRE].s.contexts._.defined) {
@@ -59,8 +59,9 @@ export class DependencyWatcher implements IPlugin {
          } catch (error) {
             this._logger.error(error);
          }
-      });
-      this.__defineProperty(define, DEFINE).catch(() => {
+      }).then(() => {
+         return this.__defineProperty(define, DEFINE);
+      }).catch(() => {
          // ignore
       });
    }
@@ -77,24 +78,30 @@ export class DependencyWatcher implements IPlugin {
       const existingDescriptor = Object.getOwnPropertyDescriptor(GLOBAL, name);
       return new Promise<void>((resolve, reject) => {
          try {
-            Object.defineProperties(GLOBAL, {
-               [name]: {
-                  ...existingDescriptor,
-                  ...descriptor
+            if (existingDescriptor) {
+               if (existingDescriptor.configurable) {
+                  /*
+                   * TODO: этот кусок расширения очень сильно завязан на require, причем тот, что
+                   * используется в тензоре. Он не configurable, так что если он не наш, то просто ничего не делаем.
+                   * Если пытаться перебивать чужой require, то это часто роняет сайты и пока непонятно
+                   * как максимально безопасно перебивать его везде.
+                   */
+                  reject();
+               } else {
+                  // @ts-ignore
+                  descriptor.set(GLOBAL[name]);
+                  // @ts-ignore
+                  GLOBAL[name] = descriptor.get();
                }
-            });
+            } else {
+               Object.defineProperties(GLOBAL, {
+                  [name]: descriptor
+               });
+            }
             resolve();
          } catch (e) {
             reject(e);
          }
-      }).catch<void>((error: Error) => {
-         // @ts-ignore
-         descriptor.set(GLOBAL[name]);
-         // @ts-ignore
-         GLOBAL[name] = descriptor.get();
-         this._channel.dispatch('error', error.message);
-         // this.__logger.error(error);
-         throw error;
       });
    }
 
