@@ -6,6 +6,7 @@ import { File as FileStorage } from '../storage/File';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { Compatibility, ICompatibilityConfig } from './Compatibility';
 import { Lang, revert } from 'Extension/Utils/kbLayout';
+import getComputedSize from 'Extension/Utils/getComputedSize';
 
 export interface IFileConfig extends ICompatibilityConfig {
    fileStorage: FileStorage;
@@ -52,7 +53,8 @@ export class File extends Compatibility {
                         data: files.map((f) => {
                            return {
                               ...f,
-                              title: f.name
+                              title: f.name,
+                              computedSize: getComputedSize(f.size)
                            };
                         }),
                         meta: {

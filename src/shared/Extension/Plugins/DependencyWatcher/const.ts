@@ -10,13 +10,11 @@ export enum RPCMethodNames {
    moduleGetItems = 'module.getItems',
    moduleHasUpdates = 'module.hasUpdates',
    moduleQuery = 'module.query',
-   moduleUpdateItems = 'module.updateItems',
    moduleOpenSource = 'module.openSource',
 
    fileGetItems = 'file.getItems',
    fileHasUpdates = 'file.hasUpdates',
-   fileQuery = 'file.query',
-   fileUpdateItems = 'file.updateItems'
+   fileQuery = 'file.query'
 }
 
 export const GLOBAL_MODULE_NAME = '~> page <~';

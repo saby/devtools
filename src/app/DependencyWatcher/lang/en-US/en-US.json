@@ -1,8 +1,6 @@
 {
   "Не найдено": "No data",
   "Режим отображения": "View mode",
-  "Модуль не загружен": "Module is not loaded",
-  "Не удалось получить размер файла. Попробуйте перезагрузить страницу.": "Failed to get file size. Try to reload the page.",
   "Модули файла": "Modules of file",
   "Зависят от файла": "File dependents",
   "": "",
@@ -19,5 +17,7 @@
   "Модуль является зависимостью неиспользуемого модуля в бандле": "This module is a dependency of an unused module in a bundle",
   "Неиспользуемый модуль": "Unused module",
   "Попробуйте отфильтровать данные по файлу, чтобы посмотреть кто его загрузил": "Try filtering data by module name to see who downloaded it",
-  "Динамическая зависимость модуля": "Dynamic dependency"
+  "Динамическая зависимость модуля": "Dynamic dependency",
+  "Устаревший модуль": "Deprecated module",
+  "Только устаревшие модули": "Only deprecated modules"
 }

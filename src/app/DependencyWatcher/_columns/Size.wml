@@ -1,9 +1,0 @@
-<ws:if data="{{ _size }}">
-    <div class="DependencyWatcher__size">
-        {{ _size }} {{ _unit }}
-    </div>
-</ws:if>
-<ws:else>
-    <div class="DependencyWatcher__size"
-          title="{{ _options.itemData.item.defined ? rk('Не удалось получить размер файла. Попробуйте перезагрузить страницу.') : rk('Модуль не загружен') }}">-----</div>
-</ws:else>

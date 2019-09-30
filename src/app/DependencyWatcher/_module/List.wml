@@ -13,21 +13,21 @@
     root="{{ _root }}"
     theme="default-Layout"
     searchValue="{{ _searchValue }}"
-    dataLoadCallback="{{ _dataLoadCallback }}"
 >
     <ws:search>
-        <span class="DependencyWatcher_Page__head">
-            <ws:partial template="{{ _options.headButton }}" />
-            <Controls.search:Input
+        <Controls.search:Input
                 bind:value="_searchValue"
-            />
-        </span>
+        />
     </ws:search>
     <ws:filterButton>
         <Controls.filter:View
             detailPanelTemplateName="DependencyWatcher/module:filter.Panel"
+            on:itemsChanged="_onItemsChanged()"
         />
     </ws:filterButton>
+    <ws:topTemplate>
+        <ws:partial template="{{ _options.headButton }}" />
+    </ws:topTemplate>
     <ws:content>
         <Controls.scroll:Container
             attr:class="DependencyWatcher_Page__scroll"
@@ -36,12 +36,14 @@
                 name="listView"
                 bind:sorting="_sorting"
                 bind:root="_root"
-                nodeProperty="child"
+                nodeProperty="hasChildren"
                 columns="{{ _column }}"
                 header="{{ _headers }}"
                 columnScroll="{{ true }}"
                 displayProperty="name"
                 itemActions="{{ _itemActions }}"
+                virtualScrolling="{{ true }}"
+                virtualPageSize="{{ 70 }}"
             >
                 <ws:emptyTemplate>
                     <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">

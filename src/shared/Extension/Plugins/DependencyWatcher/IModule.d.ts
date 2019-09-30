@@ -15,12 +15,14 @@ interface IModuleDependencies<TCollection> {
  * @property {Number} fileId Идентификатор файла
  * @property {Boolean} defined Был ли объявлен define модуля (По нему мы понимаем что модульзагружен)
  * @property {Boolean} initialized Был ли модуль инициализирован (Для понимания что модуль испольуется или был втянут в бандле просто так)
+ * @property {Boolean} isDeprecated Determines whether a module is deprecated.
  */
 export interface IModuleInfo {
    name: string;
    fileId: number;
    defined: boolean;
    initialized: boolean;
+   isDeprecated: boolean;
 }
 
 interface IModuleData<TCollection>
@@ -48,4 +50,5 @@ export interface IModuleFilter {
    name: string;
    files: number[];
    dependentOnFiles: number[];
+   onlyDeprecated: boolean;
 }

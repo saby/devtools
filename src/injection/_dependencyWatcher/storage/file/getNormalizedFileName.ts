@@ -1,4 +1,4 @@
-function getFileName(path?: string): string {
+function getNormalizedFileName(path?: string): string {
    if (!path) {
       return '';
    }
@@ -11,4 +11,4 @@ function getFileName(path?: string): string {
    );
 }
 
-export default getFileName;
+export default getNormalizedFileName;

@@ -5,7 +5,7 @@ import {
    IModuleInfo
 } from 'Extension/Plugins/DependencyWatcher/IModule';
 import { DependencyType } from 'Extension/Plugins/DependencyWatcher/const';
-import { ignoredPlugins, IRequirePlugin } from '../require/ignoredPlugins';
+import { ignoredPlugins } from '../require/ignoredPlugins';
 import filterHelpers from './module/filterHelpers';
 import addDynamic from './module/addDynamic';
 import addStatic from './module/addStatic';
@@ -60,7 +60,7 @@ export class ModuleStorage extends Update<
       }
       module.defined = true;
       module.data = moduleData;
-      this.__addDeps(module, dependencies, DependencyType.static);
+      this.__addDependencies(module, dependencies, DependencyType.static);
    }
 
    initModule(name: string): void {
@@ -74,15 +74,11 @@ export class ModuleStorage extends Update<
 
    require(name: string, dependencies: string | string[]): void {
       const module = this.__get(name);
-      this.__addDeps(
+      this.__addDependencies(
          module,
          Array.isArray(dependencies) ? dependencies : [dependencies],
          DependencyType.dynamic
       );
-   }
-
-   getItem(id: number): IModule | void {
-      return this._getItem(id);
    }
 
    getItems(keys?: number[]): IModule[] {
@@ -102,16 +98,16 @@ export class ModuleStorage extends Update<
       window.__WASABY_DEV_MODULE__ = module.data;
       return true;
    }
-   private __get(name: string): IModule {
+   private __get(name: string, parentDefined: boolean = false): IModule {
       let module = this._storage.getItemByIndex(name);
       if (!module) {
-         module = create(name);
+         module = create(name, parentDefined);
          this._storage.add(module);
       }
       return module;
    }
 
-   private __addDeps(
+   private __addDependencies(
       module: IModule,
       dependencies: string[],
       type: DependencyType
@@ -122,7 +118,7 @@ export class ModuleStorage extends Update<
          .map(removeIgnoredPrefixes)
          .map(
             (dependency: string): IModule => {
-               return this.__get(dependency);
+               return this.__get(dependency, type === DependencyType.static);
             }
          );
 

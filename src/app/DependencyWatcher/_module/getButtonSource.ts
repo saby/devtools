@@ -53,13 +53,25 @@ const css: IFilterItemAdditional<boolean> = {
    viewMode: 'extended'
 };
 
+const onlyDeprecated: IFilterItemAdditional<boolean> = {
+   name: 'onlyDeprecated',
+   textValue: 'onlyDeprecated',
+   itemText: rk('Только устаревшие модули'),
+   additionalText: rk('Только устаревшие модули'),
+   value: false,
+   resetValue: false,
+   visibility: false,
+   viewMode: 'extended'
+};
+
 const files: IFilterItem<number[]> = {
    name: 'files',
    id: 'files',
    value: [],
    resetValue: [],
    visibility: true,
-   viewMode: 'base'
+   viewMode: 'base',
+   textValue: ''
 };
 
 const dependentOnFiles: IFilterItem<number[]> = {
@@ -68,7 +80,8 @@ const dependentOnFiles: IFilterItem<number[]> = {
    value: [],
    resetValue: [],
    visibility: true,
-   viewMode: 'base'
+   viewMode: 'base',
+   textValue: ''
 };
 
 interface IFilterItemConfig {
@@ -82,6 +95,7 @@ export function getButtonSource({
       json,
       css,
       i18n,
+      onlyDeprecated,
       {
          ...files,
          source: fileSource

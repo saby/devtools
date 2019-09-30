@@ -1,4 +1,3 @@
-import { Size } from 'DependencyWatcher/columns';
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 import { IColumn } from '../interface/IColumn';
 // @ts-ignore
@@ -20,10 +19,9 @@ const modules: Partial<IFileColumn> = {
 };
 
 const size: Partial<IFileColumn> = {
-   displayProperty: 'size',
+   displayProperty: 'computedSize',
    width: '100px',
-   align: 'right',
-   template: Size
+   align: 'right'
 };
 
 export const columns: Array<Partial<IFileColumn>> = [name, modules, size];

@@ -2,7 +2,6 @@ import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 // @ts-ignore
 import * as template from 'wml!DependencyWatcher/_module/List';
 import { Model } from 'Types/entity';
-import { RecordSet } from 'Types/collection';
 import { IListItem, source } from '../data';
 import { columns } from './column';
 import { headers } from './header';
@@ -53,15 +52,12 @@ export default class List extends Control<IOptions> {
    protected _searchValue?: string;
    protected _sorting?: object;
    protected _itemActions: IItemAction[];
-   protected _dataLoadCallback: (items: RecordSet) => void;
-   protected _filterChanged: boolean = false;
    constructor(options: IOptions) {
       super(options);
       this._filterButtonSource = getButtonSource({
          fileSource: options.fileSource
       });
       this.__setItemActions();
-      this._dataLoadCallback = this.__dataLoadCallback.bind(this);
    }
    reload(): void {
       if (this._children.listView) {
@@ -76,17 +72,13 @@ export default class List extends Control<IOptions> {
                files: [model.get('fileId')]
             });
             this._root = undefined;
-            /**
-             * TODO: здесь не должно быть setFilterValue, но без него операции над записью становятся одноразовыми
-             * Там какая-то запутанная схема, и первый раз стреляет dataLoadCallback, а второй раз нет
-             * setFilterValue зовётся только из dataLoadCallback. Возможно стоит перетащить это в setFilter
-             */
             this._setFilterValue(
                'files',
                [model.get('fileId')],
                model.get('fileName')
             );
             this._setFilterValue('dependentOnFiles');
+            this._filterButtonSource = [...this._filterButtonSource];
          },
          [ItemActionNames.dependentOnFile]: (model: Model) => {
             this.__setFilter({
@@ -94,17 +86,13 @@ export default class List extends Control<IOptions> {
                files: [model.get('fileId')]
             });
             this._root = undefined;
-            /**
-             * TODO: здесь не должно быть setFilterValue, но без него операции над записью становятся одноразовыми
-             * Там какая-то запутанная схема, и первый раз стреляет dataLoadCallback, а второй раз нет
-             * setFilterValue зовётся только из dataLoadCallback. Возможно стоит перетащить это в setFilter
-             */
             this._setFilterValue(
                'dependentOnFiles',
                [model.get('fileId')],
                model.get('fileName')
             );
             this._setFilterValue('files');
+            this._filterButtonSource = [...this._filterButtonSource];
          }
       });
    }
@@ -120,7 +108,6 @@ export default class List extends Control<IOptions> {
       ) {
          delete this._filter.dependentOnFiles;
       }
-      this._filterChanged = true;
    }
 
    protected _onFilterChanged(
@@ -129,6 +116,23 @@ export default class List extends Control<IOptions> {
    ): void {
       this.__setFilter(filter);
    }
+
+   protected _onItemsChanged(event: unknown, items: IFilterItem[]): void {
+      this._filterButtonSource = items;
+      // Filter doesn't know anything about textValue, so it can't reset it properly.
+      const mutableFields = ['files', 'dependentOnFiles'];
+      mutableFields.forEach((field) => {
+         const item = this._filterButtonSource.find(
+            ({ name }) => name === field
+         );
+         if (item) {
+            if (Array.isArray(item.value) && !item.value.length) {
+               item.textValue = '';
+            }
+         }
+      });
+   }
+
    protected _setFilterValue<T>(
       id: keyof source.IWhere<IRPCModuleFilter>,
       value?: T,
@@ -148,48 +152,7 @@ export default class List extends Control<IOptions> {
       }
       item.value = value || item.resetValue;
       item.textValue = textValue;
+      item.visibility = true;
       return true;
-   }
-   private __dataLoadCallback(items: RecordSet): void {
-      if (this._filterChanged) {
-         this._filterChanged = false;
-         const keys: Array<keyof source.IWhere<IRPCModuleFilter>> = [
-            'files',
-            'dependentOnFiles'
-         ];
-         let updated = false;
-         keys.forEach((key) => {
-            if (
-               this._filter &&
-               this._filter[key] &&
-               (this._filter[key] as number[]).length
-            ) {
-               const fileId = (this._filter[key] as number[])[0];
-               const count = items.getCount();
-               let item;
-               for (let i = 0; i < count; i++) {
-                  item = items.at(i);
-                  if (item.get('fileId') === fileId) {
-                     break;
-                  }
-               }
-               if (item) {
-                  const fileName = item.get('fileName');
-                  const result = this._setFilterValue(key, [fileId], fileName);
-                  if (result) {
-                     updated = true;
-                  }
-               }
-            } else {
-               const result = this._setFilterValue(key);
-               if (result) {
-                  updated = true;
-               }
-            }
-         });
-         if (updated) {
-            this._filterButtonSource = [...this._filterButtonSource];
-         }
-      }
    }
 }
