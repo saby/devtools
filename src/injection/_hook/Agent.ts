@@ -254,13 +254,16 @@ class Agent {
       const currentRoot = this.__getCurrentRoot();
       const id = this.__getNodeId(oldNode);
 
-      // TODO: если нода уже есть, то это асинхронное построение, можно это отдельной операцией показывать
-      startMark(name, id, operation);
-
       if (currentRoot.has(id)) {
          const changedNode = currentRoot.get(id) as IChangedNode;
          changedNode.node.selfStartTime = performance.now();
-         changedNode.operation = operation;
+         // TODO: если нода уже есть, то это асинхронное построение, можно это отдельной операцией показывать
+         /*
+         onStartCommit can be called more than one time during synchronization, e.g. if _beforeMount returns a Promise.
+         What's worse, framework doesn't even know what it is doing, so it calls onStartCommit with the wrong operation.
+         So, we have to ignore operation from the arguments and use the first one.
+          */
+         startMark(name, id, changedNode.operation);
       } else {
          currentRoot.set(id, {
             /**
@@ -276,6 +279,7 @@ class Agent {
             },
             operation
          });
+         startMark(name, id, operation);
       }
       this.componentsStack.push(id);
       return id;
