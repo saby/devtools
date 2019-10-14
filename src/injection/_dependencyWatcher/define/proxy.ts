@@ -88,7 +88,7 @@ export function proxyDefine(
          return target.call(
             thisArg,
             name,
-            dependencies,
+            argArray[1],
             (...depModules: unknown[]) => {
                _init(name);
                return module.apply(GLOBAL, depModules);

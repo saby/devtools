@@ -31,7 +31,9 @@ export class Define implements IDescriptor {
          },
          get(): IDefine | void {
             return _this._proxy;
-         }
+         },
+         configurable: true,
+         enumerable: true
       };
    }
 }

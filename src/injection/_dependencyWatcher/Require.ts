@@ -30,7 +30,9 @@ export class Require implements IDescriptor {
          },
          get(): IRequire | IRequireInitObject | void {
             return _this._proxy || _this._init;
-         }
+         },
+         configurable: true,
+         enumerable: true
       };
    }
    getOrigin(): IRequire {
