@@ -9,10 +9,11 @@ import 'css!Devtool/Page/Page';
 
 // TODO: пока не подключили application берём шрифты отсюда
 import 'css!Controls/Application/Application';
-import { ConsoleLogger } from "Extension/Logger/Console";
+import 'css!Controls/Application/oldCss';
+import { ConsoleLogger } from 'Extension/Logger/Console';
 import { Store } from 'Elements/elements';
 
-let logger = new ConsoleLogger('Wasaby');
+const logger = new ConsoleLogger('Wasaby');
 logger.log('main component loaded');
 class Extension extends Control {
    protected _template: Function = template;

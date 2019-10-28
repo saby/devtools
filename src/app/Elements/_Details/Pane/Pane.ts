@@ -111,7 +111,8 @@ class Pane extends Control<IOptions> {
       this._itemActions = [
          {
             id: 'storeAsGlobal',
-            showType: ShowType.MENU,
+            icon: 'icon-Copy',
+            showType: ShowType.MENU_TOOLBAR,
             title: 'Store as global variable',
             handler: this.__storeAsGlobal.bind(this)
          },
