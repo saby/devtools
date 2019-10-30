@@ -4,6 +4,7 @@ import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateRea
 export interface IChangesDescription {
    selfDuration: number;
    updateReason: ControlUpdateReason;
+   domChanged: boolean;
    changedOptions?: string[];
    changedAttributes?: string[];
 }

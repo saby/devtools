@@ -145,7 +145,8 @@ function getChangesDescription(
       ),
       changedOptions: processChanges(node.changedOptions),
       changedAttributes: processChanges(node.changedAttributes),
-      selfDuration: node.selfDuration
+      selfDuration: node.selfDuration,
+      domChanged: node.domChanged
    };
 }
 

@@ -46,6 +46,7 @@ export interface IBackendControlNode extends IControlNode {
    treeDuration: number;
    selfStartTime: number;
    vNode: object;
+   domChanged: boolean;
 }
 
 export interface IFrontendControlNode {

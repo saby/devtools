@@ -4,4 +4,7 @@
     <ws:if data="{{ _options.itemData.caption }}">
         <span class="Flamegraph__nodeCaption">{{ itemData.caption }}</span>
     </ws:if>
+    <ws:if data="{{ !_options.itemData.domChanged }}">
+        <div class="Flamegraph__node_domUnchanged"></div>
+    </ws:if>
 </div>

@@ -13,6 +13,7 @@ interface IFlamegraphControlNode extends IFrontendControlNode {
    actualDuration: number;
    actualBaseDuration: number;
    updateReason: ControlUpdateReason;
+   domChanged: boolean;
 }
 
 interface IOptions extends IControlOptions {
@@ -27,6 +28,7 @@ interface INodeItemData {
    leftOffset: number;
    width: number;
    isSelected: boolean;
+   domChanged: boolean;
    parentId?: IFrontendControlNode['parentId'];
    caption?: string;
 }
@@ -235,7 +237,8 @@ function getItemDataForDepth(
          actualBaseDuration,
          name,
          parentId,
-         updateReason
+         updateReason,
+         domChanged
       }) => {
          const width = getWidth(
             actualBaseDuration,
@@ -273,7 +276,8 @@ function getItemDataForDepth(
                actualDuration,
                didRender
             ),
-            isSelected: id === markedKey
+            isSelected: id === markedKey,
+            domChanged
          });
       }
    );

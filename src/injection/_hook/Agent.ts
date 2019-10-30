@@ -75,7 +75,7 @@ class Agent {
     * This map is just used to speed up search for virtual node by dom node.
     */
    private domToIds: WeakMap<
-      Element,
+      Node,
       Array<IBackendControlNode['id']>
    > = new WeakMap();
    /**
@@ -153,6 +153,22 @@ class Agent {
 
    private renderer: IRenderer;
 
+   /**
+    * Mutation observer is used for tracking DOM changes during profiling.
+    */
+   private mutationObserver: MutationObserver;
+   /**
+    * This set is used to track DOM changes of controls.
+    * If DOM was changed - all controls from the nearest control node get added here.
+    */
+   private dirtyControls: Set<IBackendControlNode['id']> = new Set();
+   /**
+    * This set is used to speed up the mutation observer callback.
+    * If a DOM element gets changed during synchronization it gets added here and will be ignored
+    * until the next synchronization.
+    */
+   private dirtyContainers: Set<Node> = new Set();
+
    constructor(config: { logger: INamedLogger; renderer: IRenderer }) {
       this.logger = config.logger;
       this.renderer = config.renderer;
@@ -213,6 +229,9 @@ class Agent {
          'revertNodeOption',
          this.__revertNodeOption.bind(this)
       );
+      this.mutationObserver = new MutationObserver(
+         this.__mutationObserverCallback.bind(this)
+      );
       if (window.__WASABY_START_PROFILING) {
          this.__toggleProfiling(window.__WASABY_START_PROFILING);
          this.isDevtoolsOpened = true;
@@ -244,6 +263,14 @@ class Agent {
       this.rootStack.push(rootId);
       this.changedRoots.set(rootId, new Map());
       startSyncMark(rootId);
+      if (this.isProfiling) {
+         this.mutationObserver.observe(document, {
+            childList: true,
+            attributes: true,
+            characterData: true,
+            subtree: true
+         });
+      }
    }
 
    onStartCommit(
@@ -373,6 +400,11 @@ class Agent {
                `Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`
             );
          }
+         if (this.isProfiling) {
+            node.domChanged =
+               operation === OperationType.CREATE ||
+               this.dirtyControls.has(node.id);
+         }
          node.selfDuration -= node.treeDuration;
          switch (operation) {
             case OperationType.DELETE:
@@ -413,6 +445,7 @@ class Agent {
       const id = guid();
       if (this.isProfiling) {
          this.changedNodesBySynchronization.set(id, changes);
+         this.__cleanupMutationObserver();
       }
       if (this.isDevtoolsOpened) {
          window.__WASABY_DEV_HOOK__.pushMessage('endSynchronization', id);
@@ -674,14 +707,14 @@ class Agent {
    private __findControlByDomNode(
       element: Element
    ): IBackendControlNode | undefined {
-      let currentElement = element;
+      let currentElement: Node | null = element;
 
       while (currentElement) {
          const nodes = this.domToIds.get(currentElement);
          if (nodes) {
             return this.elements.get(nodes[nodes.length - 1]);
          }
-         currentElement = currentElement.parentElement as Element;
+         currentElement = currentElement.parentElement;
       }
       return;
    }
@@ -737,6 +770,7 @@ class Agent {
             this.initialIdToDuration.set(id, selfDuration);
          });
       }
+      this.__cleanupMutationObserver();
       this.channel.dispatch('profilingStatus', this.isProfiling);
    }
 
@@ -858,6 +892,37 @@ class Agent {
       if (element) {
          this.renderer.revertNodeOption(element.vNode, optionType, path);
       }
+   }
+
+   private __cleanupMutationObserver(): void {
+      this.dirtyContainers.clear();
+      this.dirtyControls.clear();
+      this.mutationObserver.disconnect();
+   }
+
+   private __mutationObserverCallback(mutations: MutationRecord[]): void {
+      mutations.forEach(({ target }) => {
+         if (this.dirtyContainers.has(target)) {
+            return;
+         }
+         this.dirtyContainers.add(target);
+         const ids = this.domToIds.get(target);
+         if (ids) {
+            ids.forEach((id) => this.dirtyControls.add(id));
+         } else {
+            let currentElement: Node | null = target;
+
+            while (currentElement) {
+               this.dirtyContainers.add(currentElement);
+               const nodes = this.domToIds.get(currentElement);
+               if (nodes) {
+                  nodes.forEach((id) => this.dirtyControls.add(id));
+                  break;
+               }
+               currentElement = currentElement.parentElement;
+            }
+         }
+      });
    }
 }
 

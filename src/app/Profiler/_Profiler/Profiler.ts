@@ -10,7 +10,6 @@ import SynchronizationsList from '../_SynchronizationsList/SynchronizationsList'
 import {
    applyOperations,
    convertProfilingData,
-   getActualDurations,
    getChanges,
    getChangesDescription,
    getSelfDuration,
@@ -25,7 +24,7 @@ import {
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 // @ts-ignore
 import template = require('wml!Profiler/_Profiler/Profiler');
-import Tab = chrome.tabs.Tab;
+import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 interface IOptions extends IControlOptions {
    store: Store;
@@ -163,31 +162,83 @@ class Profiler extends Control<IOptions> {
             synchronizationKey
          );
 
-         const dataWithSelfDurations = elements.map((element) => {
-            const changesForElement = changes.get(element.id);
-            return {
-               ...element,
-               updateReason: changesForElement ? changesForElement.updateReason : 'unchanged',
-               selfDuration: getSelfDuration(
-                  this._profilingData,
-                  synchronizationKey,
-                  element.id
-               )
-            };
-         });
-
-         snapshot = dataWithSelfDurations.map((element, index) => {
-            const actualDurations = getActualDurations(
-               dataWithSelfDurations,
-               element.id,
-               index
+         /**
+          * Here we're adding profiling data to the elements: timings, update reason, dom changes, etc.
+          * Because timings and dom changes should bubble, we're traversing in reverse order.
+          */
+         const elementsWithProfilingData: Flamegraph['_options']['snapshot'] = [];
+         const parentsOfChangedElements: Set<
+            IFrontendControlNode['id']
+         > = new Set();
+         const parentsDuration: Map<
+            IFrontendControlNode['id'],
+            {
+               actualDuration: number;
+               actualBaseDuration: number;
+            }
+         > = new Map();
+         for (let i = elements.length - 1; i >= 0; i--) {
+            const currentItem = elements[i];
+            const changesForElement = changes.get(currentItem.id);
+            const selfDuration = getSelfDuration(
+               this._profilingData,
+               synchronizationKey,
+               currentItem.id
             );
-            return {
-               ...element,
-               actualBaseDuration: actualDurations.actualBaseDuration,
-               actualDuration: actualDurations.actualDuration
-            };
-         });
+            let updateReason: ControlUpdateReason = 'unchanged';
+            let domChanged = false;
+
+            if (changesForElement) {
+               updateReason = changesForElement.updateReason;
+               domChanged = changesForElement.domChanged;
+            }
+
+            if (parentsOfChangedElements.has(currentItem.id) || domChanged) {
+               domChanged = true;
+               if (typeof currentItem.parentId !== 'undefined') {
+                  parentsOfChangedElements.add(currentItem.parentId);
+               }
+            }
+            // TODO: по сути костыль, чтобы не помечать в профиле лишние элементы, как проблемные
+            if (updateReason === 'unchanged') {
+               domChanged = true;
+            }
+
+            const duration = parentsDuration.get(currentItem.id);
+            let actualBaseDuration = selfDuration;
+            let actualDuration = updateReason !== 'unchanged' ? selfDuration : 0;
+            if (duration) {
+               actualBaseDuration += duration.actualBaseDuration;
+               actualDuration += duration.actualDuration;
+            }
+
+            if (typeof currentItem.parentId !== 'undefined') {
+               const previousDuration = parentsDuration.get(
+                  currentItem.parentId
+               );
+               if (previousDuration) {
+                  previousDuration.actualBaseDuration += actualBaseDuration;
+                  if (updateReason !== 'unchanged') {
+                     previousDuration.actualDuration += actualDuration;
+                  }
+               } else {
+                  parentsDuration.set(currentItem.parentId, {
+                     actualBaseDuration,
+                     actualDuration
+                  });
+               }
+            }
+
+            elementsWithProfilingData.push({
+               ...currentItem,
+               selfDuration,
+               updateReason,
+               domChanged,
+               actualBaseDuration,
+               actualDuration
+            });
+         }
+         snapshot = elementsWithProfilingData.reverse();
 
          this._snapshotBySynchronization.set(synchronizationKey, snapshot);
       }
