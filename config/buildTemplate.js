@@ -97,6 +97,10 @@ const EXTENSION_MODULES = [
     "name": "Devtool",
     "path": resolve(input.app, "Devtool")
   },
+  {
+    "name": "test",
+    "path": resolve("test")
+  }
 ];
 
 const MODULES = [].concat(WASABY_MODULES, EXTENSION_MODULES);

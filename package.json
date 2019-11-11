@@ -16,12 +16,15 @@
       "build:extension": "node ./scripts/build_extension.js && npm run build:content",
       "build:app": "node ./scripts/build_app.js",
       "build:cdn": "node ./scripts/build_cdn.js",
-      "build:shared": "node ./scripts/copy_shared.js"
+      "build:shared": "node ./scripts/copy_shared.js",
+      "test": "saby-units --isolated",
+      "test:coverage": "saby-units --isolated --coverage"
    },
    "devDependencies": {
       "@types/chrome": "0.0.81",
       "cross-env": "^5.2.0",
-      "tslint": "^5.15.0"
+      "tslint": "^5.15.0",
+      "saby-units": "git+https://github.com/saby/Units.git#rc-19.710"
    },
    "dependencies": {
       "cdn": "git+https://github.com/saby/wasaby-cdn.git#rc-19.710",
@@ -42,5 +45,28 @@
       "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-19.710",
       "wasaby-app": "git+https://github.com/saby/wasaby-app.git#rc-19.710",
       "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-19.710"
+   },
+   "saby-units": {
+      "moduleType": "amd",
+      "root": "build/resources",
+      "tests": "test",
+      "dependencies": ["mockChrome.js"]
+   },
+   "nyc": {
+      "include": [
+         "build/resources/DependencyWatcher/**/*.js",
+         "build/resources/Devtool/**/*.js",
+         "build/resources/Elements/**/*.js",
+         "build/resources/Extension/**/*.js",
+         "build/resources/Profiler/**/*.js",
+         "build/resources/Search/**/*.js"
+      ],
+      "reporter": [
+         "text",
+         "html"
+      ],
+      "cache": false,
+      "eager": true,
+      "report-dir": "./artifacts/coverage"
    }
 }
