@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui_module for_cdn="0" id="cfa0d2ed-6026-476a-9244-042099a8a5b8" name="DevtoolsTest" responsible="Зайцев А.С." version="1.00">
+
+  <description/>
+
+  <depends>
+        <module id="0bad3dc3-e17e-441f-a91e-7aecf37867f1" name="Profiler"/>
+  </depends>
+
+  <load_after/>
+
+  <parameters/>
+
+  <resources/>
+
+  <unit_test/>
+
+</ui_module>
