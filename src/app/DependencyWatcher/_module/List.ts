@@ -126,6 +126,7 @@ export default class List extends Control<IOptions> {
             ({ name }) => name === field
          );
          if (item) {
+            item.visibility = true;
             if (Array.isArray(item.value) && !item.value.length) {
                item.textValue = '';
             }
