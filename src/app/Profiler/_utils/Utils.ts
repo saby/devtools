@@ -166,6 +166,11 @@ const colors: Array<Exclude<BACKGROUND_COLOR, '#e2e2e2'>> = [
    '#efc457'
 ];
 
+/**
+ * Returns background color corresponding to the duration of an operation.
+ * @param value Duration of an operation.
+ * @return Background color corresponding to the duration of an operation.
+ */
 export function getBackgroundColorBasedOnTiming(
    value: number
 ): Exclude<BACKGROUND_COLOR, '#e2e2e2'> {
@@ -174,6 +179,11 @@ export function getBackgroundColorBasedOnTiming(
    return colors[Math.round(index)];
 }
 
+/**
+ * Returns background color corresponding to the update reason.
+ * @param updateReason Reason for the update.
+ * @return Background color corresponding to the update reason.
+ */
 export function getBackgroundColorBasedOnReason(
    updateReason: ControlUpdateReason
 ): '#e2e2e2' | '#ffab66' | '#e6d174' | '#b3e6e6' | '#000' | '#baf7c8' {
@@ -193,13 +203,27 @@ export function getBackgroundColorBasedOnReason(
    }
 }
 
+/**
+ * Converts a number to a string which represents duration. Rounds to seconds if necessary.
+ * @param value Value to be converted.
+ * @return String which represents duration.
+ */
 export function formatTime(value: number): string {
    const SECOND = 1000;
    const PRECISION = 2;
-   const roundedValue = value.toFixed(PRECISION);
-   return value >= SECOND ? `${roundedValue}s` : `${roundedValue}ms`;
+   if (value >= SECOND) {
+      return `${(value / 1000).toFixed(PRECISION)}s`;
+   } else {
+      return `${value.toFixed(PRECISION)}ms`;
+   }
 }
 
+/**
+ * Counts how many times each operation happened during a synchronization and returns an object with results.
+ * @param snapshot Snapshot of the synchronization.
+ * @param destroyedCount Number of elements destroyed during the syncrhonization.
+ * @return Object with results of the synchronization.
+ */
 export function getSynchronizationOverview(
    snapshot: Flamegraph['_options']['snapshot'],
    destroyedCount: number = 0

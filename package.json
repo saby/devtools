@@ -21,10 +21,12 @@
       "test:coverage": "saby-units --isolated --coverage"
    },
    "devDependencies": {
+      "@types/chai": "^4.2.4",
       "@types/chrome": "0.0.81",
+      "@types/sinon": "^7.5.0",
       "cross-env": "^5.2.0",
-      "tslint": "^5.15.0",
-      "saby-units": "git+https://github.com/saby/Units.git#rc-19.710"
+      "saby-units": "git+https://github.com/saby/Units.git#rc-19.710",
+      "tslint": "^5.15.0"
    },
    "dependencies": {
       "cdn": "git+https://github.com/saby/wasaby-cdn.git#rc-19.710",
@@ -50,7 +52,9 @@
       "moduleType": "amd",
       "root": "build/resources",
       "tests": "test",
-      "dependencies": ["mockChrome.js"]
+      "dependencies": [
+         "mockChrome.js"
+      ]
    },
    "nyc": {
       "include": [
