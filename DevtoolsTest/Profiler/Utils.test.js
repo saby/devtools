@@ -1,4 +1,10 @@
-define(['Profiler/_utils/Utils', 'Elements/elements', 'Extension/Plugins/Elements/const'], function(
+define([
+   'DevtoolsTest/mockChrome',
+   'Profiler/_utils/Utils',
+   'Elements/elements',
+   'Extension/Plugins/Elements/const'
+], function(
+   mockChrome,
    Utils,
    elementsLib,
    elementsConsts

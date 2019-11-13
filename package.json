@@ -18,7 +18,8 @@
       "build:cdn": "node ./scripts/build_cdn.js",
       "build:shared": "node ./scripts/copy_shared.js",
       "test": "saby-units --isolated",
-      "test:coverage": "saby-units --isolated --coverage"
+      "test:coverage": "saby-units --isolated --coverage",
+      "test:app": "saby-units --server"
    },
    "devDependencies": {
       "@types/chai": "^4.2.4",
@@ -51,10 +52,7 @@
    "saby-units": {
       "moduleType": "amd",
       "root": "build/resources",
-      "tests": "test",
-      "dependencies": [
-         "mockChrome.js"
-      ]
+      "tests": "DevtoolsTest"
    },
    "nyc": {
       "include": [

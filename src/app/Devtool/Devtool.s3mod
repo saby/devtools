@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<ui_module for_cdn="0" id="c7af5b1b-ad28-4cf8-ba55-c892c0b59245" name="Elements" responsible="Зайцев А. С." version="1.00">
+<ui_module for_cdn="0" id="8fc415e2-ad25-4452-aabb-a94e0e290dfe" name="Devtool" responsible="Зайцев А. С." version="1.00">
 
   <description/>
 
@@ -17,9 +17,10 @@
         <module id="f27abe12-19df-4c9f-b886-634bd20a0011" name="UI"/>
         <module id="f6fdf353-3ab3-4dbb-8671-01c2b418bf0a" name="Controls"/>
         <module id="d61e9307-ee6b-47f5-8a16-5d056fe644f4" name="Layout"/>
-        <module id="8c7f5a73-e594-404f-ac3e-0615cc8ae4f3" name="Search"/>
-        <module id="fe7ac5f4-313e-4fea-93be-9f54fca9a946" name="Extension"/>
-  </depends>
+        <module id="0bad3dc3-e17e-441f-a91e-7aecf37867f1" name="Profiler"/>
+        <module id="c7af5b1b-ad28-4cf8-ba55-c892c0b59245" name="Elements"/>
+        <module id="8768d783-37e7-4f0d-a476-16766b4635b8" name="DependencyWatcher"/>
+    </depends>
 
   <load_after/>
 
