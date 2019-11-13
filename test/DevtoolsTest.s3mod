@@ -5,6 +5,7 @@
 
   <depends>
         <module id="0bad3dc3-e17e-441f-a91e-7aecf37867f1" name="Profiler"/>
+        <module id="c7af5b1b-ad28-4cf8-ba55-c892c0b59245" name="Elements"/>
   </depends>
 
   <load_after/>
