@@ -42,6 +42,12 @@ class Model {
             diff.added.forEach((item: IModelItem) => {
                if (item.depth === 0) {
                   this._visibleItems.set(item.id, this.__getElement(item));
+               } else if (typeof item.parentId !== 'undefined' && this._visibleItems.has(item.parentId)) {
+                  if (!(this._visibleItems.get(item.parentId) as IModelItem).hasChildren) {
+                     this.__updateElement(item.parentId, {
+                        hasChildren: true
+                     });
+                  }
                }
             });
             diff.removed.forEach((item: IModelItem) => {
