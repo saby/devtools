@@ -22,7 +22,6 @@ export interface IWasabyDevHook {
    init: () => void;
    pushMessage: (eventName: string, args?: ISerializable) => void;
    $0: IWasabyElement;
-   _initialized: boolean;
    __node?: IBackendControlNode;
    __template?: Function;
    __constructor?: Function;

@@ -198,14 +198,11 @@ class Pane extends Control<IOptions> {
          return false;
       }
       switch (action.id) {
+         // TODO: отключил эти 2 операции пока не разобрался с редактированием
          case 'editValue':
-            return this._options.isControl && isEditable(value);
+            return false;
          case 'revertValue':
-            return (
-               this._options.isControl &&
-               isEditable(value) &&
-               item.getState() === 'Changed'
-            );
+            return false;
          case 'storeAsGlobal':
             return (
                !!this._options.canStoreAsGlobal &&
