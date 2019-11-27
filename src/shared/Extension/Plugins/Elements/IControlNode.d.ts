@@ -1,8 +1,10 @@
 interface ITemplateNode {
-   id: number;
    name: string;
    template: Function;
    container: IWasabyElement;
+   children: Array<ITemplateNode | IControlNode>;
+   type: string | null;
+   ref?: Function;
    options?: {
       [key: string]: unknown;
       content?: object;
@@ -10,7 +12,6 @@ interface ITemplateNode {
    changedOptions?: ITemplateNode['options'];
    attributes?: Record<string, string>;
    changedAttributes?: ITemplateNode['attributes'];
-   parentId?: ITemplateNode['id'];
 }
 
 interface IWasabyHandlerFn extends Function {
@@ -31,7 +32,10 @@ export interface IWasabyElement extends HTMLElement {
    }>;
 }
 
-interface IControlNode extends ITemplateNode {
+interface IControlNode extends Exclude<ITemplateNode, 'children'> {
+   markup: Array<ITemplateNode | IControlNode>;
+   controlClass: Function;
+   vnode: object;
    instance?: {
       _container: IWasabyElement;
       _destroyed: boolean;
@@ -42,16 +46,18 @@ interface IControlNode extends ITemplateNode {
 }
 
 export interface IBackendControlNode extends IControlNode {
+   id: number;
    selfDuration: number;
    treeDuration: number;
    selfStartTime: number;
    vNode: object;
+   parentId?: IBackendControlNode['id'];
 }
 
 export interface IFrontendControlNode {
-   id: IControlNode['id'];
+   id: IBackendControlNode['id'];
    name: IControlNode['name'];
    depth: number;
    class: string;
-   parentId?: IControlNode['parentId'];
+   parentId?: IBackendControlNode['parentId'];
 }

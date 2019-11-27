@@ -6,6 +6,7 @@ import {
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
 import Agent from './Agent';
+import OldAgent from './OldAgent';
 import { INamedLogger } from 'Extension/Logger/ILogger';
 import { IRenderer } from 'Extension/Plugins/Elements/IRenderer';
 
@@ -54,6 +55,16 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
+   saveChildren(children: object | object[]): void {
+      if (this._agent) {
+         try {
+            this._agent.saveChildren(children);
+         } catch (e) {
+            rethrowError(e);
+         }
+      }
+   }
+
    onStartLifecycle(id: IBackendControlNode['id']): void {
       if (this._agent) {
          try {
@@ -74,7 +85,7 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onStartSync(rootId: string): void {
+   onStartSync(rootId: string | number): void {
       if (this._agent) {
          try {
             this._agent.onStartSync(rootId);
@@ -84,7 +95,7 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onEndSync(rootId: string): void {
+   onEndSync(rootId: string | number): void {
       if (this._agent) {
          try {
             this._agent.onEndSync(rootId);
@@ -106,13 +117,20 @@ export class Hook implements IWasabyDevHook {
 
    init(renderer?: IRenderer): void {
       if (renderer) {
-         this._agent = new Agent({
-            logger: this._logger,
-            renderer
-         });
+         // В Изыгинской ветке поддерживается редактирование, в другой ветке - нет. Так и будем различать
+         // TODO: убрать проверку условия после отката Изыгинской ветки и создавать сразу нужный объект
+         if (Object.keys(renderer).length) {
+            this._agent = new Agent({
+               logger: this._logger,
+               renderer
+            });
+         } else {
+            this._agent = new OldAgent({
+               logger: this._logger
+            });
+         }
          this._initialized = true;
       }
-      // TODO: поменять цвет иконки, создать вкладку в дев тулзах, загрузить плагины, навесить всякие обработчики
    }
 
    pushMessage(eventName: string, args?: ISerializable): void {

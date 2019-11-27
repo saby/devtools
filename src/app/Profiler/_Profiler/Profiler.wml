@@ -34,7 +34,7 @@
     </ws:headTemplate>
     <ws:content>
         <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
-            <Controls.masterDetail:Base attr:class="Profiler__masterDetail">
+            <Controls.masterDetail:Base attr:class="Profiler__masterDetail" masterWidth="{{300}}">
                 <ws:master>
                     <Controls.scroll:Container attr:class="Profiler__master">
                         <Profiler._SynchronizationsList.SynchronizationsList synchronizations="{{ _synchronizations }}"

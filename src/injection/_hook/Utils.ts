@@ -7,6 +7,7 @@ import {
    IChangesDescription
 } from 'Extension/Plugins/Elements/IProfilingData';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
+import isDeepEqual from './isDeepEqual';
 
 function operationToString(
    operation?: OperationType
@@ -29,7 +30,7 @@ function getCaption(name: string, operation?: OperationType): string {
    return `${name} (${operationToString(operation)})`;
 }
 
-export function startSyncMark(rootId: string): void {
+export function startSyncMark(rootId: string | number): void {
    if (
       window.wasabyDevtoolsOptions &&
       window.wasabyDevtoolsOptions.useUserTimingAPI
@@ -38,7 +39,7 @@ export function startSyncMark(rootId: string): void {
    }
 }
 
-export function endSyncMark(rootId: string): void {
+export function endSyncMark(rootId: string | number): void {
    if (
       window.wasabyDevtoolsOptions &&
       window.wasabyDevtoolsOptions.useUserTimingAPI
@@ -179,4 +180,33 @@ export function getSyncList(
          }
       ];
    });
+}
+
+export function getObjectDiff(obj1?: object, obj2?: object): object | undefined {
+   if (!obj1) {
+      return obj2 ? obj2 : undefined;
+   }
+   if (!obj2) {
+      return obj1 ? obj1 : undefined;
+   }
+   const diff = Object.keys(obj1).reduce((result, key) => {
+      if (!obj2.hasOwnProperty(key)) {
+         result.push(key);
+      } else if (!isDeepEqual(obj1[key], obj2[key])) {
+         return result;
+      } else {
+         const resultKeyIndex = result.indexOf(key);
+         result.splice(resultKeyIndex, 1);
+      }
+      return result;
+   }, Object.keys(obj2));
+   if (diff.length === 0) {
+      return;
+   } else {
+      const resultDiff = {};
+      diff.forEach((key) => {
+         resultDiff[key] = obj2[key];
+      });
+      return resultDiff;
+   }
 }
