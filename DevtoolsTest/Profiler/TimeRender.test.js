@@ -1,7 +1,9 @@
-define(['DevtoolsTest/mockChrome', 'Profiler/_TimeRender/TimeRender'], function(
-   mockChrome,
-   TimeRender
-) {
+define([
+   'DevtoolsTest/mockChrome',
+   'Profiler/_TimeRender/TimeRender',
+   'Types/entity',
+   'DevtoolsTest/optionTypesMocks'
+], function(mockChrome, TimeRender, entityLib, optionTypesMocks) {
    let sandbox;
    let instance;
    TimeRender = TimeRender.default;
@@ -64,6 +66,40 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_TimeRender/TimeRender'], function(
             });
 
             assert.equal(instance._formattedValue, '1.20s');
+         });
+      });
+
+      describe('getOptionTypes', function() {
+         it('should call entity:Descriptor with correct values', function() {
+            const { mockOptionTypes, testOption } = optionTypesMocks;
+            mockOptionTypes(sandbox, entityLib);
+
+            const optionTypes = TimeRender.getOptionTypes();
+
+            assert.hasAllKeys(optionTypes, [
+               'value',
+               'barColor',
+               'length',
+               'readOnly',
+               'theme'
+            ]);
+            testOption(optionTypes, 'value', {
+               required: true,
+               args: [Number]
+            });
+            testOption(optionTypes, 'barColor', {
+               required: true,
+               args: [String]
+            });
+            testOption(optionTypes, 'length', {
+               args: [Number]
+            });
+            testOption(optionTypes, 'readOnly', {
+               args: [Boolean]
+            });
+            testOption(optionTypes, 'theme', {
+               args: [String]
+            });
          });
       });
    });

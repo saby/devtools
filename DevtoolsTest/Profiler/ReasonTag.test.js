@@ -1,7 +1,9 @@
-define(['DevtoolsTest/mockChrome', 'Profiler/_ReasonTag/ReasonTag'], function(
-   mockChrome,
-   ReasonTag
-) {
+define([
+   'DevtoolsTest/mockChrome',
+   'Profiler/_ReasonTag/ReasonTag',
+   'Types/entity',
+   'DevtoolsTest/optionTypesMocks'
+], function(mockChrome, ReasonTag, entityLib, optionTypesMocks) {
    let sandbox;
    let instance;
    ReasonTag = ReasonTag.default;
@@ -34,6 +36,44 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_ReasonTag/ReasonTag'], function(
          });
          it('should return color for destroyed', function() {
             assert.equal(instance._getColor('destroyed'), '#000');
+         });
+      });
+
+      it('getDefaultOptions', function() {
+         assert.deepEqual(ReasonTag.getDefaultOptions(), {
+            updateReason: 'unchanged'
+         });
+      });
+
+      describe('getOptionTypes', function() {
+         it('should call entity:Descriptor with correct values', function() {
+            const { mockOptionTypes, testOption } = optionTypesMocks;
+            mockOptionTypes(sandbox, entityLib);
+
+            const optionTypes = ReasonTag.getOptionTypes();
+
+            assert.hasAllKeys(optionTypes, [
+               'updateReason',
+               'readOnly',
+               'theme'
+            ]);
+            testOption(optionTypes, 'updateReason', {
+               oneOf: [
+                  'mounted',
+                  'selfUpdated',
+                  'parentUpdated',
+                  'unchanged',
+                  'destroyed',
+                  'forceUpdated'
+               ],
+               args: [String]
+            });
+            testOption(optionTypes, 'readOnly', {
+               args: [Boolean]
+            });
+            testOption(optionTypes, 'theme', {
+               args: [String]
+            });
          });
       });
    });

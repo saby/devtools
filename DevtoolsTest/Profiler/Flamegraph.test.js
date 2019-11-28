@@ -1,7 +1,9 @@
-define(['DevtoolsTest/mockChrome', 'Profiler/_Flamegraph/Flamegraph'], function(
-   mockChrome,
-   Flamegraph
-) {
+define([
+   'DevtoolsTest/mockChrome',
+   'Profiler/_Flamegraph/Flamegraph',
+   'Types/entity',
+   'DevtoolsTest/optionTypesMocks'
+], function(mockChrome, Flamegraph, entityLib, optionTypesMocks) {
    Flamegraph = Flamegraph.default;
    let sandbox;
    let instance;
@@ -1199,6 +1201,35 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Flamegraph/Flamegraph'], function(
             assert.isTrue(
                stub.calledOnceWithExactly('markedKeyChanged', ['1'])
             );
+         });
+      });
+
+      describe('getOptionTypes', function() {
+         it('should call entity:Descriptor with correct values', function() {
+            const { mockOptionTypes, testOption } = optionTypesMocks;
+            mockOptionTypes(sandbox, entityLib);
+
+            const optionTypes = Flamegraph.getOptionTypes();
+
+            assert.hasAllKeys(optionTypes, [
+               'snapshot',
+               'markedKey',
+               'readOnly',
+               'theme'
+            ]);
+            testOption(optionTypes, 'snapshot', {
+               required: true,
+               args: [Array]
+            });
+            testOption(optionTypes, 'markedKey', {
+               args: [Number]
+            });
+            testOption(optionTypes, 'readOnly', {
+               args: [Boolean]
+            });
+            testOption(optionTypes, 'theme', {
+               args: [String]
+            });
          });
       });
    });

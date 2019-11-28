@@ -2,8 +2,9 @@ define([
    'DevtoolsTest/mockChrome',
    'Profiler/_RankedView/RankedView',
    'Types/source',
-   'Types/entity'
-], function(mockChrome, RankedView, sourceLib, entityLib) {
+   'Types/entity',
+   'DevtoolsTest/optionTypesMocks'
+], function(mockChrome, RankedView, sourceLib, entityLib, optionTypesMocks) {
    let sandbox;
    RankedView = RankedView.default;
    const Memory = sourceLib.Memory;
@@ -279,6 +280,41 @@ define([
          assert.equal(instance._groupingCallback(item), 'parentUpdated');
          item.set('updateReason', 'forceUpdated');
          assert.equal(instance._groupingCallback(item), 'forceUpdated');
+      });
+
+      describe('getOptionTypes', function() {
+         it('should call entity:Descriptor with correct values', function() {
+            const { mockOptionTypes, testOption } = optionTypesMocks;
+            mockOptionTypes(sandbox, entityLib);
+
+            const optionTypes = RankedView.getOptionTypes();
+
+            assert.hasAllKeys(optionTypes, [
+               'snapshot',
+               'markedKey',
+               'filter',
+               'readOnly',
+               'theme'
+            ]);
+            testOption(optionTypes, 'snapshot', {
+               required: true,
+               args: [Array]
+            });
+            testOption(optionTypes, 'markedKey', {
+               required: true,
+               args: [Number]
+            });
+            testOption(optionTypes, 'filter', {
+               required: true,
+               args: [Object]
+            });
+            testOption(optionTypes, 'readOnly', {
+               args: [Boolean]
+            });
+            testOption(optionTypes, 'theme', {
+               args: [String]
+            });
+         });
       });
    });
 });

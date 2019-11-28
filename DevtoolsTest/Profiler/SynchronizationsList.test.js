@@ -1,8 +1,10 @@
 define([
    'DevtoolsTest/mockChrome',
    'Profiler/_SynchronizationsList/SynchronizationsList',
-   'Types/source'
-], function(mockChrome, SynchronizationsList, sourceLib) {
+   'Types/source',
+   'Types/entity',
+   'DevtoolsTest/optionTypesMocks'
+], function(mockChrome, SynchronizationsList, sourceLib, entityLib, optionTypesMocks) {
    let sandbox;
    SynchronizationsList = SynchronizationsList.default;
    const Memory = sourceLib.Memory;
@@ -180,6 +182,41 @@ define([
             assert.isTrue(
                stub.calledOnceWithExactly('markedKeyChanged', ['1'])
             );
+         });
+      });
+
+      describe('getOptionTypes', function() {
+         it('should call entity:Descriptor with correct values', function() {
+            const { mockOptionTypes, testOption } = optionTypesMocks;
+            mockOptionTypes(sandbox, entityLib);
+
+            const optionTypes = SynchronizationsList.getOptionTypes();
+
+            assert.hasAllKeys(optionTypes, [
+               'synchronizations',
+               'markedKey',
+               'filter',
+               'readOnly',
+               'theme'
+            ]);
+            testOption(optionTypes, 'synchronizations', {
+               required: true,
+               args: [Array]
+            });
+            testOption(optionTypes, 'markedKey', {
+               required: true,
+               args: [String]
+            });
+            testOption(optionTypes, 'filter', {
+               required: true,
+               args: [Function]
+            });
+            testOption(optionTypes, 'readOnly', {
+               args: [Boolean]
+            });
+            testOption(optionTypes, 'theme', {
+               args: [String]
+            });
          });
       });
    });
