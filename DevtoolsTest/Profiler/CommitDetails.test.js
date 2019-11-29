@@ -8,16 +8,16 @@ define([
    let instance;
    CommitDetails = CommitDetails.default;
 
-   beforeEach(function() {
-      sandbox = sinon.createSandbox();
-      instance = new CommitDetails();
-   });
-
-   afterEach(function() {
-      sandbox.restore();
-   });
-
    describe('Profiler/_CommitDetails/CommitDetails', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+         instance = new CommitDetails();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
       describe('getOptionTypes', function() {
          it('should call entity:Descriptor with correct values', function() {
             const { mockOptionTypes, testOption } = optionTypesMocks;

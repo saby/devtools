@@ -8,16 +8,16 @@ define([
    let instance;
    ReasonTag = ReasonTag.default;
 
-   beforeEach(function() {
-      sandbox = sinon.createSandbox();
-      instance = new ReasonTag();
-   });
-
-   afterEach(function() {
-      sandbox.restore();
-   });
-
    describe('Profiler/_ReasonTag/ReasonTag', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+         instance = new ReasonTag();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
       describe('_getColor', function() {
          it('should return color for mounted', function() {
             assert.equal(instance._getColor('mounted'), '#ffab66');
