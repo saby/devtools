@@ -16,22 +16,12 @@ class ObjectTemplate extends Control {
 
    constructor(options: Readonly<IOptions>) {
       super(options);
-      this._caption = this.__getCaption(options.value);
+      this._caption = getCaption(options.value);
    }
 
    _beforeUpdate(newOptions: Readonly<IOptions>): void {
       if (this._options.value !== newOptions.value) {
-         this._caption = this.__getCaption(newOptions.value);
-      }
-   }
-
-   private __getCaption(value: object): string {
-      if (value instanceof Array) {
-         return `Array[${value.length}]`;
-      } else if (value === null) {
-         return 'null';
-      } else {
-         return Object.keys(value).length === 0 ? 'Empty object' : 'Object';
+         this._caption = getCaption(newOptions.value);
       }
    }
 
@@ -42,6 +32,16 @@ class ObjectTemplate extends Control {
          key: descriptor(String).required(),
          itemData: descriptor(Object)
       };
+   }
+}
+
+function getCaption(value: object): string {
+   if (value instanceof Array) {
+      return `Array[${value.length}]`;
+   } else if (value === null) {
+      return 'null';
+   } else {
+      return Object.keys(value).length === 0 ? 'Empty object' : 'Object';
    }
 }
 
