@@ -74,8 +74,8 @@ class Details extends Control<IOptions> {
       }, 100);
    }
 
-   private __hasData(data: object): boolean {
-      return data && Object.keys(data).length > 0;
+   private __hasData(data?: object): boolean {
+      return typeof data !== 'undefined' && Object.keys(data).length > 0;
    }
 
    private __forwardExpanded(

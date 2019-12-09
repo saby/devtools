@@ -156,23 +156,6 @@ export class Source implements ICrud {
       );
    }
 
-   private __getValueByPath(path: string[]): unknown {
-      let currentProperty = path.pop();
-      let value = this._data.find(
-         (item) => item[this._idProperty] === currentProperty
-      );
-      while (path.length) {
-         currentProperty = path.pop();
-         if (currentProperty && value) {
-            value =
-               value instanceof EntityRecord
-                  ? value.get(currentProperty)
-                  : value[currentProperty];
-         }
-      }
-      return value;
-   }
-
    private __getImmediateChildren(parentId: string): Source['_data'] {
       const parent = this._data.find(
          (item) => item[this._idProperty] === parentId

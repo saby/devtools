@@ -9,15 +9,16 @@ define([
    RankedView = RankedView.default;
    const Memory = sourceLib.Memory;
    const Model = entityLib.Model;
-   beforeEach(function() {
-      sandbox = sinon.createSandbox();
-   });
-
-   afterEach(function() {
-      sandbox.restore();
-   });
 
    describe('Profiler/_RankedView/RankedView', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
       describe('constructor', function() {
          it('should initialize source', function() {
             const instance = new RankedView({

@@ -59,6 +59,9 @@ class Model {
             roots.forEach((element) =>
                this._visibleItems.set(element.id, this.__getElement(element))
             );
+         } else {
+            this._visibleItems.clear();
+            this._expandedItems.clear();
          }
       }
    }

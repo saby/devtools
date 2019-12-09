@@ -8,16 +8,16 @@ define([
    let instance;
    TimeRender = TimeRender.default;
 
-   beforeEach(function() {
-      sandbox = sinon.createSandbox();
-      instance = new TimeRender();
-   });
-
-   afterEach(function() {
-      sandbox.restore();
-   });
-
    describe('Profiler/_TimeRender/TimeRender', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+         instance = new TimeRender();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
       describe('_beforeMount', function() {
          it('should properly format time higher than a second', function() {
             instance._beforeMount({

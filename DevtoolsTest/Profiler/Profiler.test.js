@@ -5,15 +5,15 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
    let sandbox;
    Profiler = Profiler.default;
 
-   beforeEach(function() {
-      sandbox = sinon.createSandbox();
-   });
-
-   afterEach(function() {
-      sandbox.restore();
-   });
-
    describe('Profiler/_Profiler/Profiler', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
       describe('constructor', function() {
          it('should subscribe to all necessary events', function() {
             const listeners = new Map();

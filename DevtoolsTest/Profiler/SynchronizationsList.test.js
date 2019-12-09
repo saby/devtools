@@ -4,20 +4,26 @@ define([
    'Types/source',
    'Types/entity',
    'DevtoolsTest/optionTypesMocks'
-], function(mockChrome, SynchronizationsList, sourceLib, entityLib, optionTypesMocks) {
+], function(
+   mockChrome,
+   SynchronizationsList,
+   sourceLib,
+   entityLib,
+   optionTypesMocks
+) {
    let sandbox;
    SynchronizationsList = SynchronizationsList.default;
    const Memory = sourceLib.Memory;
 
-   beforeEach(function() {
-      sandbox = sinon.createSandbox();
-   });
-
-   afterEach(function() {
-      sandbox.restore();
-   });
-
    describe('Profiler/_SynchronizationsList/SynchronizationsList', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
       describe('constructor', function() {
          it('should initialize source', function() {
             const instance = new SynchronizationsList({

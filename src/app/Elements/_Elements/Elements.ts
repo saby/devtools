@@ -91,7 +91,7 @@ class Elements extends Control {
    }
 
    _afterUpdate(): void {
-      if (this._scrollToId) {
+      if (typeof this._scrollToId !== 'undefined') {
          const child = this._children[this._scrollToId] as HTMLElement;
          if (child) {
             const text = child.querySelector('.Elements__name');
@@ -215,15 +215,13 @@ class Elements extends Control {
       if (this._selectingFromPage) {
          this.__toggleSelectElementFromPage();
       }
-      if (this._model.getVisibleItems().length > 0) {
-         this._model.expandParents(id);
-         this._path = this._model.getPath(id);
-         this._selectedItemId = id;
-         this._scrollToId = id;
-         this.__inspectElement(this._options.store, {
-            reset: true
-         });
-      }
+      this._model.expandParents(id);
+      this._path = this._model.getPath(id);
+      this._selectedItemId = id;
+      this._scrollToId = id;
+      this.__inspectElement(this._options.store, {
+         reset: true
+      });
    }
 
    private __highlightNode(id: IFrontendControlNode['id']): void {

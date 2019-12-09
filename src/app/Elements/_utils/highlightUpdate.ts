@@ -1,14 +1,11 @@
 export function highlightUpdate(
-   node: HTMLElement,
-   flashColor: string = '#881280',
-   baseColor: string = 'transparent',
-   duration: number = 1
+   node: HTMLElement
 ): void {
    node.style.transition = 'none';
-   node.style.backgroundColor = flashColor;
+   node.style.backgroundColor = '#881280';
    // force recalc
    // tslint:disable-next-line:no-unused-expression
    node.offsetTop;
-   node.style.transition = `background-color ${duration}s ease`;
-   node.style.backgroundColor = baseColor;
+   node.style.transition = 'background-color 1s ease';
+   node.style.backgroundColor = 'transparent';
 }

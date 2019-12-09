@@ -7,12 +7,14 @@
                                  viewMode="link"
                                  on:click="__toggleSelectElementFromPage()"
                                  attr:class="Elements__headElement" />
-        <Controls.search:Input bind:value="_searchValue"
-                               on:valueChanged="__onSearchValueChanged()"
-                               on:keydown="__onSearchKeydown()"
-                               attr:class="Elements__headElement" />
-        <ws:if data="{{ _searchTotal > 0 }}">
-            <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchTotal }}</span>
+        <ws:if data="{{_model.getVisibleItems().length > 0}}">
+            <Controls.search:Input bind:value="_searchValue"
+                                   on:valueChanged="__onSearchValueChanged()"
+                                   on:keydown="__onSearchKeydown()"
+                                   attr:class="Elements__headElement" />
+            <ws:if data="{{ _searchTotal > 0 }}">
+                <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchTotal }}</span>
+            </ws:if>
         </ws:if>
     </ws:headTemplate>
    <ws:content>

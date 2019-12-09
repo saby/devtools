@@ -78,15 +78,6 @@ function getEditingConfig(isControl: boolean): IEditingConfig | undefined {
       : undefined;
 }
 
-function isEditable(value: unknown): boolean {
-   const type = typeof value;
-   return (
-      type === 'number' ||
-      type === 'boolean' ||
-      (type === 'string' && !(value as string).startsWith('function '))
-   );
-}
-
 class Pane extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected _source: Source;

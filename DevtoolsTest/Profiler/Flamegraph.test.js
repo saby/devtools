@@ -8,16 +8,17 @@ define([
    let sandbox;
    let instance;
 
-   beforeEach(function() {
-      sandbox = sinon.createSandbox();
-      instance = new Flamegraph();
-   });
-
-   afterEach(function() {
-      sandbox.restore();
-   });
-
    describe('Profiler/_Flamegraph/Flamegraph', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+         instance = new Flamegraph();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
+
       describe('_afterMount', function() {
          it('stores container width and calls _updateGraph', function() {
             const options = {};

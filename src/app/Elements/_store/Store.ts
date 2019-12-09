@@ -36,15 +36,13 @@ class Store {
    constructor() {
       this._channel.addListener(
          'operation',
-         this.__operationHandler.bind(this)
+         (args: IOperationEvent['args']) => {
+            applyOperation(this._elements, args);
+         }
       );
       this._channel.addListener('endOfTree', () => {
          this._hasFullTree = true;
       });
-      this._channel.addListener(
-         'endSynchronization',
-         this.__onEndSynchronization.bind(this)
-      );
    }
 
    dispatch(eventName: string, args?: ISerializable): void {
@@ -87,21 +85,6 @@ class Store {
          this._channel.dispatch('devtoolsInitialized');
       }
    }
-
-   private __onEndSynchronization(): void {
-      const uniqueIds: Set<IFrontendControlNode['id']> = new Set();
-      this._elements = this._elements.filter((element) => {
-         if (uniqueIds.has(element.id)) {
-            return false;
-         }
-         uniqueIds.add(element.id);
-         return true;
-      });
-   }
-
-   private __operationHandler(args: IOperationEvent['args']): void {
-      applyOperation(this._elements, args);
-   }
 }
 
 function removeNode(
@@ -130,7 +113,6 @@ function addNode(
          depth: 0
       });
    } else {
-      // TODO: сделать добавление в произвольное место
       const parentIndex = elements.findIndex(
          (element) => element.id === parentId
       );
@@ -152,7 +134,7 @@ function addNode(
          name,
          parentId,
          class: getClassByControlType(controlType),
-         depth: getDepth(elements, parentId)
+         depth: elements[parentIndex].depth + 1
       });
    }
 }
@@ -167,22 +149,19 @@ function reorderChildren(
       .map(({ id }) => id);
    const movedChildrenIds = getMovedChildrenIds(childrenIds, newOrder);
 
-   if (movedChildrenIds) {
-      const firstMovedChildId = childrenIds.find((id) =>
-         movedChildrenIds.includes(id)
-      );
-      const firstMovedChildIndex = elements.findIndex(
-         ({ id }) => id === firstMovedChildId
-      );
+   const firstMovedChildId = childrenIds.find((id) =>
+      movedChildrenIds.includes(id)
+   );
+   const firstMovedChildIndex = elements.findIndex(
+      ({ id }) => id === firstMovedChildId
+   );
 
-      // TODO: попробовать делать не spliceSubtree, а sliceSubtree, а потом заменять. Это должно быть быстрее
-      const newChildren: Store['_elements'] = [];
-      movedChildrenIds.forEach((childId) => {
-         newChildren.push(...spliceSubtree(elements, childId));
-      });
+   const newChildren: Store['_elements'] = [];
+   movedChildrenIds.forEach((childId) => {
+      newChildren.push(...sliceSubtree(elements, childId));
+   });
 
-      elements.splice(firstMovedChildIndex, 0, ...newChildren);
-   }
+   elements.splice(firstMovedChildIndex, newChildren.length, ...newChildren);
 }
 
 function getMovedChildrenIds(
@@ -208,7 +187,7 @@ function getMovedChildrenIds(
    return newOrder.slice(startIndex, endIndex + 1);
 }
 
-function spliceSubtree(
+function sliceSubtree(
    elements: Store['_elements'],
    rootId: IBackendControlNode['id']
 ): Store['_elements'] {
@@ -221,7 +200,7 @@ function spliceSubtree(
          break;
       }
    }
-   return elements.splice(startIndex, endIndex - startIndex);
+   return elements.slice(startIndex, endIndex);
 }
 
 function getClassByControlType(controlType: ControlType): string {
@@ -233,19 +212,6 @@ function getClassByControlType(controlType: ControlType): string {
       case ControlType.TEMPLATE:
          return 'Elements__node_template';
    }
-}
-
-function getDepth(
-   elements: Store['_elements'],
-   parentId?: IBackendControlNode['parentId']
-): number {
-   if (typeof parentId !== 'undefined') {
-      const parent = elements.find((element) => element.id === parentId);
-      if (parent) {
-         return parent.depth + 1;
-      }
-   }
-   return 0;
 }
 
 export default Store;

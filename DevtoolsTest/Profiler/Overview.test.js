@@ -8,16 +8,16 @@ define([
    let instance;
    Overview = Overview.default;
 
-   beforeEach(function() {
-      sandbox = sinon.createSandbox();
-      instance = new Overview();
-   });
-
-   afterEach(function() {
-      sandbox.restore();
-   });
-
    describe('Profiler/_Overview/Overview', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+         instance = new Overview();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
       describe('getOptionTypes', function() {
          it('should call entity:Descriptor with correct values', function() {
             const { mockOptionTypes, testOption } = optionTypesMocks;
