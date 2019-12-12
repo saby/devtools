@@ -189,7 +189,7 @@ define([
             instance.saveOptions(options);
             sandbox.stub(chrome, 'devtools').value({
                inspectedWindow: {
-                  eval: sinon.stub().callsArg(1)
+                  eval: sandbox.stub().callsArg(1)
                }
             });
 

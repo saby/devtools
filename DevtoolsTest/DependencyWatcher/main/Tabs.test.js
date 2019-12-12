@@ -1,0 +1,41 @@
+define([
+   'DevtoolsTest/mockChrome',
+   'DependencyWatcher/_main/Tabs',
+   'DependencyWatcher/_main/ViewMode',
+   'DependencyWatcher/data',
+   'Core/i18n'
+], function(mockChrome, Tabs, ViewMode, dataLib, i18n) {
+   let sandbox;
+   ViewMode = ViewMode.ViewMode;
+   const rk = i18n.rk;
+
+   describe('DependencyWatcher/_main/Tabs', function() {
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
+      describe('getTabConfig', function() {
+         it('should return config for dependency', function() {
+            assert.deepEqual(Tabs.getTabConfig(ViewMode.dependency), {
+               id: ViewMode.dependency,
+               caption: 'Dependency',
+               title: rk('Зависимости модулей'),
+               Source: dataLib.source.Dependencies
+            });
+         });
+
+         it('should return config for dependent', function() {
+            assert.deepEqual(Tabs.getTabConfig(ViewMode.dependent), {
+               id: ViewMode.dependent,
+               caption: 'Dependent',
+               title: rk('Зависимые модули'),
+               Source: dataLib.source.Dependent
+            });
+         });
+      });
+   });
+});

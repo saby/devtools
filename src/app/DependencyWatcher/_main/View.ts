@@ -77,9 +77,7 @@ export default class View extends Control {
       }
    }
    protected _beforeUnmount(): void {
-      this._channel.removeListener(EventNames.update, this._onUpdateHandler);
       this._channel.destructor();
-      delete this._channel;
    }
 
    protected _openSource(event: Event, id: number): void {
