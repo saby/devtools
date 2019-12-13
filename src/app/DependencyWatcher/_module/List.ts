@@ -134,9 +134,9 @@ export default class List extends Control<IOptions> {
       });
    }
 
-   protected _setFilterValue<T>(
+   protected _setFilterValue(
       id: keyof source.IWhere<IRPCModuleFilter>,
-      value?: T,
+      value?: number[],
       textValue: string = ''
    ): boolean {
       const item = this._filterButtonSource.find(({ name }) => name === id);

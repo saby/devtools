@@ -742,7 +742,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
       });
 
       describe('_visibleItemsToArray', function() {
-         it('TBD', function() {
+         it('should convert _visibleItems to array of items', function() {
             instance._items = [
                {
                   id: 0

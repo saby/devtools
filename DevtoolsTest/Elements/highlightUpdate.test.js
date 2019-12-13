@@ -14,7 +14,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_utils/highlightUpdate'], function(
          sandbox.restore();
       });
 
-      it('TBD', function() {
+      it('should change the background color of the node, trigger forced reflow and then change the background back', function() {
          const node = {
             style: {
                set transition(newValue) {},

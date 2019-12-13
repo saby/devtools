@@ -13,7 +13,6 @@ export type DefaultFilters<TData extends object> = Partial<TData>;
 
 export function getQueryParam<TData extends object>(
    query: TypesQuery,
-   keys?: number[],
    ignoreFilters: IgnoreFilters<TData> = {},
    defaultFilters: DefaultFilters<TData> = {}
 ): IQueryParam<TData, IWhere<TData>> {
@@ -24,6 +23,7 @@ export function getQueryParam<TData extends object>(
    const queryWhere = query.getWhere() as IWhere<TData> & {
       id?: number | number[];
    };
+   let keys;
    if (queryWhere.id) {
       keys = Array.isArray(queryWhere.id) ? queryWhere.id : [queryWhere.id];
       delete queryWhere.id;

@@ -50,7 +50,6 @@ export abstract class ListAbstract extends Compatibility {
       this._logger.log('start query');
       const queryParam = getQueryParam<IRPCModuleFilter>(
          query,
-         undefined,
          this._ignoreFilters,
          this._defaultFilters
       );
@@ -112,12 +111,7 @@ export abstract class ListAbstract extends Compatibility {
          return this.__queryItems(parent, param);
       }
 
-      const itemId = parent ? hierarchyId.split(parent)[0] : undefined;
-      if (!itemId) {
-         return this.__query(param);
-      }
-
-      return this.__queryItem(itemId, parent, param);
+      return this.__queryItem(hierarchyId.split(parent)[0], parent, param);
    }
 
    private __query(

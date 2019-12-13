@@ -23,7 +23,7 @@ export class File extends Compatibility {
    }
    query(query: TypesQuery): Promise<DataSet> {
       this._logger.log('start query');
-      const queryParam = getQueryParam<IRPCModuleInfo>(query, undefined);
+      const queryParam = getQueryParam<IRPCModuleInfo>(query);
       let switchedStr: string | undefined;
       return this._files
          .query(queryParam)
