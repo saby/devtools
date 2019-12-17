@@ -184,7 +184,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          });
          it('should correctly calculate snapshot of the synchronization', function() {
             const profilingData = {
-               initialIdToDuration: new Map([[1, 10], [2, 15]]),
+               initialIdToDuration: new Map([[1, 10], [2, 15], [5, 2], [6, 3]]),
                synchronizationKeyToDescription: new Map([
                   [
                      'test',
@@ -217,14 +217,32 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                               1,
                               {
                                  selfDuration: 5,
-                                 updateReason: 'forceUpdated'
+                                 updateReason: 'forceUpdated',
+                                 domChanged: true
                               }
                            ],
                            [
                               2,
                               {
                                  selfDuration: 7,
-                                 updateReason: 'parentUpdated'
+                                 updateReason: 'parentUpdated',
+                                 domChanged: false
+                              }
+                           ],
+                           [
+                              3,
+                              {
+                                 selfDuration: 10,
+                                 updateReason: 'mounted',
+                                 domChanged: true
+                              }
+                           ],
+                           [
+                              4,
+                              {
+                                 selfDuration: 15,
+                                 updateReason: 'mounted',
+                                 domChanged: true
                               }
                            ]
                         ])
@@ -255,11 +273,25 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   depth: 1,
                   parentId: 1,
                   class: ''
+               },
+               {
+                  id: 5,
+                  name: '5',
+                  depth: 2,
+                  parentId: 2,
+                  class: ''
+               },
+               {
+                  id: 6,
+                  name: '6',
+                  depth: 2,
+                  parentId: 2,
+                  class: ''
                }
             ];
             const changesBySynchronization = new Map([
                ['test', [[3, 1], [3, 2]]],
-               ['test2', [[3, 1], [3, 2]]]
+               ['test2', [[3, 1], [3, 2], [1, 3, '3', 0, 1], [1, 4, '4', 0, 1]]]
             ]);
             instance._profilingData = profilingData;
             instance._synchronizations = synchronizations;
@@ -281,8 +313,9 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   class: '',
                   updateReason: 'forceUpdated',
                   selfDuration: 5,
-                  actualBaseDuration: 12,
-                  actualDuration: 12
+                  actualBaseDuration: 42,
+                  actualDuration: 37,
+                  warnings: undefined
                },
                {
                   id: 2,
@@ -292,8 +325,57 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   class: '',
                   updateReason: 'parentUpdated',
                   selfDuration: 7,
-                  actualBaseDuration: 7,
-                  actualDuration: 7
+                  actualBaseDuration: 12,
+                  actualDuration: 7,
+                  warnings: ['domUnchanged']
+               },
+               {
+                  id: 5,
+                  name: '5',
+                  depth: 2,
+                  parentId: 2,
+                  class: '',
+                  updateReason: 'unchanged',
+                  selfDuration: 2,
+                  actualBaseDuration: 2,
+                  actualDuration: 0,
+                  warnings: undefined
+               },
+               {
+                  id: 6,
+                  name: '6',
+                  depth: 2,
+                  parentId: 2,
+                  class: '',
+                  updateReason: 'unchanged',
+                  selfDuration: 3,
+                  actualBaseDuration: 3,
+                  actualDuration: 0,
+                  warnings: undefined
+               },
+               {
+                  id: 3,
+                  name: '3',
+                  depth: 1,
+                  parentId: 1,
+                  class: 'Elements__node_template',
+                  updateReason: 'mounted',
+                  selfDuration: 10,
+                  actualBaseDuration: 10,
+                  actualDuration: 10,
+                  warnings: undefined
+               },
+               {
+                  id: 4,
+                  name: '4',
+                  depth: 1,
+                  parentId: 1,
+                  class: 'Elements__node_template',
+                  updateReason: 'mounted',
+                  selfDuration: 15,
+                  actualBaseDuration: 15,
+                  actualDuration: 15,
+                  warnings: undefined
                }
             ];
             assert.deepEqual(instance._snapshot, expectedSnapshot);
@@ -302,10 +384,10 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                expectedSnapshot
             );
             assert.deepEqual(instance._synchronizationOverview, {
-               mountedCount: 0,
+               mountedCount: 2,
                selfUpdatedCount: 0,
                parentUpdatedCount: 1,
-               unchangedCount: 0,
+               unchangedCount: 2,
                forceUpdatedCount: 1,
                destroyedCount: 0
             });
@@ -399,7 +481,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             const changesDescription = {
                updateReason: 'mounted',
                changedOptions: ['value', 'iconSize'],
-               changedAttributes: ['class', 'style']
+               changedAttributes: ['class', 'style'],
+               warnings: undefined
             };
             instance._profilingData = {
                initialIdToDuration: new Map(),
@@ -415,6 +498,38 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             };
             instance._selectedSynchronizationId = 'test1';
             instance._selectedCommitId = 1;
+            sandbox.stub(instance, '__getWarnings').returns(undefined);
+
+            instance.__updateSelectedCommitChanges();
+
+            assert.deepEqual(
+               instance._selectedCommitChanges,
+               changesDescription
+            );
+         });
+
+         it('should find the correct changesDescription and correct warnings', function() {
+            const changesDescription = {
+               updateReason: 'mounted',
+               changedOptions: ['value', 'iconSize'],
+               changedAttributes: ['class', 'style'],
+               warnings: ['domUnchanged']
+            };
+            instance._profilingData = {
+               initialIdToDuration: new Map(),
+               synchronizationKeyToDescription: new Map([
+                  [
+                     'test1',
+                     {
+                        selfDuration: 10,
+                        changes: new Map([[1, changesDescription]])
+                     }
+                  ]
+               ])
+            };
+            instance._selectedSynchronizationId = 'test1';
+            instance._selectedCommitId = 1;
+            sandbox.stub(instance, '__getWarnings').returns(['domUnchanged']);
 
             instance.__updateSelectedCommitChanges();
 
@@ -445,6 +560,92 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             assert.deepEqual(instance._selectedCommitChanges, {
                updateReason: 'unchanged'
             });
+         });
+      });
+
+      describe('__getWarnings', function() {
+         let instance;
+         beforeEach(function() {
+            instance = new Profiler({
+               store: {
+                  addListener() {},
+                  toggleDevtoolsOpened() {},
+                  dispatch() {}
+               }
+            });
+         });
+
+         it('should return undefined because there is no snapshot', function() {
+            assert.isUndefined(instance.__getWarnings());
+         });
+
+         it('should return undefined because snapshot does not contain selected commit', function() {
+            instance._snapshot = [
+               {
+                  id: 1,
+                  name: '1',
+                  depth: 0,
+                  class: ''
+               },
+               {
+                  id: 2,
+                  name: '2',
+                  depth: 1,
+                  parentId: 1,
+                  class: ''
+               }
+            ];
+            instance._selectedCommitId = 3;
+
+            assert.isUndefined(instance.__getWarnings());
+         });
+
+         it('should return undefined because selected commit does not contain warnings', function() {
+            instance._snapshot = [
+               {
+                  id: 1,
+                  name: '1',
+                  depth: 0,
+                  class: ''
+               },
+               {
+                  id: 2,
+                  name: '2',
+                  depth: 1,
+                  parentId: 1,
+                  class: ''
+               }
+            ];
+            instance._selectedCommitId = 2;
+
+            assert.isUndefined(instance.__getWarnings());
+         });
+
+         it('should return warnings', function() {
+            instance._snapshot = [
+               {
+                  id: 1,
+                  name: '1',
+                  depth: 0,
+                  class: ''
+               },
+               {
+                  id: 2,
+                  name: '2',
+                  depth: 1,
+                  parentId: 1,
+                  class: '',
+                  warnings: ['domUnchanged']
+               }
+            ];
+            instance._selectedCommitId = 2;
+
+            assert.deepEqual(instance.__getWarnings(), [
+               {
+                  caption: 'Needless synchronization',
+                  template: 'Profiler/profiler:domUnchanged'
+               }
+            ]);
          });
       });
 

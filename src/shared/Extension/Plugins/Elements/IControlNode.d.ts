@@ -27,7 +27,7 @@ interface IWasabyEventHandler {
 export interface IWasabyElement extends HTMLElement {
    eventProperties?: Record<string, IWasabyEventHandler[]>;
    controlNodes?: Array<{
-      key: IControlNode['id'];
+      key: string;
       id: string;
    }>;
 }
@@ -51,6 +51,7 @@ export interface IBackendControlNode extends IControlNode {
    treeDuration: number;
    selfStartTime: number;
    vNode: object;
+   domChanged: boolean;
    parentId?: IBackendControlNode['id'];
 }
 

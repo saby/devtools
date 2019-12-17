@@ -3,6 +3,16 @@
         <div>This control didn't re-render during this synchronization.</div>
     </ws:if>
     <ws:else>
+        <ws:if data="{{ _options.warnings }}">
+            <ws:for data="warning in _options.warnings">
+                <Profiler._Warning.Warning attr:key="{{ warning.caption }}"
+                                           caption="{{ warning.caption }}">
+                    <Controls.Container.Async templateName="{{ warning.template }}">
+                        <ws:partial template="{{ content.resolvedTemplate }}" />
+                    </Controls.Container.Async>
+                </Profiler._Warning.Warning>
+            </ws:for>
+        </ws:if>
         <Controls.heading:Title caption="Why did this render:"
                                 size="s"
                                 style="secondary" />

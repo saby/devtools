@@ -338,7 +338,8 @@ define([
                         'width: 200px; background-color: #baf7c8; left: 0px; top: 0px;',
                      tooltip: 'Application 50.00ms of 50.00ms',
                      caption: 'Application (50.00ms)',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   }
                ],
                [
@@ -351,7 +352,8 @@ define([
                         'width: 20px; background-color: #e2e2e2; left: 0px; top: 20px;',
                      tooltip: 'Text',
                      caption: '',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   },
                   {
                      id: '2',
@@ -362,7 +364,8 @@ define([
                         'width: 80px; background-color: #e6d174; left: 20px; top: 20px;',
                      tooltip: 'List 10.00ms of 40.00ms',
                      caption: 'List',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   }
                ],
                [
@@ -375,7 +378,8 @@ define([
                         'width: 20px; background-color: #b3e6e6; left: 20px; top: 40px;',
                      tooltip: 'ListItem 10.00ms of 10.00ms',
                      caption: '',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   },
                   {
                      id: '4',
@@ -386,7 +390,8 @@ define([
                         'width: 60px; background-color: #b3e6e6; left: 40px; top: 40px;',
                      tooltip: 'ListItem 10.00ms of 10.00ms',
                      caption: 'ListItem',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   }
                ],
                [
@@ -399,7 +404,8 @@ define([
                         'width: 40px; background-color: #e2e2e2; left: 40px; top: 60px;',
                      tooltip: 'ContentTemplate',
                      caption: 'ContentTemplate',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   }
                ]
             ]);
@@ -416,7 +422,8 @@ define([
                      selfDuration: 50,
                      actualDuration: 50,
                      actualBaseDuration: 100,
-                     updateReason: 'forceUpdated'
+                     updateReason: 'forceUpdated',
+                     warnings: undefined
                   },
                   {
                      id: '1',
@@ -426,7 +433,8 @@ define([
                      selfDuration: 10,
                      actualDuration: 0,
                      actualBaseDuration: 10,
-                     updateReason: 'unchanged'
+                     updateReason: 'unchanged',
+                     warnings: ['domUnchanged']
                   },
                   {
                      id: '2',
@@ -436,7 +444,8 @@ define([
                      selfDuration: 10,
                      actualDuration: 40,
                      actualBaseDuration: 40,
-                     updateReason: 'selfUpdated'
+                     updateReason: 'selfUpdated',
+                     warnings: undefined
                   },
                   {
                      id: '3',
@@ -446,7 +455,8 @@ define([
                      selfDuration: 10,
                      actualDuration: 10,
                      actualBaseDuration: 10,
-                     updateReason: 'parentUpdated'
+                     updateReason: 'parentUpdated',
+                     warnings: ['domUnchanged']
                   },
                   {
                      id: '4',
@@ -456,7 +466,8 @@ define([
                      selfDuration: 10,
                      actualDuration: 10,
                      actualBaseDuration: 30,
-                     updateReason: 'parentUpdated'
+                     updateReason: 'parentUpdated',
+                     warnings: ['domUnchanged']
                   },
                   {
                      id: '5',
@@ -466,7 +477,8 @@ define([
                      selfDuration: 20,
                      actualDuration: 0,
                      actualBaseDuration: 20,
-                     updateReason: 'unchanged'
+                     updateReason: 'unchanged',
+                     warnings: undefined
                   }
                ]
             };
@@ -487,7 +499,8 @@ define([
                         'width: 2500px; background-color: #baf7c8; left: 0px; top: 0px;',
                      tooltip: 'Application 50.00ms of 50.00ms',
                      caption: 'Application (50.00ms of 50.00ms)',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   }
                ],
                [
@@ -500,7 +513,8 @@ define([
                         'width: 1000px; background-color: #e6d174; left: 0px; top: 20px;',
                      tooltip: 'List 10.00ms of 40.00ms',
                      caption: 'List (10.00ms of 40.00ms)',
-                     isSelected: true
+                     isSelected: true,
+                     warnings: undefined
                   }
                ],
                [
@@ -513,7 +527,8 @@ define([
                         'width: 250px; background-color: #b3e6e6; left: 0px; top: 40px;',
                      tooltip: 'ListItem 10.00ms of 10.00ms',
                      caption: 'ListItem (10.00ms of 10.00ms)',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: ['domUnchanged']
                   },
                   {
                      id: '4',
@@ -524,7 +539,8 @@ define([
                         'width: 750px; background-color: #b3e6e6; left: 250px; top: 40px;',
                      tooltip: 'ListItem 10.00ms of 10.00ms',
                      caption: 'ListItem (10.00ms of 10.00ms)',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: ['domUnchanged']
                   }
                ],
                [
@@ -537,7 +553,8 @@ define([
                         'width: 500px; background-color: #e2e2e2; left: 250px; top: 60px;',
                      tooltip: 'ContentTemplate',
                      caption: 'ContentTemplate',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   }
                ]
             ]);
@@ -595,7 +612,8 @@ define([
                         'width: 100px; background-color: #baf7c8; left: 0px; top: 0px;',
                      tooltip: 'Application 50.00ms of 50.00ms',
                      caption: 'Application',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   }
                ],
                [
@@ -608,7 +626,8 @@ define([
                         'width: 46px; background-color: #e6d174; left: 0px; top: 20px;',
                      tooltip: 'Text 46.00ms of 46.00ms',
                      caption: 'Text',
-                     isSelected: false
+                     isSelected: false,
+                     warnings: undefined
                   }
                ]
             ]);
