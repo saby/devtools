@@ -10,7 +10,6 @@ import SynchronizationsList from '../_SynchronizationsList/SynchronizationsList'
 import {
    applyOperations,
    convertProfilingData,
-   getActualDurations,
    getChanges,
    getChangesDescription,
    getSelfDuration,
@@ -25,7 +24,8 @@ import {
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 // @ts-ignore
 import template = require('wml!Profiler/_Profiler/Profiler');
-import Tab = chrome.tabs.Tab;
+import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
+import { WARNING_NAMES, WARNINGS, IWarning } from 'Profiler/_Warning/const';
 
 interface IOptions extends IControlOptions {
    store: Store;
@@ -83,7 +83,12 @@ class Profiler extends Control<IOptions> {
    protected _detailFilter: RankedView['_options']['filter'] = {
       minDuration: 0,
       name: '',
-      displayReasons: ['mounted', 'selfUpdated', 'parentUpdated', 'forceUpdated']
+      displayReasons: [
+         'mounted',
+         'selfUpdated',
+         'parentUpdated',
+         'forceUpdated'
+      ]
    };
 
    protected _currentOperations: Array<IOperationEvent['args']>;
@@ -158,38 +163,93 @@ class Profiler extends Control<IOptions> {
    private __setSynchronization(synchronizationKey: string): void {
       let snapshot = this._snapshotBySynchronization.get(synchronizationKey);
       if (!snapshot) {
+         /*
+         We have two sources of information:
+         1) Profiling data (timings, update reason, dom changes, etc) which is only collected during profiling.
+         2) Operations on the elements tree which are always collected.
+         Here we're merging the information from both to get the snapshot which will be used to render graphs.
+         Because timings and dom changes should propagate, we're traversing in reverse order - from children to parents.
+          */
+         snapshot = [];
          const changes = getChanges(this._profilingData, synchronizationKey);
          const elements = this.__getElementsBySynchronization(
             synchronizationKey
          );
 
-         const dataWithSelfDurations = elements.map((element) => {
-            const changesForElement = changes.get(element.id);
-            return {
-               ...element,
-               updateReason: changesForElement ? changesForElement.updateReason : 'unchanged',
-               selfDuration: getSelfDuration(
-                  this._profilingData,
-                  synchronizationKey,
-                  element.id
-               )
-            };
-         });
-
-         snapshot = dataWithSelfDurations.map((element, index) => {
-            const actualDurations = getActualDurations(
-               dataWithSelfDurations,
-               element.id,
-               index
+         const parentsOfChangedElements: Set<
+            IFrontendControlNode['id']
+         > = new Set();
+         const parentsDuration: Map<
+            IFrontendControlNode['id'],
+            {
+               actualDuration: number;
+               actualBaseDuration: number;
+            }
+         > = new Map();
+         for (let i = elements.length - 1; i >= 0; i--) {
+            const currentItem = elements[i];
+            const elementChanges = changes.get(currentItem.id);
+            const selfDuration = getSelfDuration(
+               this._profilingData,
+               synchronizationKey,
+               currentItem.id
             );
-            return {
-               ...element,
-               actualBaseDuration: actualDurations.actualBaseDuration,
-               actualDuration: actualDurations.actualDuration
-            };
-         });
+            let warnings: WARNING_NAMES[] | undefined;
+            const updateReason: ControlUpdateReason = elementChanges
+               ? elementChanges.updateReason
+               : 'unchanged';
 
-         this._snapshotBySynchronization.set(synchronizationKey, snapshot);
+            if (
+               parentsOfChangedElements.has(currentItem.id) ||
+               (elementChanges && elementChanges.domChanged)
+            ) {
+               if (typeof currentItem.parentId !== 'undefined') {
+                  parentsOfChangedElements.add(currentItem.parentId);
+               }
+            } else if (updateReason !== 'unchanged') {
+               warnings = ['domUnchanged'];
+            }
+
+            let actualBaseDuration = selfDuration;
+            let actualDuration =
+               updateReason === 'unchanged' ? 0 : selfDuration;
+            const duration = parentsDuration.get(currentItem.id);
+            if (duration) {
+               actualBaseDuration += duration.actualBaseDuration;
+               actualDuration += duration.actualDuration;
+            }
+
+            if (typeof currentItem.parentId !== 'undefined') {
+               const previousDuration = parentsDuration.get(
+                  currentItem.parentId
+               );
+               if (previousDuration) {
+                  previousDuration.actualBaseDuration += actualBaseDuration;
+                  if (updateReason !== 'unchanged') {
+                     previousDuration.actualDuration += actualDuration;
+                  }
+               } else {
+                  parentsDuration.set(currentItem.parentId, {
+                     actualBaseDuration,
+                     actualDuration
+                  });
+               }
+            }
+
+            snapshot.push({
+               ...currentItem,
+               selfDuration,
+               updateReason,
+               warnings,
+               actualBaseDuration,
+               actualDuration
+            });
+         }
+
+         this._snapshotBySynchronization.set(
+            synchronizationKey,
+            snapshot.reverse()
+         );
       }
 
       this._synchronizationOverview = getSynchronizationOverview(
@@ -216,7 +276,8 @@ class Profiler extends Control<IOptions> {
             this._selectedCommitChanges = {
                updateReason: changes.updateReason,
                changedOptions: changes.changedOptions,
-               changedAttributes: changes.changedAttributes
+               changedAttributes: changes.changedAttributes,
+               warnings: this.__getWarnings()
             };
          } else {
             this._selectedCommitChanges = {
@@ -226,12 +287,36 @@ class Profiler extends Control<IOptions> {
       }
    }
 
-   private __masterMarkedKeyChanged(e: Event, id: Profiler['_selectedSynchronizationId']): void {
+   /**
+    * Takes warnings of the item and if they exist transforms them into array of objects.
+    * @returns Array of IWarning objects or undefined if there are no warnings for the commit.
+    * @private
+    */
+   private __getWarnings(): IWarning[] | undefined {
+      let warnings;
+      if (this._snapshot) {
+         const item = this._snapshot.find(
+            ({ id }) => id === this._selectedCommitId
+         );
+         if (item && item.warnings) {
+            warnings = item.warnings.map((name) => WARNINGS[name]);
+         }
+      }
+      return warnings;
+   }
+
+   private __masterMarkedKeyChanged(
+      e: Event,
+      id: Profiler['_selectedSynchronizationId']
+   ): void {
       this._selectedSynchronizationId = id;
       this.__setSynchronization(this._selectedSynchronizationId);
    }
 
-   private __detailMarkedKeyChanged(e: Event, id?: IFrontendControlNode['id']): void {
+   private __detailMarkedKeyChanged(
+      e: Event,
+      id?: IFrontendControlNode['id']
+   ): void {
       this._selectedCommitId = id;
       this.__updateSelectedCommitChanges();
    }

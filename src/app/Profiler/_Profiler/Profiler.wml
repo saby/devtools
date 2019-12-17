@@ -61,8 +61,9 @@
             </Controls.masterDetail:Base>
             <ws:if data="{{ _selectedCommitChanges }}">
                 <Profiler._CommitDetails.CommitDetails updateReason="{{ _selectedCommitChanges.updateReason }}"
-                                                      changedOptions="{{ _selectedCommitChanges.changedOptions }}"
-                                                      changedAttributes="{{ _selectedCommitChanges.changedAttributes }}"/>
+                                                       changedOptions="{{ _selectedCommitChanges.changedOptions }}"
+                                                       changedAttributes="{{ _selectedCommitChanges.changedAttributes }}"
+                                                       warnings="{{ _selectedCommitChanges.warnings }}"/>
             </ws:if>
             <ws:else>
                 <Profiler._Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"

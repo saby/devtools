@@ -7,12 +7,14 @@ import { formatTime, getBackgroundColorBasedOnReason } from '../_utils/Utils';
 // @ts-ignore
 import template = require('wml!Profiler/_Flamegraph/Flamegraph');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
+import { WARNING_NAMES } from 'Profiler/_Warning/const';
 
 interface IFlamegraphControlNode extends IFrontendControlNode {
    selfDuration: number;
    actualDuration: number;
    actualBaseDuration: number;
    updateReason: ControlUpdateReason;
+   warnings?: WARNING_NAMES[];
 }
 
 interface IOptions extends IControlOptions {
@@ -27,6 +29,7 @@ interface INodeItemData {
    leftOffset: number;
    width: number;
    isSelected: boolean;
+   warnings?: WARNING_NAMES[];
    parentId?: IFrontendControlNode['parentId'];
    caption?: string;
 }
@@ -235,7 +238,8 @@ function getItemDataForDepth(
          actualBaseDuration,
          name,
          parentId,
-         updateReason
+         updateReason,
+         warnings
       }) => {
          const width = getWidth(
             actualBaseDuration,
@@ -273,7 +277,8 @@ function getItemDataForDepth(
                actualDuration,
                didRender
             ),
-            isSelected: id === markedKey
+            isSelected: id === markedKey,
+            warnings
          });
       }
    );

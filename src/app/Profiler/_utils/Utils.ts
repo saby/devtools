@@ -94,54 +94,6 @@ export function getSelfDuration(
    }
 }
 
-export function getActualDurations(
-   dataWithSelfDurations: Array<{
-      id: IFrontendControlNode['id'];
-      selfDuration: number;
-      updateReason: ControlUpdateReason;
-      parentId?: IFrontendControlNode['parentId'];
-   }>,
-   startId: IFrontendControlNode['id'],
-   startIndex: number
-): {
-   actualDuration: number;
-   actualBaseDuration: number;
-} {
-   let actualBaseDuration = dataWithSelfDurations[startIndex].selfDuration;
-   let actualDuration =
-      dataWithSelfDurations[startIndex].updateReason !== 'unchanged'
-         ? dataWithSelfDurations[startIndex].selfDuration
-         : 0;
-   const parents: Set<IFrontendControlNode['id']> = new Set();
-   parents.add(startId);
-
-   for (let i = startIndex + 1; i < dataWithSelfDurations.length; i++) {
-      const {
-         id,
-         parentId,
-         updateReason,
-         selfDuration
-      }: {
-         id: IFrontendControlNode['id'];
-         selfDuration: number;
-         updateReason: ControlUpdateReason;
-         parentId?: IFrontendControlNode['parentId'];
-      } = dataWithSelfDurations[i];
-      if (typeof parentId !== 'undefined' && parents.has(parentId)) {
-         parents.add(id);
-         actualBaseDuration += selfDuration;
-         if (updateReason !== 'unchanged') {
-            actualDuration += selfDuration;
-         }
-      }
-   }
-
-   return {
-      actualDuration,
-      actualBaseDuration
-   };
-}
-
 type BACKGROUND_COLOR =
    | '#e2e2e2'
    | '#baf7c8'

@@ -309,7 +309,6 @@ define([
             assert.deepEqual(getSelfDuration(profilingData, 'test2', 2), 15);
          });
       });
-      describe('getActualDurations', function() {});
 
       it('getBackgroundColorBasedOnTiming', function() {
          const getBackgroundColorBasedOnTiming =

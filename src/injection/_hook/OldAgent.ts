@@ -99,7 +99,7 @@ class Agent {
     * This map is just used to speed up search for virtual node by dom node.
     */
    private domToIds: WeakMap<
-      Element,
+      Node,
       Array<IBackendControlNode['id']>
    > = new WeakMap();
    /**
@@ -171,6 +171,22 @@ class Agent {
       IBackendControlNode['id']
    > = new WeakMap();
 
+   /**
+    * Mutation observer is used for tracking DOM changes during profiling.
+    */
+   private mutationObserver: MutationObserver;
+   /**
+    * This set is used to track DOM changes of controls.
+    * If DOM was changed - all controls from the closest control node get added here.
+    */
+   private dirtyControls: Set<IBackendControlNode['id']> = new Set();
+   /**
+    * This set is used to speed up the mutation observer callback.
+    * If a DOM element gets changed during synchronization it gets added here and will be ignored
+    * until the next synchronization.
+    */
+   private dirtyContainers: Set<Node> = new Set();
+
    constructor(config: { logger: INamedLogger; }) {
       this.logger = config.logger;
       this.channel.addListener(
@@ -222,6 +238,9 @@ class Agent {
          'getProfilingStatus',
          this.__getProfilingStatus.bind(this)
       );
+      this.mutationObserver = new MutationObserver(
+         this.__mutationObserverCallback.bind(this)
+      );
       if (window.__WASABY_START_PROFILING) {
          this.__toggleProfiling(window.__WASABY_START_PROFILING);
          this.isDevtoolsOpened = true;
@@ -268,6 +287,14 @@ class Agent {
       }
       this.rootStack.push(rootId);
       this.changedRoots.set(rootId, new Map());
+      if (this.isProfiling) {
+         this.mutationObserver.observe(document, {
+            childList: true,
+            attributes: true,
+            characterData: true,
+            subtree: true
+         });
+      }
       startSyncMark(rootId);
    }
 
@@ -458,6 +485,13 @@ class Agent {
          return;
       }
       endSyncMark(rootId);
+      if (this.isProfiling) {
+         /*
+         Because observer calls callback asynchronously there is no guarantee that every change was handled.
+         We should manually take records from the queue and pass them to the callback.
+          */
+         this.__mutationObserverCallback(this.mutationObserver.takeRecords());
+      }
       changes.forEach(({ operation, node }) => {
          if (node.selfDuration - node.treeDuration < 0) {
             this.logger.error(
@@ -467,6 +501,11 @@ class Agent {
             );
          }
          node.selfDuration -= node.treeDuration;
+         if (this.isProfiling) {
+            node.domChanged =
+               operation === OperationType.CREATE ||
+               this.dirtyControls.has(node.id);
+         }
          switch (operation) {
             case OperationType.DELETE:
                this.__handleRemove(node);
@@ -482,6 +521,7 @@ class Agent {
       const id = guid();
       if (this.isProfiling) {
          this.changedNodesBySynchronization.set(id, changes);
+         this.__cleanupMutationObserver();
       }
       if (this.isDevtoolsOpened) {
          window.__WASABY_DEV_HOOK__.pushMessage('endSynchronization', id);
@@ -748,14 +788,14 @@ class Agent {
    private __findControlByDomNode(
       element: Element
    ): IBackendControlNode | undefined {
-      let currentElement = element;
+      let currentElement: Node | null = element;
 
       while (currentElement) {
          const nodes = this.domToIds.get(currentElement);
          if (nodes) {
             return this.elements.get(nodes[nodes.length - 1]);
          }
-         currentElement = currentElement.parentElement as Element;
+         currentElement = currentElement.parentElement;
       }
       return;
    }
@@ -811,6 +851,7 @@ class Agent {
             this.initialIdToDuration.set(id, selfDuration);
          });
       }
+      this.__cleanupMutationObserver();
       this.channel.dispatch('profilingStatus', this.isProfiling);
    }
 
@@ -826,6 +867,47 @@ class Agent {
       this.initialIdToDuration.clear();
       this.changedNodesBySynchronization.clear();
       this.channel.dispatch('profilingData', profilingData);
+   }
+
+   /**
+    * Disconnects the mutation observer and clears its data.
+    * @private
+    */
+   private __cleanupMutationObserver(): void {
+      this.dirtyContainers.clear();
+      this.dirtyControls.clear();
+      this.mutationObserver.disconnect();
+   }
+
+   /**
+    * For every DOM change finds nearest control node and marks all controls on it as dirty.
+    * If a DOM node gets changed multiple times during one synchronization it is only processed once.
+    * @param mutations Array of DOM changes.
+    * @private
+    */
+   private __mutationObserverCallback(mutations: MutationRecord[]): void {
+      mutations.forEach(({ target }) => {
+         if (this.dirtyContainers.has(target)) {
+            return;
+         }
+         this.dirtyContainers.add(target);
+         const ids = this.domToIds.get(target);
+         if (ids) {
+            ids.forEach((id) => this.dirtyControls.add(id));
+         } else {
+            let currentElement: Node | null = target;
+
+            while (currentElement) {
+               this.dirtyContainers.add(currentElement);
+               const nodes = this.domToIds.get(currentElement);
+               if (nodes) {
+                  nodes.forEach((id) => this.dirtyControls.add(id));
+                  break;
+               }
+               currentElement = currentElement.parentElement;
+            }
+         }
+      });
    }
 
    private __getNodeId(node?: object): number {
