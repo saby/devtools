@@ -642,7 +642,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
 
             assert.deepEqual(instance.__getWarnings(), [
                {
-                  caption: 'Unnecessary synchronization',
+                  caption: 'Needless synchronization',
                   template: 'Profiler/profiler:domUnchanged'
                }
             ]);
