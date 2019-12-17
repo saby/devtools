@@ -1094,7 +1094,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          it('reloads window and sets __WASABY_START_PROFILING to true', function() {
             sandbox.stub(chrome, 'devtools').value({
                inspectedWindow: {
-                  reload: sinon.stub()
+                  reload: sandbox.stub()
                }
             });
 

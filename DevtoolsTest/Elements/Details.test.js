@@ -27,7 +27,7 @@ define([
             };
             sandbox.stub(chrome, 'devtools').value({
                inspectedWindow: {
-                  eval: sinon.stub()
+                  eval: sandbox.stub()
                }
             });
             const clock = sinon.useFakeTimers();
@@ -66,7 +66,7 @@ define([
             };
             sandbox.stub(chrome, 'devtools').value({
                inspectedWindow: {
-                  eval: sinon.stub()
+                  eval: sandbox.stub()
                }
             });
             const clock = sinon.useFakeTimers();
@@ -101,7 +101,7 @@ define([
             };
             sandbox.stub(chrome, 'devtools').value({
                inspectedWindow: {
-                  eval: sinon.stub()
+                  eval: sandbox.stub()
                }
             });
             const clock = sinon.useFakeTimers();
@@ -158,7 +158,7 @@ define([
             };
             sandbox.stub(chrome, 'devtools').value({
                inspectedWindow: {
-                  eval: sinon.stub()
+                  eval: sandbox.stub()
                }
             });
             const clock = sinon.useFakeTimers();

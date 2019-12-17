@@ -9,7 +9,7 @@ interface IOptions extends IControlOptions {
    };
 }
 
-export default class Size extends Control<IOptions> {
+export default class File extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected __openResource(e: Event, item: Model): void {
       e.stopPropagation();
