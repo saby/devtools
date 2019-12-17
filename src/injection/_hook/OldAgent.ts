@@ -880,7 +880,7 @@ class Agent {
    }
 
    /**
-    * For every DOM change finds nearest control node and marks all controls on it as dirty.
+    * For every DOM change finds the closest control node and marks all controls on it as dirty.
     * If a DOM node gets changed multiple times during one synchronization it is only processed once.
     * @param mutations Array of DOM changes.
     * @private
