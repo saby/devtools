@@ -14,6 +14,7 @@ interface IFlamegraphControlNode extends IFrontendControlNode {
    actualDuration: number;
    actualBaseDuration: number;
    updateReason: ControlUpdateReason;
+   hasChangesInSubtree: boolean;
    warnings?: WARNING_NAMES[];
 }
 
@@ -239,7 +240,8 @@ function getItemDataForDepth(
          name,
          parentId,
          updateReason,
-         warnings
+         warnings,
+         hasChangesInSubtree
       }) => {
          const width = getWidth(
             actualBaseDuration,
@@ -266,8 +268,9 @@ function getItemDataForDepth(
             parentId,
             leftOffset,
             width,
-            style: `width: ${width}px; background-color: ${getBackgroundColorBasedOnReason(
-               updateReason
+            style: `width: ${width}px; background: ${getBackgroundColorBasedOnReason(
+               updateReason,
+               hasChangesInSubtree
             )}; left: ${leftOffset}px; top: ${topOffset}px;`,
             tooltip: getTooltip(name, selfDuration, actualDuration, didRender),
             caption: getCaption(

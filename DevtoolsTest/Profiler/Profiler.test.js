@@ -315,7 +315,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   selfDuration: 5,
                   actualBaseDuration: 42,
                   actualDuration: 37,
-                  warnings: undefined
+                  warnings: undefined,
+                  hasChangesInSubtree: true
                },
                {
                   id: 2,
@@ -327,7 +328,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   selfDuration: 7,
                   actualBaseDuration: 12,
                   actualDuration: 7,
-                  warnings: ['domUnchanged']
+                  warnings: ['domUnchanged'],
+                  hasChangesInSubtree: true
                },
                {
                   id: 5,
@@ -339,7 +341,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   selfDuration: 2,
                   actualBaseDuration: 2,
                   actualDuration: 0,
-                  warnings: undefined
+                  warnings: undefined,
+                  hasChangesInSubtree: false
                },
                {
                   id: 6,
@@ -351,7 +354,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   selfDuration: 3,
                   actualBaseDuration: 3,
                   actualDuration: 0,
-                  warnings: undefined
+                  warnings: undefined,
+                  hasChangesInSubtree: false
                },
                {
                   id: 3,
@@ -363,7 +367,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   selfDuration: 10,
                   actualBaseDuration: 10,
                   actualDuration: 10,
-                  warnings: undefined
+                  warnings: undefined,
+                  hasChangesInSubtree: true
                },
                {
                   id: 4,
@@ -375,7 +380,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   selfDuration: 15,
                   actualBaseDuration: 15,
                   actualDuration: 15,
-                  warnings: undefined
+                  warnings: undefined,
+                  hasChangesInSubtree: true
                }
             ];
             assert.deepEqual(instance._snapshot, expectedSnapshot);
