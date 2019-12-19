@@ -357,6 +357,32 @@ define([
          it('should return color for destroyed', function() {
             assert.equal(getBackgroundColorBasedOnReason('destroyed'), '#000');
          });
+         it('should return color for element with no changes in the subtree no matter what the updateReason is', function() {
+            assert.equal(
+               getBackgroundColorBasedOnReason('mounted', false),
+               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+            );
+            assert.equal(
+               getBackgroundColorBasedOnReason('forceUpdated', false),
+               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+            );
+            assert.equal(
+               getBackgroundColorBasedOnReason('selfUpdated', false),
+               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+            );
+            assert.equal(
+               getBackgroundColorBasedOnReason('parentUpdated', false),
+               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+            );
+            assert.equal(
+               getBackgroundColorBasedOnReason('unchanged', false),
+               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+            );
+            assert.equal(
+               getBackgroundColorBasedOnReason('destroyed', false),
+               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+            );
+         });
       });
 
       describe('formatTime', function() {

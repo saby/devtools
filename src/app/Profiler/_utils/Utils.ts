@@ -134,11 +134,23 @@ export function getBackgroundColorBasedOnTiming(
 /**
  * Returns background color corresponding to the update reason.
  * @param updateReason Reason for the update.
+ * @param hasChangesInSubtree Whether control and its subtree took part in a synchronization.
  * @return Background color corresponding to the update reason.
  */
 export function getBackgroundColorBasedOnReason(
-   updateReason: ControlUpdateReason
-): '#e2e2e2' | '#ffab66' | '#e6d174' | '#b3e6e6' | '#000' | '#baf7c8' {
+   updateReason: ControlUpdateReason,
+   hasChangesInSubtree: boolean = true
+):
+   | '#e2e2e2'
+   | '#ffab66'
+   | '#e6d174'
+   | '#b3e6e6'
+   | '#000'
+   | '#baf7c8'
+   | 'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)' {
+   if (!hasChangesInSubtree) {
+      return 'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)';
+   }
    switch (updateReason) {
       case 'mounted':
          return '#ffab66';

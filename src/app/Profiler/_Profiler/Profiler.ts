@@ -176,7 +176,10 @@ class Profiler extends Control<IOptions> {
             synchronizationKey
          );
 
-         const parentsOfChangedElements: Set<
+         const parentsOfElementsWithDOMChanges: Set<
+            IFrontendControlNode['id']
+         > = new Set();
+         const parentsOfSynchronizedElements: Set<
             IFrontendControlNode['id']
          > = new Set();
          const parentsDuration: Map<
@@ -198,13 +201,16 @@ class Profiler extends Control<IOptions> {
             const updateReason: ControlUpdateReason = elementChanges
                ? elementChanges.updateReason
                : 'unchanged';
+            const hasChangesInSubtree =
+               updateReason !== 'unchanged' ||
+               parentsOfSynchronizedElements.has(currentItem.id);
 
             if (
-               parentsOfChangedElements.has(currentItem.id) ||
+               parentsOfElementsWithDOMChanges.has(currentItem.id) ||
                (elementChanges && elementChanges.domChanged)
             ) {
                if (typeof currentItem.parentId !== 'undefined') {
-                  parentsOfChangedElements.add(currentItem.parentId);
+                  parentsOfElementsWithDOMChanges.add(currentItem.parentId);
                }
             } else if (updateReason !== 'unchanged') {
                warnings = ['domUnchanged'];
@@ -234,6 +240,10 @@ class Profiler extends Control<IOptions> {
                      actualDuration
                   });
                }
+
+               if (hasChangesInSubtree) {
+                  parentsOfSynchronizedElements.add(currentItem.parentId);
+               }
             }
 
             snapshot.push({
@@ -242,7 +252,8 @@ class Profiler extends Control<IOptions> {
                updateReason,
                warnings,
                actualBaseDuration,
-               actualDuration
+               actualDuration,
+               hasChangesInSubtree
             });
          }
 
