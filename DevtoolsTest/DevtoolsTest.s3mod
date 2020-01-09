@@ -6,6 +6,9 @@
   <depends>
         <module id="0bad3dc3-e17e-441f-a91e-7aecf37867f1" name="Profiler"/>
         <module id="c7af5b1b-ad28-4cf8-ba55-c892c0b59245" name="Elements"/>
+        <module id="8768d783-37e7-4f0d-a476-16766b4635b8" name="DependencyWatcher"/>
+        <module id="8fc415e2-ad25-4452-aabb-a94e0e290dfe" name="Devtool"/>
+        <module id="8c7f5a73-e594-404f-ac3e-0615cc8ae4f3" name="Search"/>
   </depends>
 
   <load_after/>
