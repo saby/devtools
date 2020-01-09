@@ -35,7 +35,6 @@ export class Storage<TItem extends IItem = IItem, TIndex = unknown>
       }
       return [...this._allItems].filter((item: TItem) => {
          return indexList.includes(
-            // @ts-ignore
             item[this.indexField]
          );
       });
@@ -55,7 +54,6 @@ export class Storage<TItem extends IItem = IItem, TIndex = unknown>
       this._allItems.add(item);
       this._idMap.set(item.id, item);
       this._indexMap.set(
-         // @ts-ignore
          item[this.indexField],
          item
       );
@@ -66,7 +64,6 @@ export class Storage<TItem extends IItem = IItem, TIndex = unknown>
       }
       this._idMap.delete(item.id);
       this._indexMap.delete(
-         // @ts-ignore
          item[this.indexField]
       );
       return true;

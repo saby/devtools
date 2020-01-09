@@ -31,7 +31,7 @@ interface IModuleData<TCollection>
       IModuleDependencies<TCollection> {}
 
 interface IModule extends IModuleData<Set<IModule>> {
-   data?: any;
+   data?: unknown;
 }
 
 /**

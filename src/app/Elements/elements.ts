@@ -1,3 +1,7 @@
+/**
+ * Library of controls used on the "Elements" tab.
+ * @author Зайцев А.С.
+ */
 export { default as Elements } from './_Elements/Elements';
 export { default as Store, applyOperation } from './_store/Store';
 

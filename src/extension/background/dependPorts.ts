@@ -1,5 +1,5 @@
-import { createProxy } from "./proxyMessage";
-import { PORT_TAB_ID_POSTFIX } from "Extension/const";
+import { createProxy } from './proxyMessage';
+import { PORT_TAB_ID_POSTFIX } from 'Extension/const';
 
 type TabId = string;
 type PortName = string;
@@ -9,9 +9,9 @@ const enum PortType {
     devtool
 }
 type ActivePorts = Map<PortType, chrome.runtime.Port>;
-type TabActivePorts = Map<TabId, ActivePorts>
+type TabActivePorts = Map<TabId, ActivePorts>;
 
-let getReversePortType = (type: PortType): PortType => {
+const getReversePortType = (type: PortType): PortType => {
   switch (type) {
       case PortType.content: {
           return PortType.devtool;
@@ -22,56 +22,55 @@ let getReversePortType = (type: PortType): PortType => {
   }
 };
 
-let dependPorts = (portName: PortName) => {
+const dependPorts = (portName: PortName) => {
     const ACTIVE_PORTS: TabActivePorts = new Map();
-    
-    let getOnDisconnect = (tabId: TabId, type: PortType) => {
+
+    const getOnDisconnect = (tabId: TabId, type: PortType) => {
         return () => {
-            if(!ACTIVE_PORTS.has(tabId)) {
+            if (!ACTIVE_PORTS.has(tabId)) {
                 return;
             }
-            let activePorts = <ActivePorts> ACTIVE_PORTS.get(tabId);
+            const activePorts = ACTIVE_PORTS.get(tabId) as ActivePorts;
             activePorts.delete(type);
-            if (activePorts.size == 0) {
+            if (activePorts.size === 0) {
                 ACTIVE_PORTS.delete(tabId);
             }
-        }
+        };
     };
-    
+
     chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
         if (!port.name.startsWith(portName)) {
             return;
         }
         let tabId: TabId;
         let type: PortType;
-        
+
         if (port.name.includes(PORT_TAB_ID_POSTFIX)) {
             // when port was opened from devtool
             tabId = port.name.replace(`${portName}${PORT_TAB_ID_POSTFIX}`, '');
             type = PortType.devtool;
         } else {
             // when port was opened from content script
-            // @ts-ignore
             tabId = String(port.sender.tab.id);
             type = PortType.content;
         }
-    
+
         port.onDisconnect.addListener(getOnDisconnect(tabId, type));
-        
+
         if (!ACTIVE_PORTS.has(tabId)) {
             ACTIVE_PORTS.set(tabId, new Map());
         }
-        
-        let activePorts = <ActivePorts> ACTIVE_PORTS.get(tabId);
-    
+
+        const activePorts = ACTIVE_PORTS.get(tabId) as ActivePorts;
+
         activePorts.set(type, port);
-        
+
         if (activePorts.size <= 1) {
             return;
         }
-        
-        createProxy(port, <chrome.runtime.Port> activePorts.get(getReversePortType(type)));
+
+        createProxy(port, activePorts.get(getReversePortType(type)) as chrome.runtime.Port);
     });
 };
 
-export { dependPorts }
+export { dependPorts };

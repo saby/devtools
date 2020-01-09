@@ -1,12 +1,15 @@
 import { IWasabyDevHook } from 'Types/IHook';
 import {
    IBackendControlNode,
+   IControlChanges,
+   IControlNode,
+   ITemplateChanges,
+   ITemplateNode,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
 import Agent from './Agent';
-import OldAgent from './OldAgent';
 import { INamedLogger } from 'Extension/Logger/ILogger';
 import { IRenderer } from 'Extension/Plugins/Elements/IRenderer';
 
@@ -19,6 +22,11 @@ function rethrowError(e: Error): void {
    }, 0);
 }
 
+/**
+ * Manages communication between an agent and a framework.
+ * Also contains some fields which frontend uses to get access to things living in a page context (functions, objects, etc.).
+ * @author Зайцев А.С.
+ */
 export class Hook implements IWasabyDevHook {
    private _agent: Agent;
    private _messageQueue: Array<[string, ISerializable?]> = [];
@@ -33,29 +41,31 @@ export class Hook implements IWasabyDevHook {
    onStartCommit(
       typeOfOperation: OperationType,
       name: string,
-      oldNode?: object
-   ): number {
+      oldNode?: IControlNode | ITemplateNode
+   ): void {
       if (this._agent) {
          try {
-            return this._agent.onStartCommit(typeOfOperation, name, oldNode);
-         } catch (e) {
-            rethrowError(e);
-         }
-      }
-      return -1;
-   }
-
-   onEndCommit(id: IBackendControlNode['id'], node: IBackendControlNode): void {
-      if (this._agent) {
-         try {
-            this._agent.onEndCommit(id, node);
+            this._agent.onStartCommit(typeOfOperation, name, oldNode);
          } catch (e) {
             rethrowError(e);
          }
       }
    }
 
-   saveChildren(children: object | object[]): void {
+   onEndCommit(
+      node: IBackendControlNode,
+      data?: ITemplateChanges | IControlChanges
+   ): void {
+      if (this._agent) {
+         try {
+            this._agent.onEndCommit(node, data);
+         } catch (e) {
+            rethrowError(e);
+         }
+      }
+   }
+
+   saveChildren(children: ITemplateNode['children'] | IControlNode['markup']): void {
       if (this._agent) {
          try {
             this._agent.saveChildren(children);
@@ -65,27 +75,27 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onStartLifecycle(id: IBackendControlNode['id']): void {
+   onStartLifecycle(node: IControlNode): void {
       if (this._agent) {
          try {
-            this._agent.onStartLifecycle(id);
+            this._agent.onStartLifecycle(node);
          } catch (e) {
             rethrowError(e);
          }
       }
    }
 
-   onEndLifecycle(currentNode: object, data: IBackendControlNode): void {
+   onEndLifecycle(node: IControlNode): void {
       if (this._agent) {
          try {
-            this._agent.onEndLifecycle(currentNode, data);
+            this._agent.onEndLifecycle(node);
          } catch (e) {
             rethrowError(e);
          }
       }
    }
 
-   onStartSync(rootId: string | number): void {
+   onStartSync(rootId: number): void {
       if (this._agent) {
          try {
             this._agent.onStartSync(rootId);
@@ -95,7 +105,7 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onEndSync(rootId: string | number): void {
+   onEndSync(rootId: number): void {
       if (this._agent) {
          try {
             this._agent.onEndSync(rootId);
@@ -105,30 +115,11 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   onReorder(node: object, newOrder: object[]): void {
-      if (this._agent) {
-         try {
-            this._agent.onReorder(node, newOrder);
-         } catch (e) {
-            rethrowError(e);
-         }
-      }
-   }
-
    init(renderer?: IRenderer): void {
       if (renderer) {
-         // В Изыгинской ветке поддерживается редактирование, в другой ветке - нет. Так и будем различать
-         // TODO: убрать проверку условия после отката Изыгинской ветки и создавать сразу нужный объект
-         if (Object.keys(renderer).length) {
-            this._agent = new Agent({
-               logger: this._logger,
-               renderer
-            });
-         } else {
-            this._agent = new OldAgent({
-               logger: this._logger
-            });
-         }
+         this._agent = new Agent({
+            logger: this._logger
+         });
          this._initialized = true;
       }
    }

@@ -34,8 +34,8 @@ function cloneOrCopy(
 }
 
 function mergeInner(
-   hash: unknown,
-   hashExtender: unknown,
+   hash: object,
+   hashExtender: object,
    currentKey: string | null,
    path: IPath
 ): object {
@@ -104,12 +104,18 @@ function mergeInner(
       path.keys.pop();
       path.objects.pop();
    } else {
-      hash = hashExtender;
+      return hashExtender;
    }
 
    return hash;
 }
 
+/**
+ * Deep clones an object.
+ * @param originalObject Object to clone.
+ * @return New object which is a deep clone of the original.
+ * @author Зайцев А.С.
+ */
 export default function deepClone(originalObject?: object): object | undefined {
    if (!originalObject) {
       return;

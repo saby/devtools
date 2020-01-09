@@ -1,6 +1,15 @@
+/**
+ * Contains utility functions used by agent.
+ * @author Зайцев А.С.
+ */
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import Agent, { IChangedNode } from './Agent';
-import { IBackendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IBackendControlNode,
+   IControlNode,
+   ITemplateNode,
+   IWasabyElement
+} from 'Extension/Plugins/Elements/IControlNode';
 import {
    IBackendProfilingData,
    IBackendSynchronizationDescription,
@@ -30,7 +39,7 @@ function getCaption(name: string, operation?: OperationType): string {
    return `${name} (${operationToString(operation)})`;
 }
 
-export function startSyncMark(rootId: string | number): void {
+export function startSyncMark(rootId: number): void {
    if (
       window.wasabyDevtoolsOptions &&
       window.wasabyDevtoolsOptions.useUserTimingAPI
@@ -39,7 +48,7 @@ export function startSyncMark(rootId: string | number): void {
    }
 }
 
-export function endSyncMark(rootId: string | number): void {
+export function endSyncMark(rootId: number): void {
    if (
       window.wasabyDevtoolsOptions &&
       window.wasabyDevtoolsOptions.useUserTimingAPI
@@ -75,20 +84,6 @@ export function endMark(
       performance.measure(caption, label);
       performance.clearMarks(label);
       performance.clearMeasures(caption);
-   }
-}
-
-export function updateParentDuration(
-   currentRoot: Map<IBackendControlNode['id'], IChangedNode>,
-   childDuration: number,
-   componentsStack: Array<IBackendControlNode['id']>,
-   parentId?: IBackendControlNode['parentId']
-): void {
-   if (typeof parentId !== 'undefined' && componentsStack.includes(parentId)) {
-      const parent = currentRoot.get(parentId);
-      if (parent) {
-         parent.node.treeDuration += childDuration;
-      }
    }
 }
 
@@ -163,7 +158,7 @@ function getChanges(
 function getSynchronizationDuration(
    changedNodesEntries: Array<[IBackendControlNode['id'], IChangedNode]>
 ): number {
-   return changedNodesEntries.reduce((acc, [key, changes]) => {
+   return changedNodesEntries.reduce((acc, [_, changes]) => {
       return acc + changes.node.selfDuration;
    }, 0);
 }
@@ -183,7 +178,10 @@ export function getSyncList(
    });
 }
 
-export function getObjectDiff(obj1?: object, obj2?: object): object | undefined {
+export function getObjectDiff(
+   obj1?: object,
+   obj2?: object
+): object | undefined {
    if (!obj1) {
       return obj2 ? obj2 : undefined;
    }
@@ -210,4 +208,36 @@ export function getObjectDiff(obj1?: object, obj2?: object): object | undefined 
       });
       return resultDiff;
    }
+}
+
+export function isControlNode(node: object): node is IControlNode {
+   return node.hasOwnProperty('controlClass');
+}
+
+export function isTemplateNode(node: object): node is ITemplateNode {
+   return node.type === 'TemplateNode';
+}
+
+export function addRef(
+   changedNode: IChangedNode,
+   ...oldRefs: Array<Function | undefined>
+): Function {
+   return (element?: Element) => {
+      oldRefs.forEach((ref) => {
+         if (ref) {
+            ref(element);
+         }
+      });
+      changedNode.node.container = element as IWasabyElement;
+   };
+}
+
+export function getContainerForNode(node: IBackendControlNode): IWasabyElement {
+   if (node.container) {
+      return node.container;
+   }
+   if (node.instance && node.instance._container) {
+      return node.instance._container;
+   }
+   return document.body;
 }

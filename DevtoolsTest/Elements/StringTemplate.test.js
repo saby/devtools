@@ -18,14 +18,14 @@ define([
          sandbox.restore();
       });
 
-      describe('__viewFunctionSource', function() {
+      describe('_viewFunctionSource', function() {
          it('should fire viewFunctionSource event', function() {
             const stub = sandbox.stub(instance, '_notify');
             instance.saveOptions({
                key: '0---1'
             });
 
-            instance.__viewFunctionSource();
+            instance._viewFunctionSource();
 
             assert.isTrue(
                stub.calledOnceWithExactly('viewFunctionSource', [['1', '0']], {

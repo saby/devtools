@@ -1,9 +1,9 @@
-export function decycle<T>(
-   object: T,
+export function decycle(
+   object: object,
    options?: {
       replacer?: <U>(value: U) => U | string,
       ignore?: string[]
-   }): T {
+   }): object {
    // Make a deep copy of an object or array, assuring that there is at most
    // one instance of each object or array in the resulting structure. The
    // duplicate references (which might be forming cycles) are replaced with
@@ -30,48 +30,50 @@ export function decycle<T>(
 
    const objects = new WeakMap(); // object to path mappings
 
-   return (function derez(value, path) {
+   // tslint:disable-next-line:no-any
+   return (function derez(value: unknown, path: string): any {
       // The derez function recurses through the object, producing the deep copy.
 
       let oldPath; // The path of an earlier occurance of value
       let nu; // The new object or array
+      let tempValue = value;
 
       // If a replacer function was provided, then call it to get a replacement value.
 
       if (options && typeof options.replacer === 'function') {
-         value = options.replacer(value);
+         tempValue = options.replacer(tempValue);
       }
 
       // typeof null === "object", so go on if this value is really an object but not
       // one of the weird builtin objects.
 
       if (
-         typeof value === 'object' &&
-         value !== null &&
-         !(value instanceof Boolean) &&
-         !(value instanceof Date) &&
-         !(value instanceof Number) &&
-         !(value instanceof RegExp) &&
-         !(value instanceof String)
+         typeof tempValue === 'object' &&
+         tempValue !== null &&
+         !(tempValue instanceof Boolean) &&
+         !(tempValue instanceof Date) &&
+         !(tempValue instanceof Number) &&
+         !(tempValue instanceof RegExp) &&
+         !(tempValue instanceof String)
       ) {
          // If the value is an object or array, look to see if we have already
          // encountered it. If so, return a {"$ref":PATH} object. This uses an
          // ES6 WeakMap.
 
-         oldPath = objects.get(value);
+         oldPath = objects.get(tempValue);
          if (oldPath !== undefined) {
             return { $ref: oldPath };
          }
 
          // Otherwise, accumulate the unique value and its path.
 
-         objects.set(value, path);
+         objects.set(tempValue, path);
 
          // If it is an array, replicate the array.
 
-         if (Array.isArray(value)) {
+         if (Array.isArray(tempValue)) {
             nu = [];
-            value.forEach(function(element, i) {
+            tempValue.forEach((element, i) => {
                nu[i] = derez(element, path + '[' + i + ']');
             });
          } else {
@@ -79,18 +81,18 @@ export function decycle<T>(
             // If it is an object, replicate the object.
 
             nu = {};
-            Object.keys(value).forEach(function(name) {
+            Object.keys(tempValue).forEach((name) => {
                if (options && options.ignore && options.ignore.indexOf(name) !== -1) {
                   return;
                }
                nu[name] = derez(
-                  value[name],
+                  tempValue[name],
                   path + '[' + JSON.stringify(name) + ']'
                );
             });
          }
          return nu;
       }
-      return value;
+      return tempValue;
    })(object, '$');
 }

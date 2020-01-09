@@ -1,3 +1,8 @@
+/**
+ * Highlights an element on a page (similar to highlightning in "Elements" tab in Chrome DevTools).
+ * @param node Element to highlight.
+ * @author Зайцев А.С.
+ */
 export function highlightUpdate(
    node: HTMLElement
 ): void {

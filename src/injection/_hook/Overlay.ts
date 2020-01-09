@@ -34,6 +34,10 @@ function calculateCaptionPosition({ top, height, bottom }: ClientRect): {
    return result;
 }
 
+/**
+ * Module for managing overlay of an element on the page.
+ * @author Зайцев А.С.
+ */
 class Overlay {
    private overlay: HTMLDivElement;
    private caption: HTMLSpanElement;

@@ -62,3 +62,18 @@ export interface IFrontendControlNode {
    class: string;
    parentId?: IBackendControlNode['parentId'];
 }
+
+export interface ITemplateChanges {
+   template: Function;
+   options: object;
+   changedOptions?: object;
+   attributes: Record<string, string | number>;
+   changedAttributes?: Record<string, string | number>;
+   state: object;
+}
+
+export interface IControlChanges extends ITemplateChanges {
+   instance: object;
+   context?: object;
+   changedContext?: object;
+}

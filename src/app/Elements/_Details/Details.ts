@@ -1,5 +1,4 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Elements/_Details/Details');
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
@@ -25,10 +24,16 @@ interface IOptions extends IControlOptions {
    changedAttributes?: object;
 }
 
+const DEFAULT_EVAL_TIMEOUT = 100;
+
+/**
+ * Renders information about the selected control - options, attributes, state, attributes and adds links to the sources.
+ * @author Зайцев А.С.
+ */
 class Details extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 
-   private __viewFunctionSource(e: Event, path: Array<string | number>): void {
+   protected _viewFunctionSource(e: Event, path: Array<string | number>): void {
       this._options.store.dispatch('viewFunctionSource', {
          id: this._options.id,
          path
@@ -37,48 +42,48 @@ class Details extends Control<IOptions> {
          chrome.devtools.inspectedWindow.eval(
             'inspect(window.__WASABY_DEV_HOOK__.__function)'
          );
-      }, 100);
+      }, DEFAULT_EVAL_TIMEOUT);
    }
 
-   private __viewConstructor(): void {
+   protected _viewConstructor(): void {
       this._options.store.dispatch('viewConstructor', this._options.id);
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
             'inspect(window.__WASABY_DEV_HOOK__.__constructor)'
          );
-      }, 100);
+      }, DEFAULT_EVAL_TIMEOUT);
    }
 
-   private __viewContainer(): void {
+   protected _viewContainer(): void {
       this._options.store.dispatch('viewContainer', this._options.id);
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
             'inspect(window.__WASABY_DEV_HOOK__.__container)'
          );
-      }, 100);
+      }, DEFAULT_EVAL_TIMEOUT);
    }
 
-   private __storeAsGlobal(e: Event, path: Array<string | number>): void {
+   protected _storeAsGlobal(e: Event, path: Array<string | number>): void {
       this._options.store.dispatch('storeAsGlobal', {
          id: this._options.id,
          path
       });
    }
 
-   private __viewTemplate(): void {
+   protected _viewTemplate(): void {
       this._options.store.dispatch('viewTemplate', this._options.id);
       setTimeout(() => {
          chrome.devtools.inspectedWindow.eval(
             'inspect(window.__WASABY_DEV_HOOK__.__template)'
          );
-      }, 100);
+      }, DEFAULT_EVAL_TIMEOUT);
    }
 
-   private __hasData(data?: object): boolean {
+   protected _hasData(data?: object): boolean {
       return typeof data !== 'undefined' && Object.keys(data).length > 0;
    }
 
-   private __forwardExpanded(
+   protected _forwardExpanded(
       e: Event,
       eventName: string,
       value: boolean
@@ -86,7 +91,7 @@ class Details extends Control<IOptions> {
       this._notify('expandedChanged', [eventName, value]);
    }
 
-   private __setNodeOption(
+   protected _setNodeOption(
       e: Event,
       optionType: NodeOptionType,
       path: string[],
@@ -100,7 +105,7 @@ class Details extends Control<IOptions> {
       });
    }
 
-   private __revertNodeOption(
+   protected _revertNodeOption(
       e: Event,
       optionType: NodeOptionType,
       path: string[]

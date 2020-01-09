@@ -14,14 +14,14 @@ type OperationPayload =
         IBackendControlNode['id'],
         IBackendControlNode['name'],
         ControlType
-     ] //add root
+     ] // add root
    | [
         OperationType.CREATE,
         IBackendControlNode['id'],
         IBackendControlNode['name'],
         ControlType,
         IBackendControlNode['parentId']
-     ] //add leaf
+     ] // add leaf
    | [
         OperationType.REORDER,
         IBackendControlNode['id'],

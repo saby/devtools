@@ -1,5 +1,4 @@
 import { Control, TemplateFunction } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Elements/_Details/Pane/templates/BooleanTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
@@ -9,6 +8,10 @@ interface IOptions extends ITemplateOptions {
    value: boolean;
 }
 
+/**
+ * Template for booleans.
+ * @author Зайцев А.С.
+ */
 class BooleanTemplate extends Control {
    protected _template: TemplateFunction = template;
    protected readonly _options: Readonly<IOptions>;

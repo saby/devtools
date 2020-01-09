@@ -3,7 +3,7 @@ import { getForName } from 'Extension/Plugins/DependencyWatcher/data/filter/getF
 import { IFileInfo } from 'Extension/Plugins/DependencyWatcher/IFile';
 import withoutSize from 'Extension/Plugins/DependencyWatcher/data/filter/withoutSize';
 
-const fileFilters: Record<string, FilterFunctionGetter<any, IFileInfo>> = {
+const fileFilters: Record<string, FilterFunctionGetter<unknown, IFileInfo>> = {
    name: getForName,
    withoutSize
 };

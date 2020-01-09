@@ -1,7 +1,5 @@
 export const PANEL_NAME = 'Wasaby';
 
-export const UPDATE_MESSAGE = '';
-
 export const POST_MESSAGE_SOURCE = `${PANEL_NAME}/content-message`;
 
 export const BACKGROUND_PORT_NAME = `${PANEL_NAME}/background`;

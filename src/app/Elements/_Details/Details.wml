@@ -2,30 +2,30 @@
    <div attr:class="Details__buttons">
       <Controls.buttons:Button caption="View template"
                                viewMode="link"
-                               on:click="__viewTemplate()" />
+                               on:click="_viewTemplate()" />
       <Controls.buttons:Button caption="View DOM element"
                                viewMode="link"
-                               on:click="__viewContainer()" />
+                               on:click="_viewContainer()" />
       <Controls.buttons:Button if="{{_options.isControl}}"
                                caption="View constructor"
                                viewMode="link"
-                               on:click="__viewConstructor()" />
+                               on:click="_viewConstructor()" />
    </div>
-   <ws:if data="{{ __hasData(_options.options) }}">
+   <ws:if data="{{ _hasData(_options.options) }}">
       <Elements._Details.Pane.Pane caption="Options"
                                   data="{{ _options.options }}"
                                   changedData="{{ _options.changedOptions }}"
                                   controlId="{{ _options.id }}"
                                   isControl="{{ _options.isControl }}"
-                                  on:viewFunctionSource="__viewFunctionSource()"
-                                  on:storeAsGlobal="__storeAsGlobal()"
-                                  on:expandedChanged="__forwardExpanded('_optionsExpanded')"
-                                  on:setNodeOption="__setNodeOption(1)"
-                                  on:revertNodeOption="__revertNodeOption(1)"
+                                  on:viewFunctionSource="_viewFunctionSource()"
+                                  on:storeAsGlobal="_storeAsGlobal()"
+                                  on:expandedChanged="_forwardExpanded('_optionsExpanded')"
+                                  on:setNodeOption="_setNodeOption(1)"
+                                  on:revertNodeOption="_revertNodeOption(1)"
                                   expanded="{{_options.optionsExpanded}}"/>
    </ws:if>
    <ws:if data="{{_options.isControl}}">
-      <ws:if data="{{ __hasData(_options.state) }}">
+      <ws:if data="{{ _hasData(_options.state) }}">
          <Elements._Details.Pane.Pane caption="State"
                                      data="{{ _options.state }}"
                                      changedData="{{ _options.changedState }}"
@@ -33,13 +33,13 @@
                                      isControl="{{ _options.isControl }}"
                                      on:viewFunctionSource="__viewFunctionSource()"
                                      on:storeAsGlobal="__storeAsGlobal()"
-                                     on:expandedChanged="__forwardExpanded('_stateExpanded')"
-                                     on:setNodeOption="__setNodeOption(2)"
-                                     on:revertNodeOption="__revertNodeOption(2)"
+                                     on:expandedChanged="_forwardExpanded('_stateExpanded')"
+                                     on:setNodeOption="_setNodeOption(2)"
+                                     on:revertNodeOption="_revertNodeOption(2)"
                                      expanded="{{_options.stateExpanded}}"/>
       </ws:if>
    </ws:if>
-   <ws:if data="{{ __hasData(_options.events) }}">
+   <ws:if data="{{ _hasData(_options.events) }}">
       <Elements._Details.Pane.Pane caption="Events"
                                   data="{{_options.events}}"
                                   canStoreAsGlobal="{{false}}"
@@ -47,18 +47,18 @@
                                   isControl="{{ _options.isControl }}"
                                   on:viewFunctionSource="__viewFunctionSource()"
                                   on:storeAsGlobal="__storeAsGlobal()"
-                                  on:expandedChanged="__forwardExpanded('_eventsExpanded')"
+                                  on:expandedChanged="_forwardExpanded('_eventsExpanded')"
                                   expanded="{{_options.eventsExpanded}}"/>
    </ws:if>
-   <ws:if data="{{ __hasData(_options.attributes) }}">
+   <ws:if data="{{ _hasData(_options.attributes) }}">
       <Elements._Details.Pane.Pane caption="Attributes"
                                   data="{{ _options.attributes }}"
                                   changedData="{{ _options.changedAttributes }}"
                                   controlId="{{ _options.id }}"
                                   isControl="{{ _options.isControl }}"
-                                  on:expandedChanged="__forwardExpanded('_attributesExpanded')"
-                                  on:setNodeOption="__setNodeOption(0)"
-                                  on:revertNodeOption="__revertNodeOption(0)"
+                                  on:expandedChanged="_forwardExpanded('_attributesExpanded')"
+                                  on:setNodeOption="_setNodeOption(0)"
+                                  on:revertNodeOption="_revertNodeOption(0)"
                                   expanded="{{_options.attributesExpanded}}"/>
    </ws:if>
 </div>

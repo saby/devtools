@@ -6,6 +6,10 @@ interface IResult {
    total: number;
 }
 
+/**
+ * Manages search in a collection. Has methods for calculating search result and getting the next item.
+ * @author Зайцев А.С.
+ */
 class Controller {
    private _displayProperty: string = '';
    private _lastFoundItemIndex: number = 0;

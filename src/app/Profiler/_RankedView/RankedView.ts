@@ -1,16 +1,12 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { Memory } from 'Types/source';
-// @ts-ignore
 import template = require('wml!Profiler/_RankedView/RankedView');
 import { descriptor, Model } from 'Types/entity';
-// @ts-ignore
 import commitTimeTemplate = require('wml!Profiler/_RankedView/commitTimeTemplate');
-// @ts-ignore
 import reasonTemplate = require('wml!Profiler/_RankedView/reasonTemplate');
-// @ts-ignore
 import groupTemplate = require('wml!Profiler/_RankedView/groupTemplate');
-import { getBackgroundColorBasedOnTiming } from '../_utils/Utils';
+import { getDataWithLengths } from '../_utils/Utils';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
 interface IRankedViewControlNode extends IFrontendControlNode {
@@ -28,25 +24,6 @@ interface IOptions extends IControlOptions {
    };
 }
 
-// TODO: копипаста в SynchronizationsList
-function getDataWithLengths(
-   initialData: IOptions['snapshot']
-): Array<{ selfDuration: number; length: number; barColor: string }> {
-   const maxDuration = initialData.reduce(
-      (max, { selfDuration }) => Math.max(max, selfDuration),
-      0
-   );
-   return initialData.map((item) => {
-      return {
-         ...item,
-         barColor: getBackgroundColorBasedOnTiming(
-            item.selfDuration / maxDuration
-         ),
-         length: (item.selfDuration / maxDuration) * 100
-      };
-   });
-}
-
 function applyFilter(
    initialData: IOptions['snapshot'],
    filter: IOptions['filter']
@@ -62,6 +39,10 @@ function groupByReason(item: Model): ControlUpdateReason {
    return item.get('updateReason') as ControlUpdateReason;
 }
 
+/**
+ * Renders a flat list of commits which happened during the last profiling session.
+ * @author Зайцев А.С.
+ */
 class RankedView extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 
@@ -121,11 +102,8 @@ class RankedView extends Control<IOptions> {
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
-         // @ts-ignore
          snapshot: descriptor(Array).required(),
-         // @ts-ignore
          markedKey: descriptor(Number).required(),
-         // @ts-ignore
          filter: descriptor(Object).required(),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)

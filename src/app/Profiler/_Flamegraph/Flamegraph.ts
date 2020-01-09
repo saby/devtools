@@ -4,7 +4,6 @@ import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import 'css!Profiler/profiler';
 import { getWidth } from './Utils';
 import { formatTime, getBackgroundColorBasedOnReason } from '../_utils/Utils';
-// @ts-ignore
 import template = require('wml!Profiler/_Flamegraph/Flamegraph');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { WARNING_NAMES } from 'Profiler/_Warning/const';
@@ -326,6 +325,10 @@ function convertSnapshotToItemData(
    return result;
 }
 
+/**
+ * Renders commits which happened during the last profiling session as a flamegraph.
+ * @author Зайцев А.С.
+ */
 class Flamegraph extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected _maxTreeDuration: number = 0;
@@ -364,8 +367,7 @@ class Flamegraph extends Control<IOptions> {
          if (this._shouldRestoreFocus) {
             this._shouldRestoreFocus = false;
 
-            // @ts-ignore
-            this._children[this._options.markedKey].focus();
+            (this._children[this._options.markedKey] as HTMLElement).focus();
          }
       }
 
@@ -502,7 +504,6 @@ class Flamegraph extends Control<IOptions> {
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
-         // @ts-ignore
          snapshot: descriptor(Array).required(),
          markedKey: descriptor(Number),
          readOnly: descriptor(Boolean),
