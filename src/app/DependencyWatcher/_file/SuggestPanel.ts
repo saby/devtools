@@ -1,6 +1,5 @@
 import { Control, TemplateFunction } from 'UI/Base';
-// @ts-ignore
-import * as template from 'wml!DependencyWatcher/_file/SuggestPanel';
+import template = require('wml!DependencyWatcher/_file/SuggestPanel');
 import { navigation } from './navigation';
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 

@@ -1,6 +1,5 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-// @ts-ignore
-import * as template from 'wml!Profiler/_Overview/Overview';
+import template = require('wml!Profiler/_Overview/Overview');
 import 'css!Profiler/profiler';
 import { descriptor } from 'Types/entity';
 
@@ -13,6 +12,10 @@ interface IOptions extends IControlOptions {
    forceUpdatedCount: number;
 }
 
+/**
+ * Renders a short overview of the current synchronization.
+ * @author Зайцев А.С.
+ */
 class Overview extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 

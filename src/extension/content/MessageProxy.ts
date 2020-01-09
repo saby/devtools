@@ -2,7 +2,7 @@ import {
     IContentMessageEvent,
     IMessageData,
     IMessageWrapper
-} from "Extension/Event/IContentMessage";
+} from 'Extension/Event/IContentMessage';
 
 const getPort = (() => {
     let port: chrome.runtime.Port | void;
@@ -13,7 +13,7 @@ const getPort = (() => {
         port = chrome.runtime.connect({
             name
         });
-        
+
         port.onDisconnect.addListener(() => {
             port = undefined;
         });
@@ -22,20 +22,20 @@ const getPort = (() => {
 })();
 
 interface IWrapper extends IMessageWrapper {
-    __proxyMessage__?: true
+    __proxyMessage__?: true;
 }
 
-let getProxyToPage = (source: string) => {
+const getProxyToPage = (source: string) => {
     return (data: IMessageData): void => {
-        window.postMessage(<IWrapper>{
+        window.postMessage({
             data,
             source,
             __proxyMessage__: true
-        }, '*');
+        } as IWrapper, '*');
     };
 };
 
-let getProxyToPort = (
+const getProxyToPort = (
     port: chrome.runtime.Port,
     proxySource: string
 ) => {
@@ -52,19 +52,19 @@ let getProxyToPort = (
     };
 };
 
-interface CreateConfig {
+interface ICreateConfig {
     portName: string;
     source: string;
 }
 
-let createProxy = ({
+const createProxy = ({
    portName,
    source
-}: CreateConfig) => {
-    let port = getPort(portName);
+}: ICreateConfig) => {
+    const port = getPort(portName);
 
-    let proxyToPort = getProxyToPort(port, source);
-    let proxyToPage = getProxyToPage(source);
+    const proxyToPort = getProxyToPort(port, source);
+    const proxyToPage = getProxyToPage(source);
 
     port.onMessage.addListener(proxyToPage);
     port.onDisconnect.addListener(() => {

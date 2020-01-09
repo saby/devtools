@@ -143,7 +143,7 @@ export class ModuleStorage extends Update<
 
    /// region Query
    protected _getFilters(): Partial<
-      Record<keyof IModuleFilter, FilterFunctionGetter<any, IModule>>
+      Record<keyof IModuleFilter, FilterFunctionGetter<unknown, IModule>>
    > {
       return moduleFilters;
    }

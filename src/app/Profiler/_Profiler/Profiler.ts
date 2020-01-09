@@ -22,7 +22,6 @@ import {
    IFrontendProfilingData
 } from 'Extension/Plugins/Elements/IProfilingData';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
-// @ts-ignore
 import template = require('wml!Profiler/_Profiler/Profiler');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { WARNING_NAMES, WARNINGS, IWarning } from 'Profiler/_Warning/const';
@@ -44,6 +43,10 @@ export interface ISynchronizationOverview {
    forceUpdatedCount: number;
 }
 
+/**
+ * Controller of the profiler tab. Manages profiling status, combines information from the frontend and backend, controls current view, etc.
+ * @author Зайцев А.С.
+ */
 class Profiler extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 

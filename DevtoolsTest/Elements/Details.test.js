@@ -10,7 +10,7 @@ define([
    Details = Details.default;
    Store = Store.default;
 
-   describe('Elements/_Breadcrumbs/Breadcrumbs', function() {
+   describe('Elements/_Details/Details', function() {
       beforeEach(function() {
          sandbox = sinon.createSandbox();
          instance = new Details();
@@ -20,7 +20,7 @@ define([
          sandbox.restore();
       });
 
-      describe('__viewFunctionSource', function() {
+      describe('_viewFunctionSource', function() {
          it('should fire the viewFunctionSource event and inspect function after a timeout', function() {
             const store = {
                dispatch: sandbox.stub()
@@ -37,7 +37,7 @@ define([
                store
             });
 
-            instance.__viewFunctionSource({}, path);
+            instance._viewFunctionSource({}, path);
 
             assert.isTrue(
                store.dispatch.calledOnceWithExactly('viewFunctionSource', {
@@ -59,7 +59,7 @@ define([
          });
       });
 
-      describe('__viewConstructor', function() {
+      describe('_viewConstructor', function() {
          it('should fire the viewConstructor event and inspect constructor after a timeout', function() {
             const store = {
                dispatch: sandbox.stub()
@@ -75,7 +75,7 @@ define([
                store
             });
 
-            instance.__viewConstructor();
+            instance._viewConstructor();
 
             assert.isTrue(
                store.dispatch.calledOnceWithExactly('viewConstructor', '1')
@@ -94,7 +94,7 @@ define([
          });
       });
 
-      describe('__viewContainer', function() {
+      describe('_viewContainer', function() {
          it('should fire the viewContainer event and inspect container after a timeout', function() {
             const store = {
                dispatch: sandbox.stub()
@@ -110,7 +110,7 @@ define([
                store
             });
 
-            instance.__viewContainer();
+            instance._viewContainer();
 
             assert.isTrue(
                store.dispatch.calledOnceWithExactly('viewContainer', '1')
@@ -129,7 +129,7 @@ define([
          });
       });
 
-      describe('__storeAsGlobal', function() {
+      describe('_storeAsGlobal', function() {
          it('should fire the storeAsGlobal event', function() {
             const store = {
                dispatch: sandbox.stub()
@@ -140,7 +140,7 @@ define([
                store
             });
 
-            instance.__storeAsGlobal({}, path);
+            instance._storeAsGlobal({}, path);
 
             assert.isTrue(
                store.dispatch.calledOnceWithExactly('storeAsGlobal', {
@@ -151,7 +151,7 @@ define([
          });
       });
 
-      describe('__viewTemplate', function() {
+      describe('_viewTemplate', function() {
          it('should fire the viewTemplate event and inspect container after a timeout', function() {
             const store = {
                dispatch: sandbox.stub()
@@ -167,7 +167,7 @@ define([
                store
             });
 
-            instance.__viewTemplate();
+            instance._viewTemplate();
 
             assert.isTrue(
                store.dispatch.calledOnceWithExactly('viewTemplate', '1')
@@ -186,21 +186,21 @@ define([
          });
       });
 
-      it('__hasData', function() {
-         assert.isFalse(instance.__hasData());
-         assert.isFalse(instance.__hasData({}));
+      it('_hasData', function() {
+         assert.isFalse(instance._hasData());
+         assert.isFalse(instance._hasData({}));
          assert.isTrue(
-            instance.__hasData({
+            instance._hasData({
                testKey: '123'
             })
          );
       });
 
-      describe('__forwardExpanded', function() {
+      describe('_forwardExpanded', function() {
          it('should fire the expandedChanged event', function() {
             const stub = sandbox.stub(instance, '_notify');
 
-            instance.__forwardExpanded({}, 'optionsExpanded', true);
+            instance._forwardExpanded({}, 'optionsExpanded', true);
 
             assert.isTrue(
                stub.calledOnceWithExactly('expandedChanged', [
@@ -211,7 +211,7 @@ define([
          });
       });
 
-      describe('__setNodeOption', function() {
+      describe('_setNodeOption', function() {
          it('should fire the setNodeOption event', function() {
             const store = {
                dispatch: sandbox.stub()
@@ -222,7 +222,7 @@ define([
                store
             });
 
-            instance.__setNodeOption({}, 0, path, 'testPlaceholder');
+            instance._setNodeOption({}, 0, path, 'testPlaceholder');
 
             assert.isTrue(
                store.dispatch.calledOnceWithExactly('setNodeOption', {
@@ -235,7 +235,7 @@ define([
          });
       });
 
-      describe('__revertNodeOption', function() {
+      describe('_revertNodeOption', function() {
          it('should fire the revertNodeOption event', function() {
             const store = {
                dispatch: sandbox.stub()
@@ -246,7 +246,7 @@ define([
                store
             });
 
-            instance.__revertNodeOption({}, 0, path);
+            instance._revertNodeOption({}, 0, path);
 
             assert.isTrue(
                store.dispatch.calledOnceWithExactly('revertNodeOption', {

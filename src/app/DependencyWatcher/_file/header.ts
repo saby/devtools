@@ -1,17 +1,10 @@
-// @ts-ignore
-import { rk } from 'Core/i18n';
+import rk = require('i18n!DependencyWatcher/_file/header');
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 import { IHeader, IHeaders } from '../interface/IHeaders';
 
 const name: IHeader<ITransportFile> = {
    title: rk('name'),
    sortingProperty: 'name'
-};
-// TODO: разобраться что это вообще
-const used: IHeader<ITransportFile> = {
-   title: rk('used'),
-   align: 'center',
-   sortingProperty: 'used'
 };
 const modules: IHeader<ITransportFile> = {
    title: rk('modules'),
@@ -27,6 +20,5 @@ const size: IHeader<ITransportFile> = {
 export const headers: IHeaders<ITransportFile> = [
    name,
    modules,
-   // used,
    size
 ];

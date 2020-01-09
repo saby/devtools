@@ -1,6 +1,4 @@
-// @ts-ignore
 import Control = require('Core/Control');
-// @ts-ignore
 import template = require('wml!Elements/_Elements/Elements');
 import { IBackendControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
@@ -20,7 +18,13 @@ interface IOptions {
 }
 
 const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
+const SEARCH_THROTTLE_DURATION = 200;
+const EVENT_NAME_OFFSET = -8;
 
+/**
+ * Controller of the elements tab.
+ * @author Зайцев А.С.
+ */
 class Elements extends Control {
    protected _template: Function = template;
    protected _selectedItemId: IFrontendControlNode['id'] | undefined;
@@ -70,7 +74,7 @@ class Elements extends Control {
       );
       this._throttledUpdateSearch = throttle(() => {
          this.__updateSearch(this._searchValue);
-      }, 200);
+      }, SEARCH_THROTTLE_DURATION);
       window.elementsPanel = this;
 
       options.store.toggleDevtoolsOpened(true);
@@ -357,7 +361,7 @@ class Elements extends Control {
       this[eventName] = value;
       if (eventName !== '_eventsExpanded') {
          this.__inspectElement(this._options.store, {
-            newTab: value ? eventName.slice(1, -8) : undefined
+            newTab: value ? eventName.slice(1, EVENT_NAME_OFFSET) : undefined
          });
       }
    }

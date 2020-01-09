@@ -5,6 +5,8 @@ import { ModuleStorage } from '../storage/Module';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { GLOBAL } from '../../const';
 
+const MODULE_INDEX = 2;
+
 enum warnMessage {
    withoutArgs = 'call without arguments',
    withoutName = 'call without "name"',
@@ -56,7 +58,7 @@ export function proxyDefine(
          let module: Function;
          if (Array.isArray(argArray[1])) {
             dependencies = argArray[1];
-            module = argArray[2];
+            module = argArray[MODULE_INDEX];
          } else {
             dependencies = [];
             module = argArray[1];

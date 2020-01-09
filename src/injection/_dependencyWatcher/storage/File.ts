@@ -55,7 +55,7 @@ export class FileStorage extends Update<IFile, IFileFilter> {
       return this._storage.getItemsById(keys);
    }
    protected _getFilters(): Partial<
-      Record<keyof IFileFilter, FilterFunctionGetter<any, IFile>>
+      Record<keyof IFileFilter, FilterFunctionGetter<unknown, IFile>>
    > {
       return fileFilters;
    }

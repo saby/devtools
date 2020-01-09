@@ -1,11 +1,9 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
 import { Memory } from 'Types/source';
-// @ts-ignore
 import synchronizationTemplate = require('wml!Profiler/_SynchronizationsList/synchronizationTemplate');
-// @ts-ignore
 import template = require('wml!Profiler/_SynchronizationsList/SynchronizationsList');
-import { getBackgroundColorBasedOnTiming } from '../_utils/Utils';
+import { getDataWithLengths } from '../_utils/Utils';
 
 interface ISynchronizationsList {
    id: string;
@@ -18,25 +16,10 @@ interface IOptions extends IControlOptions {
    filter: (item: ISynchronizationsList) => boolean;
 }
 
-// TODO: копипаста в RankedView
-function getDataWithLengths(
-   initialData: Array<{ selfDuration: number }>
-): Array<{ selfDuration: number; length: number; barColor: string }> {
-   const maxDuration = initialData.reduce(
-      (max, { selfDuration }) => Math.max(max, selfDuration),
-      0
-   );
-   return initialData.map((item) => {
-      return {
-         ...item,
-         barColor: getBackgroundColorBasedOnTiming(
-            item.selfDuration / maxDuration
-         ),
-         length: (item.selfDuration / maxDuration) * 100
-      };
-   });
-}
-
+/**
+ * Renders a flat list of synchronizations which happened during the last profiling session.
+ * @author Зайцев А.С.
+ */
 class SynchronizationsList extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected _source: Memory;
@@ -72,11 +55,8 @@ class SynchronizationsList extends Control<IOptions> {
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
-         // @ts-ignore
          synchronizations: descriptor(Array).required(),
-         // @ts-ignore
          markedKey: descriptor(String).required(),
-         // @ts-ignore
          filter: descriptor(Function).required(),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)

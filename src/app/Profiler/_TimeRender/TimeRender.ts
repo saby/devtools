@@ -1,5 +1,4 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Profiler/_TimeRender/TimeRender');
 import { descriptor } from 'Types/entity';
 import 'css!Profiler/profiler';
@@ -11,6 +10,10 @@ interface IOptions extends IControlOptions {
    length?: number;
 }
 
+/**
+ * Module for rendering time in the profiler. Converts time to a formatted string and renders a bar representing the time near that string.
+ * @author Зайцев А.С.
+ */
 class TimeRender extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected _formattedValue: string;
