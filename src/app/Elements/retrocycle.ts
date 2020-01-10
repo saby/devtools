@@ -1,4 +1,10 @@
-function retrocycle($) {
+/**
+ * Restores an object that was reduced by decycle. Based on cycle.js by Douglas Crockford.
+ * @param $ Object that should be restored.
+ * @return Restored object.
+ * @author Зайцев А.С.
+ */
+function retrocycle($: object): object {
    'use strict';
 
 // Restore an object that was reduced by decycle. Members whose values are
@@ -20,9 +26,9 @@ function retrocycle($) {
 //      return JSON.retrocycle(JSON.parse(s));
 // produces an array containing a single element which is the array itself.
 
-   let px = /^\$(?:\[(?:\d+|"(?:[^\\"\u0000-\u001f]|\\(?:[\\"\/bfnrt]|u[0-9a-zA-Z]{4}))*")\])*$/;
+   const px = /^\$(?:\[(?:\d+|"(?:[^\\"\u0000-\u001f]|\\(?:[\\"\/bfnrt]|u[0-9a-zA-Z]{4}))*")\])*$/;
 
-   (function rez(value) {
+   (function rez(value: unknown): void {
 
 // The rez function walks recursively through the object looking for $ref
 // properties. When it finds one that has a value that is a path, then it
@@ -31,10 +37,11 @@ function retrocycle($) {
 
       if (value && typeof value === 'object') {
          if (Array.isArray(value)) {
-            value.forEach(function(element, i) {
+            value.forEach((element, i) => {
                if (typeof element === 'object' && element !== null) {
-                  let path = element.$ref;
+                  const path = element.$ref;
                   if (typeof path === 'string' && px.test(path)) {
+                     // tslint:disable-next-line:no-eval
                      value[i] = eval(path);
                   } else {
                      rez(element);
@@ -42,11 +49,12 @@ function retrocycle($) {
                }
             });
          } else {
-            Object.keys(value).forEach(function(name) {
-               let item = value[name];
+            Object.keys(value).forEach((name) => {
+               const item = value[name];
                if (typeof item === 'object' && item !== null) {
-                  let path = item.$ref;
+                  const path = item.$ref;
                   if (typeof path === 'string' && px.test(path)) {
+                     // tslint:disable-next-line:no-eval
                      value[name] = eval(path);
                   } else {
                      rez(item);

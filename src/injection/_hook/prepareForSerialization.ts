@@ -33,6 +33,12 @@ const IGNORE_FIELDS = [
    '__lastGetterPath'
 ];
 
+/**
+ * Prepares object for serialization: removes cycles, replaces functions with strings and removes unnecessary fields.
+ * @param value Object which should be prepared.
+ * @return The same object but safe for serialization.
+ * @author Зайцев А.С.
+ */
 export default function prepareForSerialization(value: object): object {
    return decycle(value, {
       replacer: replaceFunctions,

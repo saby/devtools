@@ -1,6 +1,5 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-// @ts-ignore
-import * as template from 'wml!Profiler/_ReasonTag/ReasonTag';
+import template = require('wml!Profiler/_ReasonTag/ReasonTag');
 import 'css!Profiler/profiler';
 import { descriptor } from 'Types/entity';
 import { getBackgroundColorBasedOnReason } from '../_utils/Utils';
@@ -10,6 +9,10 @@ interface IOptions extends IControlOptions {
    updateReason?: ControlUpdateReason;
 }
 
+/**
+ * Renders an icon which color corresponds to the reason of the update.
+ * @author Зайцев А.С.
+ */
 class ReasonTag extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected _getColor: (

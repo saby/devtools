@@ -17,9 +17,9 @@ loadOptions().then((options) => {
 
     chrome.storage.onChanged.addListener((changes, areaName) => {
        if (areaName === 'sync') {
-           loadOptions().then((options) => {
+           loadOptions().then((newOptions) => {
                injectScript({
-                   textContent: `this.wasabyDevtoolsOptions = ${JSON.stringify(options)}`
+                   textContent: `this.wasabyDevtoolsOptions = ${JSON.stringify(newOptions)}`
                });
            });
        }

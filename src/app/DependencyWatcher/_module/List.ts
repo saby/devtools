@@ -1,6 +1,5 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-// @ts-ignore
-import * as template from 'wml!DependencyWatcher/_module/List';
+import template = require('wml!DependencyWatcher/_module/List');
 import { Model } from 'Types/entity';
 import { IListItem, source } from '../data';
 import { columns } from './column';

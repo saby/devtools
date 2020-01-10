@@ -1,7 +1,6 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import { Model } from 'Types/entity';
-// @ts-ignore
-import * as template from 'wml!DependencyWatcher/_module/column/File';
+import template = require('wml!DependencyWatcher/_module/column/File');
 
 interface IOptions extends IControlOptions {
    itemData: {
@@ -18,7 +17,6 @@ export default class File extends Control<IOptions> {
          this._notify('openSource', [item.get('itemId')], { bubbling: true });
       } else {
          // the third argument is a callback and it is actually optional
-         // @ts-ignore
          chrome.devtools.panels.openResource(path, 1);
       }
    }

@@ -8,12 +8,6 @@
     "sourceMap": false,
     "moduleResolution": "classic",
     "module": "es2015",
-    "lib": [
-      "es5",
-      "es2015",
-      "es2015.proxy",
-      "dom"
-    ],
     "declaration": false,
     "noImplicitAny": false,
     "stripInternal": true,

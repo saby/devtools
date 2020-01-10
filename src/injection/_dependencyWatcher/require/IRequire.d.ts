@@ -1,21 +1,21 @@
 type IDeps = string | string[];
 
+// tslint:disable-next-line:no-empty-interface
 interface IRequireConfig {}
 
-export interface ILocalRequire {
-   (dep: string): object;
-   (): ILocalRequire;
-   (deps: string[], callback?: Function, errback?: Function): ILocalRequire;
-}
+export type LocalRequire = (
+   deps?: string | string[],
+   callback?: Function,
+   errback?: Function
+) => LocalRequire | object;
 
-export interface IRequire extends ILocalRequire {
-   (config: IRequireConfig): ILocalRequire;
+export interface IRequire extends LocalRequire {
    (
       config: IRequireConfig,
-      deps: IDeps,
+      deps?: IDeps,
       callback?: Function,
       errback?: Function
-   ): ILocalRequire;
+   ): LocalRequire;
    config<T extends object>(cfg: T): void;
    toUrl(module: string): string;
    defined(module: string): boolean;

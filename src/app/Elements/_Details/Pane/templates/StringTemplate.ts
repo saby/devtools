@@ -1,5 +1,4 @@
 import { Control, TemplateFunction } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Elements/_Details/Pane/templates/StringTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
@@ -13,7 +12,7 @@ class StringTemplate extends Control {
    protected _template: TemplateFunction = template;
    protected readonly _options: Readonly<IOptions>;
 
-   private __viewFunctionSource(): void {
+   protected _viewFunctionSource(): void {
       this._notify(
          'viewFunctionSource',
          [this._options.key.split('---').reverse()],

@@ -125,7 +125,7 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
       );
    }
    protected _getFilters(): Partial<
-      Record<keyof IRPCModuleFilter, FilterFunctionGetter<any, IRPCModule>>
+      Record<keyof IRPCModuleFilter, FilterFunctionGetter<unknown, IRPCModule>>
    > {
       return itemFilters;
    }

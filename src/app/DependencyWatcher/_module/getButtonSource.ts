@@ -1,6 +1,5 @@
 import { source } from '../data';
-// @ts-ignore
-import { rk } from 'Core/i18n';
+import rk = require('i18n!DependencyWatcher/_module/getButtonSource');
 
 export interface IFilterItem<TValue = unknown> {
    name: string;

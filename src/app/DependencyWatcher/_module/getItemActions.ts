@@ -1,5 +1,4 @@
-// @ts-ignore
-import { rk } from 'Core/i18n';
+import rk = require('i18n!DependencyWatcher/_module/getItemActions');
 import { Model } from 'Types/entity';
 
 export enum ItemActionNames {
@@ -51,6 +50,9 @@ export const getItemActions = (
 ): IItemAction[] => {
    const result: IItemAction[] = [];
    for (const actionName in actions) {
+      if (!actions.hasOwnProperty(actionName)) {
+         continue;
+      }
       const item = ALL_ACTIONS.get(actionName as ItemActionNames);
       if (!item) {
          continue;

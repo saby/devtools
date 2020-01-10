@@ -1,3 +1,7 @@
+/**
+ * Contains utility functions used by profiler.
+ * @author Зайцев А.С.
+ */
 import { Store, applyOperation } from 'Elements/elements';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import Profiler, { ISynchronizationOverview } from '../_Profiler/Profiler';
@@ -222,4 +226,29 @@ export function getSynchronizationOverview(
    });
 
    return result;
+}
+
+const LENGTH_SCALE = 100;
+
+/**
+ * Adds information about the color and length of a bar that represents duration.
+ * @param initialData An initial array with timing information.
+ * @return A new array where each item has 2 new fields: barColor and length.
+ */
+export function getDataWithLengths(
+   initialData: Array<{ selfDuration: number }>
+): Array<{ selfDuration: number; length: number; barColor: string }> {
+   const maxDuration = initialData.reduce(
+      (max, { selfDuration }) => Math.max(max, selfDuration),
+      0
+   );
+   return initialData.map((item) => {
+      return {
+         ...item,
+         barColor: getBackgroundColorBasedOnTiming(
+            item.selfDuration / maxDuration
+         ),
+         length: (item.selfDuration / maxDuration) * LENGTH_SCALE
+      };
+   });
 }

@@ -23,7 +23,11 @@ interface IMessageResponse<T = unknown> {
 }
 
 const SEC = 1000;
-const DEFAULT_TIMEOUT = 10 * SEC;
+const SECONDS_IN_DEFAULT_TIMEOUT = 10;
+const DEFAULT_TIMEOUT = SECONDS_IN_DEFAULT_TIMEOUT * SEC;
+
+const NOT_FOUND_CODE = 404;
+const INTERNAL_SERVER_ERROR_CODE = 500;
 
 interface IExecuteConfig<TArgs> {
    timeout?: number;
@@ -126,7 +130,7 @@ export class RPC {
       const method = this._methods.get(methodName);
 
       if (typeof method !== 'function') {
-         return this.__responseError(id, 404);
+         return this.__responseError(id, NOT_FOUND_CODE);
       }
       const resultPromise = method(args);
       if (!(resultPromise instanceof Promise)) {
@@ -137,7 +141,7 @@ export class RPC {
             return this.__responseResult(id, result);
          },
          (message) => {
-            return this.__responseError(id, 500, message);
+            return this.__responseError(id, INTERNAL_SERVER_ERROR_CODE, message);
          }
       );
    }

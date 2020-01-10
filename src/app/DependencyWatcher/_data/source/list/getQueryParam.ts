@@ -40,11 +40,11 @@ export function getQueryParam<TData extends object>(
       ) {
          continue;
       }
-      const ignore = ignoreFilters[filterKey as IWhereKey<TData>];
-      if (!ignore) {
+      const currentIgnore = ignoreFilters[filterKey as IWhereKey<TData>];
+      if (!currentIgnore) {
          continue;
       }
-      ignore.forEach((ignore: IWhereKey<TData>) => {
+      currentIgnore.forEach((ignore: IWhereKey<TData>) => {
          delete where[ignore];
       });
    }

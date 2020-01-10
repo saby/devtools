@@ -1,5 +1,4 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Devtool/Layout/Browser');
 import { descriptor } from 'Types/entity';
 import 'css!Devtool/Layout/Browser';

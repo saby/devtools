@@ -1,6 +1,5 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-// @ts-ignore
-import * as template from 'wml!DependencyWatcher/_file/List';
+import template = require('wml!DependencyWatcher/_file/List');
 import { navigation } from './navigation';
 import { columns } from './columns';
 import { headers } from './header';
