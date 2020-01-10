@@ -87,15 +87,15 @@ export function proxyDefine(
                }
             );
          }
-         return target.call(
-            thisArg,
+         return target.apply(thisArg, [
             name,
             argArray[1],
+            ...argArray.slice(MODULE_INDEX),
             (...depModules: unknown[]) => {
                _init(name);
                return module.apply(GLOBAL, depModules);
             }
-         );
+         ]);
       }
    });
 }
