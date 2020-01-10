@@ -1,11 +1,9 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Elements/_Details/Pane/Pane');
 import { descriptor, Model } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
 import { TEMPLATES } from './const';
 import { Source } from './Source';
-// @ts-ignore
 import columnTemplate = require('wml!Elements/_Details/Pane/columnTemplate');
 import { highlightUpdate } from '../../_utils/highlightUpdate';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
@@ -78,6 +76,10 @@ function getEditingConfig(isControl: boolean): IEditingConfig | undefined {
       : undefined;
 }
 
+/**
+ * Shows a list and a caption for a portion of the details pane.
+ * @author Зайцев А.С.
+ */
 class Pane extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected _source: Source;

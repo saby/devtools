@@ -3,58 +3,59 @@ import { Emitter } from 'Extension/Event/Emitter';
 import { IMessageWrapper, IMessageData, IContentMessageEvent } from 'Extension/Event/IContentMessage';
 import { POST_MESSAGE_SOURCE } from 'Extension/const';
 
+const RANDOM_OFFSET = 2;
 /**
  * id вкладки, подмешиваемый во все сообщения.
  * Нужен для того чтобы не ловить на вкладке сообщения от самих себя
  */
-const TAB_ID = Math.random().toString().substr(2);
+const TAB_ID = Math.random().toString().substr(RANDOM_OFFSET);
 
 interface IWrapper extends IMessageWrapper {
     __tabId__: string;
 }
 
 class DevtoolChannel implements IEventEmitter {
-    private __emitter: Emitter;
-    private __onmessageHandler: (event: IContentMessageEvent<IWrapper>) => void;
-    
-    constructor(private __name: string) {
-        this.__emitter = new Emitter();
-        this.__onmessageHandler = this.__onmessage.bind(this);
-        window.addEventListener('message', this.__onmessageHandler);
+    private emitter: Emitter;
+    private onmessageHandler: (event: IContentMessageEvent<IWrapper>) => void;
+
+    constructor(private name: string) {
+        this.emitter = new Emitter();
+        this.onmessageHandler = this.__onmessage.bind(this);
+        window.addEventListener('message', this.onmessageHandler);
     }
-    
+
     dispatch(event: string, args?: ISerializable): boolean {
-        window.postMessage(<IWrapper>{
+        window.postMessage({
             source: POST_MESSAGE_SOURCE,
             data: {
-                source: this.__name,
+                source: this.name,
                 args,
                 event
             },
             __tabId__: TAB_ID
-        }, '*');
-        
+        } as IWrapper, '*');
+
         return true;
     }
     addListener<T>(event: string, callback: IHandler<T>): this {
-        this.__emitter.addListener(event, callback);
+        this.emitter.addListener(event, callback);
         return this;
     }
     removeListener<T>(event: string, callback: IHandler<T>): this {
-        this.__emitter.removeListener(event, callback);
+        this.emitter.removeListener(event, callback);
         return this;
     }
     removeAllListeners(event?: string): this {
-        this.__emitter.removeAllListeners(event);
+        this.emitter.removeAllListeners(event);
         return this;
     }
-    destructor() {
-        this.__emitter.destructor();
-        window.removeEventListener('message', this.__onmessageHandler);
-        delete this.__onmessageHandler;
+    destructor(): void {
+        this.emitter.destructor();
+        window.removeEventListener('message', this.onmessageHandler);
+        delete this.onmessageHandler;
     }
-    
-    private __onmessage(event: IContentMessageEvent<IWrapper>) {
+
+    private __onmessage(event: IContentMessageEvent<IWrapper>): void {
         if (!event.data) {
             return;
         }
@@ -64,11 +65,11 @@ class DevtoolChannel implements IEventEmitter {
         }
         this.__dispatch(data);
     }
-    private __dispatch({ source, args, event }: IMessageData) {
-        if (source !== this.__name) {
+    private __dispatch({ source, args, event }: IMessageData): void {
+        if (source !== this.name) {
             return;
         }
-        this.__emitter.dispatch(event, args);
+        this.emitter.dispatch(event, args);
     }
 }
 

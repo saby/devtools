@@ -56,6 +56,13 @@ function isEqualObjects(obj1: object, obj2: object): boolean {
    return Object.getPrototypeOf(obj1) === Object.getPrototypeOf(obj2);
 }
 
+/**
+ * Returns whether two values are equal.
+ * @param obj1 First value to compare.
+ * @param obj2 Second value to compare.
+ * @return Whether two values are equal.
+ * @author Зайцев А.С.
+ */
 export default function isDeepEqual(obj1: unknown, obj2: unknown): boolean {
    const equal = obj1 === obj2;
    let val1;

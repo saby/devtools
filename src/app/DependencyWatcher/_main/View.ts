@@ -1,6 +1,5 @@
 import { Control, TemplateFunction } from 'UI/Base';
-// @ts-ignore
-import * as template from 'wml!DependencyWatcher/_main/View';
+import template = require('wml!DependencyWatcher/_main/View');
 import { RPC } from 'Extension/Event/RPC';
 import 'css!DependencyWatcher/main';
 import { IEventEmitter } from 'Extension/Event/IEventEmitter';

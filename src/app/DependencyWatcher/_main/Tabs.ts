@@ -2,8 +2,7 @@ import { ViewMode } from './ViewMode';
 import { source } from '../data';
 import { Memory } from 'Types/source';
 import { IListConfig } from '../_data/source/IList';
-// @ts-ignore
-import { rk } from 'Core/i18n';
+import rk = require('i18n!DependencyWatcher/_main/Tabs');
 
 interface IDescription {
    caption: string;

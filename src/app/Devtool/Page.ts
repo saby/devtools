@@ -1,7 +1,5 @@
-// @ts-ignore
-import * as Control from 'Core/Control';
-// @ts-ignore
-import * as template from 'wml!Devtool/Page/Page';
+import Control = require('Core/Control');
+import template = require('wml!Devtool/Page/Page');
 import { Memory } from 'Types/source';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { GlobalMessages } from 'Extension/const';

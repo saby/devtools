@@ -5,6 +5,10 @@ interface IOptions {
    onSelect: (target: IWasabyElement) => void;
 }
 
+/**
+ * Module for managing the highlightning of elements on a page. Can show and hide overlay on specific elements and track mouse to highlight the element under the cursor.
+ * @author Зайцев А.С.
+ */
 class Highlighter {
    private readonly onSelect: IOptions['onSelect'];
    private subs: Array<() => void> = [];

@@ -245,8 +245,8 @@ export abstract class ListAbstract extends Compatibility {
          .then((items: ITransferRPCModule[]) => {
             const listItems: IListItem[] = [];
             for (let i = 0; i < items.length; i++) {
-               const parent = listItems[i - 1];
-               const item = this.__createItem(items[i], parent && parent.id);
+               const currentParent = listItems[i - 1];
+               const item = this.__createItem(items[i], currentParent && currentParent.id);
                listItems.push(item);
             }
             return listItems;

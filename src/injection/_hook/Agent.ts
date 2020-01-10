@@ -1,32 +1,49 @@
-// TODO: надо будет весь файл удалить после отката Изыгинской ветки
+/**
+ * TODO: надо подумать на тему реордера, скорее всего я смогу сам диффить порядок детей старой и новой ноды, даже полный дифф не нужен, достаточно просто узнать одинаковый ли порядок
+ * TODO: подумать в сторону редактирования, пока непонятно как его делать. У контрол нод иммутабельные опции
+ */
 import prepareForSerialization from './prepareForSerialization';
-import { IBackendControlNode, IWasabyElement } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IBackendControlNode,
+   IControlChanges,
+   IControlNode,
+   ITemplateChanges,
+   ITemplateNode,
+   IWasabyElement
+} from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
 import {
+   addRef,
    endMark,
    endSyncMark,
+   getContainerForNode,
    getControlType,
    getObjectDiff,
    getSyncList,
+   isControlNode,
+   isTemplateNode,
    startMark,
-   startSyncMark,
-   updateParentDuration
+   startSyncMark
 } from './Utils';
 import Highlighter from './Highlighter';
 import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData';
 import deepClone from './deepClone';
 import getNodeId from './getNodeId';
 import { INamedLogger } from 'Extension/Logger/ILogger';
-import { IRenderer, NodeOption, NodeOptionType } from 'Extension/Plugins/Elements/IRenderer';
 
 export interface IChangedNode {
    node: IBackendControlNode;
    operation: OperationType;
 }
 
+/**
+ * Stores information from the framework.
+ * This information gets send to the frontend through the channel at the end of every synchronization if devtools were opened at least once during the agent's lifetime.
+ * @author Зайцев А.С.
+ */
 class Agent {
    /**
     * This map is needed because framework can't generate unique keys, so we use virtual nodes instead of keys.
@@ -40,7 +57,7 @@ class Agent {
     * This map is just used to speed up search for virtual node by dom node.
     */
    private domToIds: WeakMap<
-      Element,
+      Node,
       Array<IBackendControlNode['id']>
    > = new WeakMap();
    /**
@@ -59,7 +76,7 @@ class Agent {
     * This map is used to batch updates by root during synchronization.
     */
    private changedRoots: Map<
-      string,
+      number,
       Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
    /**
@@ -78,18 +95,9 @@ class Agent {
       Map<IBackendControlNode['id'], IChangedNode>
    > = new Map();
    /**
-    * TODO: реордер это вообще отдельная операция сейчас, надо подумать как её нормально делать
-    *
-    * пока буду хранить здесь, но вообще нужно подумать
-    */
-   private reorderedNodes: Map<
-      object,
-      object[]
-   > = new Map();
-   /**
     * This is used to track which root gets synchronized, so we can batch updates by root.
     */
-   private rootStack: string[] = [];
+   private rootStack: number[] = [];
 
    private componentsStack: Array<IBackendControlNode['id']> = [];
 
@@ -116,11 +124,29 @@ class Agent {
 
    private logger: INamedLogger;
 
-   private renderer: IRenderer;
+   private vNodeToParentId: WeakMap<
+      IControlNode | ITemplateNode,
+      IBackendControlNode['id']
+   > = new WeakMap();
 
-   constructor(config: { logger: INamedLogger; renderer: IRenderer }) {
+   /**
+    * Mutation observer is used for tracking DOM changes during profiling.
+    */
+   private mutationObserver: MutationObserver;
+   /**
+    * This set is used to track DOM changes of controls.
+    * If DOM was changed - all controls from the closest control node get added here.
+    */
+   private dirtyControls: Set<IBackendControlNode['id']> = new Set();
+   /**
+    * This set is used to speed up the mutation observer callback.
+    * If a DOM element gets changed during synchronization it gets added here and will be ignored
+    * until the next synchronization.
+    */
+   private dirtyContainers: Set<Node> = new Set();
+
+   constructor(config: { logger: INamedLogger; }) {
       this.logger = config.logger;
-      this.renderer = config.renderer;
       this.channel.addListener(
          'devtoolsInitialized',
          this.__onDevtoolsOpened.bind(this)
@@ -170,13 +196,8 @@ class Agent {
          'getProfilingStatus',
          this.__getProfilingStatus.bind(this)
       );
-      this.channel.addListener(
-         'setNodeOption',
-         this.__setNodeOption.bind(this)
-      );
-      this.channel.addListener(
-         'revertNodeOption',
-         this.__revertNodeOption.bind(this)
+      this.mutationObserver = new MutationObserver(
+         this.__mutationObserverCallback.bind(this)
       );
       if (window.__WASABY_START_PROFILING) {
          this.__toggleProfiling(window.__WASABY_START_PROFILING);
@@ -205,29 +226,47 @@ class Agent {
       this.channel.dispatch('longMessage');
    }
 
-   onStartSync(rootId: string): void {
+   /**
+    * Adds the rootId to the stack so we can batch operations by synchronization.
+    * This hook is called from two places:
+    * 1) From Synchronizer.
+    * 2) From DOMEnvironment.
+    *
+    * Synchronizer can call the hook several times in a row if the root contains async controls.
+    * DOMEnvironment always calls the hook exactly once.
+    *
+    * In any case, if the synchronization for the root already started, we should move it to the top of the root stack without losing changes.
+    */
+   onStartSync(rootId: number): void {
+      if (this.changedRoots.has(rootId)) {
+         this.rootStack.splice(this.rootStack.indexOf(rootId), 1);
+         this.rootStack.push(rootId);
+         return;
+      }
       this.rootStack.push(rootId);
       this.changedRoots.set(rootId, new Map());
+      if (this.isProfiling) {
+         this.mutationObserver.observe(document, {
+            childList: true,
+            attributes: true,
+            characterData: true,
+            subtree: true
+         });
+      }
       startSyncMark(rootId);
    }
 
    onStartCommit(
       operation: OperationType,
       name: string,
-      oldNode?: object
-   ): number {
+      oldNode?: IControlNode | ITemplateNode
+   ): void {
       const currentRoot = this.__getCurrentRoot();
       const id = this.__getNodeId(oldNode);
 
       if (currentRoot.has(id)) {
          const changedNode = currentRoot.get(id) as IChangedNode;
          changedNode.node.selfStartTime = performance.now();
-         // TODO: если нода уже есть, то это асинхронное построение, можно это отдельной операцией показывать
-         /*
-         onStartCommit can be called more than one time during synchronization, e.g. if _beforeMount returns a Promise.
-         What's worse, framework doesn't even know what it is doing, so it calls onStartCommit with the wrong operation.
-         So, we have to ignore operation from the arguments and use the first one.
-          */
          startMark(name, id, changedNode.operation);
       } else {
          currentRoot.set(id, {
@@ -239,106 +278,192 @@ class Agent {
                name,
                selfStartTime: performance.now(),
                selfDuration: 0,
-               treeDuration: 0,
-               parentId: this.__getParentId(id)
+               treeDuration: 0
             },
             operation
          });
          startMark(name, id, operation);
       }
       this.componentsStack.push(id);
-      return id;
    }
 
-   onEndCommit(id: IBackendControlNode['id'], node: IBackendControlNode): void {
+   onEndCommit(
+      node: IBackendControlNode,
+      data?: ITemplateChanges | IControlChanges
+   ): void {
       const currentRoot = this.__getCurrentRoot();
-      const changedNode = currentRoot.get(id);
-      if (!changedNode) {
-         this.logger.error(new Error('Trying to change nonexistent node'));
-         return;
-      }
-      endMark(changedNode.node.name, id, changedNode.operation);
+      const changedNode = this.getCurrentNode();
+
       const commitDuration = performance.now() - changedNode.node.selfStartTime;
       changedNode.node.selfDuration += commitDuration;
-      this.componentsStack.pop();
-      updateParentDuration(
-         currentRoot,
-         commitDuration,
-         this.componentsStack,
-         changedNode.node.parentId
+      endMark(
+         changedNode.node.name,
+         changedNode.node.id,
+         changedNode.operation
       );
-      this.vNodeToId.set(node, id);
-   }
 
-   onStartLifecycle(id: IBackendControlNode['id']): void {
-      const currentRoot = this.__getCurrentRoot();
-      const changedNode = currentRoot.get(id);
-      if (!changedNode) {
-         this.logger.error(new Error('Trying to change nonexistent node'));
-         return;
+      changedNode.node.parentId = this.__getParentId(node);
+      if (changedNode.node.id === changedNode.node.parentId) {
+         this.logger.error(new Error("control's id and parentId are the same"));
       }
-      startMark(changedNode.node.name, id);
-      changedNode.node.selfStartTime = performance.now();
-      this.componentsStack.push(id);
-   }
 
-   onEndLifecycle(currentNode: object, data: IBackendControlNode): void {
-      const currentRoot = this.__getCurrentRoot();
-      const id = data.id;
-      const changedNode = currentRoot.get(id);
-      if (!changedNode) {
-         this.logger.error(new Error('Trying to change nonexistent node'));
-         return;
-      }
-      endMark(data.name, data.id);
-      this.vNodeToId.set(currentNode, id);
-
-      const lifecycleDuration =
-         performance.now() - changedNode.node.selfStartTime;
-      const selfDuration = changedNode.node.selfDuration + lifecycleDuration;
-      const treeDuration = changedNode.node.treeDuration;
       const parentId = changedNode.node.parentId;
+      if (typeof parentId !== 'undefined' && currentRoot.has(parentId)) {
+         const parent = currentRoot.get(parentId);
+         if (parent) {
+            parent.node.treeDuration += commitDuration;
+            if (!this.componentsStack.includes(parentId)) {
+               parent.node.selfDuration += commitDuration;
+            }
+         }
+      }
 
-      changedNode.node = data;
-      changedNode.node.selfDuration = selfDuration;
-      changedNode.node.treeDuration = treeDuration;
-      changedNode.node.parentId = parentId;
-      changedNode.node.vNode = currentNode;
+      // TODO: подумать на тему 1 контрол - несколько контейнеров. Актуально для шаблонов с несколькими корнями
+      // TODO: подумать про невидимые ноды
+      if (
+         changedNode.operation === OperationType.CREATE ||
+         changedNode.operation === OperationType.UPDATE
+      ) {
+         if (isTemplateNode(node) && node.children && node.children[0]) {
+            node.children[0].ref = addRef(
+               changedNode,
+               node.ref,
+               node.children[0].ref
+            );
+         }
+      }
 
+      this.vNodeToId.set(node, changedNode.node.id);
+      changedNode.node = {
+         ...changedNode.node,
+         ...data
+      };
       this.componentsStack.pop();
-      updateParentDuration(
-         currentRoot,
-         lifecycleDuration,
-         this.componentsStack,
-         parentId
-      );
    }
 
-   onReorder(node: object, newOrder: object[]): void {
-      /**
-       * TODO: сложный баг
-       * расширение хранит информацию в Map, который гарантирует, что порядок элементов это порядок вставки
-       * т.е. если девтулзы не ловят события в данный момент, то перестановка потеряется
-       *
-       * или если открыть и закрыть девтулзы, то порядок будет неправильным
-       */
-      this.reorderedNodes.set(node, newOrder);
+   private getCurrentNode(): IChangedNode {
+      const currentRoot = this.__getCurrentRoot();
+      if (this.componentsStack.length === 0) {
+         throw new Error("There're no nodes in progress");
+      }
+      const id = this.componentsStack[this.componentsStack.length - 1];
+      if (typeof id === 'undefined') {
+         throw new Error("There're no nodes in progress");
+      }
+      const changedNode = currentRoot.get(id);
+      if (!changedNode) {
+         throw new Error('Trying to change nonexistent node');
+      }
+      return changedNode;
    }
 
-   onEndSync(rootId: string): void {
+   saveChildren(
+      children: ITemplateNode['children'] | IControlNode['markup']
+   ): void {
+      if (children) {
+         if (isControlNode(children) || isTemplateNode(children)) {
+            const id = this.getCurrentNode().node.id;
+            if (
+               this.vNodeToParentId.has(children) &&
+               this.vNodeToParentId.get(children) !== id
+            ) {
+               this.logger.error(
+                  new Error('This child already belongs to a different parent')
+               );
+            }
+            this.vNodeToParentId.set(children, id);
+         } else if (Array.isArray(children)) {
+            children.forEach((child) => {
+               this.saveChildren(child);
+            });
+         } else if (children.children) {
+            this.saveChildren(children.children);
+         }
+      }
+   }
+
+   /**
+    * Returns changed node without relying on root stack.
+    * When lifecycle hooks get called nodes from different roots get mixed
+    * in one synchronization.
+    * This will not be fixed in foreseeable future, so we have to search for the node across all roots.
+    */
+   private findUncommittedNode(
+      id: IBackendControlNode['id']
+   ): IChangedNode | void {
+      for (const root of this.changedRoots.values()) {
+         if (root.has(id)) {
+            return root.get(id);
+         }
+      }
+   }
+
+   onStartLifecycle(node: IControlNode): void {
+      const id = this.__getNodeId(node);
+      const changedNode = this.findUncommittedNode(id);
+
+      if (changedNode) {
+         changedNode.node.selfStartTime = performance.now();
+         startMark(changedNode.node.name, changedNode.node.id);
+         this.componentsStack.push(changedNode.node.id);
+      } else {
+         this.logger.error(new Error("Can't find the node with this id"));
+      }
+   }
+
+   onEndLifecycle(node: IControlNode): void {
+      const id = this.__getNodeId(node);
+      const changedNode = this.findUncommittedNode(id);
+
+      if (changedNode) {
+         const lifecycleDuration =
+            performance.now() - changedNode.node.selfStartTime;
+         changedNode.node.selfDuration += lifecycleDuration;
+         endMark(changedNode.node.name, changedNode.node.id);
+
+         const parentId = changedNode.node.parentId;
+         if (typeof parentId !== 'undefined') {
+            const parent = this.findUncommittedNode(parentId);
+            if (parent) {
+               parent.node.treeDuration += lifecycleDuration;
+               parent.node.selfDuration += lifecycleDuration;
+            }
+         }
+
+         this.componentsStack.pop();
+      } else {
+         this.logger.error(new Error("Can't find the node with this id"));
+      }
+   }
+
+   onEndSync(rootId: number): void {
       const changes = this.changedRoots.get(rootId);
       if (!changes) {
          this.logger.error(new Error('Trying to change nonexistent root'));
          return;
       }
       endSyncMark(rootId);
+      if (this.isProfiling) {
+         /*
+         Because observer calls callback asynchronously there is no guarantee that every change was handled.
+         We should manually take records from the queue and pass them to the callback.
+          */
+         this.__mutationObserverCallback(this.mutationObserver.takeRecords());
+      }
       changes.forEach(({ operation, node }) => {
          if (node.selfDuration - node.treeDuration < 0) {
-            this.logger.warn(
-               `Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`
+            this.logger.error(
+               new Error(
+                  `Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`
+               )
             );
          }
          node.selfDuration -= node.treeDuration;
+         if (this.isProfiling) {
+            node.domChanged =
+               operation === OperationType.CREATE ||
+               this.dirtyControls.has(node.id);
+         }
          switch (operation) {
             case OperationType.DELETE:
                this.__handleRemove(node);
@@ -351,43 +476,21 @@ class Agent {
                break;
          }
       });
-      if (this.reorderedNodes.size) {
-         if (this.isDevtoolsOpened) {
-            this.reorderedNodes.forEach((newOrder, node) => {
-               const parentId = this.__getNodeId(node);
-               const childrenIds = newOrder.map((child) => this.__getNodeId(child));
-               const message: IOperationEvent['args'] = [
-                  OperationType.REORDER,
-                  parentId,
-                  ...childrenIds
-               ];
-               window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
-            });
-         }
-         this.reorderedNodes.clear();
-      }
-      /**
-       * TODO: в слое совместимости иногда попапы закрываются в обход синхронизатора,
-       * чистим их при ближайшей синхронизации
-       */
-      this.elements.forEach((element) => {
-         if (element.instance && element.instance._destroyed) {
-            this.__handleRemove(element);
-         }
-      });
       const id = guid();
       if (this.isProfiling) {
          this.changedNodesBySynchronization.set(id, changes);
+         this.__cleanupMutationObserver();
       }
       if (this.isDevtoolsOpened) {
          window.__WASABY_DEV_HOOK__.pushMessage('endSynchronization', id);
          this.channel.dispatch('longMessage');
       }
       this.changedRoots.delete(rootId);
-      this.rootStack.pop();
+      this.rootStack.splice(this.rootStack.indexOf(rootId), 1);
    }
 
    private __handleAdd(node: IBackendControlNode): void {
+      node.container = getContainerForNode(node);
       this.__updateDomToIds(OperationType.CREATE, node.container, node.id);
       this.elements.set(node.id, node);
 
@@ -410,6 +513,9 @@ class Agent {
          this.__handleAdd(node);
          return;
       }
+      // We can either set container on every update or change a lot of code to use getter.
+      // Setting container in one place is easier and doesn't impact performance very much.
+      node.container = getContainerForNode(node);
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -601,8 +707,6 @@ class Agent {
       }
       while (path.length) {
          currentProperty = path.pop();
-         // tslint:disable-next-line: ban-ts-ignore
-         // @ts-ignore
          value = value[currentProperty];
       }
       return value;
@@ -639,14 +743,14 @@ class Agent {
    private __findControlByDomNode(
       element: Element
    ): IBackendControlNode | undefined {
-      let currentElement = element;
+      let currentElement: Node | null = element;
 
       while (currentElement) {
          const nodes = this.domToIds.get(currentElement);
          if (nodes) {
             return this.elements.get(nodes[nodes.length - 1]);
          }
-         currentElement = currentElement.parentElement as Element;
+         currentElement = currentElement.parentElement;
       }
       return;
    }
@@ -702,6 +806,7 @@ class Agent {
             this.initialIdToDuration.set(id, selfDuration);
          });
       }
+      this.__cleanupMutationObserver();
       this.channel.dispatch('profilingStatus', this.isProfiling);
    }
 
@@ -719,10 +824,53 @@ class Agent {
       this.channel.dispatch('profilingData', profilingData);
    }
 
+   /**
+    * Disconnects the mutation observer and clears its data.
+    * @private
+    */
+   private __cleanupMutationObserver(): void {
+      this.dirtyContainers.clear();
+      this.dirtyControls.clear();
+      this.mutationObserver.disconnect();
+   }
+
+   /**
+    * For every DOM change finds the closest control node and marks all controls on it as dirty.
+    * If a DOM node gets changed multiple times during one synchronization it is only processed once.
+    * @param mutations Array of DOM changes.
+    * @private
+    */
+   private __mutationObserverCallback(mutations: MutationRecord[]): void {
+      mutations.forEach(({ target }) => {
+         if (this.dirtyContainers.has(target)) {
+            return;
+         }
+         this.dirtyContainers.add(target);
+         const ids = this.domToIds.get(target);
+         if (ids) {
+            ids.forEach((id) => this.dirtyControls.add(id));
+         } else {
+            let currentElement: Node | null = target;
+
+            while (currentElement) {
+               this.dirtyContainers.add(currentElement);
+               const nodes = this.domToIds.get(currentElement);
+               if (nodes) {
+                  nodes.forEach((id) => this.dirtyControls.add(id));
+                  break;
+               }
+               currentElement = currentElement.parentElement;
+            }
+         }
+      });
+   }
+
    private __getNodeId(node?: object): number {
       if (node) {
          if (this.vNodeToId.has(node)) {
             return this.vNodeToId.get(node) as number;
+         } else if (this.vNodeToId.has(node.vnode)) {
+            return this.vNodeToId.get(node.vnode) as number;
          } else {
             this.logger.error(
                new Error(
@@ -780,49 +928,11 @@ class Agent {
    }
 
    private __getParentId(
-      id: IBackendControlNode['id']
+      node: IControlNode | ITemplateNode
    ): IBackendControlNode['id'] | undefined {
-      const element = this.elements.get(id);
-      if (element) {
-         return element.parentId;
-      }
-      const componentsStack = this.componentsStack;
-      if (componentsStack && componentsStack.length) {
-         return componentsStack[componentsStack.length - 1];
-      }
-      return;
-   }
-
-   private __setNodeOption({
-      id,
-      optionType,
-      path,
-      value
-   }: {
-      id: IBackendControlNode['id'];
-      optionType: NodeOptionType;
-      path: string[];
-      value: NodeOption;
-   }): void {
-      const element = this.elements.get(id);
-      if (element) {
-         this.renderer.setNodeOption(element.vNode, optionType, path, value);
-      }
-   }
-
-   private __revertNodeOption({
-      id,
-      optionType,
-      path
-   }: {
-      id: IBackendControlNode['id'];
-      optionType: NodeOptionType;
-      path: string[];
-   }): void {
-      const element = this.elements.get(id);
-      if (element) {
-         this.renderer.revertNodeOption(element.vNode, optionType, path);
-      }
+      return (
+         this.vNodeToParentId.get(node) || this.vNodeToParentId.get(node.vnode)
+      );
    }
 }
 

@@ -2,7 +2,7 @@
    <ws:if data="{{ _options.value.startsWith('function ') }}">
       <Controls.buttons:Button caption='"{{_options.value}}"'
                                viewMode="link"
-                               on:click="__viewFunctionSource()" />
+                               on:click="_viewFunctionSource()" />
    </ws:if>
    <ws:else>
       <ws:if data="{{ _options.itemData.isEditing }}">

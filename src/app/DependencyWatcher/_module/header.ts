@@ -1,5 +1,4 @@
-// @ts-ignore
-import { rk } from 'Core/i18n';
+import rk = require('i18n!DependencyWatcher/_module/header');
 import { IListItem } from '../data';
 import { IHeader, IHeaders } from '../interface/IHeaders';
 

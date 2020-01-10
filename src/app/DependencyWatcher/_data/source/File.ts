@@ -64,8 +64,7 @@ export class File extends Compatibility {
                      },
                      itemsProperty: 'data',
                      metaProperty: 'meta',
-                     // @ts-ignore
-                     idProperty: 'id'
+                     keyProperty: 'id'
                   });
                });
          })

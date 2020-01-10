@@ -1,3 +1,8 @@
+/**
+ * Contains interfaces and consts used to render warnings in the profiler.
+ * @author Зайцев А.С.
+ */
+
 export interface IWarning {
    caption: string;
    template: string;

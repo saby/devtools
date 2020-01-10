@@ -13,7 +13,7 @@ import { dependentOnFiles } from 'Extension/Plugins/DependencyWatcher/data/filte
 import { getDeprecated } from 'Extension/Plugins/DependencyWatcher/data/filter/getDeprecated';
 
 const moduleFilters: Partial<
-   Record<keyof IModuleFilter, FilterFunctionGetter<any, IModule>>
+   Record<keyof IModuleFilter, FilterFunctionGetter<unknown, IModule>>
 > = {
    name: getForName,
    files: getForFiles,

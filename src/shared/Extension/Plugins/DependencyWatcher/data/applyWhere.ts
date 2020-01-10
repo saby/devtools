@@ -3,11 +3,14 @@ import { FilterFunction, FilterFunctionGetter } from './filter/Filter';
 function getFilterFunctions<TItem, TFilter extends object>(
    where: Partial<TFilter>,
    filterFunctionGetters: Partial<
-      Record<keyof TFilter, FilterFunctionGetter<any, TItem>>
+      Record<keyof TFilter, FilterFunctionGetter<unknown, TItem>>
    >
 ): Array<FilterFunction<TItem>> {
    const filterFunctions: Array<FilterFunction<TItem>> = [];
    for (const filterName in where) {
+      if (!where.hasOwnProperty(filterName)) {
+         continue;
+      }
       const filterGetter = filterFunctionGetters[filterName];
       if (!filterGetter) {
          continue;
@@ -21,7 +24,7 @@ function applyWhere<TItem, TFilter extends object>(
    items: TItem[],
    where: Partial<TFilter>,
    filterFunctionGetters: Partial<
-      Record<keyof TFilter, FilterFunctionGetter<any, TItem>>
+      Record<keyof TFilter, FilterFunctionGetter<unknown, TItem>>
    >
 ): TItem[] {
    const filterFunctions: Array<FilterFunction<TItem>> = getFilterFunctions(

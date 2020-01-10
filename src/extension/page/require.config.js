@@ -1,7 +1,6 @@
-let setRequireConfig = (config) => {
-    // @ts-ignore
+function setRequireConfig(config) {
     (require.config || window.require.config)(config);
-};
+}
 
 setRequireConfig({
     baseUrl: '../',

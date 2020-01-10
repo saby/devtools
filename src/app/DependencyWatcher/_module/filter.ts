@@ -1,10 +1,7 @@
 import * as file from './filter/file';
-// @ts-ignore
-import * as itemTemplate from 'wml!DependencyWatcher/_module/filter/itemTemplate';
-// @ts-ignore
-import * as Panel from 'wml!DependencyWatcher/_module/filter/Panel';
-// @ts-ignore
-import * as additionalTemplate from 'wml!DependencyWatcher/_module/filter/additionalTemplate';
+import itemTemplate = require('wml!DependencyWatcher/_module/filter/itemTemplate');
+import Panel = require('wml!DependencyWatcher/_module/filter/Panel');
+import additionalTemplate = require('wml!DependencyWatcher/_module/filter/additionalTemplate');
 import 'css!DependencyWatcher/module';
 
 export { file, itemTemplate, additionalTemplate, Panel };
