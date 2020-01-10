@@ -7,7 +7,9 @@ const enum Unit {
 
 const STEP_SIZE = 1024;
 const STEPS: Unit[] = [Unit.KB, Unit.MB, Unit.GB];
-const ROUND = [100, 10];
+const UPPER_ROUNDING_BOUNDARY = 100;
+const LOWER_ROUNDING_BOUNDARY = 10;
+const ROUND = [UPPER_ROUNDING_BOUNDARY, LOWER_ROUNDING_BOUNDARY];
 
 export default function getComputedSize(size: number): string {
    if (!size) {

@@ -43,27 +43,36 @@ export class DependencyWatcher implements IPlugin {
          moduleStorage: this._storage
       });
 
-      this.__defineProperty(require, REQUIRE).then(() => {
-         try {
-            let defined: object | undefined;
-            if (GLOBAL[REQUIRE] && GLOBAL[REQUIRE].s && GLOBAL[REQUIRE].s.contexts && GLOBAL[REQUIRE].s.contexts._ && GLOBAL[REQUIRE].s.contexts._.defined) {
-               defined = { ...GLOBAL[REQUIRE].s.contexts._.defined };
+      this.__defineProperty(require, REQUIRE)
+         .then(() => {
+            try {
+               let defined: object | undefined;
+               if (
+                  GLOBAL[REQUIRE] &&
+                  GLOBAL[REQUIRE].s &&
+                  GLOBAL[REQUIRE].s.contexts &&
+                  GLOBAL[REQUIRE].s.contexts._ &&
+                  GLOBAL[REQUIRE].s.contexts._.defined
+               ) {
+                  defined = { ...GLOBAL[REQUIRE].s.contexts._.defined };
+               }
+               if (defined) {
+                  this._logger.warn(
+                     `Не удалось вовремя переопределить require, возможны проблемы с модулями: ${Object.keys(
+                        defined
+                     ).toString()}`
+                  );
+               }
+            } catch (error) {
+               this._logger.error(error);
             }
-            if (defined) {
-               this._logger.warn(
-                  `Не удалось вовремя переопределить require, возможны проблемы с модулями: ${Object.keys(
-                     defined
-                  ).toString()}`
-               );
-            }
-         } catch (error) {
-            this._logger.error(error);
-         }
-      }).then(() => {
-         return this.__defineProperty(define, DEFINE);
-      }).catch(() => {
-         // ignore
-      });
+         })
+         .then(() => {
+            return this.__defineProperty(define, DEFINE);
+         })
+         .catch(() => {
+            // ignore
+         });
    }
 
    private __createStorage(): ModuleStorage {
@@ -88,9 +97,7 @@ export class DependencyWatcher implements IPlugin {
                    */
                   reject();
                } else {
-                  // @ts-ignore
                   descriptor.set(GLOBAL[name]);
-                  // @ts-ignore
                   GLOBAL[name] = descriptor.get();
                }
             } else {

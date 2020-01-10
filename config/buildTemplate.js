@@ -5,11 +5,15 @@ const NODE_MODULES = resolve(root, "node_modules");
 const WASABY_MODULES = [
   {
     "name": "Controls",
-    "path": "sbis3-controls/Controls"
+    "path": "wasaby-controls/Controls"
   },
   {
     "name": "Controls-theme",
-    "path": "sbis3-controls/Controls-theme"
+    "path": "wasaby-controls/Controls-theme"
+  },
+  {
+    "name": "Controls-default-theme",
+    "path": "wasaby-controls/Controls-default-theme"
   },
   {
     "name": "WS.Core",

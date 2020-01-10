@@ -1,5 +1,7 @@
 import {
    IBackendControlNode,
+   IControlChanges, IControlNode,
+   ITemplateChanges,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
@@ -10,15 +12,15 @@ export interface IWasabyDevHook {
       typeOfOperation: OperationType,
       name: string,
       oldNode?: object
-   ) => number;
-   onStartLifecycle: (id: IBackendControlNode['id']) => void;
-   onEndCommit: (
-      id: IBackendControlNode['id'],
-      node: IBackendControlNode
    ) => void;
-   onEndLifecycle: (currentNode: object, data: IBackendControlNode) => void;
-   onStartSync: (rootId: string) => void;
-   onEndSync: (rootId: string) => void;
+   onStartLifecycle: (node: IControlNode) => void;
+   onEndCommit: (
+      node: IBackendControlNode,
+      data?: ITemplateChanges | IControlChanges
+   ) => void;
+   onEndLifecycle: (node: IControlNode) => void;
+   onStartSync: (rootId: number) => void;
+   onEndSync: (rootId: number) => void;
    init: () => void;
    pushMessage: (eventName: string, args?: ISerializable) => void;
    $0: IWasabyElement;

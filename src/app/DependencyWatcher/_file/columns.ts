@@ -1,9 +1,7 @@
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 import { IColumn } from '../interface/IColumn';
-// @ts-ignore
-import * as NameTemplate from 'wml!DependencyWatcher/_file/columns/name';
-// @ts-ignore
-import * as ModulesTemplate from 'wml!DependencyWatcher/_file/columns/modules';
+import NameTemplate = require('wml!DependencyWatcher/_file/columns/name');
+import ModulesTemplate = require('wml!DependencyWatcher/_file/columns/modules');
 
 interface IFileColumn extends IColumn<ITransportFile> {}
 

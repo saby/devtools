@@ -1,5 +1,4 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Elements/_Breadcrumbs/Breadcrumbs');
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
@@ -14,6 +13,10 @@ interface IOptions extends IControlOptions {
    selectedItemId: IFrontendControlNode['id'];
 }
 
+/**
+ * Renders breadcrumbs.
+ * @author Зайцев А.С.
+ */
 class Breadcrumbs extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected _shouldScrollToElement: boolean = false;

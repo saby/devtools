@@ -1,7 +1,5 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-// @ts-ignore
-import * as template from 'wml!DependencyWatcher/_module/filter/file/input';
-// @ts-ignore
+import template = require('wml!DependencyWatcher/_module/filter/file/input');
 import tmplNotify = require('Controls/Utils/tmplNotify');
 
 interface IOptions extends IControlOptions {

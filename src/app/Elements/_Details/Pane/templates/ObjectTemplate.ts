@@ -1,5 +1,4 @@
 import { Control, TemplateFunction } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Elements/_Details/Pane/templates/ObjectTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
@@ -9,6 +8,10 @@ interface IOptions extends ITemplateOptions {
    value: object;
 }
 
+/**
+ * Template for objects. Shows only a caption which is created based on the type of object and the length of its keys.
+ * @author Зайцев А.С.
+ */
 class ObjectTemplate extends Control {
    protected _template: TemplateFunction = template;
    protected readonly _options: Readonly<IOptions>;

@@ -41,13 +41,11 @@ export class Require implements IDescriptor {
    getConfig<T extends IRequireInitObject>(): T {
       if (this._require) {
          try {
-            // @ts-ignore
             return this._require.s.contexts._.config;
          } catch (error) {
             this._logger.warn(error);
          }
       }
-      // @ts-ignore
       return this._init;
    }
 }

@@ -1,5 +1,4 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Profiler/_Warning/Warning');
 import 'css!Profiler/profiler';
 import { descriptor } from 'Types/entity';
@@ -15,6 +14,7 @@ export interface IWarningOptions extends IControlOptions {
  * @extends UI/_base/Control
  * @control
  * @public
+ * @author Зайцев А.С.
  */
 class Warning extends Control<IWarningOptions> {
    protected _template: TemplateFunction = template;

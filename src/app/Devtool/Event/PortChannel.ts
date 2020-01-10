@@ -1,55 +1,55 @@
 import { IEventEmitter, IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
 import { Emitter } from 'Extension/Event/Emitter';
-import { IMessageData } from "Extension/Event/IContentMessage";
+import { IMessageData } from 'Extension/Event/IContentMessage';
 import EvaluationExceptionInfo = chrome.devtools.inspectedWindow.EvaluationExceptionInfo;
 
 class PortChannel implements IEventEmitter {
-    private __emitter: Emitter;
-    private __onmessageHandler: (arg: IMessageData) => void;
+    private emitter: Emitter;
+    private onmessageHandler: (arg: IMessageData) => void;
 
     constructor(
-        private __name: string,
-        private __port: chrome.runtime.Port
+        private name: string,
+        private port: chrome.runtime.Port
     ) {
-        this.__emitter = new Emitter();
-        this.__onmessageHandler = this.__onmessage.bind(this);
-        this.__port.onMessage.addListener(this.__onmessageHandler);
+        this.emitter = new Emitter();
+        this.onmessageHandler = this.__onmessage.bind(this);
+        this.port.onMessage.addListener(this.onmessageHandler);
     }
 
     dispatch(event: string, args?: ISerializable): boolean {
-        this.__port.postMessage({
-            source: this.__name,
+        this.port.postMessage({
+            source: this.name,
             args,
             event
         });
         return true;
     }
     addListener<T>(event: string, callback: IHandler<T>): this {
-        this.__emitter.addListener(event, callback);
+        this.emitter.addListener(event, callback);
         return this;
     }
     removeListener<T>(event: string, callback: IHandler<T>): this {
-        this.__emitter.removeListener(event, callback);
+        this.emitter.removeListener(event, callback);
         return this;
     }
     removeAllListeners(event?: string): this {
-        this.__emitter.removeAllListeners(event);
+        this.emitter.removeAllListeners(event);
         return this;
     }
-    destructor() {
-        this.__emitter.destructor();
-        this.__port.onMessage.removeListener(this.__onmessageHandler);
-        delete this.__onmessageHandler;
+    destructor(): void {
+        this.emitter.destructor();
+        this.port.onMessage.removeListener(this.onmessageHandler);
+        delete this.onmessageHandler;
     }
 
-    private __onmessage({ source, args, event }: IMessageData) {
-        if (source !== this.__name) {
+    private __onmessage({ source, args, event }: IMessageData): void {
+        if (source !== this.name) {
             return;
         }
         if (event === 'longMessage') {
             this.__onLongMessage();
         } else {
-            this.__emitter.dispatch(event, args);
+            this.emitter.dispatch(event, args);
         }
     }
 
@@ -65,7 +65,7 @@ class PortChannel implements IEventEmitter {
                    throw e;
                } else {
                    result.forEach((event) => {
-                       this.__emitter.dispatch(event[0], event[1]);
+                       this.emitter.dispatch(event[0], event[1]);
                    });
                }
            }

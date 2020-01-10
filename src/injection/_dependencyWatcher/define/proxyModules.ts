@@ -1,20 +1,20 @@
 import { REQUIRE } from '../const';
-import { ILocalRequire } from '../require/IRequire';
+import { LocalRequire } from '../require/IRequire';
 import { ModuleStorage } from '../storage/Module';
 
 type ReplaceFunction<T extends object> = (name: string, origin: T) => T;
 
 interface IProxyObject {
-   require: ReplaceFunction<ILocalRequire>;
+   require: ReplaceFunction<LocalRequire>;
    'Core/library': ReplaceFunction<object>;
    'Core/moduleStubs': ReplaceFunction<object>;
 }
 
 export function getProxyModules(storage: ModuleStorage): IProxyObject {
-   function proxyRequire(name: string, require: ILocalRequire): ILocalRequire {
+   function proxyRequire(name: string, require: LocalRequire): LocalRequire {
       return new Proxy(require, {
          apply(
-            target: ILocalRequire,
+            target: LocalRequire,
             thisArg: unknown,
             argArray: Array<string | string[]>
          ): object | void {

@@ -2,6 +2,8 @@ import { PANEL_NAME } from 'Extension/const';
 
 let panelCreated: boolean = false;
 
+const WASABY_INIT_TIMEOUT = 1000;
+
 function createPanelIfNeeded(): void {
    if (panelCreated) {
       return;
@@ -29,7 +31,7 @@ function createPanelIfNeeded(): void {
                               elementsPanel.panelShownCallback();
                               window.clearInterval(loadInterval);
                            }
-                        }, 1000);
+                        }, WASABY_INIT_TIMEOUT);
                      }
                   });
                   panel.onHidden.addListener(() => {
@@ -55,5 +57,5 @@ if (!panelCreated) {
       if (panelCreated) {
          window.clearInterval(createPanelInterval);
       }
-   }, 1000);
+   }, WASABY_INIT_TIMEOUT);
 }

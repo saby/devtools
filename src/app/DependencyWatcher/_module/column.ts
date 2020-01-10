@@ -1,10 +1,8 @@
 import FileTemplate from './column/File';
 import { IListItem } from '../data';
 import { IColumn } from '../interface/IColumn';
-// @ts-ignore
-import * as usedTemplate from 'wml!DependencyWatcher/_module/column/used';
-// @ts-ignore
-import * as isDynamicTemplate from 'wml!DependencyWatcher/_module/column/isDynamic';
+import usedTemplate = require('wml!DependencyWatcher/_module/column/used');
+import isDynamicTemplate = require('wml!DependencyWatcher/_module/column/isDynamic');
 
 interface IListItemColumn extends IColumn<IListItem> {}
 

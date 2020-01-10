@@ -7,25 +7,34 @@ import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
 import { IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
 
+const NAME_INDEX = 2;
+const CONTROL_TYPE_INDEX = 3;
+const PARENT_ID_INDEX = 4;
+const REORDER_ARGS_OFFSET = 2;
+
 export function applyOperation(
    elements: Store['_elements'],
    args: IOperationEvent['args']
 ): void {
    switch (args[0]) {
       case OperationType.CREATE:
-         addNode(elements, args[1], args[2], args[3], args[4]);
+         addNode(elements, args[1], args[NAME_INDEX], args[CONTROL_TYPE_INDEX], args[PARENT_ID_INDEX]);
          break;
       case OperationType.DELETE:
          removeNode(elements, args[1]);
          break;
       case OperationType.REORDER:
-         reorderChildren(elements, args[1], args.slice(2));
+         reorderChildren(elements, args[1], args.slice(REORDER_ARGS_OFFSET));
          break;
       case OperationType.UPDATE:
          break;
    }
 }
 
+/**
+ * Collects and stores information about VDOM-tree from the frontend.
+ * @author Зайцев А.С.
+ */
 class Store {
    protected _channel: ContentChannel = new ContentChannel('elements');
    protected _elements: IFrontendControlNode[] = [];

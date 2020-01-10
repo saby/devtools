@@ -1,8 +1,7 @@
 import Store from '../_store/Store';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
-// @ts-ignore
-import * as ArraySimpleValuesUtil from 'Controls/Utils/ArraySimpleValuesUtil';
+import ArraySimpleValuesUtil = require('Controls/Utils/ArraySimpleValuesUtil');
 
 interface IModelItem {
    id: IFrontendControlNode['id'];
@@ -14,6 +13,10 @@ interface IModelItem {
    parentId?: IFrontendControlNode['parentId'];
 }
 
+/**
+ * Model for the elements tab.
+ * @author Зайцев А.С.
+ */
 class Model {
    private _items: Store['_elements'] = [];
    private _visibleItems: Map<

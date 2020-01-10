@@ -1,5 +1,4 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-// @ts-ignore
 import template = require('wml!Profiler/_CommitDetails/CommitDetails');
 import { descriptor } from 'Types/entity';
 import 'css!Profiler/profiler';
@@ -15,6 +14,10 @@ export interface ICommitDetailsOptions {
 
 type Options = IControlOptions & ICommitDetailsOptions;
 
+/**
+ * Renders details of the selected commit: warnings, reasons for the update.
+ * @author Зайцев А.С.
+ */
 class CommitDetails extends Control<Options> {
    protected _template: TemplateFunction = template;
 

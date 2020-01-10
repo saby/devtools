@@ -15,22 +15,21 @@ export class Define implements IDescriptor {
       this._logger = logger;
    }
    getDescriptor(): PropertyDescriptor {
-      const _this = this;
       return {
-         set(value: IDefine): void {
-            if (!_this._define) {
-               _this._define = value;
-               _this._proxy = proxyDefine(
-                  _this._define,
-                  _this._storage,
-                  _this._logger
+         set: (value: IDefine): void => {
+            if (!this._define) {
+               this._define = value;
+               this._proxy = proxyDefine(
+                  this._define,
+                  this._storage,
+                  this._logger
                );
             } else {
-               _this._proxy = value;
+               this._proxy = value;
             }
          },
-         get(): IDefine | void {
-            return _this._proxy;
+         get: (): IDefine | void => {
+            return this._proxy;
          },
          configurable: true,
          enumerable: true

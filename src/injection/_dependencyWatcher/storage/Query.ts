@@ -31,7 +31,7 @@ export abstract class Query<TItem extends IId, TFilter extends object>
    }
    protected abstract _getItems(keys?: number[]): TItem[];
    protected abstract _getFilters(): Partial<
-      Record<keyof TFilter, FilterFunctionGetter<any, TItem>>
+      Record<keyof TFilter, FilterFunctionGetter<unknown, TItem>>
    >;
    protected abstract _getSorting(): Record<keyof TItem, SortFunction<TItem>>;
 }

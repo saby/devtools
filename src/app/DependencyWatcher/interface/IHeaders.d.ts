@@ -4,4 +4,4 @@ export interface IHeader<TItem extends object> {
     sortingProperty?: keyof TItem | string;
 }
 
-export type IHeaders<TItem extends object> = Array<IHeader<TItem>>
+export type IHeaders<TItem extends object> = Array<IHeader<TItem>>;

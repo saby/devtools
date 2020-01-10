@@ -1,7 +1,7 @@
 import { IEventEmitter, IHandler, ISerializable } from './IEventEmitter';
 
 class Emitter implements IEventEmitter {
-   private _listeners: Map<string, Set<IHandler<any>>> = new Map();
+   private _listeners: Map<string, Set<IHandler<unknown>>> = new Map();
    addListener<T>(event: string, callback: IHandler<T>): this {
       let listeners = this._listeners.get(event);
       if (!listeners) {

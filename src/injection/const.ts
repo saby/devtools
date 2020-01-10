@@ -1,5 +1,6 @@
 // TODO: попробовать использовать globalThis
-export const GLOBAL = (function() {
+// tslint:disable-next-line:only-arrow-functions
+export const GLOBAL = (function(): object {
    if (typeof self !== 'undefined') {
       return self;
    }

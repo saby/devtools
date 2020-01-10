@@ -13,6 +13,10 @@ interface IOptions {
 
 const SEPARATOR = '---';
 
+/**
+ * Source for the details pane. Avoids circular dependencies by generating new elements on the fly.
+ * @author Зайцев А.С.
+ */
 export class Source implements ICrud {
    protected readonly _idProperty: IOptions['idProperty'];
    protected readonly _parentProperty: IOptions['parentProperty'];

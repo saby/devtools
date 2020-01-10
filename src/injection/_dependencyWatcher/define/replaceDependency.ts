@@ -4,17 +4,17 @@
  * @param {TCollection} origin
  * @return TCollection
  */
-type ReplaceFunction<T = any> = (name: string, origin: T) => T;
+type ReplaceFunction<T = unknown> = (name: string, origin: T) => T;
 
 interface IR1 {
    moduleName: string;
    dependencies: string[];
-   args: any[];
+   args: unknown[];
 }
 
 interface IR2 extends IR1 {
    dependencyName: string;
-   getReplacement<T = any>(name: string, origin: T): T;
+   getReplacement<T = unknown>(name: string, origin: T): T;
 }
 
 /**
@@ -63,6 +63,9 @@ export function replaceDependencies({
    }
    const newArgs = [...args];
    for (const dependencyName in proxyModules) {
+      if (!proxyModules.hasOwnProperty(dependencyName)) {
+         continue;
+      }
       replaceDependency({
          moduleName,
          dependencyName,
