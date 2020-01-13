@@ -11,7 +11,6 @@
             source="{{ _options.source }}"
             keyProperty="id"
             bind:filter="_filter"
-            searchValue="{{ _options.searchValue }}"
             navigation="{{ _navigation }}"
             sorting="{{ _sorting }}"
         >
@@ -23,7 +22,8 @@
                     attr:class="DependencyFilter__FilePanel_scroll"
                 >
                     <DependencyWatcher._file.List
-                        scope="{{ _options }}"
+                            columns="{{ _options.columns }}"
+                            header="{{ _options.headers }}"
                     />
                 </Controls.scroll:Container>
             </ws:content>
