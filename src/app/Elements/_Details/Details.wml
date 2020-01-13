@@ -31,7 +31,7 @@
                                      changedData="{{ _options.changedState }}"
                                      controlId="{{ _options.id }}"
                                      isControl="{{ _options.isControl }}"
-                                     on:viewFunctionSource="__viewFunctionSource()"
+                                     on:viewFunctionSource="_viewFunctionSource()"
                                      on:storeAsGlobal="__storeAsGlobal()"
                                      on:expandedChanged="_forwardExpanded('_stateExpanded')"
                                      on:setNodeOption="_setNodeOption(2)"
@@ -45,7 +45,7 @@
                                   canStoreAsGlobal="{{false}}"
                                   controlId="{{ _options.id }}"
                                   isControl="{{ _options.isControl }}"
-                                  on:viewFunctionSource="__viewFunctionSource()"
+                                  on:viewFunctionSource="_viewFunctionSource()"
                                   on:storeAsGlobal="__storeAsGlobal()"
                                   on:expandedChanged="_forwardExpanded('_eventsExpanded')"
                                   expanded="{{_options.eventsExpanded}}"/>
