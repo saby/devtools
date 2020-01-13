@@ -44,6 +44,8 @@
                 itemActions="{{ _itemActions }}"
                 virtualScrolling="{{ true }}"
                 virtualPageSize="{{ 70 }}"
+                stickyHeader="{{ true }}"
+                stickyColumnsCount="{{ 4 }}"
             >
                 <ws:emptyTemplate>
                     <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
