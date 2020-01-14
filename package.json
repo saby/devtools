@@ -61,7 +61,8 @@
          "build/resources/Elements/**/*.js",
          "build/resources/Extension/**/*.js",
          "build/resources/Profiler/**/*.js",
-         "build/resources/Search/**/*.js"
+         "build/resources/Search/**/*.js",
+         "build/resources/Debugging/**/*.js"
       ],
       "reporter": [
          "text",

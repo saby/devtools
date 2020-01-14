@@ -1,0 +1,33 @@
+<Devtool.Layout.Browser>
+    <ws:headTemplate>
+        <Controls.buttons:Button tooltip="Apply changes and reload the page"
+                                 caption="Apply"
+                                 style="primary"
+                                 attr:class="devtools-Debugging__headElement"
+                                 on:click="_applyChanges()" />
+        <Controls.buttons:Button tooltip="Remove s3debug cookie and reload the page"
+                                 caption="Reset"
+                                 on:click="_resetCookie()" />
+    </ws:headTemplate>
+    <ws:content>
+        <Layout.Browser source="{{ _source }}"
+                        keyProperty="id"
+                        multiSelectVisibility="visible"
+                        searchParam="title"
+                        theme="default-Layout"
+                        markerVisibility="hidden"
+                        selectedKeys="{{ _selectedKeys }}"
+                        minSearchLength="{{ 3 }}"
+                        sorting="{{ _sorting }}"
+                        on:selectedKeysChanged="_onSelectedKeysChanged()" attr:class="devtools-Debugging__browser">
+            <ws:search>
+                <Controls.search:Input bind:value="_searchValue" />
+            </ws:search>
+            <ws:content>
+                <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
+                    <Controls.list:View />
+                </Controls.scroll:Container>
+            </ws:content>
+        </Layout.Browser>
+    </ws:content>
+</Devtool.Layout.Browser>

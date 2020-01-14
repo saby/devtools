@@ -20,6 +20,7 @@
         <module id="0bad3dc3-e17e-441f-a91e-7aecf37867f1" name="Profiler"/>
         <module id="c7af5b1b-ad28-4cf8-ba55-c892c0b59245" name="Elements"/>
         <module id="8768d783-37e7-4f0d-a476-16766b4635b8" name="DependencyWatcher"/>
+        <module id="61cc9fd1-7bf3-43d0-9905-54dbe6b084bb" name="Debugging"/>
     </depends>
 
   <load_after/>
