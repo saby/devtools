@@ -29,6 +29,9 @@
       ],
       "UI/*": [
         "../node_modules/saby-ui/UI/*"
+      ],
+      "Controls/*": [
+        "../node_modules/wasaby-controls/Controls/*"
       ]
     }
   }

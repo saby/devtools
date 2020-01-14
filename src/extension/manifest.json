@@ -27,7 +27,8 @@
     "tabs",
     "webRequest",
     "storage",
-    "<all_urls>"
+    "<all_urls>",
+    "cookies"
   ],
 
   "content_scripts": [

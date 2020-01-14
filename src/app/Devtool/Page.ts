@@ -33,6 +33,11 @@ class Extension extends Control {
             id: 'Dependencies',
             title: 'Dependencies',
             align: 'left'
+         },
+         {
+            id: 'Debugging',
+            title: 'Debugging',
+            align: 'left'
          }
       ]
    });
