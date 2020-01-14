@@ -102,6 +102,10 @@ const EXTENSION_MODULES = [
     "path": resolve(input.app, "Devtool")
   },
   {
+    "name": "Debugging",
+    "path": resolve(input.app, "Debugging")
+  },
+  {
     "name": "DevtoolsTest",
     "path": resolve("DevtoolsTest")
   }

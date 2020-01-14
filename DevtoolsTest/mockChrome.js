@@ -34,7 +34,22 @@ GLOBAL.chrome = {
    },
    devtools: {
       inspectedWindow: {
-         tabId: 1
+         tabId: 1,
+         eval() {},
+         reload() {}
       }
+   },
+   cookies: {
+      set() {},
+      get() {},
+      remove() {},
+      getAll() {},
+      onChanged: {
+         addListener() {},
+         removeListener() {}
+      }
+   },
+   tabs: {
+      get() {}
    }
 };

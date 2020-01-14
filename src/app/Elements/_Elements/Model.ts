@@ -1,7 +1,7 @@
 import Store from '../_store/Store';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
-import ArraySimpleValuesUtil = require('Controls/Utils/ArraySimpleValuesUtil');
+import { getArrayDifference } from 'Controls/Utils/ArraySimpleValuesUtil';
 
 interface IModelItem {
    id: IFrontendControlNode['id'];
@@ -36,7 +36,7 @@ class Model {
          this._items = items.slice();
          this.__nextVersion();
       }
-      const diff = ArraySimpleValuesUtil.getArrayDifference(this._items, items);
+      const diff = getArrayDifference(this._items, items);
       if (diff.added.length > 0 || diff.removed.length > 0) {
          this._items = items.slice();
          this.__nextVersion();
