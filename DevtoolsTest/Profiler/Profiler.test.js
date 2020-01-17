@@ -218,7 +218,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                               {
                                  selfDuration: 5,
                                  updateReason: 'forceUpdated',
-                                 domChanged: true
+                                 domChanged: true,
+                                 isVisible: true
                               }
                            ],
                            [
@@ -226,7 +227,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                               {
                                  selfDuration: 7,
                                  updateReason: 'parentUpdated',
-                                 domChanged: false
+                                 domChanged: false,
+                                 isVisible: true
                               }
                            ],
                            [
@@ -234,7 +236,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                               {
                                  selfDuration: 10,
                                  updateReason: 'mounted',
-                                 domChanged: true
+                                 domChanged: true,
+                                 isVisible: false
                               }
                            ],
                            [
@@ -242,7 +245,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                               {
                                  selfDuration: 15,
                                  updateReason: 'mounted',
-                                 domChanged: true
+                                 domChanged: true,
+                                 isVisible: true
                               }
                            ]
                         ])
@@ -367,7 +371,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   selfDuration: 10,
                   actualBaseDuration: 10,
                   actualDuration: 10,
-                  warnings: undefined,
+                  warnings: ['invisible'],
                   hasChangesInSubtree: true
                },
                {
