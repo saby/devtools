@@ -51,8 +51,9 @@ export interface IBackendControlNode extends IControlNode {
    treeDuration: number;
    selfStartTime: number;
    vNode: object;
-   domChanged: boolean;
+   domChanged?: boolean;
    parentId?: IBackendControlNode['id'];
+   isVisible?: boolean;
 }
 
 export interface IFrontendControlNode {

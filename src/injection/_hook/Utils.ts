@@ -142,7 +142,8 @@ function getChangesDescription(
       changedOptions: processChanges(node.changedOptions),
       changedAttributes: processChanges(node.changedAttributes),
       selfDuration: node.selfDuration,
-      domChanged: node.domChanged
+      domChanged: !!node.domChanged,
+      isVisible: !!node.isVisible
    };
 }
 
@@ -240,4 +241,29 @@ export function getContainerForNode(node: IBackendControlNode): IWasabyElement {
       return node.instance._container;
    }
    return document.body;
+}
+
+function isParentVisible(element: HTMLElement): boolean {
+   const parent = element.parentElement;
+   if (parent) {
+      return isVisible(parent);
+   } else {
+      return true;
+   }
+}
+
+export function isVisible(element: HTMLElement): boolean {
+   if (element === document.documentElement || element === document.body || element.offsetParent !== null) {
+      return true;
+   }
+
+   const style = getComputedStyle(element);
+   if (style.position === 'fixed') {
+      return style.display !== 'none' && isParentVisible(element);
+   }
+   if (style.display === 'contents') {
+      return isParentVisible(element);
+   }
+
+   return false;
 }
