@@ -5,6 +5,7 @@ export interface IChangesDescription {
    selfDuration: number;
    updateReason: ControlUpdateReason;
    domChanged: boolean;
+   isVisible: boolean;
    changedOptions?: string[];
    changedAttributes?: string[];
 }

@@ -25,6 +25,7 @@ import {
    getSyncList,
    isControlNode,
    isTemplateNode,
+   isVisible,
    startMark,
    startSyncMark
 } from './Utils';
@@ -459,11 +460,6 @@ class Agent {
             );
          }
          node.selfDuration -= node.treeDuration;
-         if (this.isProfiling) {
-            node.domChanged =
-               operation === OperationType.CREATE ||
-               this.dirtyControls.has(node.id);
-         }
          switch (operation) {
             case OperationType.DELETE:
                this.__handleRemove(node);
@@ -475,6 +471,7 @@ class Agent {
                this.__handleUpdate(node);
                break;
          }
+         this.__addProfilingData(node, operation);
       });
       const id = guid();
       if (this.isProfiling) {
@@ -933,6 +930,24 @@ class Agent {
       return (
          this.vNodeToParentId.get(node) || this.vNodeToParentId.get(node.vnode)
       );
+   }
+
+   private __addProfilingData(node: IBackendControlNode, operation: OperationType): void {
+      if (this.isProfiling) {
+         switch (operation) {
+            case OperationType.CREATE:
+               node.domChanged = true;
+               node.isVisible = isVisible(node.container);
+               break;
+            case OperationType.UPDATE:
+               if (this.dirtyControls.has(node.id)) {
+                  node.domChanged = true;
+               }
+               node.isVisible = isVisible(node.container);
+               break;
+
+         }
+      }
    }
 }
 

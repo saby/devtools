@@ -200,7 +200,7 @@ class Profiler extends Control<IOptions> {
                synchronizationKey,
                currentItem.id
             );
-            let warnings: WARNING_NAMES[] | undefined;
+            const warnings: WARNING_NAMES[] = [];
             const updateReason: ControlUpdateReason = elementChanges
                ? elementChanges.updateReason
                : 'unchanged';
@@ -216,7 +216,7 @@ class Profiler extends Control<IOptions> {
                   parentsOfElementsWithDOMChanges.add(currentItem.parentId);
                }
             } else if (updateReason !== 'unchanged') {
-               warnings = ['domUnchanged'];
+               warnings.push('domUnchanged');
             }
 
             let actualBaseDuration = selfDuration;
@@ -249,11 +249,15 @@ class Profiler extends Control<IOptions> {
                }
             }
 
+            if (elementChanges && !elementChanges.isVisible) {
+               warnings.push('invisible');
+            }
+
             snapshot.push({
                ...currentItem,
                selfDuration,
                updateReason,
-               warnings,
+               warnings: warnings.length ? warnings : undefined,
                actualBaseDuration,
                actualDuration,
                hasChangesInSubtree
