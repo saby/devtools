@@ -51,9 +51,10 @@ export interface IBackendControlNode extends IControlNode {
    treeDuration: number;
    selfStartTime: number;
    vNode: object;
-   domChanged?: boolean;
    parentId?: IBackendControlNode['id'];
+   domChanged?: boolean;
    isVisible?: boolean;
+   unusedReceivedState?: boolean;
 }
 
 export interface IFrontendControlNode {
@@ -74,7 +75,9 @@ export interface ITemplateChanges {
 }
 
 export interface IControlChanges extends ITemplateChanges {
-   instance: object;
+   instance: {
+      _$resultBeforeMount?: Promise<unknown>;
+   };
    context?: object;
    changedContext?: object;
 }

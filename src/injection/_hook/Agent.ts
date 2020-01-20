@@ -145,8 +145,13 @@ class Agent {
     * until the next synchronization.
     */
    private dirtyContainers: Set<Node> = new Set();
+   /**
+    * This set is used to find controls with received state.
+    * If a control has received state from a server and returns Promise from _beforeMount we should show a warning in the profiler.
+    */
+   private controlsWithReceivedStates: Set<string>;
 
-   constructor(config: { logger: INamedLogger; }) {
+   constructor(config: { logger: INamedLogger }) {
       this.logger = config.logger;
       this.channel.addListener(
          'devtoolsInitialized',
@@ -203,6 +208,13 @@ class Agent {
       if (window.__WASABY_START_PROFILING) {
          this.__toggleProfiling(window.__WASABY_START_PROFILING);
          this.isDevtoolsOpened = true;
+         try {
+            this.controlsWithReceivedStates = new Set(
+               Object.keys(JSON.parse(window.receivedStates))
+            );
+         } catch (e) {
+            this.logger.error(new Error("Can't read received states"));
+         }
       }
    }
 
@@ -331,6 +343,22 @@ class Agent {
                node.ref,
                node.children[0].ref
             );
+         }
+      }
+
+      if (this.isProfiling) {
+         if (
+            changedNode.operation === OperationType.CREATE &&
+            data.instance &&
+            data.instance._$resultBeforeMount
+         ) {
+            if (
+               this.controlsWithReceivedStates &&
+               this.controlsWithReceivedStates.has(node.key)
+            ) {
+               changedNode.node.unusedReceivedState = true;
+               this.controlsWithReceivedStates.delete(node.key);
+            }
          }
       }
 
@@ -932,7 +960,10 @@ class Agent {
       );
    }
 
-   private __addProfilingData(node: IBackendControlNode, operation: OperationType): void {
+   private __addProfilingData(
+      node: IBackendControlNode,
+      operation: OperationType
+   ): void {
       if (this.isProfiling) {
          switch (operation) {
             case OperationType.CREATE:
@@ -945,7 +976,6 @@ class Agent {
                }
                node.isVisible = isVisible(node.container);
                break;
-
          }
       }
    }

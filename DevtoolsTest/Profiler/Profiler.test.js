@@ -219,7 +219,8 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                                  selfDuration: 5,
                                  updateReason: 'forceUpdated',
                                  domChanged: true,
-                                 isVisible: true
+                                 isVisible: true,
+                                 unusedReceivedState: true
                               }
                            ],
                            [
@@ -319,7 +320,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   selfDuration: 5,
                   actualBaseDuration: 42,
                   actualDuration: 37,
-                  warnings: undefined,
+                  warnings: ['unusedReceivedState'],
                   hasChangesInSubtree: true
                },
                {

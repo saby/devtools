@@ -8,7 +8,7 @@ export interface IWarning {
    template: string;
 }
 
-export type WARNING_NAMES = 'domUnchanged' | 'invisible';
+export type WARNING_NAMES = 'domUnchanged' | 'invisible' | 'unusedReceivedState';
 
 export const WARNINGS: Record<WARNING_NAMES, IWarning> = {
    domUnchanged: {
@@ -18,5 +18,9 @@ export const WARNINGS: Record<WARNING_NAMES, IWarning> = {
    invisible: {
       caption: 'Invisible control',
       template: 'Profiler/profiler:invisible'
+   },
+   unusedReceivedState: {
+      caption: 'Unused received state',
+      template: 'Profiler/profiler:unusedReceivedState'
    }
 };
