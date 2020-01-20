@@ -249,8 +249,13 @@ class Profiler extends Control<IOptions> {
                }
             }
 
-            if (elementChanges && !elementChanges.isVisible) {
-               warnings.push('invisible');
+            if (elementChanges) {
+               if (!elementChanges.isVisible) {
+                  warnings.push('invisible');
+               }
+               if (elementChanges.unusedReceivedState) {
+                  warnings.push('unusedReceivedState');
+               }
             }
 
             snapshot.push({

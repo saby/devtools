@@ -6,6 +6,7 @@ export interface IChangesDescription {
    updateReason: ControlUpdateReason;
    domChanged: boolean;
    isVisible: boolean;
+   unusedReceivedState: boolean;
    changedOptions?: string[];
    changedAttributes?: string[];
 }
