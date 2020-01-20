@@ -143,7 +143,8 @@ function getChangesDescription(
       changedAttributes: processChanges(node.changedAttributes),
       selfDuration: node.selfDuration,
       domChanged: !!node.domChanged,
-      isVisible: !!node.isVisible
+      isVisible: !!node.isVisible,
+      unusedReceivedState: !!node.unusedReceivedState
    };
 }
 

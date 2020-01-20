@@ -4,6 +4,7 @@
  */
 import domUnchanged = require('wml!Profiler/_Warning/templates/domUnchanged');
 import invisible = require('wml!Profiler/_Warning/templates/invisible');
+import unusedReceivedState = require('wml!Profiler/_Warning/templates/unusedReceivedState');
 
-export { domUnchanged, invisible };
+export { domUnchanged, invisible, unusedReceivedState };
 export { default as Profiler } from './_Profiler/Profiler';
