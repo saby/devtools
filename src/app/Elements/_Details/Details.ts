@@ -3,6 +3,7 @@ import template = require('wml!Elements/_Details/Details');
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import Store from '../_store/Store';
+import tmplNotify = require('Controls/Utils/tmplNotify');
 
 import 'css!Elements/elements';
 import { NodeOptionType } from 'Extension/Plugins/Elements/IRenderer';
@@ -32,6 +33,7 @@ const DEFAULT_EVAL_TIMEOUT = 100;
  */
 class Details extends Control<IOptions> {
    protected _template: TemplateFunction = template;
+   protected _notifyHandler: Function = tmplNotify;
 
    protected _viewFunctionSource(e: Event, path: Array<string | number>): void {
       this._options.store.dispatch('viewFunctionSource', {

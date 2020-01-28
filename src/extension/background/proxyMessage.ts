@@ -1,3 +1,10 @@
+import {
+   DEVTOOL_CONTENT_PORT,
+   GLOBAL_CHANNEL_NAME,
+   PORT_TAB_ID_POSTFIX,
+   GlobalMessages
+} from 'Extension/const';
+
 type MessageHandler = (message: MessageEvent) => void;
 type DisconnectHandler = (port: chrome.runtime.Port) => void;
 
@@ -12,6 +19,13 @@ function getOnDisconnect(
    messageProxy: MessageHandler
 ): DisconnectHandler {
    return (port: chrome.runtime.Port) => {
+      // When devtools window get closed we should notify the corresponding backend tab.
+      if (port.name.includes(`${DEVTOOL_CONTENT_PORT}${PORT_TAB_ID_POSTFIX}`)) {
+         dependentPort.postMessage({
+            source: GLOBAL_CHANNEL_NAME,
+            event: GlobalMessages.devtoolsClosed
+         });
+      }
       dependentPort.onMessage.removeListener(messageProxy);
    };
 }

@@ -39,8 +39,12 @@ define([
             const items = [1, 2, 3];
             const options = {
                data: {
-                  text: 'test',
-                  items
+                  text: {
+                     value: 'test'
+                  },
+                  items: {
+                     value: items
+                  }
                },
                isControl: false
             };
@@ -71,7 +75,7 @@ define([
                }
             ]);
             // every action has a handler that gets bound inside _beforeMount so we can't test deep equality here
-            assert.equal(instance._itemActions.length, 3);
+            assert.equal(instance._itemActions.length, 5);
             assert.isFunction(instance._visibilityCallback);
             assert.isUndefined(instance._editingConfig);
          });
@@ -79,8 +83,13 @@ define([
             const items = [1, 2, 3];
             const options = {
                data: {
-                  text: 'test',
-                  items
+                  text: {
+                     value: 'test',
+                     hasBreakpoint: true
+                  },
+                  items: {
+                     value: items
+                  }
                },
                isControl: true
             };
@@ -94,7 +103,8 @@ define([
                   value: 'test',
                   name: 'text',
                   parent: null,
-                  hasChildren: null
+                  hasChildren: null,
+                  hasBreakpoint: true
                },
                {
                   key: 'items',
@@ -111,7 +121,7 @@ define([
                }
             ]);
             // every action has a handler that gets bound inside _beforeMount so we can't test deep equality here
-            assert.equal(instance._itemActions.length, 3);
+            assert.equal(instance._itemActions.length, 5);
             assert.isFunction(instance._visibilityCallback);
             assert.deepEqual(instance._editingConfig, {
                sequentialEditing: false,
@@ -161,19 +171,27 @@ define([
 
          it('should update source without reloading list', function() {
             const data = {
-               text: 'test',
-               items: [1, 2, 3]
+               text: {
+                  value: 'test'
+               },
+               items: {
+                  value: [1, 2, 3]
+               }
             };
             const oldOptions = {
                data,
                changedData: {
-                  text: 'test1'
+                  text: {
+                     value: 'test1'
+                  }
                },
                isControl: false
             };
             const newOptions = {
                changedData: {
-                  text: 'test2'
+                  text: {
+                     value: 'test2'
+                  }
                },
                data,
                isControl: false
@@ -215,19 +233,27 @@ define([
 
          it('should update source and reload the list', function() {
             const data = {
-               text: 'test',
-               items: [1, 2, 3]
+               text: {
+                  value: 'test'
+               },
+               items: {
+                  value: [1, 2, 3]
+               }
             };
             const oldOptions = {
                data,
                changedData: {
-                  text: 'test1'
+                  text: {
+                     value: 'test1'
+                  }
                },
                isControl: false
             };
             const newOptions = {
                changedData: {
-                  text: 'test2'
+                  text: {
+                     value: 'test2'
+                  }
                },
                data,
                isControl: false,
@@ -273,16 +299,24 @@ define([
          it('should create new source', function() {
             const oldOptions = {
                data: {
-                  text: 'test',
-                  items: [1, 2, 3]
+                  text: {
+                     value: 'test'
+                  },
+                  items: {
+                     value: [1, 2, 3]
+                  }
                },
-               isControl: false
+               isControl: false,
+               controlId: 0
             };
             const newOptions = {
                data: {
-                  text: 'test123'
+                  text: {
+                     value: 'test123'
+                  }
                },
-               isControl: false
+               isControl: false,
+               controlId: 1
             };
             const oldSource = {};
             instance._source = oldSource;
@@ -301,6 +335,30 @@ define([
                   hasChildren: null
                }
             ]);
+         });
+
+         it('should not create new source', function() {
+            const oldOptions = {
+               data: {
+                  text: {
+                     value: 'test'
+                  }
+               },
+               isControl: false,
+               controlId: 0
+            };
+            const newOptions = {
+               data: { ...oldOptions.data },
+               isControl: false,
+               controlId: 0
+            };
+            const oldSource = {};
+            instance._source = oldSource;
+            instance.saveOptions(oldOptions);
+
+            instance._beforeUpdate(newOptions);
+
+            assert.equal(instance._source, oldSource);
          });
 
          it('should create new editingConfig', function() {
@@ -421,7 +479,8 @@ define([
                value: 456
             };
             instance.saveOptions({
-               changedData
+               changedData,
+               highlightUpdates: true
             });
             const testParentElement = {};
             const valueParentElement = {};
@@ -447,6 +506,25 @@ define([
                highlightUpdateMock.calledWithExactly(valueParentElement)
             );
             assert.isTrue(highlightUpdateMock.calledTwice);
+         });
+
+         it('should not call highlightUpdate', function() {
+            const highlightUpdateMock = sandbox.stub(
+               highlightUpdate,
+               'highlightUpdate'
+            );
+            const changedData = {
+               test: '123',
+               value: 456
+            };
+            instance.saveOptions({
+               changedData,
+               highlightUpdates: false
+            });
+
+            instance._afterUpdate({});
+
+            assert.isTrue(highlightUpdateMock.notCalled);
          });
       });
 
@@ -503,62 +581,240 @@ define([
             );
          });
 
-         it('should return false because _options.canStoreAsGlobal is false', function() {
-            const action = {
-               id: 'storeAsGlobal'
-            };
-            const item = new entityLib.Model({
-               rawData: {
-                  key: 'item---value',
-                  value: 123
-               },
-               keyProperty: 'key'
-            });
-            instance.saveOptions({
-               canStoreAsGlobal: false
+         describe('canStoreAsGlobal', function() {
+            it('should return false because _options.canStoreAsGlobal is false', function() {
+               const action = {
+                  id: 'storeAsGlobal'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'item---value',
+                     value: 123
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  canStoreAsGlobal: false
+               });
+
+               assert.isFalse(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
             });
 
-            assert.isFalse(
-               instance._itemActionVisibilityCallback(action, item)
-            );
+            it("should return false because item's value is not an object", function() {
+               const action = {
+                  id: 'storeAsGlobal'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'item---value',
+                     value: 123
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  canStoreAsGlobal: false
+               });
+
+               assert.isFalse(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
+            });
+
+            it('should return true', function() {
+               const action = {
+                  id: 'storeAsGlobal'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'item---value',
+                     value: {}
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  canStoreAsGlobal: true
+               });
+
+               assert.isTrue(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
+            });
          });
 
-         it("should return false because item's value is not an object", function() {
-            const action = {
-               id: 'storeAsGlobal'
-            };
-            const item = new entityLib.Model({
-               rawData: {
-                  key: 'item---value',
-                  value: 123
-               },
-               keyProperty: 'key'
-            });
-            instance.saveOptions({
-               canStoreAsGlobal: false
+         describe('addBreakpoint', function() {
+            it('should return false because this is not the events tab', function() {
+               const action = {
+                  id: 'addBreakpoint'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'item---value',
+                     value: {}
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  caption: 'Options'
+               });
+
+               assert.isFalse(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
             });
 
-            assert.isFalse(
-               instance._itemActionVisibilityCallback(action, item)
-            );
+            it('should return false because the item is not on the top level', function() {
+               const action = {
+                  id: 'addBreakpoint'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'click-0',
+                     value: {},
+                     parent: 'click'
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  caption: 'Events'
+               });
+
+               assert.isFalse(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
+            });
+
+            it("should return false because the item has a breakpoint", function() {
+               const action = {
+                  id: 'addBreakpoint'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'click',
+                     value: {},
+                     hasBreakpoint: true,
+                     parent: null
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  caption: 'Events'
+               });
+
+               assert.isFalse(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
+            });
+
+            it('should return true', function() {
+               const action = {
+                  id: 'addBreakpoint'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'click',
+                     value: {},
+                     hasBreakpoint: false,
+                     parent: null
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  caption: 'Events'
+               });
+
+               assert.isTrue(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
+            });
          });
 
-         it('should return true', function() {
-            const action = {
-               id: 'storeAsGlobal'
-            };
-            const item = new entityLib.Model({
-               rawData: {
-                  key: 'item---value',
-                  value: {}
-               },
-               keyProperty: 'key'
-            });
-            instance.saveOptions({
-               canStoreAsGlobal: true
+         describe('removeBreakpoint', function() {
+            it('should return false because this is not the events tab', function() {
+               const action = {
+                  id: 'removeBreakpoint'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'item---value',
+                     value: {}
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  caption: 'Options'
+               });
+
+               assert.isFalse(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
             });
 
-            assert.isTrue(instance._itemActionVisibilityCallback(action, item));
+            it('should return false because the item is not on the top level', function() {
+               const action = {
+                  id: 'removeBreakpoint'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'click-0',
+                     value: {},
+                     parent: 'click'
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  caption: 'Events'
+               });
+
+               assert.isFalse(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
+            });
+
+            it("should return false because the item doesn't have a breakpoint", function() {
+               const action = {
+                  id: 'removeBreakpoint'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'click',
+                     value: {},
+                     hasBreakpoint: false,
+                     parent: null
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  caption: 'Events'
+               });
+
+               assert.isFalse(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
+            });
+
+            it('should return true', function() {
+               const action = {
+                  id: 'removeBreakpoint'
+               };
+               const item = new entityLib.Model({
+                  rawData: {
+                     key: 'click',
+                     value: {},
+                     hasBreakpoint: true,
+                     parent: null
+                  },
+                  keyProperty: 'key'
+               });
+               instance.saveOptions({
+                  caption: 'Events'
+               });
+
+               assert.isTrue(
+                  instance._itemActionVisibilityCallback(action, item)
+               );
+            });
          });
       });
 
@@ -818,7 +1074,8 @@ define([
                'changedData',
                'canStoreAsGlobal',
                'readOnly',
-               'theme'
+               'theme',
+               'highlightUpdates'
             ]);
             testOption(optionTypes, 'caption', {
                required: true,
@@ -852,12 +1109,45 @@ define([
             testOption(optionTypes, 'theme', {
                args: [String]
             });
+            testOption(optionTypes, 'highlightUpdates', {
+               args: [Boolean]
+            });
          });
       });
 
       it('getDefaultOptions', function() {
          assert.deepEqual(Pane.getDefaultOptions(), {
-            canStoreAsGlobal: true
+            canStoreAsGlobal: true,
+            highlightUpdates: true
+         });
+      });
+
+      describe('__setBreakpoint', function() {
+         it('should fire setBreakpoint event', function() {
+            const item = new entityLib.Model({
+               rawData: {
+                  name: 'click'
+               },
+               keyProperty: 'key'
+            });
+            const stub = sandbox.stub(instance, '_notify');
+
+            instance.__setBreakpoint(item);
+
+            assert.isTrue(
+               stub.calledOnceWithExactly('setBreakpoint', ['click'])
+            );
+         });
+
+         it('should fire removeBreakpoint event', function() {
+            const stub = sandbox.stub(instance, '_notify');
+            instance.saveOptions({
+               controlId: 0
+            });
+
+            instance.__removeBreakpoint();
+
+            assert.isTrue(stub.calledOnceWithExactly('removeBreakpoint', [0]));
          });
       });
    });
