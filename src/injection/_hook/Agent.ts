@@ -19,8 +19,10 @@ import {
    addRef,
    endMark,
    endSyncMark,
+   getCondition,
    getContainerForNode,
    getControlType,
+   getEvents,
    getObjectDiff,
    getSyncList,
    isControlNode,
@@ -34,6 +36,8 @@ import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData
 import deepClone from './deepClone';
 import getNodeId from './getNodeId';
 import { INamedLogger } from 'Extension/Logger/ILogger';
+import { GlobalMessages } from 'Extension/const';
+import { globalChannel } from '../_devtool/globalChannel';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -146,7 +150,11 @@ class Agent {
     */
    private dirtyContainers: Set<Node> = new Set();
 
-   constructor(config: { logger: INamedLogger; }) {
+   constructor(config: { logger: INamedLogger }) {
+      globalChannel.addListener(
+         GlobalMessages.devtoolsClosed,
+         this.__onDevtoolsClosed.bind(this)
+      );
       this.logger = config.logger;
       this.channel.addListener(
          'devtoolsInitialized',
@@ -196,6 +204,10 @@ class Agent {
       this.channel.addListener(
          'getProfilingStatus',
          this.__getProfilingStatus.bind(this)
+      );
+      this.channel.addListener(
+         'setBreakpoint',
+         this.__setBreakpoint.bind(this)
       );
       this.mutationObserver = new MutationObserver(
          this.__mutationObserverCallback.bind(this)
@@ -580,7 +592,7 @@ class Agent {
             result.attributes = node.attributes;
             result.state = node.state;
             result.options = node.options;
-            result.events = this.__getEvents(id);
+            result.events = getEvents(this.elements, id);
             result.isControl = !!node.instance;
             this.selectedNodePreviousState = result.isControl
                ? deepClone(node.state)
@@ -695,7 +707,7 @@ class Agent {
       let currentProperty = path.pop();
       let value;
       if (currentProperty === 'events') {
-         value = this.__getEvents(id);
+         value = getEvents(this.elements, id);
       } else {
          const element = this.elements.get(id);
          if (element) {
@@ -760,38 +772,6 @@ class Agent {
          this.channel.dispatch('setSelectedItem', node.id);
          this.idClosestToPreviousSelectedElement = node.id;
       }
-   }
-
-   private __getEvents(
-      id: IBackendControlNode['id']
-   ): Record<string, Array<{ function: Function; arguments: unknown[] }>> {
-      const EVENT_NAME_OFFSET = 3;
-      const node = this.elements.get(id);
-      const events: Record<
-         string,
-         Array<{ function: Function; arguments: unknown[] }>
-      > = {};
-      if (node && node.container.eventProperties) {
-         const eventProperties = node.container.eventProperties;
-         Object.keys(eventProperties).forEach((key) => {
-            events[key.slice(EVENT_NAME_OFFSET)] = eventProperties[key].map(
-               (handler) => {
-                  if (handler.fn.control[handler.value]) {
-                     return {
-                        function: handler.fn.control[handler.value],
-                        arguments: handler.args
-                     };
-                  } else {
-                     return {
-                        function: handler.fn,
-                        arguments: handler.args
-                     };
-                  }
-               }
-            );
-         });
-      }
-      return events;
    }
 
    private __toggleProfiling(state: boolean = !this.isProfiling): void {
@@ -932,7 +912,10 @@ class Agent {
       );
    }
 
-   private __addProfilingData(node: IBackendControlNode, operation: OperationType): void {
+   private __addProfilingData(
+      node: IBackendControlNode,
+      operation: OperationType
+   ): void {
       if (this.isProfiling) {
          switch (operation) {
             case OperationType.CREATE:
@@ -945,9 +928,86 @@ class Agent {
                }
                node.isVisible = isVisible(node.container);
                break;
-
          }
       }
+   }
+
+   /**
+    * Performs the cleanup on devtools closure. Stops sending events, disables selection from the page.
+    * @private
+    */
+   private __onDevtoolsClosed(): void {
+      this.isDevtoolsOpened = false;
+      this.__toggleSelectFromPage(false);
+   }
+
+   /**
+    * Constructs array of event handlers and saves it on the hook. Each item of the array is a tuple which declaration can be found in IHook.d.ts.
+    * Includes event handlers of the control with the passed id and its' ancestors.
+    * @param id Id of the first control to which breakpoints will be added.
+    * @param eventName Name of the event which will be handled.
+    * @private
+    */
+   private __setBreakpoint({
+      id,
+      eventName
+   }: {
+      id: IBackendControlNode['id'];
+      eventName: string;
+   }): void {
+      let node = this.elements.get(id);
+      const breakpoints: Window['__WASABY_DEV_HOOK__']['_breakpoints'] = [];
+      const processedHandlers: WeakMap<
+         Function,
+         WeakSet<IControlNode['instance']>
+      > = new WeakMap();
+      while (node) {
+         const currentId = node.id;
+         const eventHandlers = getEvents(this.elements, currentId, true)[
+            eventName
+         ];
+         if (eventHandlers) {
+            eventHandlers.forEach((handler) => {
+               const control = handler.controlNode.control;
+               if (node && (!node.instance || control === node.instance)) {
+                  const handledControls = processedHandlers.get(
+                     handler.function
+                  );
+                  let needBreakpoint = false;
+
+                  if (handledControls) {
+                     if (!handledControls.has(control)) {
+                        handledControls.add(control);
+                        needBreakpoint = true;
+                     }
+                  } else {
+                     processedHandlers.set(
+                        handler.function,
+                        new WeakSet([control])
+                     );
+                     needBreakpoint = true;
+                  }
+
+                  if (needBreakpoint) {
+                     const controlId = this.__getNodeId(handler.controlNode);
+                     breakpoints.push([
+                        handler.function,
+                        getCondition(eventName, controlId),
+                        controlId,
+                        id
+                     ]);
+                  }
+               }
+            });
+         }
+
+         if (typeof node.parentId !== 'undefined') {
+            node = this.elements.get(node.parentId);
+         } else {
+            break;
+         }
+      }
+      window.__WASABY_DEV_HOOK__._breakpoints = breakpoints;
    }
 }
 

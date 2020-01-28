@@ -253,7 +253,11 @@ function isParentVisible(element: HTMLElement): boolean {
 }
 
 export function isVisible(element: HTMLElement): boolean {
-   if (element === document.documentElement || element === document.body || element.offsetParent !== null) {
+   if (
+      element === document.documentElement ||
+      element === document.body ||
+      element.offsetParent !== null
+   ) {
       return true;
    }
 
@@ -266,4 +270,88 @@ export function isVisible(element: HTMLElement): boolean {
    }
 
    return false;
+}
+
+/**
+ * Finds the controlNode to which the control belongs to.
+ * @param control Control which controlNode we're trying to get.
+ * @return The controlNode to which the control belongs to.
+ */
+function getControlNode(control: IControlNode['instance']): IControlNode {
+   return control._container.controlNodes.find(
+      (node) => node.control === control
+   ) as IControlNode;
+}
+
+/**
+ * For templates, returns every event handler. For controls, returns every event which is handled by this control.
+ * Actually, not every event handled by the control is returned, only events for the control's container.
+ * Devtools take information about events from the DOM elements, and there's no fast way to collect this information and keep it updated.
+ * @param elements
+ * @param id
+ * @param needControlNode
+ */
+export function getEvents(
+   elements: Agent['elements'],
+   id: IBackendControlNode['id'],
+   needControlNode?: false
+): Record<string, Array<{ function: Function; arguments: unknown[] }>>;
+export function getEvents(
+   elements: Agent['elements'],
+   id: IBackendControlNode['id'],
+   needControlNode?: true
+): Record<
+   string,
+   Array<{
+      function: Function;
+      arguments: unknown[];
+      controlNode: IControlNode;
+   }>
+>;
+export function getEvents(
+   elements: Agent['elements'],
+   id: IBackendControlNode['id'],
+   needControlNode: boolean = false
+): ReturnType<typeof getEvents> {
+   const EVENT_NAME_OFFSET = 3;
+   const node = elements.get(id);
+   const events: ReturnType<typeof getEvents> = {};
+   if (node && node.container.eventProperties) {
+      const eventProperties = node.container.eventProperties;
+      Object.keys(eventProperties).forEach((key) => {
+         let properties = eventProperties[key];
+         if (node.instance) {
+            properties = properties.filter(
+               (handler) => handler.fn.control === node.instance
+            );
+         }
+         const result = properties.map((handler) => {
+            const userHandler = handler.fn.control[handler.value];
+            return {
+               function: userHandler ? userHandler : handler.fn,
+               arguments: handler.args,
+               controlNode: needControlNode
+                  ? getControlNode(handler.fn.control)
+                  : undefined
+            };
+         });
+         if (result.length) {
+            events[key.slice(EVENT_NAME_OFFSET)] = result;
+         }
+      });
+   }
+   return events;
+}
+
+/**
+ * Constructs a condition for usage as a second argument to debug function.
+ * @param name Name of the event.
+ * @param id Id of a control to which method breakpoint will be added.
+ */
+export function getCondition(
+   name: string,
+   id: IBackendControlNode['id']
+): string {
+   const ctrl = `window.__WASABY_DEV_HOOK__._agent.elements.get(${id}).instance`;
+   return `(arguments.length === 0 || arguments[0].type === "${name}") && (this === ${ctrl} || this.data === ${ctrl})`;
 }

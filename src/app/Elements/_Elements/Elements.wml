@@ -32,6 +32,8 @@
                                     on:click="_onItemClick(element.id)"
                                     selectedItemId="{{ _selectedItemId }}"
                                     searchValue="{{ _searchValue }}"
+                                    hasBreakpoint="{{ _elementsWithBreakpoints.has(element.id) }}"
+                                    task1178532066="{{ _task1178532066 }}"
                                     scope="{{ element }}" />
                     </ws:for>
                 </div>
@@ -52,7 +54,9 @@
                                       optionsExpanded="{{_optionsExpanded}}"
                                       stateExpanded="{{_stateExpanded}}"
                                       eventsExpanded="{{_eventsExpanded}}"
-                                      attributesExpanded="{{_attributesExpanded}}" />
+                                      attributesExpanded="{{_attributesExpanded}}"
+                                      on:setBreakpoint="_setBreakpoint()"
+                                      on:removeBreakpoint="_removeAllBreakpoints()" />
          </ws:if>
       </ws:if>
       <ws:else>

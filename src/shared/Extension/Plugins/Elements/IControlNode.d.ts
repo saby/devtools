@@ -15,31 +15,31 @@ interface ITemplateNode {
 }
 
 interface IWasabyHandlerFn extends Function {
-   control: Record<string, Function>;
+   control: IControlNode['instance'];
 }
 
 interface IWasabyEventHandler {
    fn: IWasabyHandlerFn;
    args: unknown[];
    value: string;
+   controlNode: IControlNode;
 }
 
 export interface IWasabyElement extends HTMLElement {
    eventProperties?: Record<string, IWasabyEventHandler[]>;
-   controlNodes?: Array<{
-      key: string;
-      id: string;
-   }>;
+   controlNodes: IControlNode[];
 }
 
 interface IControlNode extends Exclude<ITemplateNode, 'children'> {
    markup: Array<ITemplateNode | IControlNode>;
    controlClass: Function;
    vnode: object;
-   instance?: {
+   control: IControlNode['instance'];
+   element: IWasabyElement;
+   instance: {
       _container: IWasabyElement;
       _destroyed: boolean;
-   };
+   } & { [handlerName: string]: Function };
    state?: object;
    context?: object;
    changedContext?: IControlNode['context'];
@@ -50,7 +50,6 @@ export interface IBackendControlNode extends IControlNode {
    selfDuration: number;
    treeDuration: number;
    selfStartTime: number;
-   vNode: object;
    domChanged?: boolean;
    parentId?: IBackendControlNode['id'];
    isVisible?: boolean;
