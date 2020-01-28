@@ -1,5 +1,5 @@
 <div>
-    <div attr:class="Elements__node {{_options.selectedItemId === _options.id ? 'Elements__node_selected'}}"
+    <div attr:class="Elements__node ws-flexbox ws-align-items-center {{_options.selectedItemId === _options.id ? 'Elements__node_selected'}}"
          attr:style="padding-left: {{16 * _options.depth}}px;">
         <ws:if data="{{ _options.hasChildren }}">
             <i attr:class="{{_options.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small icon-primary"
@@ -18,7 +18,7 @@
             <i attr:class="icon-BigRemark icon-small icon-error" />
         </ws:if>
         <ws:if data="{{_options.selectedItemId === _options.id}}">
-            <span attr:class="Elements__hint">== $wasaby</span>
+            <span attr:class="Elements__hint">&nbsp;== $wasaby</span>
         </ws:if>
     </div>
 </div>
