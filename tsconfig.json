@@ -33,6 +33,7 @@
       "Controls/*": [
         "../node_modules/wasaby-controls/Controls/*"
       ]
-    }
+    },
+    "types": ["chrome"]
   }
 }

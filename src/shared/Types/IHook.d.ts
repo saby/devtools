@@ -1,11 +1,19 @@
 import {
    IBackendControlNode,
-   IControlChanges, IControlNode,
+   IControlChanges,
+   IControlNode,
    ITemplateChanges,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
+
+type Breakpoint = [
+   Function, // handler
+   string, // condition
+   IBackendControlNode['id'], // id of the control which handler will be called
+   IBackendControlNode['id'] // id of the first control to which breakpoints were added
+];
 
 export interface IWasabyDevHook {
    onStartCommit: (
@@ -29,4 +37,5 @@ export interface IWasabyDevHook {
    __constructor?: Function;
    __container?: IWasabyElement;
    __function?: Function;
+   _breakpoints?: Breakpoint[];
 }
