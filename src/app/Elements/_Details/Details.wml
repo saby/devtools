@@ -32,7 +32,7 @@
                                      controlId="{{ _options.id }}"
                                      isControl="{{ _options.isControl }}"
                                      on:viewFunctionSource="_viewFunctionSource()"
-                                     on:storeAsGlobal="__storeAsGlobal()"
+                                     on:storeAsGlobal="_storeAsGlobal()"
                                      on:expandedChanged="_forwardExpanded('_stateExpanded')"
                                      on:setNodeOption="_setNodeOption(2)"
                                      on:revertNodeOption="_revertNodeOption(2)"
@@ -42,12 +42,16 @@
    <ws:if data="{{ _hasData(_options.events) }}">
       <Elements._Details.Pane.Pane caption="Events"
                                   data="{{_options.events}}"
+                                  changedData="{{_options.changedEvents}}"
                                   canStoreAsGlobal="{{false}}"
                                   controlId="{{ _options.id }}"
                                   isControl="{{ _options.isControl }}"
+                                  highlightUpdates="{{ false }}"
                                   on:viewFunctionSource="_viewFunctionSource()"
-                                  on:storeAsGlobal="__storeAsGlobal()"
+                                  on:storeAsGlobal="_storeAsGlobal()"
                                   on:expandedChanged="_forwardExpanded('_eventsExpanded')"
+                                  on:setBreakpoint="_notifyHandler('setBreakpoint')"
+                                  on:removeBreakpoint="_notifyHandler('removeBreakpoint')"
                                   expanded="{{_options.eventsExpanded}}"/>
    </ws:if>
    <ws:if data="{{ _hasData(_options.attributes) }}">

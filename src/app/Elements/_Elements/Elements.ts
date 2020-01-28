@@ -1,6 +1,9 @@
 import Control = require('Core/Control');
 import template = require('wml!Elements/_Elements/Elements');
-import { IBackendControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IBackendControlNode,
+   IFrontendControlNode
+} from 'Extension/Plugins/Elements/IControlNode';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
@@ -20,6 +23,8 @@ interface IOptions {
 const ARROWS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 const SEARCH_THROTTLE_DURATION = 200;
 const EVENT_NAME_OFFSET = -8;
+const DEFAULT_EVAL_TIMEOUT = 100;
+const BREAKPOINTS = 'window.__WASABY_DEV_HOOK__._breakpoints';
 
 /**
  * Controller of the elements tab.
@@ -52,6 +57,13 @@ class Elements extends Control {
    protected _stateExpanded: boolean = true;
    protected _eventsExpanded: boolean = false;
    protected _attributesExpanded: boolean = false;
+
+   protected _elementsWithBreakpoints: Set<
+      IFrontendControlNode['id']
+   > = new Set();
+   protected _eventWithBreakpoint: string = '';
+   // TODO: удалить после https://online.sbis.ru/opendoc.html?guid=4e36b340-8098-4a12-b600-91e29fb1c62a
+   protected _task1178532066: number = 0;
 
    constructor(options: IOptions) {
       super();
@@ -139,7 +151,10 @@ class Elements extends Control {
       stopPropagation: Event['stopPropagation'];
    }): void {
       const key = e.nativeEvent.key;
-      if (ARROWS.indexOf(key) !== -1 && typeof this._selectedItemId !== 'undefined') {
+      if (
+         ARROWS.indexOf(key) !== -1 &&
+         typeof this._selectedItemId !== 'undefined'
+      ) {
          e.stopPropagation();
          const visibleItems = this._model.getVisibleItems();
          const index = visibleItems.findIndex(
@@ -196,11 +211,119 @@ class Elements extends Control {
                break;
             case OperationType.DELETE:
                this._itemsChanged = true;
+               this.__removeBreakpoint(args[1]);
                break;
             case OperationType.REORDER:
                this._model.onOrderChanged();
                break;
          }
+      }
+   }
+
+   /**
+    * Removes every breakpoint and adds new ones.
+    * Because every breakpoint is set through eval, it is difficult to check which breakpoints should be left and which should be removed, so it's safer to remove them all and add them again.
+    * @param e
+    * @param eventName
+    * @private
+    */
+   protected _setBreakpoint(e: Event, eventName: string): Promise<void> {
+      const selectedItemId = this._selectedItemId as IFrontendControlNode['id'];
+      return this._removeAllBreakpoints().then(() => {
+         this._options.store.dispatch('setBreakpoint', {
+            id: selectedItemId,
+            eventName
+         });
+         setTimeout(() => {
+            chrome.devtools.inspectedWindow.eval(
+               `${BREAKPOINTS} ? ${BREAKPOINTS}.map(([handler, condition, id]) => {
+                  debug(handler, condition);
+                  return id;
+               }) : []`,
+               (result: Array<IFrontendControlNode['id']>) => {
+                  result.push(selectedItemId);
+                  if (
+                     this._inspectedItem &&
+                     result.includes(this._inspectedItem.id)
+                  ) {
+                     this.__updateEvents(eventName, true);
+                  }
+                  this._elementsWithBreakpoints = new Set(result);
+                  this._eventWithBreakpoint = eventName;
+                  this._task1178532066++;
+               }
+            );
+         }, DEFAULT_EVAL_TIMEOUT);
+      });
+   }
+
+   /**
+    * Removes every breakpoint both on the backend and the frontend.
+    * @private
+    */
+   protected _removeAllBreakpoints(): Promise<void> {
+      return new Promise((resolve) => {
+         chrome.devtools.inspectedWindow.eval(
+            `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`,
+            () => {
+               this.__updateEvents(this._eventWithBreakpoint, false);
+               this._elementsWithBreakpoints = new Set();
+               this._eventWithBreakpoint = '';
+               this._task1178532066++;
+               resolve();
+            }
+         );
+      });
+   }
+
+   /**
+    * Removes all breakpoints related to a control both on the backend and the frontend.
+    * Should be used only when the control gets removed, otherwise there's a risk to leave the user with impossible to remove breakpoints.
+    * This can happen when a control is subscribed to an event which starts on one of its children, not the root node of the control.
+    * @param id
+    * @private
+    */
+   private __removeBreakpoint(id: IFrontendControlNode['id']): Promise<void> {
+      if (this._elementsWithBreakpoints.has(id)) {
+         this.__updateEvents(this._eventWithBreakpoint, false);
+         this._elementsWithBreakpoints.delete(id);
+         this._elementsWithBreakpoints = new Set(this._elementsWithBreakpoints);
+         this._task1178532066++;
+         return new Promise((resolve) => {
+            chrome.devtools.inspectedWindow.eval(
+               `if(${BREAKPOINTS}) {
+               const result = [];
+             ${BREAKPOINTS} = ${BREAKPOINTS}.filter(([handler,, controlId, initiatorId]) => {
+               const shouldBeRemoved = controlId === ${id} || initiatorId === ${id};
+               if (shouldBeRemoved) {
+                  result.push(controlId);
+                  undebug(handler);
+               }
+               return !shouldBeRemoved;
+            });
+            result;
+         };`,
+               (result?: Array<IFrontendControlNode['id']>) => {
+                  if (result) {
+                     const hasChanges = result.reduce((res, deletedId) => {
+                        return (
+                           this._elementsWithBreakpoints.delete(deletedId) ||
+                           res
+                        );
+                     }, false);
+                     if (hasChanges) {
+                        this._elementsWithBreakpoints = new Set(
+                           this._elementsWithBreakpoints
+                        );
+                        this._task1178532066++;
+                     }
+                  }
+                  resolve();
+               }
+            );
+         });
+      } else {
+         return Promise.resolve();
       }
    }
 
@@ -319,17 +442,20 @@ class Elements extends Control {
       if (this._selectedItemId === node.id) {
          switch (type) {
             case 'full':
-               this._inspectedItem = retrocycle(node);
+               this._inspectedItem = updateInspectedItem(
+                  retrocycle(node),
+                  {},
+                  this._eventWithBreakpoint,
+                  this._elementsWithBreakpoints.has(node.id)
+               );
                break;
             case 'partial':
-               const deserializedNode = retrocycle(node);
-               Object.entries(deserializedNode).forEach(([key, value]) => {
-                  if (key === 'id') {
-                     return;
-                  }
-                  this._inspectedItem[key] = value;
-               });
-               this._inspectedItem = { ...this._inspectedItem };
+               this._inspectedItem = updateInspectedItem(
+                  retrocycle(node),
+                  this._inspectedItem as object,
+                  this._eventWithBreakpoint,
+                  this._elementsWithBreakpoints.has(node.id)
+               );
                break;
          }
       }
@@ -365,6 +491,63 @@ class Elements extends Control {
          });
       }
    }
+
+   /**
+    * This function is used only to add hasBreakpoint field to an event and trigger the update of the tab
+    * @param eventName
+    * @param hasBreakpoint
+    * @private
+    */
+   private __updateEvents(eventName: string, hasBreakpoint: boolean): void {
+      if (
+         this._inspectedItem &&
+         this._inspectedItem.events &&
+         this._inspectedItem.events[eventName]
+      ) {
+         this._inspectedItem.changedEvents = {
+            [eventName]: {
+               ...this._inspectedItem.events[eventName],
+               hasBreakpoint
+            }
+         };
+         this._inspectedItem = { ...this._inspectedItem };
+      }
+   }
+}
+
+/**
+ * Merges the data from backend and current inspectedItem. Transforms every value for the consumption by details tab, adds information about breakpoints.
+ * @param data
+ * @param originalObject
+ * @param eventName
+ * @param needBreakpoint
+ */
+function updateInspectedItem(
+   data: object,
+   originalObject: object,
+   eventName: string,
+   needBreakpoint: boolean
+): Elements['_inspectedItem'] {
+   const result = { ...originalObject };
+
+   Object.entries(data).forEach(([key, value]) => {
+      if (key === 'id' || key === 'isControl') {
+         result[key] = value;
+         return;
+      }
+      const innerResult = {};
+      Object.entries(value).forEach(([valueKey, valueValue]) => {
+         innerResult[valueKey] = {
+            value: valueValue
+         };
+         if (key === 'events' && eventName === valueKey) {
+            innerResult[valueKey].hasBreakpoint = needBreakpoint;
+         }
+      });
+      result[key] = innerResult;
+   });
+
+   return result;
 }
 
 export default Elements;

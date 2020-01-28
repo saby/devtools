@@ -8,6 +8,7 @@ define([
    Elements = Elements.default;
    const OperationType = elementsConsts.OperationType;
    const ControlType = elementsConsts.ControlType;
+   const BREAKPOINTS = 'window.__WASABY_DEV_HOOK__._breakpoints';
 
    describe('Elements/_Elements/Elements', function() {
       beforeEach(function() {
@@ -1569,16 +1570,51 @@ define([
             const instance = new Elements(options);
             instance._selectedItemId = 0;
             instance._inspectedItem = undefined;
+            instance._eventWithBreakpoint = 'click';
+            instance._elementsWithBreakpoints.add(0);
 
             instance.__setInspectedElement({
                type: 'full',
                node: {
-                  id: 0
+                  id: 0,
+                  options: {
+                     test: '123'
+                  },
+                  events: {
+                     mousedown: {
+                        function: 'mousedownHandler()',
+                        arguments: [1]
+                     },
+                     click: {
+                        function: 'clickHandler()',
+                        arguments: []
+                     }
+                  }
                }
             });
 
             assert.deepEqual(instance._inspectedItem, {
-               id: 0
+               id: 0,
+               options: {
+                  test: {
+                     value: '123'
+                  }
+               },
+               events: {
+                  mousedown: {
+                     value: {
+                        function: 'mousedownHandler()',
+                        arguments: [1]
+                     }
+                  },
+                  click: {
+                     value: {
+                        function: 'clickHandler()',
+                        arguments: []
+                     },
+                     hasBreakpoint: true
+                  }
+               }
             });
 
             delete window.elementsPanel;
@@ -1596,8 +1632,11 @@ define([
             instance._selectedItemId = 0;
             const oldInspectedItem = {
                id: 0,
-               test: 123,
-               value: 456
+               options: {
+                  test: {
+                     value: '123'
+                  }
+               }
             };
             instance._inspectedItem = oldInspectedItem;
 
@@ -1605,17 +1644,25 @@ define([
                type: 'partial',
                node: {
                   id: 0,
-                  test: 456,
-                  anotherTest: 'test'
+                  changedOptions: {
+                     test: '456'
+                  }
                }
             });
 
             assert.notEqual(instance._inspectedItem, oldInspectedItem);
             assert.deepEqual(instance._inspectedItem, {
                id: 0,
-               test: 456,
-               value: 456,
-               anotherTest: 'test'
+               options: {
+                  test: {
+                     value: '123'
+                  }
+               },
+               changedOptions: {
+                  test: {
+                     value: '456'
+                  }
+               }
             });
 
             delete window.elementsPanel;
@@ -1732,6 +1779,387 @@ define([
 
             assert.isTrue(instance._eventsExpanded);
             assert.isTrue(stub.notCalled);
+
+            delete window.elementsPanel;
+         });
+      });
+
+      describe('_setBreakpoint', function() {
+         it('should remove all breakpoints, then add them again. Should not change inspected item', async function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([]),
+                  dispatch: sandbox.stub()
+               }
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._inspectedItem = {
+               id: 1,
+               events: {
+                  mousedown: {
+                     value: {
+                        function: 'handleMousedown()',
+                        arguments: []
+                     }
+                  }
+               }
+            };
+            const oldElementsWithBreakpoints =
+               instance._elementsWithBreakpoints;
+            instance._selectedItemId = 0;
+            sandbox.stub(chrome, 'devtools').value({
+               inspectedWindow: {
+                  eval: sandbox.stub().callsArgWith(1, [])
+               }
+            });
+            sandbox.stub(instance, '_removeAllBreakpoints').resolves();
+            const clock = sinon.useFakeTimers();
+
+            await instance._setBreakpoint({}, 'mousedown');
+
+            assert.isTrue(
+               options.store.dispatch.calledOnceWithExactly('setBreakpoint', {
+                  id: 0,
+                  eventName: 'mousedown'
+               })
+            );
+            assert.isTrue(chrome.devtools.inspectedWindow.eval.notCalled);
+
+            clock.tick(100);
+
+            assert.isTrue(
+               chrome.devtools.inspectedWindow.eval.calledOnceWith(
+                  `${BREAKPOINTS} ? ${BREAKPOINTS}.map(([handler, condition, id]) => {\n                  debug(handler, condition);\n                  return id;\n               }) : []`
+               )
+            );
+            assert.equal(instance._eventWithBreakpoint, 'mousedown');
+            assert.notEqual(
+               instance._elementsWithBreakpoints,
+               oldElementsWithBreakpoints
+            );
+            assert.deepEqual(instance._elementsWithBreakpoints, new Set([0]));
+            assert.deepEqual(instance._inspectedItem, {
+               id: 1,
+               events: {
+                  mousedown: {
+                     value: {
+                        function: 'handleMousedown()',
+                        arguments: []
+                     }
+                  }
+               }
+            });
+
+            clock.restore();
+            delete window.elementsPanel;
+         });
+
+         it('should remove all breakpoints, then add them again. Should update events on the inspected item', async function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([]),
+                  dispatch: sandbox.stub()
+               }
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._inspectedItem = {
+               id: 1,
+               events: {
+                  mousedown: {
+                     value: {
+                        function: 'handleMousedown()',
+                        arguments: []
+                     }
+                  }
+               }
+            };
+            const oldElementsWithBreakpoints =
+               instance._elementsWithBreakpoints;
+            instance._selectedItemId = 1;
+            sandbox.stub(chrome, 'devtools').value({
+               inspectedWindow: {
+                  eval: sandbox.stub().callsArgWith(1, [0])
+               }
+            });
+            sandbox.stub(instance, '_removeAllBreakpoints').resolves();
+            const clock = sinon.useFakeTimers();
+
+            await instance._setBreakpoint({}, 'mousedown');
+
+            assert.isTrue(
+               options.store.dispatch.calledOnceWithExactly('setBreakpoint', {
+                  id: 1,
+                  eventName: 'mousedown'
+               })
+            );
+            assert.isTrue(chrome.devtools.inspectedWindow.eval.notCalled);
+
+            clock.tick(100);
+
+            assert.isTrue(
+               chrome.devtools.inspectedWindow.eval.calledOnceWith(
+                  `${BREAKPOINTS} ? ${BREAKPOINTS}.map(([handler, condition, id]) => {\n                  debug(handler, condition);\n                  return id;\n               }) : []`
+               )
+            );
+            assert.equal(instance._eventWithBreakpoint, 'mousedown');
+            assert.notEqual(
+               instance._elementsWithBreakpoints,
+               oldElementsWithBreakpoints
+            );
+            assert.deepEqual(
+               instance._elementsWithBreakpoints,
+               new Set([0, 1])
+            );
+            assert.deepEqual(instance._inspectedItem, {
+               id: 1,
+               events: {
+                  mousedown: {
+                     value: {
+                        function: 'handleMousedown()',
+                        arguments: []
+                     }
+                  }
+               },
+               changedEvents: {
+                  mousedown: {
+                     value: {
+                        function: 'handleMousedown()',
+                        arguments: []
+                     },
+                     hasBreakpoint: true
+                  }
+               }
+            });
+
+            clock.restore();
+            delete window.elementsPanel;
+         });
+      });
+
+      describe('_removeAllBreakpoints', function() {
+         it('should remove all breakpoints', async function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               }
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            const oldElementsWithBreakpoints =
+               instance._elementsWithBreakpoints;
+            sandbox.stub(chrome, 'devtools').value({
+               inspectedWindow: {
+                  eval: sandbox.stub().callsArg(1)
+               }
+            });
+
+            await instance._removeAllBreakpoints();
+
+            assert.isTrue(
+               chrome.devtools.inspectedWindow.eval.calledOnceWith(
+                  `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`
+               )
+            );
+            assert.equal(instance._eventWithBreakpoint, '');
+            assert.notEqual(
+               instance._elementsWithBreakpoints,
+               oldElementsWithBreakpoints
+            );
+            assert.deepEqual(instance._elementsWithBreakpoints, new Set());
+
+            delete window.elementsPanel;
+         });
+
+         it('should remove all breakpoints and update inspectedItem', async function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               }
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            const oldElementsWithBreakpoints =
+               instance._elementsWithBreakpoints;
+            sandbox.stub(chrome, 'devtools').value({
+               inspectedWindow: {
+                  eval: sandbox.stub().callsArg(1)
+               }
+            });
+            instance._eventWithBreakpoint = 'mousedown';
+            instance._selectedItemId = 1;
+            instance._inspectedItem = {
+               id: 1,
+               events: {
+                  mousedown: {
+                     value: {
+                        function: 'handleMousedown()',
+                        arguments: []
+                     }
+                  }
+               }
+            };
+
+            await instance._removeAllBreakpoints();
+
+            assert.isTrue(
+               chrome.devtools.inspectedWindow.eval.calledOnceWith(
+                  `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`
+               )
+            );
+            assert.equal(instance._eventWithBreakpoint, '');
+            assert.notEqual(
+               instance._elementsWithBreakpoints,
+               oldElementsWithBreakpoints
+            );
+            assert.deepEqual(instance._elementsWithBreakpoints, new Set());
+            assert.deepEqual(instance._inspectedItem, {
+               id: 1,
+               events: {
+                  mousedown: {
+                     value: {
+                        function: 'handleMousedown()',
+                        arguments: []
+                     }
+                  }
+               },
+               changedEvents: {
+                  mousedown: {
+                     value: {
+                        function: 'handleMousedown()',
+                        arguments: []
+                     },
+                     hasBreakpoint: false
+                  }
+               }
+            });
+
+            delete window.elementsPanel;
+         });
+      });
+
+      describe('__removeBreakpoint', function() {
+         it("should not do anything because this element doesn't have a breakpoint", async function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               }
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._elementsWithBreakpoints.add(1);
+            const oldElementsWithBreakpoints =
+               instance._elementsWithBreakpoints;
+
+            await instance.__removeBreakpoint(0);
+
+            assert.equal(
+               instance._elementsWithBreakpoints,
+               oldElementsWithBreakpoints
+            );
+            assert.deepEqual(instance._elementsWithBreakpoints, new Set([1]));
+
+            delete window.elementsPanel;
+         });
+
+         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Should not fail because 0 breakpoints were removed', async function() {
+            // This test is for the case when frontend somehow got desynced with the backend
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               }
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._elementsWithBreakpoints.add(0);
+            const oldElementsWithBreakpoints =
+               instance._elementsWithBreakpoints;
+            sandbox.stub(chrome, 'devtools').value({
+               inspectedWindow: {
+                  eval: sandbox.stub().callsArg(1)
+               }
+            });
+
+            await instance.__removeBreakpoint(0);
+
+            assert.notEqual(
+               instance._elementsWithBreakpoints,
+               oldElementsWithBreakpoints
+            );
+            assert.deepEqual(instance._elementsWithBreakpoints, new Set());
+
+            delete window.elementsPanel;
+         });
+
+         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Should not fail if related breakpoints were already removed from elementsWithBreakpoints', async function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               }
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._elementsWithBreakpoints.add(0);
+            const oldElementsWithBreakpoints =
+               instance._elementsWithBreakpoints;
+            sandbox.stub(chrome, 'devtools').value({
+               inspectedWindow: {
+                  eval: sandbox.stub().callsArgWith(1, [1, 2, 3])
+               }
+            });
+
+            await instance.__removeBreakpoint(0);
+
+            assert.notEqual(
+               instance._elementsWithBreakpoints,
+               oldElementsWithBreakpoints
+            );
+            assert.deepEqual(instance._elementsWithBreakpoints, new Set());
+
+            delete window.elementsPanel;
+         });
+
+         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Also should remove every related breakpoint', async function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               }
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._elementsWithBreakpoints.add(0).add(1).add(2).add(3);
+            const oldElementsWithBreakpoints =
+               instance._elementsWithBreakpoints;
+            sandbox.stub(chrome, 'devtools').value({
+               inspectedWindow: {
+                  eval: sandbox.stub().callsArgWith(1, [1, 2, 3])
+               }
+            });
+
+            await instance.__removeBreakpoint(0);
+
+            assert.notEqual(
+               instance._elementsWithBreakpoints,
+               oldElementsWithBreakpoints
+            );
+            assert.deepEqual(instance._elementsWithBreakpoints, new Set());
 
             delete window.elementsPanel;
          });

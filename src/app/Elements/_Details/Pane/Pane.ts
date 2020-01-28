@@ -14,12 +14,18 @@ import './templates/BooleanTemplate';
 
 import 'css!Elements/elements';
 
+export interface IPaneValue {
+   value: object;
+   hasBreakpoint?: boolean;
+}
+
 interface IOptions extends IControlOptions {
    caption: string;
-   data: object;
+   data: Record<string, IPaneValue>;
    expanded: boolean;
    controlId: IFrontendControlNode['id'];
    isControl: boolean;
+   highlightUpdates?: boolean;
    changedData?: object;
    canStoreAsGlobal?: boolean;
 }
@@ -31,12 +37,18 @@ const enum ShowType {
 }
 
 interface IItemAction {
-   id: 'storeAsGlobal' | 'editValue' | 'revertValue';
+   id:
+      | 'storeAsGlobal'
+      | 'editValue'
+      | 'revertValue'
+      | 'addBreakpoint'
+      | 'removeBreakpoint';
    showType: ShowType;
    title: string;
    style?: string;
    handler?: (item: Model) => void;
    icon?: string;
+   iconStyle?: string;
 }
 
 interface IEditingConfig {
@@ -44,17 +56,36 @@ interface IEditingConfig {
    toolbarVisibility: boolean;
 }
 
+interface IItem {
+   key: string;
+   value: unknown;
+   name: string;
+   parent: null;
+   hasBreakpoint?: boolean;
+}
+
+function getRawData(initialData: IOptions['data']): IItem[] {
+   return Object.entries(initialData).map(
+      ([key, value]: [string, IPaneValue]) => {
+         const result: IItem = {
+            key,
+            value: value.value,
+            name: key,
+            parent: null
+         };
+
+         if (value.hasBreakpoint) {
+            result.hasBreakpoint = value.hasBreakpoint;
+         }
+
+         return result;
+      }
+   );
+}
+
 function getSource(initialData: IOptions['data']): Source {
-   const data = Object.entries(initialData).map(([key, value]) => {
-      return {
-         key,
-         value,
-         name: key,
-         parent: null
-      };
-   });
    return new Source({
-      data,
+      data: getRawData(initialData),
       idProperty: 'key',
       parentProperty: 'parent'
    });
@@ -122,6 +153,22 @@ class Pane extends Control<IOptions> {
             showType: ShowType.MENU_TOOLBAR,
             title: 'Reset',
             handler: this.__revertValue.bind(this)
+         },
+         {
+            id: 'addBreakpoint',
+            icon: 'icon-BigRemark',
+            showType: ShowType.TOOLBAR,
+            title: 'Add breakpoint',
+            iconStyle: 'danger',
+            handler: this.__setBreakpoint.bind(this)
+         },
+         {
+            id: 'removeBreakpoint',
+            icon: 'icon-BigRemarkNull',
+            showType: ShowType.TOOLBAR,
+            title: 'Remove breakpoint',
+            iconStyle: 'danger',
+            handler: this.__removeBreakpoint.bind(this)
          }
       ];
       this._visibilityCallback = this._itemActionVisibilityCallback.bind(this);
@@ -133,16 +180,7 @@ class Pane extends Control<IOptions> {
          newOptions.changedData &&
          this._options.changedData !== newOptions.changedData
       ) {
-         const rawData = Object.entries(newOptions.changedData).map(
-            ([key, value]) => {
-               return {
-                  key,
-                  value,
-                  name: key,
-                  parent: null
-               };
-            }
-         );
+         const rawData = getRawData(newOptions.changedData);
          this._source.update(
             new RecordSet({
                rawData
@@ -152,7 +190,7 @@ class Pane extends Control<IOptions> {
             this._children.list.reload();
          }
       }
-      if (this._options.data !== newOptions.data) {
+      if (this._options.controlId !== newOptions.controlId) {
          this._source = getSource(newOptions.data);
       }
       if (this._options.isControl !== newOptions.isControl) {
@@ -162,6 +200,7 @@ class Pane extends Control<IOptions> {
 
    protected _afterUpdate(oldOptions: IOptions): void {
       if (
+         this._options.highlightUpdates &&
          this._options.changedData &&
          this._options.changedData !== oldOptions.changedData
       ) {
@@ -201,6 +240,18 @@ class Pane extends Control<IOptions> {
                !!this._options.canStoreAsGlobal &&
                value &&
                typeof value === 'object'
+            );
+         case 'addBreakpoint':
+            return (
+               this._options.caption === 'Events' &&
+               item.get('parent') === null &&
+               !item.get('hasBreakpoint')
+            );
+         case 'removeBreakpoint':
+            return (
+               this._options.caption === 'Events' &&
+               item.get('parent') === null &&
+               item.get('hasBreakpoint')
             );
       }
    }
@@ -259,6 +310,14 @@ class Pane extends Control<IOptions> {
       this._notify('revertNodeOption', [getPath(item)]);
    }
 
+   private __setBreakpoint(item: Model): void {
+      this._notify('setBreakpoint', [item.get('name')]);
+   }
+
+   private __removeBreakpoint(): void {
+      this._notify('removeBreakpoint', [this._options.controlId]);
+   }
+
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          caption: descriptor(String).required(),
@@ -267,6 +326,7 @@ class Pane extends Control<IOptions> {
          controlId: descriptor(Number).required(),
          isControl: descriptor(Boolean).required(),
          changedData: descriptor(Object, null),
+         highlightUpdates: descriptor(Boolean),
          canStoreAsGlobal: descriptor(Boolean),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
@@ -275,7 +335,8 @@ class Pane extends Control<IOptions> {
 
    static getDefaultOptions(): Partial<IOptions> {
       return {
-         canStoreAsGlobal: true
+         canStoreAsGlobal: true,
+         highlightUpdates: true
       };
    }
 }

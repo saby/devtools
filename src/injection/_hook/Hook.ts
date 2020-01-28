@@ -12,6 +12,8 @@ import { ISerializable } from 'Extension/Event/IEventEmitter';
 import Agent from './Agent';
 import { INamedLogger } from 'Extension/Logger/ILogger';
 import { IRenderer } from 'Extension/Plugins/Elements/IRenderer';
+import { GlobalMessages } from 'Extension/const';
+import { globalChannel } from '../_devtool/globalChannel';
 
 /**
  * Rethrows error asynchronously to avoid breaking the calling code.
@@ -28,6 +30,7 @@ function rethrowError(e: Error): void {
  * @author Зайцев А.С.
  */
 export class Hook implements IWasabyDevHook {
+   private _breakpoints?: IWasabyDevHook['_breakpoints'];
    private _agent: Agent;
    private _messageQueue: Array<[string, ISerializable?]> = [];
    private _logger: INamedLogger;
@@ -121,6 +124,9 @@ export class Hook implements IWasabyDevHook {
             logger: this._logger
          });
          this._initialized = true;
+         globalChannel.addListener(GlobalMessages.devtoolsClosed, () => {
+            this._breakpoints = undefined;
+         });
       }
    }
 
