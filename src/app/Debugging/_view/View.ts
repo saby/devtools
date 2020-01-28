@@ -172,7 +172,7 @@ class View extends Control<IControlOptions, void[]> {
       if (!where.title) {
          return true;
       } else {
-         return item.get('title').includes(where.title);
+         return item.get('title').toLowerCase().includes(where.title.toLowerCase());
       }
    }
 }
