@@ -1,11 +1,11 @@
 <div>
-    <div attr:class="Elements__node ws-flexbox ws-align-items-center {{_options.selectedItemId === _options.id ? 'Elements__node_selected'}}"
+    <div attr:class="devtools-Elements__node ws-flexbox ws-align-items-center {{_options.selectedItemId === _options.id ? 'devtools-Elements__node_selected'}}"
          attr:style="padding-left: {{16 * _options.depth}}px;">
         <ws:if data="{{ _options.hasChildren }}">
-            <i attr:class="{{_options.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} icon-small icon-primary"
+            <i attr:class="controls-icon {{_options.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} controls-icon_size-s_theme-{{ _options.theme }} controls-icon_style-secondary_theme-{{ _options.theme }}"
                on:click="__toggleExpanded(_options.id)" />
         </ws:if>
-        <span attr:class="Elements__name {{_options.class}}{{ !_options.hasChildren ? ' Elements__node_childless' }}">
+        <span attr:class="js-devtools-Elements__name {{_options.class}}{{ !_options.hasChildren ? ' devtools-Elements__node_childless' }}">
             <ws:if data="{{ _options.name.toLowerCase().indexOf(_options.searchValue.toLowerCase()) }}">
                 <Controls.decorator:Highlight text="{{ _options.name }}"
                                               highlight="{{ _options.searchValue }}" />
@@ -15,10 +15,10 @@
             </ws:else>
         </span>
         <ws:if data="{{ _options.hasBreakpoint }}">
-            <i attr:class="icon-BigRemark icon-small icon-error" />
+            <i attr:class="controls-icon icon-BigRemark controls-icon_size-s_theme-{{ _options.theme }} controls-icon_style-danger_theme-{{ _options.theme }}" />
         </ws:if>
         <ws:if data="{{_options.selectedItemId === _options.id}}">
-            <span attr:class="Elements__hint">&nbsp;== $wasaby</span>
+            <span attr:class="devtools-Elements__hint">&nbsp;== $wasaby</span>
         </ws:if>
     </div>
 </div>

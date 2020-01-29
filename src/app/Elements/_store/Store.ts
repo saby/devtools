@@ -215,11 +215,11 @@ function sliceSubtree(
 function getClassByControlType(controlType: ControlType): string {
    switch (controlType) {
       case ControlType.HOC:
-         return 'Elements__node_hoc';
+         return 'devtools-Elements__node_hoc';
       case ControlType.CONTROL:
-         return 'Elements__node_control';
+         return 'devtools-Elements__node_control';
       case ControlType.TEMPLATE:
-         return 'Elements__node_template';
+         return 'devtools-Elements__node_template';
    }
 }
 

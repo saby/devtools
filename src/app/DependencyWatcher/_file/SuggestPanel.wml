@@ -2,7 +2,6 @@
     headingCaption="{[Выберите файл]}"
     selectedItems="{{ _options.selectedItems }}"
     attr:class="DependencyFilter__FilePanel"
-    theme="default-Layout"
 >
     <ws:bodyContentTemplate>
         <Layout.Selector.Browser
@@ -19,7 +18,7 @@
             </ws:search>
             <ws:content>
                 <Controls.scroll:Container
-                    attr:class="DependencyFilter__FilePanel_scroll"
+                    attr:class="devtools-DependencyFilter__FilePanel_scroll"
                 >
                     <DependencyWatcher._file.List
                             columns="{{ _options.columns }}"

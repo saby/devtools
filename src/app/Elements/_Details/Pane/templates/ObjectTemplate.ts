@@ -2,7 +2,6 @@ import { Control, TemplateFunction } from 'UI/Base';
 import template = require('wml!Elements/_Details/Pane/templates/ObjectTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
-import 'css!Elements/elements';
 
 interface IOptions extends ITemplateOptions {
    value: object;
@@ -27,6 +26,8 @@ class ObjectTemplate extends Control {
          this._caption = getCaption(newOptions.value);
       }
    }
+
+   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

@@ -1,10 +1,10 @@
-<div class="Flamegraph__node{{ _options.itemData.caption ? ' Flamegraph__node_withCaption' }}{{ _options.itemData.isSelected ? ' Flamegraph__node_selected' }}"
+<div class="devtools-Flamegraph__node{{ _options.itemData.caption ? ' devtools-Flamegraph__node_withCaption' }}{{ _options.itemData.isSelected ? ' devtools-Flamegraph__node_selected' }}"
      title="{{ _options.itemData.tooltip }}"
      attr:style="{{ _options.itemData.style }}">
     <ws:if data="{{ _options.itemData.caption }}">
-        <span class="Flamegraph__nodeCaption">{{ itemData.caption }}</span>
+        <span class="devtools-Flamegraph__nodeCaption">{{ itemData.caption }}</span>
     </ws:if>
     <ws:if data="{{ _options.itemData.warnings }}">
-        <div class="Flamegraph__node_warning"></div>
+        <div class="devtools-Flamegraph__node_warning"></div>
     </ws:if>
 </div>

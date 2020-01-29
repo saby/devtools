@@ -1,9 +1,9 @@
-<div attr:class="Breadcrumbs" on:wheel="_wheelHandler()">
+<div attr:class="devtools-Breadcrumbs ws-flexbox ws-flex-shrink-0" on:wheel="_wheelHandler()">
    <ws:if data="{{_options.items.length > 0}}">
       <ws:for data="crumb in _options.items">
          <div attr:key="{{crumb.id}}"
               attr:name="{{crumb.id}}"
-              attr:class="Breadcrumbs__crumb {{crumb.class}} {{crumb.id === _options.selectedItemId ? 'Breadcrumbs__crumb_selected'}}"
+              attr:class="devtools-Breadcrumbs__crumb {{crumb.class}} {{crumb.id === _options.selectedItemId ? 'devtools-Breadcrumbs__crumb_selected'}}"
               on:mouseenter="_onMouseEnter(crumb.id)"
               on:mouseleave="_onMouseLeave()"
               on:click="_onItemClick(crumb.id)">{{crumb.name}}</div>

@@ -1,13 +1,8 @@
-import Control = require('Core/Control');
+import { Control } from 'UI/Base';
 import template = require('wml!Devtool/Page/Page');
 import { Memory } from 'Types/source';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
 import { GlobalMessages } from 'Extension/const';
-import 'css!Devtool/Page/Page';
-
-// TODO: пока не подключили application берём шрифты отсюда
-import 'css!Controls/Application/Application';
-import 'css!Controls/Application/oldCss';
 import { ConsoleLogger } from 'Extension/Logger/Console';
 import { Store } from 'Elements/elements';
 
@@ -46,6 +41,7 @@ class Extension extends Control {
    protected _store?: Store;
    protected _tabChanged: boolean = false;
    protected _rootKey: number = 0;
+   protected _currentTheme: string = 'devtools:dark'; // TODO: брать из опций, как-то резолвить тему перед этим...
    constructor() {
       super();
       logger.log('сообщаем странице об активности вкладки');
@@ -85,6 +81,12 @@ class Extension extends Control {
    private __openOptionsPage(): void {
       chrome.runtime.openOptionsPage();
    }
+
+   static _theme: string[] = [
+      'Devtool/Page/Page',
+      'Controls/Application/Application',
+      'Controls/Application/oldCss' // TODO: пока не подключили application берём шрифты отсюда
+   ];
 }
 
 export default Extension;

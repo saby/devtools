@@ -14,7 +14,6 @@
                         keyProperty="id"
                         multiSelectVisibility="visible"
                         searchParam="title"
-                        theme="default-Layout"
                         markerVisibility="hidden"
                         selectedKeys="{{ _selectedKeys }}"
                         minSearchLength="{{ 3 }}"

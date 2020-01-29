@@ -156,7 +156,7 @@ define([
                0: {
                   querySelector: sandbox
                      .stub()
-                     .withArgs('.Elements__name')
+                     .withArgs('.js-devtools-Elements__name')
                      .returns(child)
                }
             };
@@ -314,7 +314,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   },
@@ -322,7 +322,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   }
@@ -359,7 +359,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   },
@@ -367,7 +367,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   }
@@ -406,7 +406,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   },
@@ -414,7 +414,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: true,
                      hasChildren: false
                   }
@@ -451,7 +451,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: true
                   },
@@ -459,7 +459,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 1,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false,
                      parentId: 0
@@ -504,7 +504,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   },
@@ -512,7 +512,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   }
@@ -552,7 +552,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: true,
                      hasChildren: true
                   },
@@ -560,7 +560,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 1,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false,
                      parentId: 0
@@ -598,7 +598,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: true
                   },
@@ -606,7 +606,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 1,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false,
                      parentId: 0
@@ -651,7 +651,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   },
@@ -659,7 +659,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   }
@@ -699,7 +699,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: true,
                      hasChildren: false
                   },
@@ -707,7 +707,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   }
@@ -744,7 +744,7 @@ define([
                      id: 0,
                      name: 'Test',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: true,
                      hasChildren: false
                   },
@@ -752,7 +752,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      depth: 0,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      isExpanded: false,
                      hasChildren: false
                   }
@@ -976,7 +976,7 @@ define([
                {
                   id: 0,
                   name: 'Test',
-                  class: 'Elements__node_hoc'
+                  class: 'devtools-Elements__node_hoc'
                }
             ];
             const options = {
@@ -1029,7 +1029,7 @@ define([
                {
                   id: 0,
                   name: 'Test',
-                  class: 'Elements__node_hoc'
+                  class: 'devtools-Elements__node_hoc'
                }
             ];
             const options = {

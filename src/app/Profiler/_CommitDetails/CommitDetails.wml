@@ -1,4 +1,4 @@
-<div class="CommitDetails">
+<div class="devtools-CommitDetails ws-flexbox ws-flex-column">
     <ws:if data="{{ _options.updateReason === 'unchanged' }}">
         <div>This control didn't re-render during this synchronization.</div>
     </ws:if>
@@ -16,7 +16,7 @@
         <Controls.heading:Title caption="Why did this render:"
                                 size="s"
                                 style="secondary" />
-        <div class="CommitDetails__changesContainer">
+        <div class="devtools-CommitDetails__changesContainer ws-flexbox ws-flex-column">
             <Controls.scroll:Container>
                 <ws:if data="{{ _options.updateReason === 'mounted' }}">
                     <div>This was the first time this control was rendered.</div>
@@ -32,7 +32,7 @@
                         <div>
                             Changed options:
                             <ws:for data="item in _options.changedOptions">
-                                <div class="CommitDetails__changedValueName">{{ item }}</div>
+                                <div class="devtools-CommitDetails__changedValueName">{{ item }}</div>
                             </ws:for>
                         </div>
                     </ws:if>
@@ -40,7 +40,7 @@
                         <div>
                             Changed attributes:
                             <ws:for data="item in _options.changedAttributes">
-                                <div class="CommitDetails__changedValueName">{{ item }}</div>
+                                <div class="devtools-CommitDetails__changedValueName">{{ item }}</div>
                             </ws:for>
                         </div>
                     </ws:if>

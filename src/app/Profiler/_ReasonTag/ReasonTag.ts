@@ -1,6 +1,5 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import template = require('wml!Profiler/_ReasonTag/ReasonTag');
-import 'css!Profiler/profiler';
 import { descriptor } from 'Types/entity';
 import { getBackgroundColorBasedOnReason } from '../_utils/Utils';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
@@ -18,6 +17,8 @@ class ReasonTag extends Control<IOptions> {
    protected _getColor: (
       updateReason: ControlUpdateReason
    ) => string = getBackgroundColorBasedOnReason;
+
+   static _theme: string[] = ['Profiler/profiler'];
 
    static getDefaultOptions(): Partial<IOptions> {
       return {

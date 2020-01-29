@@ -40,6 +40,10 @@ const WASABY_MODULES = [
     "path": "sbis3.engine/client/Layout-theme"
   },
   {
+    "name": "Layout-default-theme",
+    "path": "sbis3.engine/client/Layout-default-theme"
+  },
+  {
     "name": "Application",
     "path": "wasaby-app/src/Application"
   },
@@ -61,7 +65,7 @@ const WASABY_MODULES = [
   },
   {
     "name": "Inferno",
-    "path": "sbis3-ws/Inferno"
+    "path": "saby-inferno/Inferno"
   },
   {
     "name": "UI",
@@ -108,6 +112,30 @@ const EXTENSION_MODULES = [
   {
     "name": "DevtoolsTest",
     "path": resolve("DevtoolsTest")
+  },
+  {
+    "name": "Controls-devtools-theme",
+    "path": resolve(input.app, "Controls-devtools-theme")
+  },
+  {
+    "name": "Debugging-devtools-theme",
+    "path": resolve(input.app, "Debugging-devtools-theme")
+  },
+  {
+    "name": "DependencyWatcher-devtools-theme",
+    "path": resolve(input.app, "DependencyWatcher-devtools-theme")
+  },
+  {
+    "name": "Debugging-devtools-theme",
+    "path": resolve(input.app, "Devtool-devtools-theme")
+  },
+  {
+    "name": "Elements-devtools-theme",
+    "path": resolve(input.app, "Elements-devtools-theme")
+  },
+  {
+    "name": "Profiler-devtools-theme",
+    "path": resolve(input.app, "Profiler-devtools-theme")
   }
 ];
 

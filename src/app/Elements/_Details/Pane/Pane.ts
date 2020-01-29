@@ -12,8 +12,6 @@ import './templates/NumberTemplate';
 import './templates/ObjectTemplate';
 import './templates/BooleanTemplate';
 
-import 'css!Elements/elements';
-
 export interface IPaneValue {
    value: object;
    hasBreakpoint?: boolean;
@@ -317,6 +315,8 @@ class Pane extends Control<IOptions> {
    private __removeBreakpoint(): void {
       this._notify('removeBreakpoint', [this._options.controlId]);
    }
+
+   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

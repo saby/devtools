@@ -1,2 +1,2 @@
-<div attr:class="ReasonTag"
+<div attr:class="devtools-ReasonTag ws-inline-flexbox"
      attr:style="background-color: {{ _getColor(_options.updateReason) }};"></div>

@@ -4,8 +4,6 @@ import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import Store from '../_store/Store';
 import tmplNotify = require('Controls/Utils/tmplNotify');
-
-import 'css!Elements/elements';
 import { NodeOptionType } from 'Extension/Plugins/Elements/IRenderer';
 
 interface IOptions extends IControlOptions {
@@ -118,6 +116,8 @@ class Details extends Control<IOptions> {
          path
       });
    }
+
+   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

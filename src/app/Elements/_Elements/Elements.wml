@@ -6,12 +6,12 @@
                                  tooltip="Select an element from the page"
                                  viewMode="link"
                                  on:click="__toggleSelectElementFromPage()"
-                                 attr:class="Elements__headElement" />
+                                 attr:class="devtools-Elements__headElement" />
         <ws:if data="{{_model.getVisibleItems().length > 0}}">
             <Controls.search:Input bind:value="_searchValue"
                                    on:valueChanged="__onSearchValueChanged()"
                                    on:keydown="__onSearchKeydown()"
-                                   attr:class="Elements__headElement" />
+                                   attr:class="devtools-Elements__headElement" />
             <ws:if data="{{ _searchTotal > 0 }}">
                 <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchTotal }}</span>
             </ws:if>
@@ -19,10 +19,10 @@
     </ws:headTemplate>
    <ws:content>
       <ws:if data="{{_model.getVisibleItems().length > 0}}">
-         <div attr:class="Elements__treeContainer"
+         <div attr:class="devtools-Elements__treeContainer ws-flexbox ws-flex-column"
               on:keydown="_onListKeyDown()">
-            <Controls.scroll:Container attr:class="Elements__treeWrapper">
-                <div attr:class="Elements__tree">
+            <Controls.scroll:Container attr:class="devtools-Elements__treeWrapper">
+                <div attr:class="devtools-Elements__tree">
                     <ws:for data="element in _model.getVisibleItems()">
                         <ws:partial template="wml!Elements/_Elements/Node"
                                     attr:key="{{element.id}}"

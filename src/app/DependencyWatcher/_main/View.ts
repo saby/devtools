@@ -1,7 +1,6 @@
 import { Control, TemplateFunction } from 'UI/Base';
 import template = require('wml!DependencyWatcher/_main/View');
 import { RPC } from 'Extension/Event/RPC';
-import 'css!DependencyWatcher/main';
 import { IEventEmitter } from 'Extension/Event/IEventEmitter';
 import {
    EventNames,
@@ -114,4 +113,6 @@ export default class View extends Control {
    private __toggleRecording(): void {
       this._isRecording = !this._isRecording;
    }
+
+   static _theme: string[] = ['DependencyWatcher/main'];
 }

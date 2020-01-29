@@ -367,7 +367,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   name: '3',
                   depth: 1,
                   parentId: 1,
-                  class: 'Elements__node_template',
+                  class: 'devtools-Elements__node_template',
                   updateReason: 'mounted',
                   selfDuration: 10,
                   actualBaseDuration: 10,
@@ -380,7 +380,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   name: '4',
                   depth: 1,
                   parentId: 1,
-                  class: 'Elements__node_template',
+                  class: 'devtools-Elements__node_template',
                   updateReason: 'mounted',
                   selfDuration: 15,
                   actualBaseDuration: 15,
@@ -779,7 +779,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   id: 3,
                   name: '3',
                   parentId: 2,
-                  class: 'Elements__node_template',
+                  class: 'devtools-Elements__node_template',
                   depth: 2
                }
             ]);
@@ -813,7 +813,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   id: 3,
                   name: '3',
                   parentId: 2,
-                  class: 'Elements__node_template',
+                  class: 'devtools-Elements__node_template',
                   depth: 2
                }
             ]);
@@ -838,14 +838,14 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                   id: 3,
                   name: '3',
                   parentId: 2,
-                  class: 'Elements__node_template',
+                  class: 'devtools-Elements__node_template',
                   depth: 2
                },
                {
                   id: 4,
                   name: '4',
                   parentId: 3,
-                  class: 'Elements__node_template',
+                  class: 'devtools-Elements__node_template',
                   depth: 3
                }
             ]);

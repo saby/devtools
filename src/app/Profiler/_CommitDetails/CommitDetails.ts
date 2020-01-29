@@ -1,7 +1,6 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import template = require('wml!Profiler/_CommitDetails/CommitDetails');
 import { descriptor } from 'Types/entity';
-import 'css!Profiler/profiler';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { IWarning } from 'Profiler/_Warning/const';
 
@@ -20,6 +19,8 @@ type Options = IControlOptions & ICommitDetailsOptions;
  */
 class CommitDetails extends Control<Options> {
    protected _template: TemplateFunction = template;
+
+   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof Options, unknown> {
       return {

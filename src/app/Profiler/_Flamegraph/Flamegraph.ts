@@ -1,7 +1,6 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import 'css!Profiler/profiler';
 import { getWidth } from './Utils';
 import { formatTime, getBackgroundColorBasedOnReason } from '../_utils/Utils';
 import template = require('wml!Profiler/_Flamegraph/Flamegraph');
@@ -501,6 +500,8 @@ class Flamegraph extends Control<IOptions> {
       this._shouldRestoreFocus = true;
       this._notify('markedKeyChanged', [id]);
    }
+
+   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

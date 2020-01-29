@@ -24,7 +24,9 @@
             require(['Devtool/Page'], (Extension) => {
                 Extension.default.createControl(
                     Extension.default,
-                    {},
+                    {
+                        theme: 'devtools:dark'
+                    },
                     document.querySelector('#root')
                 );
             });

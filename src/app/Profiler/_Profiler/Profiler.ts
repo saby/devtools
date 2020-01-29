@@ -3,7 +3,6 @@ import { Memory } from 'Types/source';
 import { Store } from 'Elements/elements';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { ICommitDetailsOptions } from 'Profiler/_CommitDetails/CommitDetails';
-import 'css!Profiler/profiler';
 import Flamegraph from '../_Flamegraph/Flamegraph';
 import RankedView from '../_RankedView/RankedView';
 import SynchronizationsList from '../_SynchronizationsList/SynchronizationsList';
@@ -466,6 +465,8 @@ class Profiler extends Control<IOptions> {
          this._searchTotal = searchResult.total;
       }
    }
+
+   static _theme: string[] = ['Profiler/profiler'];
 }
 
 export default Profiler;

@@ -9,7 +9,6 @@ import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
 import { highlightUpdate } from '../_utils/highlightUpdate';
 import retrocycle from '../retrocycle';
-import 'css!Elements/elements';
 import Store from '../_store/Store';
 import Model from './Model';
 import { throttle } from 'Types/function';
@@ -110,7 +109,7 @@ class Elements extends Control {
       if (typeof this._scrollToId !== 'undefined') {
          const child = this._children[this._scrollToId] as HTMLElement;
          if (child) {
-            const text = child.querySelector('.Elements__name');
+            const text = child.querySelector('.js-devtools-Elements__name');
             if (text) {
                text.scrollIntoView({
                   block: 'nearest',
@@ -513,6 +512,8 @@ class Elements extends Control {
          this._inspectedItem = { ...this._inspectedItem };
       }
    }
+
+   static _theme: string[] = ['Elements/elements'];
 }
 
 /**
