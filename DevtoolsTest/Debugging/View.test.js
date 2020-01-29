@@ -272,6 +272,43 @@ define([
             );
          });
 
+         it('should overwrite s3debug cookie value', async function() {
+            instance._selectedKeys = ['Controls', 'UI'];
+            const url = 'https://online.sbis.ru';
+            sandbox
+               .stub(chrome.tabs, 'get')
+               .withArgs(chrome.devtools.inspectedWindow.tabId)
+               .callsArgWith(1, {
+                  url
+               });
+            sandbox
+               .stub(chrome.cookies, 'getAll')
+               .withArgs({
+                  url
+               })
+               .callsArgWith(1, [
+                  {
+                     name: 's3debug',
+                     value: '1'.repeat(4074),
+                     url
+                  }
+               ]);
+            const setStub = sandbox.stub(chrome.cookies, 'set');
+
+            await instance._applyChanges();
+
+            assert.isTrue(
+               setStub.calledOnceWithExactly(
+                  {
+                     name: 's3debug',
+                     url,
+                     value: 'Controls,UI'
+                  },
+                  chrome.devtools.inspectedWindow.reload
+               )
+            );
+         });
+
          it('should show popup because cookies don\'t fit in the available space', async function() {
             instance._selectedKeys = ['Controls', 'UI', 'Core'];
             const url = 'https://online.sbis.ru';
