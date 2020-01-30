@@ -98,13 +98,18 @@ function getPath(item: Model): string[] {
       .reverse();
 }
 
-function getEditingConfig(isControl: boolean): IEditingConfig | undefined {
-   return isControl
-      ? {
-           sequentialEditing: false,
-           toolbarVisibility: true
-        }
-      : undefined;
+function getEditingConfig(
+   isControl: boolean,
+   tabCaption: Pane['_options']['caption']
+): IEditingConfig | undefined {
+   if (isControl && tabCaption !== 'Events') {
+      return {
+         sequentialEditing: false,
+         toolbarVisibility: true
+      };
+   } else {
+      return;
+   }
 }
 
 /**
@@ -172,7 +177,10 @@ class Pane extends Control<IOptions> {
          }
       ];
       this._visibilityCallback = this._itemActionVisibilityCallback.bind(this);
-      this._editingConfig = getEditingConfig(options.isControl);
+      this._editingConfig = getEditingConfig(
+         options.isControl,
+         options.caption
+      );
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
@@ -193,8 +201,11 @@ class Pane extends Control<IOptions> {
       if (this._options.controlId !== newOptions.controlId) {
          this._source = getSource(newOptions.data);
       }
-      if (this._options.isControl !== newOptions.isControl) {
-         this._editingConfig = getEditingConfig(newOptions.isControl);
+      if (this._options.isControl !== newOptions.isControl || this._options.caption !== newOptions.caption) {
+         this._editingConfig = getEditingConfig(
+            newOptions.isControl,
+            newOptions.caption
+         );
       }
    }
 
