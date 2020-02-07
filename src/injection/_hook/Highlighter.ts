@@ -15,6 +15,9 @@ class Highlighter {
    private overlay?: Overlay;
 
    constructor(options: IOptions) {
+      this.__mouseOverHandler = this.__mouseOverHandler.bind(this);
+      this.__clickHandler = this.__clickHandler.bind(this);
+      this.__mouseDownHandler = this.__mouseDownHandler.bind(this);
       this.onSelect = options.onSelect;
    }
 
@@ -23,9 +26,9 @@ class Highlighter {
          this.overlay = new Overlay();
       }
       this.subs = [
-         this.__subscribe('mouseover', this.__mouseOverHandler.bind(this)),
-         this.__subscribe('click', this.__clickHandler.bind(this)),
-         this.__subscribe('mousedown', this.__mouseDownHandler.bind(this))
+         this.__subscribe('mouseover', this.__mouseOverHandler),
+         this.__subscribe('click', this.__clickHandler),
+         this.__subscribe('mousedown', this.__mouseDownHandler)
       ];
    }
 
@@ -58,7 +61,7 @@ class Highlighter {
    }
 
    private __mouseOverHandler(e: MouseEvent): void {
-      const element = document.elementFromPoint(e.x, e.y);
+      const element = document.elementFromPoint(e.clientX, e.clientY);
       if (element && this.overlay) {
          this.overlay.inspect(element);
       }

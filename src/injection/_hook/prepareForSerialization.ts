@@ -10,7 +10,7 @@ function isJqueryElement(value: unknown): boolean {
    );
 }
 
-function replaceFunctions<T>(value: T): T | string {
+function replacer<T>(value: T): T | string {
    if (typeof value === 'function') {
       return `function ${value.name.replace('bound ', '')}`;
    }
@@ -41,7 +41,7 @@ const IGNORE_FIELDS = [
  */
 export default function prepareForSerialization(value: object): object {
    return decycle(value, {
-      replacer: replaceFunctions,
+      replacer,
       ignore: IGNORE_FIELDS
    });
 }

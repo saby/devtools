@@ -24,6 +24,7 @@
    "devDependencies": {
       "@types/chai": "^4.2.4",
       "@types/chrome": "0.0.91",
+      "@types/jsdom": "^12.2.4",
       "@types/sinon": "^7.5.0",
       "cross-env": "^5.2.0",
       "saby-units": "git+https://github.com/saby/Units.git#rc-20.1000",
@@ -62,7 +63,8 @@
          "build/resources/Extension/**/*.js",
          "build/resources/Profiler/**/*.js",
          "build/resources/Search/**/*.js",
-         "build/resources/Debugging/**/*.js"
+         "build/resources/Debugging/**/*.js",
+         "build/resources/injection/**/*.js"
       ],
       "reporter": [
          "text",

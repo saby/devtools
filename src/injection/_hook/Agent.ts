@@ -29,7 +29,8 @@ import {
    isTemplateNode,
    isVisible,
    startMark,
-   startSyncMark
+   startSyncMark,
+   findControlByDomNode
 } from './Utils';
 import Highlighter from './Highlighter';
 import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData';
@@ -37,7 +38,7 @@ import deepClone from './deepClone';
 import getNodeId from './getNodeId';
 import { INamedLogger } from 'Extension/Logger/ILogger';
 import { GlobalMessages } from 'Extension/const';
-import { globalChannel } from '../_devtool/globalChannel';
+import { getGlobalChannel } from '../_devtool/globalChannel';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -113,7 +114,7 @@ class Agent {
    private channel: DevtoolChannel = new DevtoolChannel('elements');
 
    private highlighter: Highlighter = new Highlighter({
-      onSelect: this.__selectByDomNode.bind(this)
+      onSelect: this.selectByDomNode.bind(this)
    });
    /**
     * This is the id of the node closest to the element selected in the Elements tab of native devtools.
@@ -153,72 +154,63 @@ class Agent {
     * This set is used to find controls with received state.
     * If a control has received state from a server and returns Promise from _beforeMount we should show a warning in the profiler.
     */
-   private controlsWithReceivedStates: Set<string>;
+   private controlsWithReceivedStates: Set<string> = new Set();
 
    constructor(config: { logger: INamedLogger }) {
-      globalChannel.addListener(
+      getGlobalChannel().addListener(
          GlobalMessages.devtoolsClosed,
-         this.__onDevtoolsClosed.bind(this)
+         this.onDevtoolsClosed.bind(this)
       );
       this.logger = config.logger;
       this.channel.addListener(
          'devtoolsInitialized',
-         this.__onDevtoolsOpened.bind(this)
+         this.onDevtoolsOpened.bind(this)
       );
       this.channel.addListener(
          'inspectElement',
-         this.__inspectElement.bind(this)
+         this.inspectElement.bind(this)
       );
-      this.channel.addListener('viewTemplate', this.__viewTemplate.bind(this));
+      this.channel.addListener('viewTemplate', this.viewTemplate.bind(this));
       this.channel.addListener(
          'viewConstructor',
-         this.__viewConstructor.bind(this)
+         this.viewConstructor.bind(this)
       );
-      this.channel.addListener(
-         'viewContainer',
-         this.__viewContainer.bind(this)
-      );
-      this.channel.addListener(
-         'storeAsGlobal',
-         this.__storeAsGlobal.bind(this)
-      );
+      this.channel.addListener('viewContainer', this.viewContainer.bind(this));
+      this.channel.addListener('storeAsGlobal', this.storeAsGlobal.bind(this));
       this.channel.addListener(
          'getSelectedItem',
-         this.__getSelectedItem.bind(this)
+         this.getSelectedItem.bind(this)
       );
       this.channel.addListener(
          'viewFunctionSource',
-         this.__viewFunctionSource.bind(this)
+         this.viewFunctionSource.bind(this)
       );
       this.channel.addListener(
          'highlightElement',
-         this.__highlightElement.bind(this)
+         this.highlightElement.bind(this)
       );
       this.channel.addListener(
          'toggleSelectFromPage',
-         this.__toggleSelectFromPage.bind(this)
+         this.toggleSelectFromPage.bind(this)
       );
       this.channel.addListener(
          'toggleProfiling',
-         this.__toggleProfiling.bind(this)
+         this.toggleProfiling.bind(this)
       );
       this.channel.addListener(
          'getProfilingData',
-         this.__getProfilingData.bind(this)
+         this.getProfilingData.bind(this)
       );
       this.channel.addListener(
          'getProfilingStatus',
-         this.__getProfilingStatus.bind(this)
+         this.getProfilingStatus.bind(this)
       );
-      this.channel.addListener(
-         'setBreakpoint',
-         this.__setBreakpoint.bind(this)
-      );
+      this.channel.addListener('setBreakpoint', this.setBreakpoint.bind(this));
       this.mutationObserver = new MutationObserver(
-         this.__mutationObserverCallback.bind(this)
+         this.mutationObserverCallback.bind(this)
       );
       if (window.__WASABY_START_PROFILING) {
-         this.__toggleProfiling(window.__WASABY_START_PROFILING);
+         this.toggleProfiling(window.__WASABY_START_PROFILING);
          this.isDevtoolsOpened = true;
          try {
             this.controlsWithReceivedStates = new Set(
@@ -230,7 +222,7 @@ class Agent {
       }
    }
 
-   private __onDevtoolsOpened(): void {
+   private onDevtoolsOpened(): void {
       this.isDevtoolsOpened = true;
 
       this.elements.forEach((node) => {
@@ -286,8 +278,8 @@ class Agent {
       name: string,
       oldNode?: IControlNode | ITemplateNode
    ): void {
-      const currentRoot = this.__getCurrentRoot();
-      const id = this.__getNodeId(oldNode);
+      const currentRoot = this.getCurrentRoot();
+      const id = this.getNodeId(oldNode);
 
       if (currentRoot.has(id)) {
          const changedNode = currentRoot.get(id) as IChangedNode;
@@ -316,7 +308,7 @@ class Agent {
       node: IBackendControlNode,
       data?: ITemplateChanges | IControlChanges
    ): void {
-      const currentRoot = this.__getCurrentRoot();
+      const currentRoot = this.getCurrentRoot();
       const changedNode = this.getCurrentNode();
 
       const commitDuration = performance.now() - changedNode.node.selfStartTime;
@@ -327,19 +319,14 @@ class Agent {
          changedNode.operation
       );
 
-      changedNode.node.parentId = this.__getParentId(node);
-      if (changedNode.node.id === changedNode.node.parentId) {
-         this.logger.error(new Error("control's id and parentId are the same"));
-      }
+      changedNode.node.parentId = this.getParentId(node);
 
       const parentId = changedNode.node.parentId;
       if (typeof parentId !== 'undefined' && currentRoot.has(parentId)) {
-         const parent = currentRoot.get(parentId);
-         if (parent) {
-            parent.node.treeDuration += commitDuration;
-            if (!this.componentsStack.includes(parentId)) {
-               parent.node.selfDuration += commitDuration;
-            }
+         const parent = currentRoot.get(parentId) as IChangedNode;
+         parent.node.treeDuration += commitDuration;
+         if (!this.componentsStack.includes(parentId)) {
+            parent.node.selfDuration += commitDuration;
          }
       }
 
@@ -365,7 +352,6 @@ class Agent {
             data.instance._$resultBeforeMount
          ) {
             if (
-               this.controlsWithReceivedStates &&
                this.controlsWithReceivedStates.has(node.key)
             ) {
                changedNode.node.unusedReceivedState = true;
@@ -383,14 +369,11 @@ class Agent {
    }
 
    private getCurrentNode(): IChangedNode {
-      const currentRoot = this.__getCurrentRoot();
+      const currentRoot = this.getCurrentRoot();
       if (this.componentsStack.length === 0) {
          throw new Error("There're no nodes in progress");
       }
       const id = this.componentsStack[this.componentsStack.length - 1];
-      if (typeof id === 'undefined') {
-         throw new Error("There're no nodes in progress");
-      }
       const changedNode = currentRoot.get(id);
       if (!changedNode) {
          throw new Error('Trying to change nonexistent node');
@@ -403,16 +386,7 @@ class Agent {
    ): void {
       if (children) {
          if (isControlNode(children) || isTemplateNode(children)) {
-            const id = this.getCurrentNode().node.id;
-            if (
-               this.vNodeToParentId.has(children) &&
-               this.vNodeToParentId.get(children) !== id
-            ) {
-               this.logger.error(
-                  new Error('This child already belongs to a different parent')
-               );
-            }
-            this.vNodeToParentId.set(children, id);
+            this.vNodeToParentId.set(children, this.getCurrentNode().node.id);
          } else if (Array.isArray(children)) {
             children.forEach((child) => {
                this.saveChildren(child);
@@ -425,14 +399,13 @@ class Agent {
 
    /**
     * Returns changed node without relying on root stack.
-    * When lifecycle hooks get called nodes from different roots get mixed
-    * in one synchronization.
+    * When lifecycle hooks get called nodes from different roots get mixed in one synchronization.
     * This will not be fixed in foreseeable future, so we have to search for the node across all roots.
     */
    private findUncommittedNode(
       id: IBackendControlNode['id']
    ): IChangedNode | void {
-      for (const root of this.changedRoots.values()) {
+      for (const root of Array.from(this.changedRoots.values())) {
          if (root.has(id)) {
             return root.get(id);
          }
@@ -440,7 +413,7 @@ class Agent {
    }
 
    onStartLifecycle(node: IControlNode): void {
-      const id = this.__getNodeId(node);
+      const id = this.getNodeId(node);
       const changedNode = this.findUncommittedNode(id);
 
       if (changedNode) {
@@ -453,7 +426,7 @@ class Agent {
    }
 
    onEndLifecycle(node: IControlNode): void {
-      const id = this.__getNodeId(node);
+      const id = this.getNodeId(node);
       const changedNode = this.findUncommittedNode(id);
 
       if (changedNode) {
@@ -489,34 +462,27 @@ class Agent {
          Because observer calls callback asynchronously there is no guarantee that every change was handled.
          We should manually take records from the queue and pass them to the callback.
           */
-         this.__mutationObserverCallback(this.mutationObserver.takeRecords());
+         this.mutationObserverCallback(this.mutationObserver.takeRecords());
       }
       changes.forEach(({ operation, node }) => {
-         if (node.selfDuration - node.treeDuration < 0) {
-            this.logger.error(
-               new Error(
-                  `Duration shouldn't be negative. Id: ${node.id}, name: ${node.name}.`
-               )
-            );
-         }
          node.selfDuration -= node.treeDuration;
          switch (operation) {
             case OperationType.DELETE:
-               this.__handleRemove(node);
+               this.handleRemove(node);
                break;
             case OperationType.CREATE:
-               this.__handleAdd(node);
+               this.handleAdd(node);
                break;
             case OperationType.UPDATE:
-               this.__handleUpdate(node);
+               this.handleUpdate(node);
                break;
          }
-         this.__addProfilingData(node, operation);
+         this.addProfilingData(node, operation);
       });
       const id = guid();
       if (this.isProfiling) {
          this.changedNodesBySynchronization.set(id, changes);
-         this.__cleanupMutationObserver();
+         this.cleanupMutationObserver();
       }
       if (this.isDevtoolsOpened) {
          window.__WASABY_DEV_HOOK__.pushMessage('endSynchronization', id);
@@ -526,9 +492,9 @@ class Agent {
       this.rootStack.splice(this.rootStack.indexOf(rootId), 1);
    }
 
-   private __handleAdd(node: IBackendControlNode): void {
+   private handleAdd(node: IBackendControlNode): void {
       node.container = getContainerForNode(node);
-      this.__updateDomToIds(OperationType.CREATE, node.container, node.id);
+      this.updateDomToIds(OperationType.CREATE, node.container, node.id);
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -545,9 +511,9 @@ class Agent {
       }
    }
 
-   private __handleUpdate(node: IBackendControlNode): void {
+   private handleUpdate(node: IBackendControlNode): void {
       if (!this.elements.has(node.id)) {
-         this.__handleAdd(node);
+         this.handleAdd(node);
          return;
       }
       // We can either set container on every update or change a lot of code to use getter.
@@ -564,23 +530,23 @@ class Agent {
       }
    }
 
-   private __handleRemove(node: IBackendControlNode): void {
-      this.__removeChildren(node.id);
-      this.__removeNode(node);
+   private handleRemove(node: IBackendControlNode): void {
+      this.removeChildren(node.id);
+      this.removeNode(node);
    }
 
-   private __removeChildren(id: IBackendControlNode['id']): void {
+   private removeChildren(id: IBackendControlNode['id']): void {
       const parents: Set<IBackendControlNode['parentId']> = new Set();
       this.elements.forEach((element, key) => {
          if (element.parentId === id || parents.has(element.parentId)) {
             parents.add(key);
-            this.__removeNode(element);
+            this.removeNode(element);
          }
       });
    }
 
-   private __removeNode({ id, container }: IBackendControlNode): void {
-      this.__updateDomToIds(OperationType.DELETE, container, id);
+   private removeNode({ id, container }: IBackendControlNode): void {
+      this.updateDomToIds(OperationType.DELETE, container, id);
       this.elements.delete(id);
 
       if (this.isDevtoolsOpened) {
@@ -589,7 +555,7 @@ class Agent {
       }
    }
 
-   private __inspectElement({
+   private inspectElement({
       id,
       expandedTabs,
       newTab,
@@ -620,7 +586,7 @@ class Agent {
             result.attributes = node.attributes;
             result.state = node.state;
             result.options = node.options;
-            result.events = getEvents(this.elements, id);
+            result.events = getEvents(this.elements, this.domToIds, id);
             result.isControl = !!node.instance;
             this.selectedNodePreviousState = result.isControl
                ? deepClone(node.state)
@@ -682,65 +648,63 @@ class Agent {
       }
    }
 
-   private __viewTemplate(id: IBackendControlNode['id']): void {
+   private viewTemplate(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node) {
          window.__WASABY_DEV_HOOK__.__template = node.template;
       }
    }
 
-   private __viewConstructor(id: IBackendControlNode['id']): void {
+   private viewConstructor(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node && node.instance) {
          window.__WASABY_DEV_HOOK__.__constructor = node.instance.constructor;
       }
    }
 
-   private __viewContainer(id: IBackendControlNode['id']): void {
+   private viewContainer(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
       if (node) {
          window.__WASABY_DEV_HOOK__.__container = node.container;
       }
    }
 
-   private __viewFunctionSource({
+   private viewFunctionSource({
       id,
       path
    }: {
       id: IBackendControlNode['id'];
       path: Array<string | number>;
    }): void {
-      window.__WASABY_DEV_HOOK__.__function = this.__getValueByPath(
+      window.__WASABY_DEV_HOOK__.__function = this.getValueByPath(
          id,
          path
       ) as Function;
    }
 
-   private __storeAsGlobal({
+   private storeAsGlobal({
       id,
       path
    }: {
       id: IBackendControlNode['id'];
       path: Array<string | number>;
    }): void {
-      window.$tmp = this.__getValueByPath(id, path);
+      window.$tmp = this.getValueByPath(id, path);
       // tslint:disable-next-line: no-console
       console.log('$tmp = ', window.$tmp);
    }
 
-   private __getValueByPath(
+   private getValueByPath(
       id: IBackendControlNode['id'],
       path: Array<string | number>
    ): unknown {
       let currentProperty = path.pop();
       let value;
       if (currentProperty === 'events') {
-         value = getEvents(this.elements, id);
+         value = getEvents(this.elements, this.domToIds, id);
       } else {
-         const element = this.elements.get(id);
-         if (element) {
-            value = element[currentProperty as keyof IBackendControlNode];
-         }
+         const element = this.elements.get(id) as IBackendControlNode;
+         value = element[currentProperty as keyof IBackendControlNode];
       }
       while (path.length) {
          currentProperty = path.pop();
@@ -749,7 +713,7 @@ class Agent {
       return value;
    }
 
-   private __highlightElement(id?: IBackendControlNode['id']): void {
+   private highlightElement(id?: IBackendControlNode['id']): void {
       if (typeof id !== 'undefined') {
          const node = this.elements.get(id);
          if (node && node.container) {
@@ -760,7 +724,7 @@ class Agent {
       this.highlighter.highlightElement();
    }
 
-   private __toggleSelectFromPage(state: boolean): void {
+   private toggleSelectFromPage(state: boolean): void {
       if (state) {
          this.highlighter.startSelectingFromPage();
       } else {
@@ -768,8 +732,8 @@ class Agent {
       }
    }
 
-   private __selectByDomNode(elem: IWasabyElement): void {
-      const control = this.__findControlByDomNode(elem);
+   private selectByDomNode(elem: IWasabyElement): void {
+      const control = findControlByDomNode(elem, this.domToIds, this.elements);
       if (control) {
          this.channel.dispatch('setSelectedItem', control.id);
       } else {
@@ -777,32 +741,20 @@ class Agent {
       }
    }
 
-   private __findControlByDomNode(
-      element: Element
-   ): IBackendControlNode | undefined {
-      let currentElement: Node | null = element;
-
-      while (currentElement) {
-         const nodes = this.domToIds.get(currentElement);
-         if (nodes) {
-            return this.elements.get(nodes[nodes.length - 1]);
-         }
-         currentElement = currentElement.parentElement;
-      }
-      return;
-   }
-
-   private __getSelectedItem(): void {
+   private getSelectedItem(): void {
       const node =
-         this.__findControlByDomNode(window.__WASABY_DEV_HOOK__.$0) ||
-         this.elements.values().next().value;
+         findControlByDomNode(
+            window.__WASABY_DEV_HOOK__.$0,
+            this.domToIds,
+            this.elements
+         ) || this.elements.values().next().value;
       if (node && this.idClosestToPreviousSelectedElement !== node.id) {
          this.channel.dispatch('setSelectedItem', node.id);
          this.idClosestToPreviousSelectedElement = node.id;
       }
    }
 
-   private __toggleProfiling(state: boolean = !this.isProfiling): void {
+   private toggleProfiling(state: boolean = !this.isProfiling): void {
       this.isProfiling = state;
       if (state) {
          this.changedNodesBySynchronization.clear();
@@ -811,15 +763,15 @@ class Agent {
             this.initialIdToDuration.set(id, selfDuration);
          });
       }
-      this.__cleanupMutationObserver();
+      this.cleanupMutationObserver();
       this.channel.dispatch('profilingStatus', this.isProfiling);
    }
 
-   private __getProfilingStatus(): void {
+   private getProfilingStatus(): void {
       this.channel.dispatch('profilingStatus', this.isProfiling);
    }
 
-   private __getProfilingData(): void {
+   private getProfilingData(): void {
       const profilingData: IBackendProfilingData = {
          initialIdToDuration: Array.from(this.initialIdToDuration.entries()),
          syncList: getSyncList(this.changedNodesBySynchronization)
@@ -833,7 +785,7 @@ class Agent {
     * Disconnects the mutation observer and clears its data.
     * @private
     */
-   private __cleanupMutationObserver(): void {
+   private cleanupMutationObserver(): void {
       this.dirtyContainers.clear();
       this.dirtyControls.clear();
       this.mutationObserver.disconnect();
@@ -845,7 +797,7 @@ class Agent {
     * @param mutations Array of DOM changes.
     * @private
     */
-   private __mutationObserverCallback(mutations: MutationRecord[]): void {
+   private mutationObserverCallback(mutations: MutationRecord[]): void {
       mutations.forEach(({ target }) => {
          if (this.dirtyContainers.has(target)) {
             return;
@@ -870,7 +822,7 @@ class Agent {
       });
    }
 
-   private __getNodeId(node?: object): number {
+   private getNodeId(node?: object): number {
       if (node) {
          if (this.vNodeToId.has(node)) {
             return this.vNodeToId.get(node) as number;
@@ -888,7 +840,7 @@ class Agent {
       return getNodeId();
    }
 
-   private __updateDomToIds(
+   private updateDomToIds(
       operation: OperationType,
       dom: Element,
       id: IBackendControlNode['id']
@@ -908,22 +860,14 @@ class Agent {
          case OperationType.CREATE:
             if (ids) {
                ids.push(id);
-            } else if (dom) {
-               this.domToIds.set(dom, [id]);
             } else {
-               const root = this.__getCurrentRoot();
-               const changedNode = root.get(id) as IChangedNode;
-               this.logger.error(
-                  new Error(
-                     `${changedNode.node.name} with id ${changedNode.node.id} was mounted but doesn't have container.`
-                  )
-               );
+               this.domToIds.set(dom, [id]);
             }
             break;
       }
    }
 
-   private __getCurrentRoot(): Map<IBackendControlNode['id'], IChangedNode> {
+   private getCurrentRoot(): Map<IBackendControlNode['id'], IChangedNode> {
       const currentRootId = this.rootStack[this.rootStack.length - 1];
       const currentRoot = this.changedRoots.get(currentRootId);
       if (!currentRoot) {
@@ -932,15 +876,15 @@ class Agent {
       return currentRoot;
    }
 
-   private __getParentId(
+   private getParentId(
       node: IControlNode | ITemplateNode
    ): IBackendControlNode['id'] | undefined {
       return (
-         this.vNodeToParentId.get(node) || this.vNodeToParentId.get(node.vnode)
+         this.vNodeToParentId.get(node) ?? this.vNodeToParentId.get(node.vnode)
       );
    }
 
-   private __addProfilingData(
+   private addProfilingData(
       node: IBackendControlNode,
       operation: OperationType
    ): void {
@@ -951,9 +895,7 @@ class Agent {
                node.isVisible = isVisible(node.container);
                break;
             case OperationType.UPDATE:
-               if (this.dirtyControls.has(node.id)) {
-                  node.domChanged = true;
-               }
+               node.domChanged = this.dirtyControls.has(node.id);
                node.isVisible = isVisible(node.container);
                break;
          }
@@ -964,9 +906,9 @@ class Agent {
     * Performs the cleanup on devtools closure. Stops sending events, disables selection from the page.
     * @private
     */
-   private __onDevtoolsClosed(): void {
+   private onDevtoolsClosed(): void {
       this.isDevtoolsOpened = false;
-      this.__toggleSelectFromPage(false);
+      this.toggleSelectFromPage(false);
    }
 
    /**
@@ -976,7 +918,7 @@ class Agent {
     * @param eventName Name of the event which will be handled.
     * @private
     */
-   private __setBreakpoint({
+   private setBreakpoint({
       id,
       eventName
    }: {
@@ -991,12 +933,15 @@ class Agent {
       > = new WeakMap();
       while (node) {
          const currentId = node.id;
-         const eventHandlers = getEvents(this.elements, currentId, true)[
-            eventName
-         ];
+         const eventHandlers = getEvents(
+            this.elements,
+            this.domToIds,
+            currentId,
+            true
+         )[eventName];
          if (eventHandlers) {
             eventHandlers.forEach((handler) => {
-               const control = handler.controlNode.control;
+               const control = handler.controlNode.instance;
                if (node && (!node.instance || control === node.instance)) {
                   const handledControls = processedHandlers.get(
                      handler.function
@@ -1017,11 +962,10 @@ class Agent {
                   }
 
                   if (needBreakpoint) {
-                     const controlId = this.__getNodeId(handler.controlNode);
                      breakpoints.push([
                         handler.function,
-                        getCondition(eventName, controlId),
-                        controlId,
+                        getCondition(eventName, handler.controlNode.id),
+                        handler.controlNode.id,
                         id
                      ]);
                   }
