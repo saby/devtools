@@ -1,10 +1,15 @@
-import { IStorage, IItem } from './IStorage';
+interface IItem {
+   id: number;
+}
 
-export class Storage<TItem extends IItem = IItem, TIndex = unknown>
-   implements IStorage<TItem, TIndex> {
+/**
+ * Wrapper around native Map which adds indexing by indexField.
+ * This class doesn't have a remove method by design, because once module is loaded it will never get deleted.
+ * @author Зайцев А.С.
+ */
+export class Storage<TItem extends IItem = IItem, TIndex = unknown> {
    protected _idMap: Map<number, TItem> = new Map();
    protected _indexMap: Map<TIndex, TItem> = new Map();
-   protected _allItems: Set<TItem> = new Set();
    constructor(readonly indexField: keyof TItem) {}
    getItemById(id: number): TItem | void {
       return this._idMap.get(id);
@@ -14,7 +19,7 @@ export class Storage<TItem extends IItem = IItem, TIndex = unknown>
    }
 
    getItems(): TItem[] {
-      return [...this._allItems];
+      return Array.from(this._idMap.values());
    }
    getItemsById(idList?: number[]): TItem[] {
       if (!idList) {
@@ -29,43 +34,16 @@ export class Storage<TItem extends IItem = IItem, TIndex = unknown>
       });
       return set;
    }
-   getItemsByIndex(indexList?: TIndex[]): TItem[] {
-      if (!indexList) {
-         return this.getItems();
-      }
-      return [...this._allItems].filter((item: TItem) => {
-         return indexList.includes(
-            item[this.indexField]
-         );
-      });
-   }
 
-   has(item: TItem): boolean {
-      return this._allItems.has(item);
-   }
-   hasId(id: number): boolean {
-      return this._idMap.has(id);
-   }
    hasIndex(index: TIndex): boolean {
       return this._indexMap.has(index);
    }
 
    add(item: TItem): void {
-      this._allItems.add(item);
       this._idMap.set(item.id, item);
       this._indexMap.set(
          item[this.indexField],
          item
       );
-   }
-   remove(item: TItem): boolean {
-      if (!this._allItems.delete(item)) {
-         return false;
-      }
-      this._idMap.delete(item.id);
-      this._indexMap.delete(
-         item[this.indexField]
-      );
-      return true;
    }
 }

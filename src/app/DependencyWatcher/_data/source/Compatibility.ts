@@ -7,6 +7,10 @@ export interface ICompatibilityConfig {
 
 const ERROR_TEXT = 'Not implemented';
 
+/**
+ * Compatibility layer for sources of the "Dependencies" tab. Basically, implementation of the Types/_source/ICrud interface.
+ * @author Зайцев А.С.
+ */
 export class Compatibility {
    readonly '[Types/_source/ICrud]': boolean = true;
    protected _idProperty: string;

@@ -1,3 +1,7 @@
+/**
+ * Columns for the main list of the "Dependencies" tab.
+ * @author Зайцев А.С.
+ */
 import FileTemplate from './column/File';
 import { IListItem } from '../data';
 import { IColumn } from '../interface/IColumn';

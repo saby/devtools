@@ -46,11 +46,12 @@ interface IR3 extends IR1 {
 }
 
 /**
- *
+ * Replaces modules that do dynamic imports (require, Core/library, Core/moduleStubs) with proxies.
  * @param {String} moduleName Имя модуля
  * @param {String} proxyModules Объект с подменяемыми зависимостями
  * @param {Array.<*>} args Массив аргументов
  * @param {Array.<String>} dependencies Список зависимостей модуля
+ * @author Зайцев А.С.
  */
 export function replaceDependencies({
    moduleName,

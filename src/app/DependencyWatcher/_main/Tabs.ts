@@ -1,3 +1,7 @@
+/**
+ * Configs for different modes of the main list of the "Dependencies" tab.
+ * @author Зайцев А.С.
+ */
 import { ViewMode } from './ViewMode';
 import { source } from '../data';
 import { Memory } from 'Types/source';

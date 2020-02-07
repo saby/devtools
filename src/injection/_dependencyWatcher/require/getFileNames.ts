@@ -32,6 +32,10 @@ function getBundles(
 
 const localizationRegexp = /^[\d\w._]+_localization$/;
 
+/**
+ * Returns a list of possible file names for a module.
+ * @author Зайцев А.С.
+ */
 export function getFileNames(
    moduleName: string,
    require: IRequire,

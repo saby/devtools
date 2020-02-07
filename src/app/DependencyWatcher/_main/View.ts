@@ -22,6 +22,10 @@ interface IChildren {
    moduleList: List;
 }
 
+/**
+ * Controller of the "Dependencies" tab.
+ * @author Зайцев А.С.
+ */
 export default class View extends Control {
    protected readonly _template: TemplateFunction = template;
    protected readonly _children: IChildren;
