@@ -22,6 +22,10 @@ function needReplaceDependencies(
    });
 }
 
+/**
+ * Creates a proxy around define.
+ * @author Зайцев А.С.
+ */
 export function proxyDefine(
    define: IDefine,
    storage: ModuleStorage,

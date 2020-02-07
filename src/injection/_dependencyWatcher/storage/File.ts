@@ -13,6 +13,7 @@ import { Update } from './Update';
 /**
  * File storage.
  * A file is a physical file, containing one or more modules.
+ * @author Зайцев А.С.
  */
 export class FileStorage extends Update<IFile, IFileFilter> {
    private readonly _storage: Storage<IFile, string> = new Storage('path');

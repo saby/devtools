@@ -93,6 +93,10 @@ function js(moduleName: string, require: IRequire, isRelease: boolean): string {
    }
 }
 
+/**
+ * Returns formatters for every require plugin that can affect the path. Each formatter takes a module name and returns a new name based on the information available.
+ * @author Зайцев А.С.
+ */
 export const pathPlugins: Array<IRequirePlugin<void | string>> = [
    json,
    cssTheme,

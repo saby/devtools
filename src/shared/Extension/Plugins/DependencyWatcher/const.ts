@@ -19,13 +19,6 @@ export enum RPCMethodNames {
 
 export const GLOBAL_MODULE_NAME = '~> page <~';
 
-export const TYPESCRIPT_HELPERS_MODULES = [
-   'module',
-   'require',
-   'exports',
-   'tslib'
-];
-
 export enum DependencyType {
    static = 'static',
    dynamic = 'dynamic'

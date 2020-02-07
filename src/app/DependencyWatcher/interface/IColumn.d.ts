@@ -1,3 +1,7 @@
+/**
+ * Types for headers in Wasaby lists.
+ * @author Зайцев А.С.
+ */
 export interface IColumn<TItem extends object> {
    displayProperty: keyof TItem;
    width: string;

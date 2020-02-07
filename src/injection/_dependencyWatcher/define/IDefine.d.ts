@@ -1,3 +1,7 @@
+/**
+ * Types for define.
+ * @author Зайцев А.С.
+ */
 type ArgsWithoutDependency = [string, Function];
 
 type ArgsWithDependency = [string, string[], Function];

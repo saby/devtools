@@ -13,6 +13,10 @@ interface IFileQueryResult extends IQueryResult<number> {}
 interface IFileQueryParam
    extends Partial<IQueryParam<ITransportFile, IFileFilter>> {}
 
+/**
+ * File storage on the frontend.
+ * @author Зайцев А.С.
+ */
 export class File {
    private _files: Map<number, ITransportFile> = new Map();
    constructor(private _rpc: RPC) {}

@@ -10,6 +10,10 @@ interface IConfig extends IConfigWithStorage {
    require: Require;
 }
 
+/**
+ * Registers handlers of rpc methods.
+ * @author Зайцев А.С.
+ */
 // TODO: тут класс не нужен совсем
 export class RPCResponse {
    constructor({ rpc, moduleStorage, require }: IConfig) {

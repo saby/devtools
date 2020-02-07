@@ -2,6 +2,10 @@ import { Query } from './Query';
 import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
 import { IUpdate, UpdateParam } from './IUpdate';
 
+/**
+ * Base class for storages.
+ * @author Зайцев А.С.
+ */
 export abstract class Update<
    TItem extends IId,
    TFilter extends object,
