@@ -36,6 +36,7 @@ type UpdateHandler = (moduleId: number) => void;
  * A module is an object or function returned by define().
  * @class
  * @param {(moduleId: number) => void} Update event handler
+ * @author Зайцев А.С.
  */
 export class ModuleStorage extends Update<
    IModule,

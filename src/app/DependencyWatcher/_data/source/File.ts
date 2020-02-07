@@ -13,6 +13,10 @@ export interface IFileConfig extends ICompatibilityConfig {
    logger: ILogger;
 }
 
+/**
+ * File source on the frontend.
+ * @author Зайцев А.С.
+ */
 export class File extends Compatibility {
    private _files: FileStorage;
    private _logger: ILogger;

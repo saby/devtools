@@ -23,6 +23,10 @@ function updateResourceCache(): void {
 
 window.performance.addEventListener('resourcetimingbufferfull', updateResourceCache);
 
+/**
+ * Collects information about resources using Resource Timing API and returns only the necessary information (URL and size).
+ * @author Зайцев А.С.
+ */
 function getResourcesFromPerformance(): Array<[string, number]> {
    updateResourceCache();
    const resourcesFromCache = Array.from(resourceCache.entries());

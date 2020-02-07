@@ -6,8 +6,6 @@ function replacePrefix(prefix: string): IRequirePlugin {
    };
 }
 
-const cdn: IRequirePlugin<string> = replacePrefix('cdn!');
-
 const browser: IRequirePlugin<string> = replacePrefix('browser!');
 
 const isBrowser: IRequirePlugin<string> = replacePrefix('is!browser?');
@@ -16,31 +14,10 @@ const optional: IRequirePlugin<string> = replacePrefix('optional!');
 
 const preload: IRequirePlugin<string> = replacePrefix('preload!');
 
-/*
-let allPlugins = {
-    'css': {},
-    'native-css': {},
-    'normalize': {},
-    'html': {},
-    'tmpl': {},
-    'wml': {},
-    'text': {},
-    'is': {},
-    'is-api': {},
-    'i18n': {},
-    'json': {},
-    'order': {},
-    'template': {},
-    'cdn': {},
-    'datasource': {},
-    'xml': {},
-    'preload': {},
-    'browser': {},
-    'optional': {},
-    'remote': {}
-};
-*/
-
+/**
+ * Returns formatters for every require plugin that doesn't affect the path. Each formatter takes a module name and removes prefixes.
+ * @author Зайцев А.С.
+ */
 export const ignoredPlugins: Array<IRequirePlugin<string>> = [
    browser,
    optional,

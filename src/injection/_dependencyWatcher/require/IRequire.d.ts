@@ -1,7 +1,8 @@
+/**
+ * Types for require.
+ * @author Зайцев А.С.
+ */
 type IDeps = string | string[];
-
-// tslint:disable-next-line:no-empty-interface
-interface IRequireConfig {}
 
 export type LocalRequire = (
    deps?: string | string[],
@@ -11,7 +12,7 @@ export type LocalRequire = (
 
 export interface IRequire extends LocalRequire {
    (
-      config: IRequireConfig,
+      config: object,
       deps?: IDeps,
       callback?: Function,
       errback?: Function

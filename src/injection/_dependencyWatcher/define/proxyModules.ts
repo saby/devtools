@@ -10,6 +10,10 @@ interface IProxyObject {
    'Core/moduleStubs': ReplaceFunction<object>;
 }
 
+/**
+ * Replaces proxies for modules that do dynamic imports (require, Core/library, Core/moduleStubs).
+ * @author Зайцев А.С.
+ */
 export function getProxyModules(storage: ModuleStorage): IProxyObject {
    function proxyRequire(name: string, require: LocalRequire): LocalRequire {
       return new Proxy(require, {

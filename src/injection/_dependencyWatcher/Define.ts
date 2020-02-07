@@ -5,6 +5,10 @@ import { ModuleStorage } from './storage/Module';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { proxyDefine } from './define/proxy';
 
+/**
+ * Wrapper around define which is used to intercept calls to it.
+ * @author Зайцев А.С.
+ */
 export class Define implements IDescriptor {
    private _storage: ModuleStorage;
    private _logger: ILogger;

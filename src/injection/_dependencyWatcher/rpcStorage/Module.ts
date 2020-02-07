@@ -27,8 +27,8 @@ function setToIdArray(set: Set<IModule>): number[] {
 }
 
 /**
- * Класс - обёртка над хранилищем модулей и файлов, необходимый для постоения списка модулей,
- * расширеными данными файлов, в которых они хранятся (путь до файла, размер)
+ * Wrapper around the storages of the files and modules used to construct the list of modules with the data about files where they're stored (path, size).
+ * @author Зайцев А.С.
  */
 export class Module extends Query<IRPCModule, IRPCModuleFilter>
    implements IUpdate<IRPCModule> {

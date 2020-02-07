@@ -1,10 +1,9 @@
 define([
    'DevtoolsTest/mockChrome',
    'DependencyWatcher/_file/List',
-   'DependencyWatcher/_file/navigation',
    'DependencyWatcher/_file/columns',
    'DependencyWatcher/_file/header'
-], function(mockChrome, List, navigation, columns, headers) {
+], function(mockChrome, List, columns, headers) {
    let sandbox;
    let instance;
    List = List.List;
@@ -33,7 +32,6 @@ define([
 
       it('getDefaultOptions', function() {
          assert.deepEqual(List.getDefaultOptions(), {
-            navigation: navigation.navigation,
             headers: headers.headers,
             columns: columns.columns,
             sorting: [{ size: 'ASC' }]

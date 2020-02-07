@@ -3,6 +3,10 @@ import { getId } from '../getId';
 import { GLOBAL_MODULE_NAME } from 'Extension/Plugins/DependencyWatcher/const';
 import isDeprecated from './isDeprecated';
 
+/**
+ * Creates object which serves as a module description.
+ * @author Зайцев А.С.
+ */
 function create(name: string, parentDefined: boolean): IModule {
    const module: IModule = {
       name,
