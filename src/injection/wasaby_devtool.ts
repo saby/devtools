@@ -3,7 +3,7 @@ import { IPluginConstructor, IPlugin } from './IPlugin';
 import { InjectHook } from './InjectHook';
 import { DevtoolChannel } from './_devtool/Channel';
 import { GlobalMessages } from 'Extension/const';
-import { globalChannel } from './_devtool/globalChannel';
+import { getGlobalChannel } from './_devtool/globalChannel';
 import { ConsoleLogger } from 'Extension/Logger/Console';
 
 const ALL_PLUGINS: IPluginConstructor[] = [
@@ -26,11 +26,11 @@ ALL_PLUGINS.forEach((Plugin: IPluginConstructor) => {
 
 function onDocumentLoad(): void {
    if (document.readyState === 'complete') {
-      globalChannel.addListener(GlobalMessages.devtoolsInitialized, () => {
+      getGlobalChannel().addListener(GlobalMessages.devtoolsInitialized, () => {
          logger.log('Обнаружили оживление вкладки wasaby, сообщаем о том что страница живая');
-         globalChannel.dispatch(GlobalMessages.wasabyInitialized);
+         getGlobalChannel().dispatch(GlobalMessages.wasabyInitialized);
       });
-      globalChannel.dispatch(GlobalMessages.wasabyInitialized);
+      getGlobalChannel().dispatch(GlobalMessages.wasabyInitialized);
       logger.log('Страница построена, сообщаем о том что страница живая');
       document.removeEventListener('readystatechange', onDocumentLoad);
    }

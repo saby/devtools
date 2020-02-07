@@ -2,20 +2,33 @@ define([
    'DevtoolsTest/mockChrome',
    'Elements/_Elements/Elements',
    'Extension/Plugins/Elements/const',
-   'Elements/_utils/highlightUpdate'
-], function(mockChrome, Elements, elementsConsts, highlightUpdate) {
+   'Elements/_utils/highlightUpdate',
+   'DevtoolsTest/getJSDOM'
+], function(mockChrome, Elements, elementsConsts, highlightUpdate, getJSDOM) {
    let sandbox;
    Elements = Elements.default;
    const OperationType = elementsConsts.OperationType;
    const ControlType = elementsConsts.ControlType;
    const BREAKPOINTS = 'window.__WASABY_DEV_HOOK__._breakpoints';
+   const needJSDOM = typeof window === 'undefined';
 
    describe('Elements/_Elements/Elements', function() {
+      before(async function() {
+         if (needJSDOM) {
+            const { JSDOM } = await getJSDOM();
+            const dom = new JSDOM('');
+            global.window = dom.window;
+         }
+      });
+
+      after(function() {
+         if (needJSDOM) {
+            delete global.window;
+         }
+      });
+
       beforeEach(function() {
          sandbox = sinon.createSandbox();
-         if (typeof window === 'undefined') {
-            window = {};
-         }
       });
 
       afterEach(function() {
@@ -2144,7 +2157,11 @@ define([
             };
             const instance = new Elements(options);
             instance.saveOptions(options);
-            instance._elementsWithBreakpoints.add(0).add(1).add(2).add(3);
+            instance._elementsWithBreakpoints
+               .add(0)
+               .add(1)
+               .add(2)
+               .add(3);
             const oldElementsWithBreakpoints =
                instance._elementsWithBreakpoints;
             sandbox.stub(chrome, 'devtools').value({
