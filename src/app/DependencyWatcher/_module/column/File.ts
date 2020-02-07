@@ -8,6 +8,10 @@ interface IOptions extends IControlOptions {
    };
 }
 
+/**
+ * Button that takes the filename and opens the file in the native "Sources" tab on click.
+ * @author Зайцев А.С.
+ */
 export default class File extends Control<IOptions> {
    protected _template: TemplateFunction = template;
    protected __openResource(e: Event, item: Model): void {

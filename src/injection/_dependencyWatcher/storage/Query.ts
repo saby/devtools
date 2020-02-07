@@ -10,6 +10,10 @@ import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/f
 import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
 import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
 
+/**
+ * Base class for data sources.
+ * @author Зайцев А.С.
+ */
 export abstract class Query<TItem extends IId, TFilter extends object>
    implements IQuery<TItem, TFilter> {
    query({

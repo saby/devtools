@@ -23,6 +23,10 @@ function getProxyFunction(
    };
 }
 
+/**
+ * Creates a proxy around require.
+ * @author Зайцев А.С.
+ */
 export function proxyRequire(
    require: IRequire,
    storage: ModuleStorage,

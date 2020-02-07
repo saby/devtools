@@ -1,3 +1,7 @@
+/**
+ * Types for updaters.
+ * @author Зайцев А.С.
+ */
 import { IId } from 'Extension/Plugins/DependencyWatcher/interface';
 
 export interface IUpdate<TUpdateParams extends IId> {
