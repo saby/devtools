@@ -35,6 +35,7 @@ class Highlighter {
    stopSelectingFromPage(): void {
       if (this.overlay) {
          this.overlay.remove();
+         this.overlay = undefined;
       }
       this.subs.forEach((unsubFunction) => {
          unsubFunction();
@@ -61,10 +62,7 @@ class Highlighter {
    }
 
    private __mouseOverHandler(e: MouseEvent): void {
-      const element = document.elementFromPoint(e.clientX, e.clientY);
-      if (element && this.overlay) {
-         this.overlay.inspect(element);
-      }
+      (this.overlay as Overlay).inspect(e.target as Element);
       e.stopPropagation();
       e.preventDefault();
    }

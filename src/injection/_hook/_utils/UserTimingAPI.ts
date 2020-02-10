@@ -1,3 +1,7 @@
+/**
+ * Contains utility functions used to work with the User Timing API.
+ * @author Зайцев А.С.
+ */
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IBackendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 

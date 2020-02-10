@@ -10,25 +10,7 @@ import {
    ITemplateNode,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
-import {
-   startSyncMark,
-   endSyncMark,
-   startMark,
-   endMark
-} from './_utils/UserTimingApi';
-import {
-   getSyncList
-} from './_utils/Profiling';
 import isDeepEqual from './isDeepEqual';
-
-// TODO: это обратная совместимость, потом нужно будет импортить функции напрямую, нужно будет просто поправить тесты
-export {
-   startSyncMark,
-   endSyncMark,
-   startMark,
-   endMark,
-   getSyncList
-};
 
 export function getControlType(node: IBackendControlNode): ControlType {
    if (node.instance) {

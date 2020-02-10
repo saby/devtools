@@ -2,6 +2,7 @@ define([
    'injection/_hook/Agent',
    'Extension/Plugins/Elements/const',
    'injection/_hook/Utils',
+   'injection/_hook/_utils/UserTimingAPI',
    'injection/_hook/getNodeId',
    'Extension/Utils/guid',
    'injection/_devtool/globalChannel',
@@ -10,6 +11,7 @@ define([
    Agent,
    elementsConst,
    hookUtils,
+   UserTimingAPIUtils,
    getNodeId,
    guid,
    globalChannel,
@@ -1499,7 +1501,7 @@ define([
 
       describe('onStartSync', function() {
          it('should initialize state for the root (add it to the stack and changedRoots)', function() {
-            sandbox.stub(hookUtils, 'startSyncMark');
+            sandbox.stub(UserTimingAPIUtils, 'startSyncMark');
             sandbox.stub(instance.mutationObserver, 'observe');
 
             instance.onStartSync(0);
@@ -1507,11 +1509,11 @@ define([
             assert.deepEqual(instance.rootStack, [0]);
             assert.deepEqual(instance.changedRoots, new Map([[0, new Map()]]));
             sinon.assert.notCalled(instance.mutationObserver.observe);
-            sinon.assert.calledWithExactly(hookUtils.startSyncMark, 0);
+            sinon.assert.calledWithExactly(UserTimingAPIUtils.startSyncMark, 0);
          });
 
          it('should initialize state for the root and start observing', function() {
-            sandbox.stub(hookUtils, 'startSyncMark');
+            sandbox.stub(UserTimingAPIUtils, 'startSyncMark');
             sandbox.stub(instance.mutationObserver, 'observe');
             instance.isProfiling = true;
 
@@ -1529,7 +1531,7 @@ define([
                   subtree: true
                }
             );
-            sinon.assert.calledWithExactly(hookUtils.startSyncMark, 0);
+            sinon.assert.calledWithExactly(UserTimingAPIUtils.startSyncMark, 0);
          });
 
          it('should put the root on top of the rootStack if onStartSync was called multiple times with multiple roots without calling endSync', function() {
@@ -1568,7 +1570,7 @@ define([
 
          it('should log error because startCommit for the node was called several times in a row without calling endCommit', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
-            sandbox.stub(hookUtils, 'startMark');
+            sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
@@ -1625,13 +1627,13 @@ define([
                ])
             );
             sinon.assert.calledWithExactly(
-               hookUtils.startMark,
+               UserTimingAPIUtils.startMark,
                'Controls/Application',
                0,
                OperationType.CREATE
             );
             sinon.assert.calledWithExactly(
-               hookUtils.startMark,
+               UserTimingAPIUtils.startMark,
                'Controls/Application',
                -1,
                OperationType.CREATE
@@ -1641,7 +1643,7 @@ define([
 
          it('should generate id for the node and save information about it on the current root', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
-            sandbox.stub(hookUtils, 'startMark');
+            sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
@@ -1676,7 +1678,7 @@ define([
                ])
             );
             sinon.assert.calledWithExactly(
-               hookUtils.startMark,
+               UserTimingAPIUtils.startMark,
                'Controls/Application',
                0,
                OperationType.CREATE
@@ -1687,7 +1689,7 @@ define([
          it('should update the time for the node if onStartCommit was called for it several times during one synchronization', function() {
             const oldVNode = {};
             instance.vNodeToId.set(oldVNode, 0);
-            sandbox.stub(hookUtils, 'startMark');
+            sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
@@ -1740,7 +1742,7 @@ define([
                ])
             );
             sinon.assert.calledWithExactly(
-               hookUtils.startMark,
+               UserTimingAPIUtils.startMark,
                'Controls/Application',
                0,
                OperationType.CREATE
@@ -1753,7 +1755,7 @@ define([
                vnode: {}
             };
             instance.vNodeToId.set(oldVNode.vnode, 0);
-            sandbox.stub(hookUtils, 'startMark');
+            sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
@@ -1806,7 +1808,7 @@ define([
                ])
             );
             sinon.assert.calledWithExactly(
-               hookUtils.startMark,
+               UserTimingAPIUtils.startMark,
                'Controls/Application',
                0,
                OperationType.CREATE
@@ -1874,7 +1876,7 @@ define([
             instance.componentsStack.push(0);
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
 
             instance.onEndCommit(node, {
                options: {
@@ -1883,7 +1885,7 @@ define([
             });
 
             sinon.assert.calledWithExactly(
-               hookUtils.endMark,
+               UserTimingAPIUtils.endMark,
                'Controls/Application',
                0,
                OperationType.CREATE
@@ -1941,7 +1943,7 @@ define([
             instance.componentsStack.push(1);
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
 
             instance.onEndCommit(node, {
                options: {
@@ -2012,7 +2014,7 @@ define([
             instance.componentsStack.push(1);
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
 
             instance.onEndCommit(node, {
                options: {
@@ -2074,7 +2076,7 @@ define([
             instance.componentsStack.push(0);
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.isProfiling = true;
             instance.controlsWithReceivedStates.add('_');
 
@@ -2086,7 +2088,7 @@ define([
             });
 
             sinon.assert.calledWithExactly(
-               hookUtils.endMark,
+               UserTimingAPIUtils.endMark,
                'Controls/Application',
                0,
                OperationType.CREATE
@@ -2114,7 +2116,7 @@ define([
             assert.isFalse(instance.controlsWithReceivedStates.has('_'));
          });
 
-         it('should not set unusedReceivedState because the control doesn\'t have an instance', function() {
+         it("should not set unusedReceivedState because the control doesn't have an instance", function() {
             const node = {
                key: '_'
             };
@@ -2133,7 +2135,7 @@ define([
             instance.componentsStack.push(0);
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.isProfiling = true;
 
             instance.onEndCommit(node, {
@@ -2143,7 +2145,7 @@ define([
             });
 
             sinon.assert.calledWithExactly(
-               hookUtils.endMark,
+               UserTimingAPIUtils.endMark,
                'Controls/Application',
                0,
                OperationType.CREATE
@@ -2190,7 +2192,7 @@ define([
             instance.componentsStack.push(0);
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.isProfiling = true;
             instance.controlsWithReceivedStates.add('_');
 
@@ -2202,7 +2204,7 @@ define([
             });
 
             sinon.assert.calledWithExactly(
-               hookUtils.endMark,
+               UserTimingAPIUtils.endMark,
                'Controls/Application',
                0,
                OperationType.UPDATE
@@ -2229,7 +2231,7 @@ define([
             assert.isTrue(instance.controlsWithReceivedStates.has('_'));
          });
 
-         it('should not set unusedReceivedState because this control doesn\'t have receivedState', function() {
+         it("should not set unusedReceivedState because this control doesn't have receivedState", function() {
             const node = {
                key: '_'
             };
@@ -2251,7 +2253,7 @@ define([
             instance.componentsStack.push(0);
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.isProfiling = true;
 
             instance.onEndCommit(node, {
@@ -2262,7 +2264,7 @@ define([
             });
 
             sinon.assert.calledWithExactly(
-               hookUtils.endMark,
+               UserTimingAPIUtils.endMark,
                'Controls/Application',
                0,
                OperationType.CREATE
@@ -2296,9 +2298,11 @@ define([
                type: 'TemplateNode',
                key: '_',
                ref: nodeRef,
-               children: [{
-                  ref: childRef
-               }]
+               children: [
+                  {
+                     ref: childRef
+                  }
+               ]
             };
             instance.rootStack.push(0);
             instance.changedRoots.set(0, new Map());
@@ -2316,7 +2320,7 @@ define([
             instance.componentsStack.push(0);
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
             sandbox.stub(hookUtils, 'addRef').returns(generatedRef);
 
             instance.onEndCommit(node, {
@@ -2326,7 +2330,7 @@ define([
             });
 
             sinon.assert.calledWithExactly(
-               hookUtils.endMark,
+               UserTimingAPIUtils.endMark,
                'Controls/Application',
                0,
                OperationType.CREATE
@@ -2351,7 +2355,12 @@ define([
             assert.deepEqual(instance.changedRoots, expectedChangedRoots);
             assert.deepEqual(instance.componentsStack, []);
             assert.equal(node.children[0].ref, generatedRef);
-            sinon.assert.calledWithExactly(hookUtils.addRef, changedNode, nodeRef, childRef);
+            sinon.assert.calledWithExactly(
+               hookUtils.addRef,
+               changedNode,
+               nodeRef,
+               childRef
+            );
          });
       });
 
@@ -2504,7 +2513,7 @@ define([
          it('should put the node on the stack and update its selfStartTime', function() {
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'startMark');
+            sandbox.stub(UserTimingAPIUtils, 'startMark');
             instance.changedRoots.set(
                0,
                new Map([
@@ -2588,7 +2597,7 @@ define([
                ])
             );
             sinon.assert.calledWithExactly(
-               hookUtils.startMark,
+               UserTimingAPIUtils.startMark,
                'Controls/popup:Manager',
                1
             );
@@ -2612,7 +2621,7 @@ define([
          it('should remove the node from the stack and update selfDuration', function() {
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.changedRoots.set(
                0,
                new Map([
@@ -2680,7 +2689,7 @@ define([
             });
             assert.deepEqual(instance.changedRoots, expectedResult);
             sinon.assert.calledWithExactly(
-               hookUtils.endMark,
+               UserTimingAPIUtils.endMark,
                'Controls/popup:Manager',
                1
             );
@@ -2690,7 +2699,7 @@ define([
          it('should remove the node from the stack, update selfDuration and update treeDuration and selfDuration of its parent', function() {
             const currentTime = performance.now();
             sandbox.stub(performance, 'now').returns(currentTime);
-            sandbox.stub(hookUtils, 'endMark');
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.changedRoots.set(
                0,
                new Map([
@@ -2755,7 +2764,7 @@ define([
             });
             assert.deepEqual(instance.changedRoots, expectedResult);
             sinon.assert.calledWithExactly(
-               hookUtils.endMark,
+               UserTimingAPIUtils.endMark,
                'Controls/popup:Manager',
                1
             );
@@ -2769,7 +2778,7 @@ define([
             let addedContainer;
             let expectedElements;
             beforeEach(() => {
-               sandbox.stub(hookUtils, 'endSyncMark');
+               sandbox.stub(UserTimingAPIUtils, 'endSyncMark');
                instance.rootStack.push(0);
                const changes = new Map();
 
@@ -2854,7 +2863,10 @@ define([
                instance.onEndSync(0);
 
                assert.deepEqual(instance.elements, expectedElements);
-               sinon.assert.calledWithExactly(hookUtils.endSyncMark, 0);
+               sinon.assert.calledWithExactly(
+                  UserTimingAPIUtils.endSyncMark,
+                  0
+               );
                assert.isFalse(instance.domToIds.has(removedContainer));
                assert.deepEqual(instance.domToIds.get(addedContainer), [1]);
                assert.deepEqual(instance.rootStack, []);
@@ -2872,7 +2884,10 @@ define([
                instance.onEndSync(0);
 
                assert.deepEqual(instance.elements, expectedElements);
-               sinon.assert.calledWithExactly(hookUtils.endSyncMark, 0);
+               sinon.assert.calledWithExactly(
+                  UserTimingAPIUtils.endSyncMark,
+                  0
+               );
                assert.isFalse(instance.domToIds.has(removedContainer));
                assert.deepEqual(instance.domToIds.get(addedContainer), [1]);
                assert.deepEqual(instance.rootStack, []);
@@ -3402,6 +3417,31 @@ define([
 
             // cleanup
             parent.remove();
+         });
+      });
+
+      describe('start with profiling', function() {
+         it('should read received states', function() {
+            window.__WASABY_START_PROFILING = true;
+            window.receivedStates = '{"_":{"value":123},"_0_":true}';
+
+            const localInstance = new Agent({
+               logger: {
+                  error: sandbox.stub()
+               }
+            });
+
+            assert.isTrue(localInstance.isDevtoolsOpened);
+            assert.deepEqual(
+               localInstance.controlsWithReceivedStates,
+               new Set(['_', '_0_'])
+            );
+
+            // cleanup
+            localInstance.mutationObserver.disconnect();
+            localInstance.channel.destructor();
+            delete window.__WASABY_START_PROFILING;
+            delete window.receivedStates;
          });
       });
    });

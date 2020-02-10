@@ -1,3 +1,7 @@
+/**
+ * Contains utility functions used by the backend during profiling.
+ * @author Зайцев А.С.
+ */
 import Agent, { IChangedNode } from '../Agent';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { OperationType } from 'Extension/Plugins/Elements/const';
@@ -77,6 +81,10 @@ function getSynchronizationDuration(
    }, 0);
 }
 
+/**
+ * Transforms information about the synchronizations from the backend to a format consumed by the frontend.
+ * @param changedNodesMap
+ */
 export function getSyncList(
    changedNodesMap: Agent['changedNodesBySynchronization']
 ): IBackendProfilingData['syncList'] {

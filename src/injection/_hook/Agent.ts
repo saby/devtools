@@ -17,19 +17,14 @@ import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
 import {
    addRef,
-   endMark,
-   endSyncMark,
    getCondition,
    getContainerForNode,
    getControlType,
    getEvents,
    getObjectDiff,
-   getSyncList,
    isControlNode,
    isTemplateNode,
    isVisible,
-   startMark,
-   startSyncMark,
    findControlByDomNode
 } from './Utils';
 import Highlighter from './Highlighter';
@@ -39,6 +34,8 @@ import getNodeId from './getNodeId';
 import { INamedLogger } from 'Extension/Logger/ILogger';
 import { GlobalMessages } from 'Extension/const';
 import { getGlobalChannel } from '../_devtool/globalChannel';
+import { getSyncList } from './_utils/Profiling';
+import { endMark, endSyncMark, startMark, startSyncMark } from './_utils/UserTimingAPI';
 
 export interface IChangedNode {
    node: IBackendControlNode;

@@ -48,14 +48,13 @@ define([
             assert.instanceOf(instance.overlay, Overlay);
 
             sandbox.stub(instance.overlay, 'inspect');
-            sandbox.stub(document, 'elementFromPoint').withArgs(10, 10).returns(document.body);
             const mouseoverEvent = new MouseEvent('mouseover', {
                clientX: 10,
                clientY: 10
             });
             sandbox.stub(mouseoverEvent, 'stopPropagation');
             sandbox.stub(mouseoverEvent, 'preventDefault');
-            document.dispatchEvent(mouseoverEvent);
+            document.body.dispatchEvent(mouseoverEvent);
 
             sinon.assert.calledOnce(mouseoverEvent.stopPropagation);
             sinon.assert.calledOnce(mouseoverEvent.preventDefault);
@@ -111,6 +110,59 @@ define([
             // cleanup
             instance.stopSelectingFromPage();
          });
+
+         it('should use existing overlay', function() {
+            const onSelect = sandbox.stub();
+            const instance = new Highlighter({
+               onSelect
+            });
+            const overlay = new Overlay();
+            instance.overlay = overlay;
+
+            instance.startSelectingFromPage();
+
+            assert.equal(instance.overlay, overlay);
+
+            // cleanup
+            instance.stopSelectingFromPage();
+         });
+      });
+
+      describe('stopSelectingFromPage', function() {
+         it('should remove overlay and call unsub functions', function() {
+            const onSelect = sandbox.stub();
+            const instance = new Highlighter({
+               onSelect
+            });
+            const overlay = new Overlay();
+            sandbox.stub(overlay, 'remove');
+            instance.overlay = overlay;
+            const firstUnsub = sandbox.stub();
+            const secondUnsub = sandbox.stub();
+            const thirdUnsub = sandbox.stub();
+            instance.subs = [firstUnsub, secondUnsub, thirdUnsub];
+
+            instance.stopSelectingFromPage();
+
+            sinon.assert.calledOnce(overlay.remove);
+            assert.isUndefined(instance.overlay);
+            sinon.assert.callOrder(firstUnsub, secondUnsub, thirdUnsub);
+         });
+
+         it('should not throw if the overlay doesn\'t exist and call unsub functions', function() {
+            const onSelect = sandbox.stub();
+            const instance = new Highlighter({
+               onSelect
+            });
+            const firstUnsub = sandbox.stub();
+            const secondUnsub = sandbox.stub();
+            const thirdUnsub = sandbox.stub();
+            instance.subs = [firstUnsub, secondUnsub, thirdUnsub];
+
+            instance.stopSelectingFromPage();
+
+            sinon.assert.callOrder(firstUnsub, secondUnsub, thirdUnsub);
+         });
       });
 
       describe('highlightElement', function() {
@@ -139,6 +191,17 @@ define([
             instance.highlightElement();
 
             sinon.assert.calledOnce(instance.overlay.remove);
+         });
+
+         it('should create new overlay', function() {
+            const onSelect = sandbox.stub();
+            const instance = new Highlighter({
+               onSelect
+            });
+
+            instance.highlightElement();
+
+            assert.instanceOf(instance.overlay, Overlay);
          });
       });
    });
