@@ -108,7 +108,11 @@ const EXTENSION_MODULES = [
   {
     "name": "DevtoolsTest",
     "path": resolve("DevtoolsTest")
-  }
+  },
+  {
+    "name": "Injection",
+    "path": resolve(input.injectionDir)
+  },
 ];
 
 const MODULES = [].concat(WASABY_MODULES, EXTENSION_MODULES);

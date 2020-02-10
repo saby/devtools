@@ -1,6 +1,13 @@
 import { DevtoolChannel } from './Channel';
 import { GLOBAL_CHANNEL_NAME } from 'Extension/const';
 
-const globalChannel = new DevtoolChannel(GLOBAL_CHANNEL_NAME);
+let globalChannel: DevtoolChannel;
 
-export { globalChannel };
+function getGlobalChannel(): DevtoolChannel {
+   if (!globalChannel) {
+      globalChannel = new DevtoolChannel(GLOBAL_CHANNEL_NAME);
+   }
+   return globalChannel;
+}
+
+export { getGlobalChannel };

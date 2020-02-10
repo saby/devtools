@@ -25,6 +25,8 @@ function cloneOrCopy(
             key,
             path
          );
+      } else if (hashExtender[key] instanceof Date) {
+         hash[key] = new Date(hashExtender[key]);
       } else {
          hash[key] = hashExtender[key];
       }
@@ -43,69 +45,22 @@ function mergeInner(
       return new Date(hashExtender);
    }
 
-   if (
-      hash !== null &&
-      typeof hash === 'object' &&
-      hashExtender !== null &&
-      typeof hashExtender === 'object'
-   ) {
-      path.keys.push(currentKey === null ? '.' : currentKey);
-      if (path.objects.indexOf(hashExtender) > -1) {
-         throw new Error(
-            `Recursive traversal detected for path "${path.keys.join(
-               ' -> '
-            )}" with ${hashExtender}`
-         );
-      }
-      path.objects.push(hashExtender);
-
-      for (const i in hashExtender) {
-         if (!hashExtender.hasOwnProperty(i)) {
-            continue;
-         }
-
-         if (hash[i] === undefined) {
-            if (hashExtender[i] === null) {
-               hash[i] = null;
-            } else {
-               cloneOrCopy(hash, hashExtender, i, path);
-            }
-         } else {
-            if (
-               hash[i] &&
-               typeof hash[i] === 'object' &&
-               typeof hashExtender[i] === 'object'
-            ) {
-               if (hash[i] instanceof Date) {
-                  if (hashExtender[i] instanceof Date) {
-                     hash[i] = new Date(+hashExtender[i]);
-                     continue;
-                  } else {
-                     hash[i] = hashExtender[i] instanceof Array ? [] : {};
-                  }
-               } else if (hashExtender[i] instanceof Date) {
-                  hash[i] = new Date(+hashExtender[i]);
-                  continue;
-               }
-
-               if (
-                  (isMergeableObject(hashExtender[i]) ||
-                     hashExtender[i] === null) &&
-                  Object.keys(hash[i]).length > 0
-               ) {
-                  hash[i] = mergeInner(hash[i], hashExtender[i], i, path);
-               }
-            } else {
-               cloneOrCopy(hash, hashExtender, i, path);
-            }
-         }
-      }
-
-      path.keys.pop();
-      path.objects.pop();
-   } else {
-      return hashExtender;
+   path.keys.push(currentKey === null ? '.' : currentKey);
+   if (path.objects.indexOf(hashExtender) > -1) {
+      throw new Error(
+         `Recursive traversal detected for path "${path.keys.join(
+            ' -> '
+         )}" with ${hashExtender}`
+      );
    }
+   path.objects.push(hashExtender);
+
+   Object.keys(hashExtender).forEach((key) => {
+      cloneOrCopy(hash, hashExtender, key, path);
+   });
+
+   path.keys.pop();
+   path.objects.pop();
 
    return hash;
 }

@@ -48,7 +48,6 @@
                                   isControl="{{ _options.isControl }}"
                                   highlightUpdates="{{ false }}"
                                   on:viewFunctionSource="_viewFunctionSource()"
-                                  on:storeAsGlobal="_storeAsGlobal()"
                                   on:expandedChanged="_forwardExpanded('_eventsExpanded')"
                                   on:setBreakpoint="_notifyHandler('setBreakpoint')"
                                   on:removeBreakpoint="_notifyHandler('removeBreakpoint')"

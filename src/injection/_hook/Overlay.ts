@@ -15,6 +15,7 @@ function calculateCaptionPosition({ top, height, bottom }: ClientRect): {
    x: number,
    y: number
 } {
+   // container is in viewport, caption is on top the container
    const result = {
       x: 0,
       y: -CAPTION_HEIGHT
@@ -22,11 +23,14 @@ function calculateCaptionPosition({ top, height, bottom }: ClientRect): {
    const scrollTop = document.documentElement.offsetHeight;
 
    if (top > scrollTop) {
+      // container is below the fold, caption on the bottom of the page
       result.y = scrollTop - top - CAPTION_HEIGHT;
    } else if (top < CAPTION_HEIGHT) {
       if (bottom > scrollTop - CAPTION_HEIGHT) {
+         // container is above and below the fold simultaneously, caption should be on the top of the page
          result.y = 0;
       } else {
+         // container is above the fold, caption should be on the bottom of the container
          result.y = height;
       }
    }

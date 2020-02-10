@@ -1,0 +1,172 @@
+define([
+   'injection/_hook/_utils/Profiling',
+   'Extension/Plugins/Elements/const'
+], function(ProfilingUtils, elementsConst) {
+   let sandbox;
+   const { getSyncList } = ProfilingUtils;
+   const { OperationType } = elementsConst;
+
+   describe('injection/_hook/_utils/Profiling', function() {
+
+      beforeEach(function() {
+         sandbox = sinon.createSandbox();
+      });
+
+      afterEach(function() {
+         sandbox.restore();
+      });
+
+      describe('getSyncList', function() {
+         it('should transform backend representation of synchronizations to a serializable representation (no Maps, no Sets, no functions, etc.)', function() {
+            const changedNodesBySynchronization = new Map();
+            const firstChanges = new Map();
+            firstChanges.set(0, {
+               node: {
+                  selfDuration: 10,
+                  domChanged: true,
+                  isVisible: true,
+                  unusedReceivedState: false
+               },
+               operation: OperationType.UPDATE
+            });
+            firstChanges.set(1, {
+               node: {
+                  parentId: 0,
+                  selfDuration: 5,
+                  options: {
+                     value: 12,
+                     anotherValue: 34
+                  },
+                  changedOptions: {
+                     value: 56,
+                     anotherValue: 78
+                  },
+                  attributes: {
+                     'attr:class': 'expanded'
+                  },
+                  changedAttributes: {
+                     'attr:class': 'collapsed'
+                  },
+                  domChanged: true,
+                  isVisible: true,
+                  unusedReceivedState: false
+               },
+               operation: OperationType.UPDATE
+            });
+            firstChanges.set(2, {
+               node: {
+                  parentId: 1,
+                  selfDuration: 2,
+                  domChanged: false,
+                  isVisible: false,
+                  unusedReceivedState: false
+               },
+               operation: OperationType.UPDATE
+            });
+            firstChanges.set(3, {
+               node: {
+                  parentId: 1,
+                  selfDuration: 4,
+                  domChanged: true,
+                  isVisible: false,
+                  unusedReceivedState: false
+               },
+               operation: OperationType.DELETE
+            });
+            changedNodesBySynchronization.set('0', firstChanges);
+            const secondChanges = new Map();
+            secondChanges.set(4, {
+               node: {
+                  selfDuration: 9,
+                  domChanged: true,
+                  isVisible: true,
+                  unusedReceivedState: true
+               },
+               operation: OperationType.CREATE
+            });
+            changedNodesBySynchronization.set('1', secondChanges);
+
+            const result = getSyncList(changedNodesBySynchronization);
+
+            assert.deepEqual(result, [
+               [
+                  '0',
+                  {
+                     selfDuration: 21,
+                     changes: [
+                        [
+                           0,
+                           {
+                              selfDuration: 10,
+                              updateReason: 'forceUpdated',
+                              domChanged: true,
+                              isVisible: true,
+                              unusedReceivedState: false,
+                              changedOptions: undefined,
+                              changedAttributes: undefined
+                           }
+                        ],
+                        [
+                           1,
+                           {
+                              selfDuration: 5,
+                              updateReason: 'selfUpdated',
+                              domChanged: true,
+                              isVisible: true,
+                              unusedReceivedState: false,
+                              changedOptions: ['value', 'anotherValue'],
+                              changedAttributes: ['class']
+                           }
+                        ],
+                        [
+                           2,
+                           {
+                              selfDuration: 2,
+                              updateReason: 'parentUpdated',
+                              domChanged: false,
+                              isVisible: false,
+                              unusedReceivedState: false,
+                              changedOptions: undefined,
+                              changedAttributes: undefined
+                           }
+                        ],
+                        [
+                           3,
+                           {
+                              selfDuration: 4,
+                              updateReason: 'destroyed',
+                              domChanged: true,
+                              isVisible: false,
+                              unusedReceivedState: false,
+                              changedOptions: undefined,
+                              changedAttributes: undefined
+                           }
+                        ]
+                     ]
+                  }
+               ],
+               [
+                  '1',
+                  {
+                     selfDuration: 9,
+                     changes: [
+                        [
+                           4,
+                           {
+                              selfDuration: 9,
+                              updateReason: 'mounted',
+                              domChanged: true,
+                              isVisible: true,
+                              unusedReceivedState: true,
+                              changedOptions: undefined,
+                              changedAttributes: undefined
+                           }
+                        ]
+                     ]
+                  }
+               ]
+            ]);
+         });
+      });
+   });
+});
