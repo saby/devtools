@@ -2,7 +2,6 @@
     headingCaption="{[Выберите файл]}"
     selectedItems="{{ _options.selectedItems }}"
     attr:class="DependencyFilter__FilePanel"
-    theme="default-Layout"
 >
     <ws:bodyContentTemplate>
         <Layout.Selector.Browser
