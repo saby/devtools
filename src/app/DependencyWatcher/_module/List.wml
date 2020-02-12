@@ -11,7 +11,6 @@
     searchStartingWith="current"
     viewMode="table"
     root="{{ _root }}"
-    theme="default-Layout"
     searchValue="{{ _searchValue }}"
 >
     <ws:search>
