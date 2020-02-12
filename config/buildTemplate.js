@@ -8,10 +8,6 @@ const WASABY_MODULES = [
     "path": "wasaby-controls/Controls"
   },
   {
-    "name": "Controls-theme",
-    "path": "wasaby-controls/Controls-theme"
-  },
-  {
     "name": "Controls-default-theme",
     "path": "wasaby-controls/Controls-default-theme"
   },
