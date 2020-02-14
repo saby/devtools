@@ -7,13 +7,9 @@ function findFiles(
    bundles: Record<string, string[]>,
    module: string
 ): string[] {
-   const result: string[] = [];
-   Object.entries(bundles).forEach(([bundleName, bundle]) => {
-      if (bundle.includes(module)) {
-         result.push(bundleName);
-      }
-   });
-   return result;
+   return Object.keys(bundles).filter((bundleName) =>
+      bundles[bundleName].includes(module)
+   );
 }
 
 function getBundles(
@@ -24,13 +20,17 @@ function getBundles(
    if (!isRelease) {
       return;
    }
-   const files = findFiles(bundles, moduleName);
-   if (files.length) {
-      return files.map((file) => file + '.js');
-   }
+   const files = findFiles(bundles, moduleName).map((file) => file + '.js');
+   return files.length ? files : undefined;
 }
 
 const localizationRegexp = /^[\d\w._]+_localization$/;
+const hardPlugins = ['i18n!', 'css!', 'wml!', 'tmpl!'];
+
+function shouldCheckStaticDependents(moduleName: string): boolean {
+   const isHard = hardPlugins.some((plugin) => moduleName.startsWith(plugin));
+   return isHard || localizationRegexp.test(moduleName);
+}
 
 /**
  * Returns a list of possible file names for a module.
@@ -61,28 +61,20 @@ export function getFileNames(
    For some types of modules, it is impossible to infere file name of a module using only it's name.
    So we're trying to get file names using it's static dependents, because most likely they're in the same file.
     */
-   if (
-      moduleName.startsWith('i18n!') ||
-      moduleName.startsWith('css!') ||
-      moduleName.startsWith('wml!') ||
-      moduleName.startsWith('tmpl!') ||
-      localizationRegexp.test(moduleName)
-   ) {
-      if (staticDependents.size) {
-         for (const dependent of staticDependents) {
-            if (dependent.defined) {
-               result = result.concat(
-                  getFileNames(
-                     dependent.name,
-                     require,
-                     isRelease,
-                     bundles,
-                     dependent.dependent.static
-                  )
-               );
-            }
+   if (shouldCheckStaticDependents(moduleName)) {
+      staticDependents.forEach((dependent) => {
+         if (dependent.defined) {
+            result = result.concat(
+               getFileNames(
+                  dependent.name,
+                  require,
+                  isRelease,
+                  bundles,
+                  dependent.dependent.static
+               )
+            );
          }
-      }
+      });
    }
    return result;
 }

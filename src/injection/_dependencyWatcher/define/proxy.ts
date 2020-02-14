@@ -1,17 +1,10 @@
 import { DefineArgs, IDefine } from './IDefine';
-import { getProxyModules } from './proxyModules';
+import { getProxyModules } from './getProxyModules';
 import { replaceDependencies } from './replaceDependency';
 import { ModuleStorage } from '../storage/Module';
-import { ILogger } from 'Extension/Logger/ILogger';
 import { GLOBAL } from '../../const';
 
 const MODULE_INDEX = 2;
-
-enum warnMessage {
-   withoutArgs = 'call without arguments',
-   withoutName = 'call without "name"',
-   withOneArg = 'call with one argument'
-}
 
 function needReplaceDependencies(
    dependencies: string[],
@@ -28,8 +21,7 @@ function needReplaceDependencies(
  */
 export function proxyDefine(
    define: IDefine,
-   storage: ModuleStorage,
-   logger: ILogger
+   storage: ModuleStorage
 ): IDefine {
    const proxyModules = getProxyModules(storage);
    const replacedModules: string[] = Object.keys(proxyModules);
@@ -46,16 +38,16 @@ export function proxyDefine(
    return new Proxy(define, {
       apply(target: IDefine, thisArg: unknown, argArray?: DefineArgs): unknown {
          if (!argArray || !argArray.length) {
-            logger.warn(warnMessage.withoutArgs);
+            // without args
             return target.apply(thisArg, argArray);
          }
          if (argArray.length === 1) {
-            logger.warn(warnMessage.withOneArg);
+            // with one arg
             return target.apply(thisArg, argArray);
          }
          const name = argArray[0];
          if (!name || typeof name !== 'string') {
-            logger.warn(warnMessage.withoutName);
+            // without name
             return target.apply(thisArg, argArray);
          }
          let dependencies: string[];

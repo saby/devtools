@@ -6,7 +6,7 @@ const HELPERS_MODULES = [
 ];
 
 /**
- * Filter function used to filter out helper funcitons added on build-step.
+ * Filter function used to filter out helper functions added on build-step.
  * @author Зайцев А.С.
  */
 function filterHelpers(moduleName: string): boolean {

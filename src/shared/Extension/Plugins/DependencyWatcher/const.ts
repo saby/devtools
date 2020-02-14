@@ -13,7 +13,6 @@ export enum RPCMethodNames {
    moduleOpenSource = 'module.openSource',
 
    fileGetItems = 'file.getItems',
-   fileHasUpdates = 'file.hasUpdates',
    fileQuery = 'file.query'
 }
 

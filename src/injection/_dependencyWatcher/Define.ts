@@ -2,7 +2,6 @@ import { IConfigWithStorage } from './IConfig';
 import { IDefine } from './define/IDefine';
 import { IDescriptor } from './IDescriptor';
 import { ModuleStorage } from './storage/Module';
-import { ILogger } from 'Extension/Logger/ILogger';
 import { proxyDefine } from './define/proxy';
 
 /**
@@ -11,12 +10,10 @@ import { proxyDefine } from './define/proxy';
  */
 export class Define implements IDescriptor {
    private _storage: ModuleStorage;
-   private _logger: ILogger;
    private _define: IDefine;
    private _proxy: IDefine;
-   constructor({ logger, moduleStorage }: IConfigWithStorage) {
+   constructor({ moduleStorage }: IConfigWithStorage) {
       this._storage = moduleStorage;
-      this._logger = logger;
    }
    getDescriptor(): PropertyDescriptor {
       return {
@@ -25,8 +22,7 @@ export class Define implements IDescriptor {
                this._define = value;
                this._proxy = proxyDefine(
                   this._define,
-                  this._storage,
-                  this._logger
+                  this._storage
                );
             } else {
                this._proxy = value;
