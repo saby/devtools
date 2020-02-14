@@ -3,19 +3,10 @@ define([
    'DependencyWatcher/_module/getItemActions',
    'Core/i18n'
 ], function(mockChrome, getItemActions, i18n) {
-   let sandbox;
    getItemActions = getItemActions.getItemActions;
    const rk = i18n.rk;
 
    describe('DependencyWatcher/_module/getItemActions', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       describe('getItemActions', function() {
          it('should return action configs with correct handlers', function() {
             const firstHandler = () => {};

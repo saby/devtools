@@ -1,16 +1,7 @@
 define(['injection/_dependencyWatcher/data/sort/name'], function(name) {
-   let sandbox;
    name = name.default;
 
    describe('injection/_dependencyWatcher/data/sort/name', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should correctly sort by name (ignoring prefixes)', function() {
          assert.equal(
             name({ name: 'Application' }, { name: 'Application' }),

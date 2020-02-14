@@ -4,18 +4,16 @@ define([
    'DependencyWatcher/_file/columns',
    'DependencyWatcher/_file/header'
 ], function(mockChrome, List, columns, headers) {
-   let sandbox;
    let instance;
    List = List.List;
 
    describe('DependencyWatcher/_file/List', function() {
       beforeEach(function() {
-         sandbox = sinon.createSandbox();
          instance = new List();
       });
 
       afterEach(function() {
-         sandbox.restore();
+         instance = undefined;
       });
 
       describe('_beforeMount', function() {

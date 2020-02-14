@@ -1,17 +1,8 @@
 define(['injection/_dependencyWatcher/storage/Storage'], function(Storage) {
-   let sandbox;
    let instance;
    Storage = Storage.Storage;
 
    describe('injection/_dependencyWatcher/storage/Storage', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       beforeEach(function() {
          instance = new Storage('testIndexField');
       });

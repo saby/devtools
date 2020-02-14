@@ -1,16 +1,7 @@
 define(['injection/_hook/isDeepEqual'], function(isDeepEqual) {
-   let sandbox;
    isDeepEqual = isDeepEqual.default;
 
    describe('injection/_hook/isDeepEqual', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should return true for nulls', function() {
          assert.isTrue(isDeepEqual(null, null));
       });

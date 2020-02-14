@@ -2,20 +2,18 @@ define([
    'DevtoolsTest/mockChrome',
    'DependencyWatcher/_data/source/Compatibility'
 ], function(mockChrome, Compatibility) {
-   let sandbox;
    let instance;
    Compatibility = Compatibility.Compatibility;
 
    describe('DependencyWatcher/_data/source/Compatibility', function() {
       beforeEach(function() {
-         sandbox = sinon.createSandbox();
          instance = new Compatibility({
             idProperty: 'test'
          });
       });
 
       afterEach(function() {
-         sandbox.restore();
+         instance = undefined;
       });
 
       it('should set options', function() {

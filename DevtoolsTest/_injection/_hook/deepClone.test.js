@@ -1,16 +1,7 @@
 define(['injection/_hook/deepClone'], function(deepClone) {
-   let sandbox;
    deepClone = deepClone.default;
 
    describe('injection/_hook/deepClone', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should return undefined if called with it', function() {
          const result = deepClone();
 

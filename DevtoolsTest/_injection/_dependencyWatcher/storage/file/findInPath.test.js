@@ -1,18 +1,9 @@
 define(['injection/_dependencyWatcher/storage/file/findInPath'], function(
    findInPath
 ) {
-   let sandbox;
    findInPath = findInPath.default;
 
    describe('injection/_dependencyWatcher/storage/file/findInPath', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should return the correct file', function() {
          const files = [
             {

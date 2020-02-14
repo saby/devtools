@@ -1,18 +1,9 @@
 define(['injection/_dependencyWatcher/storage/module/addDynamic'], function(
    addDynamic
 ) {
-   let sandbox;
    addDynamic = addDynamic.default;
 
    describe('injection/_dependencyWatcher/storage/module/addDynamic', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should update dynamic dependencies of modules and return updated modules', function() {
          const existingStaticDependency = {};
          const existingDynamicDependency = {};

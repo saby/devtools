@@ -1,16 +1,7 @@
 define(['injection/_dependencyWatcher/data/applyWhere'], function(applyWhere) {
-   let sandbox;
    applyWhere = applyWhere.default;
 
    describe('injection/_dependencyWatcher/data/applyWhere', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should correctly filter items', function() {
          const items = Object.freeze([
             {

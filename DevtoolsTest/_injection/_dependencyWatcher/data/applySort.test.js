@@ -1,16 +1,7 @@
 define(['injection/_dependencyWatcher/data/applySort'], function(applySort) {
-   let sandbox;
    applySort = applySort.default;
 
    describe('injection/_dependencyWatcher/data/applySort', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should correctly sort items', function() {
          const items = Object.freeze([
             {

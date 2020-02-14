@@ -1,16 +1,7 @@
 define(['injection/_dependencyWatcher/data/applyPaging'], function(applyPaging) {
-   let sandbox;
    applyPaging = applyPaging.applyPaging;
 
    describe('injection/_dependencyWatcher/data/applyPaging', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should return slice of items based on limit and offset', function() {
          const items = [0, 1, 2, 3, 4, 5];
 

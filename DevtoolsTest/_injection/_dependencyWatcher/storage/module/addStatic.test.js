@@ -1,18 +1,9 @@
 define(['injection/_dependencyWatcher/storage/module/addStatic'], function(
    addStatic
 ) {
-   let sandbox;
    addStatic = addStatic.default;
 
    describe('injection/_dependencyWatcher/storage/module/addStatic', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should update static dependencies of modules and return updated modules', function() {
          const existingStaticDependency = {};
          const newDependency = {

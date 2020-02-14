@@ -1,16 +1,7 @@
 define(['injection/_dependencyWatcher/data/sort/used'], function(used) {
-   let sandbox;
    used = used.default;
 
    describe('injection/_dependencyWatcher/data/sort/used', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should correctly sort by usage', function() {
          assert.equal(
             used({ initialized: false, defined: false }, { initialized: false, defined: false }),

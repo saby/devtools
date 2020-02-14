@@ -2,20 +2,10 @@ define([
    'injection/_hook/_utils/Profiling',
    'Extension/Plugins/Elements/const'
 ], function(ProfilingUtils, elementsConst) {
-   let sandbox;
    const { getSyncList } = ProfilingUtils;
    const { OperationType } = elementsConst;
 
    describe('injection/_hook/_utils/Profiling', function() {
-
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       describe('getSyncList', function() {
          it('should transform backend representation of synchronizations to a serializable representation (no Maps, no Sets, no functions, etc.)', function() {
             const changedNodesBySynchronization = new Map();
