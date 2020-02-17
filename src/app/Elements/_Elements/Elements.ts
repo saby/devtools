@@ -43,7 +43,7 @@ class Elements extends Control {
 
    protected _searchValue: string = '';
 
-   protected _searchController: Controller = new Controller('name');
+   protected _searchController: Controller<'name'> = new Controller('name');
 
    protected _lastFoundItemIndex: number = 0;
 
