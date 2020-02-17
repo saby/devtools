@@ -21,16 +21,6 @@ define([
          beforeEach(function() {
             instance._rpc.execute = sandbox.stub();
          });
-         it('should call method with default queryParams', async function() {
-            await instance.query();
-
-            assert.isTrue(
-               instance._rpc.execute.calledOnceWithExactly({
-                  methodName: DWConst.RPCMethodNames.moduleQuery,
-                  args: {}
-               })
-            );
-         });
 
          it('should call method with the passed queryParams', async function() {
             await instance.query({

@@ -10,28 +10,26 @@ import {
 import { getFileNames } from '../require/getFileNames';
 import { Require } from '../Require';
 import { DependencyType } from 'Extension/Plugins/DependencyWatcher/const';
-import itemsSort from 'Extension/Plugins/DependencyWatcher/data/sort/itemsSort';
-import itemFilters from 'Extension/Plugins/DependencyWatcher/data/filter/itemFilters';
+import itemsSort from '../data/sort/itemsSort';
+import itemFilters from '../data/filter/itemFilters';
 import { Query } from '../storage/Query';
-import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
-import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
+import { FilterFunctionGetter } from '../data/filter/Filter';
+import { SortFunction } from '../data/sort/Sort';
 import {
    IQueryParam,
    IQueryResult
 } from 'Extension/Plugins/DependencyWatcher/data/IQuery';
 import { isRelease } from '../require/isRelease';
-import { IUpdate } from '../storage/IUpdate';
 
 function setToIdArray(set: Set<IModule>): number[] {
-   return [...set].map((module) => module.id);
+   return Array.from(set).map((module) => module.id);
 }
 
 /**
  * Wrapper around the storages of the files and modules used to construct the list of modules with the data about files where they're stored (path, size).
  * @author Зайцев А.С.
  */
-export class Module extends Query<IRPCModule, IRPCModuleFilter>
-   implements IUpdate<IRPCModule> {
+export class Module extends Query<IRPCModule, IRPCModuleFilter> {
    constructor(
       private _moduleStorage: ModuleStorage,
       private _files: FileStorage,
@@ -39,29 +37,18 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
    ) {
       super();
    }
+
    query(
-      queryParams: Partial<IQueryParam<IRPCModule, IRPCModuleFilter>>
+      queryParams: IQueryParam<IRPCModule, IRPCModuleFilter>
    ): IQueryResult<number> {
       const _queryParams = this.__prepareParams(queryParams);
       return super.query(_queryParams);
    }
 
    hasUpdates(keys: number[]): boolean[] {
-      const items = this._getItems(keys);
-      const updatedItems = this._moduleStorage.hasUpdates(keys);
-      return items.map((item, index) => {
-         if (updatedItems[index]) {
-            return true;
-         } else {
-            const fileId = item.fileId;
-            if (fileId === Number.MIN_SAFE_INTEGER) {
-               return false;
-            } else {
-               return this._files.hasUpdates([fileId])[0];
-            }
-         }
-      });
+      return this._moduleStorage.hasUpdates(keys);
    }
+
    getItems(keys: number[]): ITransferRPCModule[] {
       return this._getItems(keys).map((item: IRPCModule) => {
          const { dependent, dependencies }: IRPCModule = item;
@@ -155,14 +142,11 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
       for (const fileName of fileNames) {
          file = this._files.find(fileName);
          if (file) {
-            break;
+            file.modules.add(module.id);
+            module.fileId = file.id;
+            return;
          }
       }
-      if (!file) {
-         return;
-      }
-      file.modules.add(module.id);
-      module.fileId = file.id;
    }
    private __setDefined(module: IModule): void {
       if (!module.initialized) {
@@ -180,23 +164,23 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
     * @private
     */
    private __prepareParams(
-      params: Partial<IQueryParam<IRPCModule, IRPCModuleFilter>>
+      params: IQueryParam<IRPCModule, IRPCModuleFilter>
    ): Partial<IQueryParam<IRPCModule, IRPCModuleFilter>> {
       const {
          keys,
          where
       }: Partial<IQueryParam<IRPCModule, IRPCModuleFilter>> = params;
-      if ((keys && keys.length) || !where) {
+      if (keys) {
          return params;
       }
       let _keys: number[] | undefined;
-      if (Array.isArray(where.files)) {
+      if (where.files) {
          if (where.files.length) {
-            _keys = this.__gitForFiles(where.files);
+            _keys = this.__getModulesOfFiles(where.files);
          }
          delete where.files;
       }
-      if (Array.isArray(where.dependentOnFiles)) {
+      if (where.dependentOnFiles) {
          if (where.dependentOnFiles.length) {
             _keys = this.__getDependentOnFiles(where.dependentOnFiles, _keys);
          }
@@ -208,7 +192,7 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter>
          keys: _keys
       };
    }
-   private __gitForFiles(fileIds: number[]): number[] {
+   private __getModulesOfFiles(fileIds: number[]): number[] {
       return this._files
          .getItems(fileIds)
          .map((file: IFile) => {

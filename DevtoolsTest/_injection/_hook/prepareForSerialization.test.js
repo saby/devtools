@@ -2,7 +2,6 @@ define([
    'injection/_hook/prepareForSerialization',
    'DevtoolsTest/getJSDOM'
 ], function(prepareForSerialization, getJSDOM) {
-   let sandbox;
    const needJSDOM = typeof window === 'undefined';
    prepareForSerialization = prepareForSerialization.default;
 
@@ -23,14 +22,6 @@ define([
             delete global.window;
             delete global.Element;
          }
-      });
-
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
       });
 
       describe('prepareForSerialization', function() {

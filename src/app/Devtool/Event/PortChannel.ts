@@ -5,15 +5,14 @@ import EvaluationExceptionInfo = chrome.devtools.inspectedWindow.EvaluationExcep
 
 class PortChannel implements IEventEmitter {
     private emitter: Emitter;
-    private onmessageHandler: (arg: IMessageData) => void;
 
     constructor(
         private name: string,
         private port: chrome.runtime.Port
     ) {
         this.emitter = new Emitter();
-        this.onmessageHandler = this.__onmessage.bind(this);
-        this.port.onMessage.addListener(this.onmessageHandler);
+        this.__onmessage = this.__onmessage.bind(this);
+        this.port.onMessage.addListener(this.__onmessage);
     }
 
     dispatch(event: string, args?: ISerializable): boolean {
@@ -38,8 +37,7 @@ class PortChannel implements IEventEmitter {
     }
     destructor(): void {
         this.emitter.destructor();
-        this.port.onMessage.removeListener(this.onmessageHandler);
-        delete this.onmessageHandler;
+        this.port.onMessage.removeListener(this.__onmessage);
     }
 
     private __onmessage({ source, args, event }: IMessageData): void {
@@ -57,12 +55,8 @@ class PortChannel implements IEventEmitter {
         chrome.devtools.inspectedWindow.eval(
            'window.__WASABY_DEV_HOOK__.readMessageQueue()',
            (result: Array<[string, ISerializable?]>, exceptionInfo: EvaluationExceptionInfo) => {
-               if (exceptionInfo && (exceptionInfo.isError || exceptionInfo.isException)) {
-                   const e = new Error('Code evaluation failed');
-                   if (exceptionInfo.isException) {
-                       e.stack = exceptionInfo.value;
-                   }
-                   throw e;
+               if (exceptionInfo) {
+                   throw new Error('Code evaluation failed');
                } else {
                    result.forEach((event) => {
                        this.emitter.dispatch(event[0], event[1]);

@@ -4,7 +4,7 @@
                                  iconSize="s"
                                  iconStyle="{{ _isRecording ? 'danger' : 'secondary' }}"
                                  viewMode="link"
-                                 tooltip="{{ _isProfiling ? 'Stop recording' : 'Start recording' }}"
+                                 tooltip="{{ _isRecording ? 'Stop recording' : 'Start recording' }}"
                                  attr:class="Profiler__headElement"
                                  on:click="__toggleRecording()"/>
     </ws:headTemplate>

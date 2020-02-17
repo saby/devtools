@@ -63,10 +63,7 @@ export function replaceDependencies({
       return args;
    }
    const newArgs = [...args];
-   for (const dependencyName in proxyModules) {
-      if (!proxyModules.hasOwnProperty(dependencyName)) {
-         continue;
-      }
+   Object.keys(proxyModules).forEach((dependencyName) => {
       replaceDependency({
          moduleName,
          dependencyName,
@@ -74,6 +71,6 @@ export function replaceDependencies({
          args: newArgs,
          getReplacement: proxyModules[dependencyName]
       });
-   }
+   });
    return newArgs;
 }

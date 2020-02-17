@@ -3,19 +3,10 @@ define([
    'DependencyWatcher/_module/getButtonSource',
    'Core/i18n'
 ], function(mockChrome, getButtonSource, i18n) {
-   let sandbox;
    getButtonSource = getButtonSource.getButtonSource;
    const rk = i18n.rk;
 
    describe('DependencyWatcher/_module/getButtonSource', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       describe('getButtonSource', function() {
          it('should return the data for a filter button source', function() {
             const source = {};

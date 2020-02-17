@@ -11,10 +11,10 @@ interface IOptions extends IControlOptions {
 class Browser extends Control<IOptions> {
    protected _template: TemplateFunction = template;
 
-   static getOptionsTypes(): Record<keyof IOptions, unknown> {
+   static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
-         content: descriptor(Function).required(),
-         headTemplate: descriptor(Function),
+         content: descriptor(Object).required(),
+         headTemplate: descriptor(Object),
          theme: descriptor(String),
          readOnly: descriptor(Boolean)
       };

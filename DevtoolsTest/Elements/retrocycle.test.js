@@ -1,16 +1,7 @@
 define(['Elements/retrocycle'], function(retrocycle) {
-   let sandbox;
    retrocycle = retrocycle.default;
 
    describe('Elements/retrocycle', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should return object with circular references', function() {
          const obj = {
             nullValue: null,

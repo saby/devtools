@@ -1,8 +1,7 @@
 import { Storage } from './Storage';
 import {
    IModule,
-   IModuleFilter,
-   IModuleInfo
+   IModuleFilter
 } from 'Extension/Plugins/DependencyWatcher/IModule';
 import { DependencyType } from 'Extension/Plugins/DependencyWatcher/const';
 import { ignoredPlugins } from '../require/ignoredPlugins';
@@ -10,16 +9,11 @@ import filterHelpers from './module/filterHelpers';
 import addDynamic from './module/addDynamic';
 import addStatic from './module/addStatic';
 import create from './module/create';
-import moduleFilters from 'Extension/Plugins/DependencyWatcher/data/filter/moduleFilters';
-import modulesSort from 'Extension/Plugins/DependencyWatcher/data/sort/modulesSort';
-import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
-import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
-import { Update } from './Update';
-import { UpdateParam } from './IUpdate';
-
-const noop = () => {
-   /* nope */
-};
+import moduleFilters from '../data/filter/moduleFilters';
+import modulesSort from '../data/sort/modulesSort';
+import { FilterFunctionGetter } from '../data/filter/Filter';
+import { SortFunction } from '../data/sort/Sort';
+import { Query } from './Query';
 
 function removeIgnoredPrefixes(module: string): string {
    let cleanModuleName = module;
@@ -38,19 +32,16 @@ type UpdateHandler = (moduleId: number) => void;
  * @param {(moduleId: number) => void} Update event handler
  * @author Зайцев А.С.
  */
-export class ModuleStorage extends Update<
-   IModule,
-   IModuleFilter,
-   UpdateParam<IModuleInfo>
-> {
+export class ModuleStorage extends Query<IModule, IModuleFilter> {
    private readonly _storage: Storage<IModule, string> = new Storage('name');
+   private readonly _updates: Set<number> = new Set();
 
    /**
     * Флаг пометки что данные уже читались.
     * Нужен для того, чтобы не слать события обновления на панель девтула, если список ещё не открывался
     */
    private _wasRead: boolean = false;
-   constructor(private _onUpdate: UpdateHandler = noop) {
+   constructor(private _onUpdate: UpdateHandler) {
       super();
    }
 
@@ -88,17 +79,25 @@ export class ModuleStorage extends Update<
    }
 
    openSource(id: number): boolean {
-      const module = this._getItem(id);
-      if (!module) {
-         return false;
-      }
-      if (!module.defined) {
-         return false;
-      }
+      const module = this._storage.getItemById(id) as IModule;
       // TODO: открывать все файлы через одно место
       window.__WASABY_DEV_MODULE__ = module.data;
       return true;
    }
+
+   hasUpdates(keys: number[]): boolean[] {
+      const result: boolean[] = [];
+      keys.forEach((key) => {
+         result.push(this._updates.has(key));
+         this._updates.delete(key);
+      });
+      return result;
+   }
+
+   private _markUpdated(id: number): void {
+      this._updates.add(id);
+   }
+
    private __get(name: string, parentDefined: boolean = false): IModule {
       let module = this._storage.getItemByIndex(name);
       if (!module) {
@@ -117,11 +116,9 @@ export class ModuleStorage extends Update<
          .filter(filterHelpers)
          .filter((dependency) => !!dependency)
          .map(removeIgnoredPrefixes)
-         .map(
-            (dependency: string): IModule => {
-               return this.__get(dependency, type === DependencyType.static);
-            }
-         );
+         .map((dependency) => {
+            return this.__get(dependency, type === DependencyType.static);
+         });
 
       if (!_dependencies.length) {
          return;
@@ -135,7 +132,7 @@ export class ModuleStorage extends Update<
 
       if (this._wasRead && updates.length) {
          this._markUpdated(module.id);
-         updates.forEach(({ id }: IModule) => {
+         updates.forEach(({ id }) => {
             this._markUpdated(id);
          });
          this._onUpdate(module.id);
@@ -143,8 +140,9 @@ export class ModuleStorage extends Update<
    }
 
    /// region Query
-   protected _getFilters(): Partial<
-      Record<keyof IModuleFilter, FilterFunctionGetter<unknown, IModule>>
+   protected _getFilters(): Record<
+      keyof IModuleFilter,
+      FilterFunctionGetter<unknown, IModule>
    > {
       return moduleFilters;
    }
@@ -155,9 +153,4 @@ export class ModuleStorage extends Update<
       return this._storage.getItemsById(keys);
    }
    /// endregion Query
-   /// region Update
-   protected _getItem(id: number): IModule | void {
-      return this._storage.getItemById(id);
-   }
-   /// endregion Update
 }

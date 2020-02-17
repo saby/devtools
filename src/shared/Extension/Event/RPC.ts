@@ -48,6 +48,9 @@ function getDefaultMessage(method: string, code: number): string {
    return `RPC call method "${method}" error[${code}]`;
 }
 
+const requestEvent = 'data-request';
+const responseEvent = 'data-response';
+
 /**
  * RPC источник данных, работающий поверх канала сообщений
  */
@@ -56,28 +59,21 @@ export class RPC {
    private _channel: IEventEmitter;
    private _waitingRequests: Map<string, IWaitingRequest> = new Map();
    private _waitingTimeout: Map<string, number> = new Map();
-   private _requestEvent: string = 'data-request';
-   private _responseEvent: string = 'data-response';
-   private _onResponse: (response: IMessageResponse) => void;
-   private _onRequest: (request: IMessageRequest) => void;
 
    constructor(cfg: IConfig) {
       this._channel = cfg.channel;
-      this._onRequest = this.__requestHandler.bind(this);
-      this._onResponse = this.__responseHandler.bind(this);
-      this._channel.addListener(this._requestEvent, this._onRequest);
-      this._channel.addListener(this._responseEvent, this._onResponse);
+      this.__requestHandler = this.__requestHandler.bind(this);
+      this.__responseHandler = this.__responseHandler.bind(this);
+      this._channel.addListener(requestEvent, this.__requestHandler);
+      this._channel.addListener(responseEvent, this.__responseHandler);
    }
    destructor(): void {
-      this._channel.removeListener(this._requestEvent, this._onRequest);
-      this._channel.removeListener(this._responseEvent, this._onResponse);
-      delete this._onRequest;
-      delete this._onResponse;
+      this._channel.removeListener(requestEvent, this.__requestHandler);
+      this._channel.removeListener(responseEvent, this.__responseHandler);
    }
    execute<TRes, TArg = void>({
       methodName,
-      args,
-      timeout = DEFAULT_TIMEOUT
+      args
    }: IExecuteConfig<TArg>): Promise<TRes> {
       return new Promise<TRes>((resolve, reject) => {
          const id: string = guid();
@@ -86,9 +82,9 @@ export class RPC {
             reject(new Error('timeout'));
             this._waitingRequests.delete(id);
             this._waitingTimeout.delete(id);
-         }, timeout);
+         }, DEFAULT_TIMEOUT);
          this._waitingTimeout.set(id, timer);
-         this._channel.dispatch(this._requestEvent, {
+         this._channel.dispatch(requestEvent, {
             methodName,
             id,
             args
@@ -100,7 +96,7 @@ export class RPC {
       method: Method<TRes, TArg>
    ): void {
       if (this._methods.has(methodName)) {
-         throw new Error(`method "${methodName}"`);
+         throw new Error(`The method "${methodName}" has a handler.`);
       }
       this._methods.set(methodName, method);
    }
@@ -141,12 +137,16 @@ export class RPC {
             return this.__responseResult(id, result);
          },
          (message) => {
-            return this.__responseError(id, INTERNAL_SERVER_ERROR_CODE, message);
+            return this.__responseError(
+               id,
+               INTERNAL_SERVER_ERROR_CODE,
+               message
+            );
          }
       );
    }
    private __responseError(id: string, code: number, message?: string): void {
-      this._channel.dispatch(this._responseEvent, {
+      this._channel.dispatch(responseEvent, {
          id,
          error: {
             message,
@@ -155,7 +155,7 @@ export class RPC {
       });
    }
    private __responseResult(id: string, result: unknown): void {
-      this._channel.dispatch(this._responseEvent, {
+      this._channel.dispatch(responseEvent, {
          id,
          result
       });

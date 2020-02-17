@@ -56,22 +56,27 @@ const tmpl: IRequirePlugin<void | string> = fileFormat('tmpl!', '.tmpl');
 
 const text: IRequirePlugin<void | string> = fileFormat('text!', '');
 
-const i18n: IRequirePlugin<void | string> = (() => {
-   const langMatch = document.cookie.match(/lang=([A-z-]+)/);
-   const lang = (langMatch && langMatch[1]) || 'ru-RU';
-   const postfix = `/lang/${lang}/${lang}.json`;
-   return (moduleName: string): void | string => {
-      const prefix = 'i18n!';
-      if (!moduleName.includes(prefix)) {
-         return;
-      }
-      const module = moduleName.replace(prefix, '').split('/')[0];
-      if (!module) {
-         return;
-      }
-      return module + postfix;
-   };
-})();
+let postfix: string;
+
+function getPostfix(): string {
+   if (!postfix) {
+      const langMatch = document.cookie.match(/lang=([A-z-]+)/);
+      const lang = (langMatch && langMatch[1]) || 'ru-RU';
+      postfix = `/lang/${lang}/${lang}.json`;
+   }
+   return postfix;
+}
+
+const i18n: IRequirePlugin<void | string> = (
+   moduleName: string
+): void | string => {
+   const prefix = 'i18n!';
+   if (!moduleName.includes(prefix)) {
+      return;
+   }
+   const module = moduleName.replace(prefix, '').split('/')[0];
+   return module + getPostfix();
+};
 
 function js(moduleName: string, require: IRequire, isRelease: boolean): string {
    const nameParts = moduleName.split(/[?!]/);
@@ -94,7 +99,7 @@ function js(moduleName: string, require: IRequire, isRelease: boolean): string {
 }
 
 /**
- * Returns formatters for every require plugin that can affect the path. Each formatter takes a module name and returns a new name based on the information available.
+ * Returns formatters for every require plugin that can affect the path. Each formatter takes a module name and formats name based on the information available.
  * @author Зайцев А.С.
  */
 export const pathPlugins: Array<IRequirePlugin<void | string>> = [
