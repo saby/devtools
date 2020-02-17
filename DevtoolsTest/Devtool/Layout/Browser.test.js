@@ -39,10 +39,10 @@ define([
             ]);
             testOption(optionTypes, 'content', {
                required: true,
-               args: [Function]
+               args: [Object]
             });
             testOption(optionTypes, 'headTemplate', {
-               args: [Function]
+               args: [Object]
             });
             testOption(optionTypes, 'theme', {
                args: [String]
