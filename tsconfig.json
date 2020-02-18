@@ -32,6 +32,12 @@
       ],
       "Controls/*": [
         "../node_modules/wasaby-controls/Controls/*"
+      ],
+      "File/*": [
+        "../node_modules/rmi/src/client/File/*"
+      ],
+      "SbisFile/*": [
+        "../node_modules/rmi/src/client/SbisFile/*"
       ]
     },
     "types": ["chrome"]
