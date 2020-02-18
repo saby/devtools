@@ -252,3 +252,35 @@ export function getDataWithLengths(
       };
    });
 }
+
+/**
+ * Stringifies profiling data.
+ * @param synchronizationKeyToDescription
+ * @param snapshotBySynchronization
+ * @param destroyedCountBySynchronization
+ */
+export function stringifyProfilingData(
+   synchronizationKeyToDescription: Profiler['_profilingData']['synchronizationKeyToDescription'],
+   snapshotBySynchronization: Profiler['_snapshotBySynchronization'],
+   destroyedCountBySynchronization: Profiler['_destroyedCountBySynchronization']
+): string {
+   const result = {
+      syncList: Array.from(synchronizationKeyToDescription).map(
+         ([key, { selfDuration, changes }]) => {
+            return [
+               key,
+               {
+                  selfDuration,
+                  changes: Array.from(changes)
+               }
+            ];
+         }
+      ),
+      snapshotBySynchronization: Array.from(snapshotBySynchronization),
+      destroyedCountBySynchronization: Array.from(
+         destroyedCountBySynchronization
+      )
+   };
+
+   return JSON.stringify(result);
+}

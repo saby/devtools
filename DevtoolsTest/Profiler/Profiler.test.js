@@ -1,11 +1,36 @@
-define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
-   mockChrome,
-   Profiler
-) {
+define([
+   'DevtoolsTest/mockChrome',
+   'Profiler/_Profiler/Profiler',
+   'Controls/popup',
+   'File/ResourceGetter/fileSystem',
+   'injection/const',
+   'DevtoolsTest/getJSDOM'
+], function(mockChrome, Profiler, popupLib, fileSystem, iConstants, getJSDOM) {
    let sandbox;
    Profiler = Profiler.default;
+   const needJSDOM = typeof window === 'undefined';
 
    describe('Profiler/_Profiler/Profiler', function() {
+      before(async function() {
+         if (needJSDOM) {
+            const { JSDOM } = await getJSDOM();
+            const dom = new JSDOM('');
+            global.window = dom.window;
+            global.document = dom.window.document;
+            global.URL = dom.window.URL;
+            global.Blob = dom.window.Blob;
+         }
+      });
+
+      after(function() {
+         if (needJSDOM) {
+            delete global.window;
+            delete global.document;
+            delete global.URL;
+            delete global.Blob;
+         }
+      });
+
       beforeEach(function() {
          sandbox = sinon.createSandbox();
       });
@@ -660,7 +685,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          });
       });
 
-      describe('__masterMarkedKeyChanged', function() {
+      describe('_masterMarkedKeyChanged', function() {
          let instance;
          beforeEach(function() {
             instance = new Profiler({
@@ -674,16 +699,43 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          it('should set _selectedSynchronizationId and call __setSynchronization with that id', function() {
             const stub = sandbox.stub(instance, '__setSynchronization');
             instance._selectedSynchronizationId = undefined;
+            instance._synchronizations = [
+               {
+                  id: 0
+               },
+               {
+                  id: 1
+               }
+            ];
             const id = 1;
 
-            instance.__masterMarkedKeyChanged({}, id);
+            instance._masterMarkedKeyChanged({}, id);
 
             assert.equal(instance._selectedSynchronizationId, id);
             assert.isTrue(stub.calledOnceWithExactly(id));
          });
+
+         it('should not call __setSynchronization because synchronization with this id does not exist', function() {
+            sandbox.stub(instance, '__setSynchronization');
+            instance._selectedSynchronizationId = undefined;
+            instance._synchronizations = [
+               {
+                  id: 0
+               },
+               {
+                  id: 2
+               }
+            ];
+            const id = 1;
+
+            instance._masterMarkedKeyChanged({}, id);
+
+            assert.isUndefined(instance._selectedSynchronizationId);
+            sinon.assert.notCalled(instance.__setSynchronization);
+         });
       });
 
-      describe('__detailMarkedKeyChanged', function() {
+      describe('_detailMarkedKeyChanged', function() {
          let instance;
          beforeEach(function() {
             instance = new Profiler({
@@ -702,7 +754,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             instance._selectedCommitId = undefined;
             const id = 1;
 
-            instance.__detailMarkedKeyChanged({}, id);
+            instance._detailMarkedKeyChanged({}, id);
 
             assert.equal(instance._selectedCommitId, id);
             assert.isTrue(stub.calledOnceWithExactly());
@@ -976,7 +1028,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          });
       });
 
-      describe('__toggleProfiling', function() {
+      describe('_toggleProfiling', function() {
          let instance;
          const options = {
             store: {
@@ -993,7 +1045,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             const stub = sandbox.stub(instance._options.store, 'dispatch');
             instance._isProfiling = false;
 
-            instance.__toggleProfiling();
+            instance._toggleProfiling();
 
             assert.isTrue(stub.calledOnceWithExactly('toggleProfiling', true));
          });
@@ -1002,7 +1054,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             const stub = sandbox.stub(instance._options.store, 'dispatch');
             instance._isProfiling = true;
 
-            instance.__toggleProfiling();
+            instance._toggleProfiling();
 
             assert.isTrue(stub.calledOnceWithExactly('toggleProfiling', false));
          });
@@ -1090,7 +1142,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          });
       });
 
-      describe('__reloadAndProfile', function() {
+      describe('_reloadAndProfile', function() {
          let instance;
          beforeEach(function() {
             instance = new Profiler({
@@ -1109,7 +1161,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
                }
             });
 
-            instance.__reloadAndProfile();
+            instance._reloadAndProfile();
             assert.isTrue(
                chrome.devtools.inspectedWindow.reload.calledOnceWithExactly({
                   injectedScript: 'this.__WASABY_START_PROFILING = true'
@@ -1118,7 +1170,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          });
       });
 
-      describe('__onSearchValueChanged', function() {
+      describe('_onSearchValueChanged', function() {
          let instance;
          beforeEach(function() {
             instance = new Profiler({
@@ -1133,7 +1185,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          it('calls __updateSearch with the second argument', function() {
             const stub = sandbox.stub(instance, '__updateSearch');
 
-            instance.__onSearchValueChanged({}, 'test');
+            instance._onSearchValueChanged({}, 'test');
 
             assert.isTrue(stub.calledOnceWithExactly('test'));
          });
@@ -1195,7 +1247,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
          });
       });
 
-      describe('__onSearchKeydown', function() {
+      describe('_onSearchKeydown', function() {
          let instance;
          beforeEach(function() {
             instance = new Profiler({
@@ -1211,7 +1263,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             Object.seal(instance);
 
             assert.doesNotThrow(() =>
-               instance.__onSearchKeydown({
+               instance._onSearchKeydown({
                   nativeEvent: {
                      key: 'Escape'
                   }
@@ -1235,7 +1287,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             instance._lastFoundItemIndex = 1;
             instance._searchTotal = 1;
 
-            instance.__onSearchKeydown({
+            instance._onSearchKeydown({
                nativeEvent: {
                   key: 'Enter',
                   shiftKey: false
@@ -1268,7 +1320,7 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             instance._lastFoundItemIndex = 1;
             instance._searchTotal = 1;
 
-            instance.__onSearchKeydown({
+            instance._onSearchKeydown({
                nativeEvent: {
                   key: 'Enter',
                   shiftKey: false
@@ -1284,6 +1336,728 @@ define(['DevtoolsTest/mockChrome', 'Profiler/_Profiler/Profiler'], function(
             );
             assert.equal(instance._lastFoundItemIndex, 1);
             assert.equal(instance._searchTotal, 2);
+         });
+      });
+
+      describe('_exportToJSON', function() {
+         let instance;
+         beforeEach(function() {
+            instance = new Profiler({
+               store: {
+                  addListener() {},
+                  toggleDevtoolsOpened() {},
+                  dispatch() {}
+               }
+            });
+         });
+
+         it('should stringify url', function() {
+            const fakeA = {
+               click: sandbox.stub()
+            };
+            const createElementStub = sandbox.stub(document, 'createElement');
+            createElementStub.withArgs('a').returns(fakeA);
+            const expectedBlob = {
+               size: 833,
+               type: 'application/json'
+            };
+            sandbox
+               .stub(iConstants.GLOBAL, 'Blob')
+               .withArgs(
+                  [
+                     '{"syncList":[["0",{"selfDuration":483.46999334171414,"changes":[[1,{"updateReason":"selfUpdated","selfDuration":1.509999856352806,"domChanged":false,"isVisible":true,"unusedReceivedState":false}]]}],["1",{"selfDuration":45.900002121925354,"changes":[[1,{"updateReason":"destroyed","selfDuration":1.509999856352806,"domChanged":false,"isVisible":true,"unusedReceivedState":false}]]}]],"snapshotBySynchronization":[["0",[{"id":0,"name":"UI/Base:Document","class":"Elements__node_control","depth":0,"selfDuration":2.754999790340662,"updateReason":"unchanged","actualBaseDuration":1297.724994365126,"actualDuration":481.6599925979972,"hasChangesInSubtree":true},{"id":1,"name":"OnlineSbisRu/Index","parentId":0,"class":"Elements__node_control","depth":1,"selfDuration":1.509999856352806,"updateReason":"selfUpdated","actualBaseDuration":1294.9699945747852,"actualDuration":481.6599925979972,"hasChangesInSubtree":true}]],["1",[{"id":0,"name":"UI/Base:Document","class":"Elements__node_control","depth":0,"selfDuration":2.754999790340662,"updateReason":"unchanged","actualBaseDuration":1131.8599968217313,"actualDuration":0,"hasChangesInSubtree":true}]]],"destroyedCountBySynchronization":[["0",0],["1",1]]}'
+                  ],
+                  {
+                     type: 'application/json'
+                  }
+               )
+               .returns(expectedBlob);
+            const expectedURL =
+               'blob:http://localhost/97b7314d-2889-474d-ad2a-a9421bf25aa8';
+            if (typeof window.URL.createObjectURL === 'undefined') {
+               window.URL.createObjectURL = () => {};
+            }
+            sandbox
+               .stub(URL, 'createObjectURL')
+               .withArgs(expectedBlob)
+               .returns(expectedURL);
+            instance._synchronizations = [
+               {
+                  id: '0'
+               },
+               {
+                  id: '1'
+               }
+            ];
+            const synchronizationKeyToDescription = new Map();
+            synchronizationKeyToDescription.set('0', {
+               selfDuration: 483.46999334171414,
+               changes: new Map([
+                  [
+                     1,
+                     {
+                        updateReason: 'selfUpdated',
+                        selfDuration: 1.509999856352806,
+                        domChanged: false,
+                        isVisible: true,
+                        unusedReceivedState: false
+                     }
+                  ]
+               ])
+            });
+            synchronizationKeyToDescription.set('1', {
+               selfDuration: 45.900002121925354,
+               changes: new Map([
+                  [
+                     1,
+                     {
+                        updateReason: 'destroyed',
+                        selfDuration: 1.509999856352806,
+                        domChanged: false,
+                        isVisible: true,
+                        unusedReceivedState: false
+                     }
+                  ]
+               ])
+            });
+            instance._profilingData = {
+               synchronizationKeyToDescription,
+               initialIdToDuration: new Map()
+            };
+            const snapshotBySynchronization = new Map();
+            snapshotBySynchronization.set('0', [
+               {
+                  id: 0,
+                  name: 'UI/Base:Document',
+                  class: 'Elements__node_control',
+                  depth: 0,
+                  selfDuration: 2.754999790340662,
+                  updateReason: 'unchanged',
+                  actualBaseDuration: 1297.724994365126,
+                  actualDuration: 481.6599925979972,
+                  hasChangesInSubtree: true
+               },
+               {
+                  id: 1,
+                  name: 'OnlineSbisRu/Index',
+                  parentId: 0,
+                  class: 'Elements__node_control',
+                  depth: 1,
+                  selfDuration: 1.509999856352806,
+                  updateReason: 'selfUpdated',
+                  actualBaseDuration: 1294.9699945747852,
+                  actualDuration: 481.6599925979972,
+                  hasChangesInSubtree: true
+               }
+            ]);
+            snapshotBySynchronization.set('1', [
+               {
+                  id: 0,
+                  name: 'UI/Base:Document',
+                  class: 'Elements__node_control',
+                  depth: 0,
+                  selfDuration: 2.754999790340662,
+                  updateReason: 'unchanged',
+                  actualBaseDuration: 1131.8599968217313,
+                  actualDuration: 0,
+                  hasChangesInSubtree: true
+               }
+            ]);
+            instance._snapshotBySynchronization = snapshotBySynchronization;
+            const destroyedCountBySynchronization = new Map();
+            destroyedCountBySynchronization.set('0', 0);
+            destroyedCountBySynchronization.set('1', 1);
+            instance._destroyedCountBySynchronization = destroyedCountBySynchronization;
+            const clock = sinon.useFakeTimers();
+            const expectedDate = new Date()
+               .toISOString()
+               .replace(/[-Z:.]/g, '')
+               .slice(0, -3);
+            // setup end
+
+            instance._exportToJSON();
+
+            assert.equal(fakeA.href, expectedURL);
+            assert.equal(fakeA.download, `WasabyProfile-${expectedDate}.json`);
+            sinon.assert.calledOnce(fakeA.click);
+
+            // cleanup
+            clock.restore();
+            createElementStub.restore();
+         });
+      });
+
+      describe('_importFromJSON', function() {
+         let instance;
+         beforeEach(function() {
+            instance = new Profiler({
+               store: {
+                  addListener() {},
+                  toggleDevtoolsOpened() {},
+                  dispatch() {}
+               }
+            });
+         });
+
+         it('should not reset state when no files were chosen', async function() {
+            const fakeGetter = {
+               getFiles: sandbox.stub().resolves()
+            };
+            sandbox.stub(fileSystem, 'Getter').returns(fakeGetter);
+            sandbox.stub(instance, 'resetState');
+            // setup end
+
+            await instance._importFromJSON();
+
+            sinon.assert.calledWithNew(fileSystem.Getter);
+            sinon.assert.calledWithExactly(fileSystem.Getter, {
+               multiSelect: false,
+               extensions: ['json']
+            });
+            sinon.assert.notCalled(instance.resetState);
+         });
+
+         it('should show error message and not reset state when wrong files were selected', async function() {
+            const fakeGetter = {
+               getFiles: sandbox.stub().resolves([
+                  {
+                     message: 'test message'
+                  }
+               ])
+            };
+            sandbox.stub(fileSystem, 'Getter').returns(fakeGetter);
+            sandbox.stub(instance, 'resetState');
+            sandbox.stub(popupLib.Confirmation, 'openPopup');
+            // setup end
+
+            await instance._importFromJSON();
+
+            sinon.assert.calledWithNew(fileSystem.Getter);
+            sinon.assert.calledWithExactly(fileSystem.Getter, {
+               multiSelect: false,
+               extensions: ['json']
+            });
+            sinon.assert.calledWithExactly(popupLib.Confirmation.openPopup, {
+               type: 'ok',
+               style: 'danger',
+               details: 'Incorrect profile format.'
+            });
+            sinon.assert.notCalled(instance.resetState);
+         });
+
+         describe('should show error message and not reset state when an incorrect profile was passed', function() {
+            const incorrectProfiles = [
+               {
+                  syncList: []
+               },
+               {
+                  snapshotBySynchronization: []
+               },
+               {
+                  destroyedCountBySynchronization: []
+               },
+               {
+                  syncList: [],
+                  snapshotBySynchronization: []
+               },
+               {
+                  syncList: [],
+                  destroyedCountBySynchronization: []
+               },
+               {
+                  snapshotBySynchronization: [],
+                  destroyedCountBySynchronization: []
+               }
+            ];
+
+            incorrectProfiles.forEach((profile, index) => {
+               it(`incorrect profile index: ${index}`, async function() {
+                  const fakeGetter = {
+                     getFiles: sandbox.stub().resolves([
+                        {
+                           getData: sandbox
+                              .stub()
+                              .returns(JSON.stringify(profile))
+                        }
+                     ])
+                  };
+                  sandbox.stub(fileSystem, 'Getter').returns(fakeGetter);
+                  sandbox.stub(instance, 'resetState');
+                  sandbox.stub(popupLib.Confirmation, 'openPopup');
+                  // setup end
+
+                  await instance._importFromJSON();
+
+                  sinon.assert.calledWithNew(fileSystem.Getter);
+                  sinon.assert.calledWithExactly(fileSystem.Getter, {
+                     multiSelect: false,
+                     extensions: ['json']
+                  });
+                  sinon.assert.calledWithExactly(
+                     popupLib.Confirmation.openPopup,
+                     {
+                        type: 'ok',
+                        style: 'danger',
+                        details: 'Incorrect profile format.'
+                     }
+                  );
+                  sinon.assert.notCalled(instance.resetState);
+               });
+            });
+         });
+
+         it('should show error message and not reset state when an error occurs during profile parsing', async function() {
+            const fakeGetter = {
+               getFiles: sandbox.stub().resolves([
+                  {
+                     getData: sandbox.stub().returns({})
+                  }
+               ])
+            };
+            sandbox.stub(fileSystem, 'Getter').returns(fakeGetter);
+            sandbox.stub(instance, 'resetState');
+            sandbox.stub(popupLib.Confirmation, 'openPopup');
+            // setup end
+
+            await instance._importFromJSON();
+
+            sinon.assert.calledWithNew(fileSystem.Getter);
+            sinon.assert.calledWithExactly(fileSystem.Getter, {
+               multiSelect: false,
+               extensions: ['json']
+            });
+            sinon.assert.calledWithExactly(popupLib.Confirmation.openPopup, {
+               type: 'ok',
+               style: 'danger',
+               details: 'Incorrect profile format.'
+            });
+            sinon.assert.notCalled(instance.resetState);
+         });
+
+         it('should apply imported profile', async function() {
+            const fakeGetter = {
+               getFiles: sandbox.stub().resolves([
+                  {
+                     getData: sandbox
+                        .stub()
+                        .returns(
+                           '{"syncList":[["0",{"selfDuration":483.46999334171414,"changes":[[1,{"updateReason":"selfUpdated","selfDuration":1.509999856352806,"domChanged":false,"isVisible":true,"unusedReceivedState":false}]]}],["1",{"selfDuration":45.900002121925354,"changes":[[1,{"updateReason":"destroyed","selfDuration":1.509999856352806,"domChanged":false,"isVisible":true,"unusedReceivedState":false}]]}]],"snapshotBySynchronization":[["0",[{"id":0,"name":"UI/Base:Document","class":"Elements__node_control","depth":0,"selfDuration":2.754999790340662,"updateReason":"unchanged","actualBaseDuration":1297.724994365126,"actualDuration":481.6599925979972,"hasChangesInSubtree":true},{"id":1,"name":"OnlineSbisRu/Index","parentId":0,"class":"Elements__node_control","depth":1,"selfDuration":1.509999856352806,"updateReason":"selfUpdated","actualBaseDuration":1294.9699945747852,"actualDuration":481.6599925979972,"hasChangesInSubtree":true}]],["1",[{"id":0,"name":"UI/Base:Document","class":"Elements__node_control","depth":0,"selfDuration":2.754999790340662,"updateReason":"unchanged","actualBaseDuration":1131.8599968217313,"actualDuration":0,"hasChangesInSubtree":true}]]],"destroyedCountBySynchronization":[["0",0],["1",1]]}'
+                        )
+                  }
+               ])
+            };
+            sandbox.stub(fileSystem, 'Getter').returns(fakeGetter);
+            sandbox.stub(instance, 'resetState');
+            sandbox.stub(popupLib.Confirmation, 'openPopup');
+            // setup end
+
+            await instance._importFromJSON();
+
+            sinon.assert.calledWithNew(fileSystem.Getter);
+            sinon.assert.calledWithExactly(fileSystem.Getter, {
+               multiSelect: false,
+               extensions: ['json']
+            });
+            sinon.assert.notCalled(popupLib.Confirmation.openPopup);
+            sinon.assert.calledOnce(instance.resetState);
+            assert.deepEqual(
+               instance._snapshotBySynchronization,
+               new Map([
+                  [
+                     '0',
+                     [
+                        {
+                           id: 0,
+                           name: 'UI/Base:Document',
+                           class: 'Elements__node_control',
+                           depth: 0,
+                           selfDuration: 2.754999790340662,
+                           updateReason: 'unchanged',
+                           actualBaseDuration: 1297.724994365126,
+                           actualDuration: 481.6599925979972,
+                           hasChangesInSubtree: true
+                        },
+                        {
+                           id: 1,
+                           name: 'OnlineSbisRu/Index',
+                           parentId: 0,
+                           class: 'Elements__node_control',
+                           depth: 1,
+                           selfDuration: 1.509999856352806,
+                           updateReason: 'selfUpdated',
+                           actualBaseDuration: 1294.9699945747852,
+                           actualDuration: 481.6599925979972,
+                           hasChangesInSubtree: true
+                        }
+                     ]
+                  ],
+                  [
+                     '1',
+                     [
+                        {
+                           id: 0,
+                           name: 'UI/Base:Document',
+                           class: 'Elements__node_control',
+                           depth: 0,
+                           selfDuration: 2.754999790340662,
+                           updateReason: 'unchanged',
+                           actualBaseDuration: 1131.8599968217313,
+                           actualDuration: 0,
+                           hasChangesInSubtree: true
+                        }
+                     ]
+                  ]
+               ])
+            );
+            assert.deepEqual(
+               instance._destroyedCountBySynchronization,
+               new Map([['0', 0], ['1', 1]])
+            );
+            assert.isTrue(instance._didProfile);
+            assert.deepEqual(instance._profilingData, {
+               initialIdToDuration: new Map(),
+               synchronizationKeyToDescription: new Map([
+                  [
+                     '0',
+                     {
+                        selfDuration: 483.46999334171414,
+                        changes: new Map([
+                           [
+                              1,
+                              {
+                                 updateReason: 'selfUpdated',
+                                 selfDuration: 1.509999856352806,
+                                 domChanged: false,
+                                 isVisible: true,
+                                 unusedReceivedState: false
+                              }
+                           ]
+                        ])
+                     }
+                  ],
+                  [
+                     '1',
+                     {
+                        selfDuration: 45.900002121925354,
+                        changes: new Map([
+                           [
+                              1,
+                              {
+                                 updateReason: 'destroyed',
+                                 selfDuration: 1.509999856352806,
+                                 domChanged: false,
+                                 isVisible: true,
+                                 unusedReceivedState: false
+                              }
+                           ]
+                        ])
+                     }
+                  ]
+               ])
+            });
+            assert.deepEqual(instance._synchronizations, [
+               {
+                  id: '0',
+                  selfDuration: 483.46999334171414
+               },
+               {
+                  id: '1',
+                  selfDuration: 45.900002121925354
+               }
+            ]);
+            assert.equal(instance._selectedSynchronizationId, '0');
+            assert.deepEqual(instance._synchronizationOverview, {
+               mountedCount: 0,
+               selfUpdatedCount: 1,
+               parentUpdatedCount: 0,
+               unchangedCount: 1,
+               forceUpdatedCount: 0,
+               destroyedCount: 0
+            });
+            assert.deepEqual(instance._snapshot, [
+               {
+                  id: 0,
+                  name: 'UI/Base:Document',
+                  class: 'Elements__node_control',
+                  depth: 0,
+                  selfDuration: 2.754999790340662,
+                  updateReason: 'unchanged',
+                  actualBaseDuration: 1297.724994365126,
+                  actualDuration: 481.6599925979972,
+                  hasChangesInSubtree: true
+               },
+               {
+                  id: 1,
+                  name: 'OnlineSbisRu/Index',
+                  parentId: 0,
+                  class: 'Elements__node_control',
+                  depth: 1,
+                  selfDuration: 1.509999856352806,
+                  updateReason: 'selfUpdated',
+                  actualBaseDuration: 1294.9699945747852,
+                  actualDuration: 481.6599925979972,
+                  hasChangesInSubtree: true
+               }
+            ]);
+         });
+      });
+
+      describe('_onFileDrop', function() {
+         let instance;
+         beforeEach(function() {
+            instance = new Profiler({
+               store: {
+                  addListener() {},
+                  toggleDevtoolsOpened() {},
+                  dispatch() {}
+               }
+            });
+         });
+
+         it('should show error message and not reset state when wrong files were selected', async function() {
+            sandbox.stub(instance, 'resetState');
+            sandbox.stub(popupLib.Confirmation, 'openPopup');
+            // setup end
+
+            await instance._onFileDrop({}, [
+               {
+                  message: 'test message'
+               }
+            ]);
+
+            sinon.assert.calledWithExactly(popupLib.Confirmation.openPopup, {
+               type: 'ok',
+               style: 'danger',
+               details: 'Incorrect profile format.'
+            });
+            sinon.assert.notCalled(instance.resetState);
+         });
+
+         describe('should show error message and not reset state when an incorrect profile was passed', function() {
+            const incorrectProfiles = [
+               {
+                  syncList: []
+               },
+               {
+                  snapshotBySynchronization: []
+               },
+               {
+                  destroyedCountBySynchronization: []
+               },
+               {
+                  syncList: [],
+                  snapshotBySynchronization: []
+               },
+               {
+                  syncList: [],
+                  destroyedCountBySynchronization: []
+               },
+               {
+                  snapshotBySynchronization: [],
+                  destroyedCountBySynchronization: []
+               }
+            ];
+
+            incorrectProfiles.forEach((profile, index) => {
+               it(`incorrect profile index: ${index}`, async function() {
+                  sandbox.stub(instance, 'resetState');
+                  sandbox.stub(popupLib.Confirmation, 'openPopup');
+                  // setup end
+
+                  await instance._onFileDrop({}, [
+                     {
+                        getData: sandbox.stub().returns(JSON.stringify(profile))
+                     }
+                  ]);
+
+                  sinon.assert.calledWithExactly(
+                     popupLib.Confirmation.openPopup,
+                     {
+                        type: 'ok',
+                        style: 'danger',
+                        details: 'Incorrect profile format.'
+                     }
+                  );
+                  sinon.assert.notCalled(instance.resetState);
+               });
+            });
+         });
+
+         it('should show error message and not reset state when an error occurs during profile parsing', async function() {
+            sandbox.stub(instance, 'resetState');
+            sandbox.stub(popupLib.Confirmation, 'openPopup');
+            // setup end
+
+            await instance._onFileDrop({}, [
+               {
+                  getData: sandbox.stub().returns({})
+               }
+            ]);
+
+            sinon.assert.calledWithExactly(popupLib.Confirmation.openPopup, {
+               type: 'ok',
+               style: 'danger',
+               details: 'Incorrect profile format.'
+            });
+            sinon.assert.notCalled(instance.resetState);
+         });
+
+         it('should apply imported profile', async function() {
+            sandbox.stub(instance, 'resetState');
+            sandbox.stub(popupLib.Confirmation, 'openPopup');
+            // setup end
+
+            await instance._onFileDrop({}, [
+               {
+                  getData: sandbox
+                     .stub()
+                     .returns(
+                        '{"syncList":[["0",{"selfDuration":483.46999334171414,"changes":[[1,{"updateReason":"selfUpdated","selfDuration":1.509999856352806,"domChanged":false,"isVisible":true,"unusedReceivedState":false}]]}],["1",{"selfDuration":45.900002121925354,"changes":[[1,{"updateReason":"destroyed","selfDuration":1.509999856352806,"domChanged":false,"isVisible":true,"unusedReceivedState":false}]]}]],"snapshotBySynchronization":[["0",[{"id":0,"name":"UI/Base:Document","class":"Elements__node_control","depth":0,"selfDuration":2.754999790340662,"updateReason":"unchanged","actualBaseDuration":1297.724994365126,"actualDuration":481.6599925979972,"hasChangesInSubtree":true},{"id":1,"name":"OnlineSbisRu/Index","parentId":0,"class":"Elements__node_control","depth":1,"selfDuration":1.509999856352806,"updateReason":"selfUpdated","actualBaseDuration":1294.9699945747852,"actualDuration":481.6599925979972,"hasChangesInSubtree":true}]],["1",[{"id":0,"name":"UI/Base:Document","class":"Elements__node_control","depth":0,"selfDuration":2.754999790340662,"updateReason":"unchanged","actualBaseDuration":1131.8599968217313,"actualDuration":0,"hasChangesInSubtree":true}]]],"destroyedCountBySynchronization":[["0",0],["1",1]]}'
+                     )
+               }
+            ]);
+
+            sinon.assert.notCalled(popupLib.Confirmation.openPopup);
+            sinon.assert.calledOnce(instance.resetState);
+            assert.deepEqual(
+               instance._snapshotBySynchronization,
+               new Map([
+                  [
+                     '0',
+                     [
+                        {
+                           id: 0,
+                           name: 'UI/Base:Document',
+                           class: 'Elements__node_control',
+                           depth: 0,
+                           selfDuration: 2.754999790340662,
+                           updateReason: 'unchanged',
+                           actualBaseDuration: 1297.724994365126,
+                           actualDuration: 481.6599925979972,
+                           hasChangesInSubtree: true
+                        },
+                        {
+                           id: 1,
+                           name: 'OnlineSbisRu/Index',
+                           parentId: 0,
+                           class: 'Elements__node_control',
+                           depth: 1,
+                           selfDuration: 1.509999856352806,
+                           updateReason: 'selfUpdated',
+                           actualBaseDuration: 1294.9699945747852,
+                           actualDuration: 481.6599925979972,
+                           hasChangesInSubtree: true
+                        }
+                     ]
+                  ],
+                  [
+                     '1',
+                     [
+                        {
+                           id: 0,
+                           name: 'UI/Base:Document',
+                           class: 'Elements__node_control',
+                           depth: 0,
+                           selfDuration: 2.754999790340662,
+                           updateReason: 'unchanged',
+                           actualBaseDuration: 1131.8599968217313,
+                           actualDuration: 0,
+                           hasChangesInSubtree: true
+                        }
+                     ]
+                  ]
+               ])
+            );
+            assert.deepEqual(
+               instance._destroyedCountBySynchronization,
+               new Map([['0', 0], ['1', 1]])
+            );
+            assert.isTrue(instance._didProfile);
+            assert.deepEqual(instance._profilingData, {
+               initialIdToDuration: new Map(),
+               synchronizationKeyToDescription: new Map([
+                  [
+                     '0',
+                     {
+                        selfDuration: 483.46999334171414,
+                        changes: new Map([
+                           [
+                              1,
+                              {
+                                 updateReason: 'selfUpdated',
+                                 selfDuration: 1.509999856352806,
+                                 domChanged: false,
+                                 isVisible: true,
+                                 unusedReceivedState: false
+                              }
+                           ]
+                        ])
+                     }
+                  ],
+                  [
+                     '1',
+                     {
+                        selfDuration: 45.900002121925354,
+                        changes: new Map([
+                           [
+                              1,
+                              {
+                                 updateReason: 'destroyed',
+                                 selfDuration: 1.509999856352806,
+                                 domChanged: false,
+                                 isVisible: true,
+                                 unusedReceivedState: false
+                              }
+                           ]
+                        ])
+                     }
+                  ]
+               ])
+            });
+            assert.deepEqual(instance._synchronizations, [
+               {
+                  id: '0',
+                  selfDuration: 483.46999334171414
+               },
+               {
+                  id: '1',
+                  selfDuration: 45.900002121925354
+               }
+            ]);
+            assert.equal(instance._selectedSynchronizationId, '0');
+            assert.deepEqual(instance._synchronizationOverview, {
+               mountedCount: 0,
+               selfUpdatedCount: 1,
+               parentUpdatedCount: 0,
+               unchangedCount: 1,
+               forceUpdatedCount: 0,
+               destroyedCount: 0
+            });
+            assert.deepEqual(instance._snapshot, [
+               {
+                  id: 0,
+                  name: 'UI/Base:Document',
+                  class: 'Elements__node_control',
+                  depth: 0,
+                  selfDuration: 2.754999790340662,
+                  updateReason: 'unchanged',
+                  actualBaseDuration: 1297.724994365126,
+                  actualDuration: 481.6599925979972,
+                  hasChangesInSubtree: true
+               },
+               {
+                  id: 1,
+                  name: 'OnlineSbisRu/Index',
+                  parentId: 0,
+                  class: 'Elements__node_control',
+                  depth: 1,
+                  selfDuration: 1.509999856352806,
+                  updateReason: 'selfUpdated',
+                  actualBaseDuration: 1294.9699945747852,
+                  actualDuration: 481.6599925979972,
+                  hasChangesInSubtree: true
+               }
+            ]);
          });
       });
    });
