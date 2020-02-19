@@ -14,8 +14,8 @@ class Browser extends Control<IOptions> {
 
    static getOptionsTypes(): Record<keyof IOptions, unknown> {
       return {
-         content: descriptor(Function).required(),
-         headTemplate: descriptor(Function),
+         content: descriptor(Object).required(),
+         headTemplate: descriptor(Object),
          theme: descriptor(String),
          readOnly: descriptor(Boolean)
       };

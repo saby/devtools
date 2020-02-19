@@ -1,22 +1,19 @@
 define([
    'DevtoolsTest/mockChrome',
    'DependencyWatcher/_file/List',
-   'DependencyWatcher/_file/navigation',
    'DependencyWatcher/_file/columns',
    'DependencyWatcher/_file/header'
-], function(mockChrome, List, navigation, columns, headers) {
-   let sandbox;
+], function(mockChrome, List, columns, headers) {
    let instance;
    List = List.List;
 
    describe('DependencyWatcher/_file/List', function() {
       beforeEach(function() {
-         sandbox = sinon.createSandbox();
          instance = new List();
       });
 
       afterEach(function() {
-         sandbox.restore();
+         instance = undefined;
       });
 
       describe('_beforeMount', function() {
@@ -33,7 +30,6 @@ define([
 
       it('getDefaultOptions', function() {
          assert.deepEqual(List.getDefaultOptions(), {
-            navigation: navigation.navigation,
             headers: headers.headers,
             columns: columns.columns,
             sorting: [{ size: 'ASC' }]

@@ -2,30 +2,37 @@ import { Storage } from './Storage';
 import { IFile, IFileFilter } from 'Extension/Plugins/DependencyWatcher/IFile';
 import { getId } from './getId';
 import getNormalizedFileName from './file/getNormalizedFileName';
-import getResourcesFromPerformance from './file/getResourcesFromPerformance';
+import getResourcesFromPerformance, {
+   init as initPerformanceObserving
+} from './file/getResourcesFromPerformance';
 import findInPath from './file/findInPath';
-import fileFilters from 'Extension/Plugins/DependencyWatcher/data/filter/fileFilters';
-import filesSort from 'Extension/Plugins/DependencyWatcher/data/sort/filesSort';
-import { FilterFunctionGetter } from 'Extension/Plugins/DependencyWatcher/data/filter/Filter';
-import { SortFunction } from 'Extension/Plugins/DependencyWatcher/data/sort/Sort';
-import { Update } from './Update';
+import fileFilters from '../data/filter/fileFilters';
+import filesSort from '../data/sort/filesSort';
+import { FilterFunctionGetter } from '../data/filter/Filter';
+import { SortFunction } from '../data/sort/Sort';
+import { Query } from './Query';
 
 /**
  * File storage.
  * A file is a physical file, containing one or more modules.
+ * @author Зайцев А.С.
  */
-export class FileStorage extends Update<IFile, IFileFilter> {
+export class FileStorage extends Query<IFile, IFileFilter> {
    private readonly _storage: Storage<IFile, string> = new Storage('path');
+   constructor() {
+      super();
+      initPerformanceObserving();
+   }
    private __getNewFiles(): IFile[] {
       return getResourcesFromPerformance().map(([path, size]) => {
-         return this.createOrUpdate(path, size);
+         return this.create(path, size);
       });
    }
    getItems(keys?: number[]): IFile[] {
       return this._getItems(keys);
    }
    getItem(key: number): IFile | void {
-      return this._getItem(key);
+      return this._storage.getItemById(key);
    }
    find(partOfName: string): IFile | void {
       return (
@@ -33,23 +40,16 @@ export class FileStorage extends Update<IFile, IFileFilter> {
          findInPath(partOfName, this.__getNewFiles())
       );
    }
-   createOrUpdate(path: string, size: number): IFile {
-      if (this._storage.hasIndex(path)) {
-         const file = this._storage.getItemByIndex(path) as IFile;
-         file.size = size;
-         this._markUpdated(file.id);
-         return file;
-      } else {
-         const file: IFile = {
-            path,
-            size,
-            name: getNormalizedFileName(path),
-            id: getId(),
-            modules: new Set<number>()
-         };
-         this._storage.add(file);
-         return file;
-      }
+   create(path: string, size: number): IFile {
+      const file: IFile = {
+         path,
+         size,
+         name: getNormalizedFileName(path),
+         id: getId(),
+         modules: new Set<number>()
+      };
+      this._storage.add(file);
+      return file;
    }
    protected _getItems(keys?: number[]): IFile[] {
       return this._storage.getItemsById(keys);
@@ -61,8 +61,5 @@ export class FileStorage extends Update<IFile, IFileFilter> {
    }
    protected _getSorting(): Record<keyof IFile, SortFunction<IFile>> {
       return filesSort;
-   }
-   protected _getItem(id: number): void | IFile {
-      return this._storage.getItemById(id);
    }
 }

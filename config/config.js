@@ -26,7 +26,8 @@ module.exports = {
      * Директория с исходниками приложения
      */
     app: resolve(source, "app"),
-    sharedDir: resolve(source, 'shared')
+    sharedDir: resolve(source, 'shared'),
+    injectionDir: resolve(source, "injection")
   },
   output: {
     /**

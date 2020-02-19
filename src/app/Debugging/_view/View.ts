@@ -144,7 +144,11 @@ class View extends Control<IControlOptions, void[]> {
             },
             (cookies: Cookie[]) => {
                const occupiedSpace = cookies.reduce((acc, cookie) => {
-                  return acc + cookie.value.length + cookie.name.length;
+                  if (cookie.name === 's3debug') {
+                     return acc;
+                  } else {
+                     return acc + cookie.value.length + cookie.name.length;
+                  }
                }, 0);
                resolve(Math.max(AVAILABLE_COOKIE_SPACE - occupiedSpace, 0));
             }
@@ -173,7 +177,7 @@ class View extends Control<IControlOptions, void[]> {
       if (!where.title) {
          return true;
       } else {
-         return item.get('title').includes(where.title);
+         return item.get('title').toLowerCase().includes(where.title.toLowerCase());
       }
    }
 }

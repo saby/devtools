@@ -3,19 +3,10 @@ define([
    'DependencyWatcher/_data/source/list/getQueryParam',
    'Types/source'
 ], function(mockChrome, getQueryParam, sourceLib) {
-   let sandbox;
    getQueryParam = getQueryParam.getQueryParam;
    const Query = sourceLib.Query;
 
    describe('DependencyWatcher/_data/source/list/getQueryParam', function() {
-      beforeEach(function() {
-         sandbox = sinon.createSandbox();
-      });
-
-      afterEach(function() {
-         sandbox.restore();
-      });
-
       it('should filter out files, dependentOnFiles, onlyDeprecated from where', function() {
          const query = new Query()
             .where({

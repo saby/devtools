@@ -31,6 +31,10 @@ interface INavigation {
    };
 }
 
+/**
+ * Main list of the "Dependencies" tab.
+ * @author Зайцев А.С.
+ */
 export default class List extends Control<IOptions> {
    protected readonly _template: TemplateFunction = template;
    protected readonly _children: IChildren;

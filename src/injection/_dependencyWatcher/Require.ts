@@ -5,6 +5,10 @@ import { ILogger } from 'Extension/Logger/ILogger';
 import { IDescriptor } from './IDescriptor';
 import { IConfigWithStorage } from './IConfig';
 
+/**
+ * Wrapper around require which is used to intercept calls to it.
+ * @author Зайцев А.С.
+ */
 export class Require implements IDescriptor {
    private _require: IRequire;
    private _init: IRequireInitObject;
@@ -16,20 +20,19 @@ export class Require implements IDescriptor {
       this._logger = logger;
    }
    getDescriptor(): PropertyDescriptor {
-      const _this = this;
       const storage = this._storage;
       const logger = this._logger;
       return {
-         set(value: IRequire | IRequireInitObject): void {
+         set: (value: IRequire | IRequireInitObject): void => {
             if (typeof value === 'function') {
-               _this._require = value;
-               _this._proxy = proxyRequire(_this._require, storage, logger);
+               this._require = value;
+               this._proxy = proxyRequire(this._require, storage, logger);
             } else {
-               _this._init = value;
+               this._init = value;
             }
          },
-         get(): IRequire | IRequireInitObject | void {
-            return _this._proxy || _this._init;
+         get: (): IRequire | IRequireInitObject | void => {
+            return this._proxy || this._init;
          },
          configurable: true,
          enumerable: true

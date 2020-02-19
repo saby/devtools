@@ -11,6 +11,10 @@ export type IgnoreFilters<TData extends object> = Partial<
 
 export type DefaultFilters<TData extends object> = Partial<TData>;
 
+/**
+ * Normalizes query params.
+ * @author Зайцев А.С.
+ */
 export function getQueryParam<TData extends object>(
    query: TypesQuery,
    ignoreFilters: IgnoreFilters<TData> = {},

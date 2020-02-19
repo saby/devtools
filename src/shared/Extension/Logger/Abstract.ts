@@ -7,7 +7,6 @@ export abstract class AbstractLogger implements INamedLogger {
    abstract error(error: Error): void;
    protected abstract _create(name: string): AbstractLogger;
    create(name: string): INamedLogger {
-      const newName = this._name ? `${this._name}/${name}` : name;
-      return this._create(newName);
+      return this._create(`${this._name}/${name}`);
    }
 }

@@ -1,3 +1,7 @@
+/**
+ * Filter button source for the main list of the "Dependencies" tab.
+ * @author Зайцев А.С.
+ */
 import { source } from '../data';
 import rk = require('i18n!DependencyWatcher/_module/getButtonSource');
 

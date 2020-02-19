@@ -33,6 +33,10 @@ function filterGlobal(item: ITransferRPCModule): boolean {
    return item.name !== GLOBAL_MODULE_NAME;
 }
 
+/**
+ * Base class for sources of the "Dependencies" tab.
+ * @author Зайцев А.С.
+ */
 export abstract class ListAbstract extends Compatibility {
    private _items: Module;
    private _defaultFilters: DefaultFilters<IRPCModuleFilter>;

@@ -2,7 +2,7 @@
  * Contains utility functions used by agent.
  * @author Зайцев А.С.
  */
-import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
+import { ControlType } from 'Extension/Plugins/Elements/const';
 import Agent, { IChangedNode } from './Agent';
 import {
    IBackendControlNode,
@@ -10,82 +10,7 @@ import {
    ITemplateNode,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
-import {
-   IBackendProfilingData,
-   IBackendSynchronizationDescription,
-   IChangesDescription
-} from 'Extension/Plugins/Elements/IProfilingData';
-import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import isDeepEqual from './isDeepEqual';
-
-function operationToString(
-   operation?: OperationType
-): 'mount' | 'update' | 'unmount' | 'reorder' | 'lifecycle' {
-   switch (operation) {
-      case OperationType.DELETE:
-         return 'unmount';
-      case OperationType.CREATE:
-         return 'mount';
-      case OperationType.REORDER:
-         return 'reorder';
-      case OperationType.UPDATE:
-         return 'update';
-      default:
-         return 'lifecycle';
-   }
-}
-
-function getCaption(name: string, operation?: OperationType): string {
-   return `${name} (${operationToString(operation)})`;
-}
-
-export function startSyncMark(rootId: number): void {
-   if (
-      window.wasabyDevtoolsOptions &&
-      window.wasabyDevtoolsOptions.useUserTimingAPI
-   ) {
-      performance.mark(`Synchronization ${rootId}`);
-   }
-}
-
-export function endSyncMark(rootId: number): void {
-   if (
-      window.wasabyDevtoolsOptions &&
-      window.wasabyDevtoolsOptions.useUserTimingAPI
-   ) {
-      performance.measure('Synchronization', `Synchronization ${rootId}`);
-   }
-}
-
-export function startMark(
-   name: string,
-   id: IBackendControlNode['id'],
-   operation?: OperationType
-): void {
-   if (
-      window.wasabyDevtoolsOptions &&
-      window.wasabyDevtoolsOptions.useUserTimingAPI
-   ) {
-      performance.mark(`${getCaption(name, operation)} ${id}`);
-   }
-}
-
-export function endMark(
-   name: string,
-   id: IBackendControlNode['id'],
-   operation?: OperationType
-): void {
-   if (
-      window.wasabyDevtoolsOptions &&
-      window.wasabyDevtoolsOptions.useUserTimingAPI
-   ) {
-      const caption = getCaption(name, operation);
-      const label = `${caption} ${id}`;
-      performance.measure(caption, label);
-      performance.clearMarks(label);
-      performance.clearMeasures(caption);
-   }
-}
 
 export function getControlType(node: IBackendControlNode): ControlType {
    if (node.instance) {
@@ -96,90 +21,6 @@ export function getControlType(node: IBackendControlNode): ControlType {
    return ControlType.TEMPLATE;
 }
 
-function processChanges(value?: object): string[] | undefined {
-   let result;
-   if (value) {
-      result = Object.keys(value).map((key) => {
-         return key.replace('attr:', '');
-      });
-   }
-   return result;
-}
-
-function getUpdateReason(
-   { operation, node }: IChangedNode,
-   parentUpdated: boolean = false
-): Exclude<ControlUpdateReason, 'unchanged'> {
-   if (operation === OperationType.CREATE) {
-      return 'mounted';
-   }
-
-   if (operation === OperationType.DELETE) {
-      return 'destroyed';
-   }
-
-   if (node.changedOptions || node.changedAttributes) {
-      return 'selfUpdated';
-   }
-
-   if (parentUpdated) {
-      return 'parentUpdated';
-   }
-
-   return 'forceUpdated';
-}
-
-function getChangesDescription(
-   changedNode: IChangedNode,
-   changedNodesMap: Map<IBackendControlNode['id'], IChangedNode>
-): IChangesDescription {
-   const { node }: IChangedNode = changedNode;
-   return {
-      updateReason: getUpdateReason(
-         changedNode,
-         typeof node.parentId === 'number' && changedNodesMap.has(node.parentId)
-      ),
-      changedOptions: processChanges(node.changedOptions),
-      changedAttributes: processChanges(node.changedAttributes),
-      selfDuration: node.selfDuration,
-      domChanged: !!node.domChanged,
-      isVisible: !!node.isVisible,
-      unusedReceivedState: !!node.unusedReceivedState
-   };
-}
-
-function getChanges(
-   changedNodesEntries: Array<[IBackendControlNode['id'], IChangedNode]>,
-   changedNodesMap: Map<IBackendControlNode['id'], IChangedNode>
-): IBackendSynchronizationDescription['changes'] {
-   return changedNodesEntries.map(([commitKey, changedNode]) => {
-      return [commitKey, getChangesDescription(changedNode, changedNodesMap)];
-   });
-}
-
-function getSynchronizationDuration(
-   changedNodesEntries: Array<[IBackendControlNode['id'], IChangedNode]>
-): number {
-   return changedNodesEntries.reduce((acc, [_, changes]) => {
-      return acc + changes.node.selfDuration;
-   }, 0);
-}
-
-export function getSyncList(
-   changedNodesMap: Agent['changedNodesBySynchronization']
-): IBackendProfilingData['syncList'] {
-   return Array.from(changedNodesMap.entries()).map(([key, value]) => {
-      const entries = Array.from(value.entries());
-      return [
-         key,
-         {
-            selfDuration: getSynchronizationDuration(entries),
-            changes: getChanges(entries, value)
-         }
-      ];
-   });
-}
-
 export function getObjectDiff(
    obj1?: object,
    obj2?: object
@@ -188,7 +29,7 @@ export function getObjectDiff(
       return obj2 ? obj2 : undefined;
    }
    if (!obj2) {
-      return obj1 ? obj1 : undefined;
+      return obj1;
    }
    const diff = Object.keys(obj1).reduce((result, key) => {
       if (!obj2.hasOwnProperty(key)) {
@@ -273,16 +114,24 @@ export function isVisible(element: HTMLElement): boolean {
    return false;
 }
 
-/**
- * Finds the controlNode to which the control belongs to.
- * @param control Control which controlNode we're trying to get.
- * @return The controlNode to which the control belongs to.
- */
-function getControlNode(control: IControlNode['instance']): IControlNode {
-   return control._container.controlNodes.find(
-      (node) => node.control === control
-   ) as IControlNode;
+export function findControlByDomNode(
+   element: Element,
+   domToIds: Agent['domToIds'],
+   elements: Agent['elements']
+): IBackendControlNode | undefined {
+   let currentElement: Node | null = element;
+
+   while (currentElement) {
+      const nodes = domToIds.get(currentElement);
+      if (nodes) {
+         return elements.get(nodes[nodes.length - 1]);
+      }
+      currentElement = currentElement.parentElement;
+   }
+   return;
 }
+
+const EVENT_NAME_OFFSET = 3;
 
 /**
  * For templates, returns every event handler. For controls, returns every event which is handled by this control.
@@ -290,15 +139,18 @@ function getControlNode(control: IControlNode['instance']): IControlNode {
  * Devtools take information about events from the DOM elements, and there's no fast way to collect this information and keep it updated.
  * @param elements
  * @param id
+ * @param domToIds
  * @param needControlNode
  */
 export function getEvents(
    elements: Agent['elements'],
+   domToIds: Agent['domToIds'],
    id: IBackendControlNode['id'],
    needControlNode?: false
 ): Record<string, Array<{ function: Function; arguments: unknown[] }>>;
 export function getEvents(
    elements: Agent['elements'],
+   domToIds: Agent['domToIds'],
    id: IBackendControlNode['id'],
    needControlNode?: true
 ): Record<
@@ -306,15 +158,15 @@ export function getEvents(
    Array<{
       function: Function;
       arguments: unknown[];
-      controlNode: IControlNode;
+      controlNode: IBackendControlNode;
    }>
 >;
 export function getEvents(
    elements: Agent['elements'],
+   domToIds: Agent['domToIds'],
    id: IBackendControlNode['id'],
    needControlNode: boolean = false
 ): ReturnType<typeof getEvents> {
-   const EVENT_NAME_OFFSET = 3;
    const node = elements.get(id);
    const events: ReturnType<typeof getEvents> = {};
    if (node && node.container.eventProperties) {
@@ -332,7 +184,7 @@ export function getEvents(
                function: userHandler ? userHandler : handler.fn,
                arguments: handler.args,
                controlNode: needControlNode
-                  ? getControlNode(handler.fn.control)
+                  ? findControlByDomNode(handler.fn.control._container, domToIds, elements)
                   : undefined
             };
          });

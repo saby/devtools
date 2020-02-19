@@ -8,10 +8,6 @@ const WASABY_MODULES = [
     "path": "wasaby-controls/Controls"
   },
   {
-    "name": "Controls-theme",
-    "path": "wasaby-controls/Controls-theme"
-  },
-  {
     "name": "Controls-default-theme",
     "path": "wasaby-controls/Controls-default-theme"
   },
@@ -36,10 +32,6 @@ const WASABY_MODULES = [
     "path": "sbis3.engine/client/Layout"
   },
   {
-    "name": "Layout-theme",
-    "path": "sbis3.engine/client/Layout-theme"
-  },
-  {
     "name": "Layout-default-theme",
     "path": "sbis3.engine/client/Layout-default-theme"
   },
@@ -58,6 +50,18 @@ const WASABY_MODULES = [
   {
     "name": "SbisEnv",
     "path": "rmi/src/client/SbisEnv"
+  },
+  {
+    "name": "SbisEnvUI",
+    "path": "rmi/src/client/SbisEnvUI"
+  },
+  {
+    "name": "File",
+    "path": "rmi/src/client/File"
+  },
+  {
+    "name": "SbisFile",
+    "path": "rmi/src/client/SbisFile"
   },
   {
     "name": "Vdom",
@@ -112,6 +116,10 @@ const EXTENSION_MODULES = [
   {
     "name": "DevtoolsTest",
     "path": resolve("DevtoolsTest")
+  },
+  {
+    "name": "Injection",
+    "path": resolve(input.injectionDir)
   },
   {
     "name": "Controls-devtools-theme",

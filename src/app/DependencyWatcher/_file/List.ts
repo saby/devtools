@@ -1,6 +1,5 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import template = require('wml!DependencyWatcher/_file/List');
-import { navigation } from './navigation';
 import { columns } from './columns';
 import { headers } from './header';
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
@@ -15,6 +14,10 @@ interface IOptions extends IControlOptions {
    sorting: Sorting;
 }
 
+/**
+ * List in the filter panel of the "Dependencies" tab.
+ * @author Зайцев А.С.
+ */
 export class List extends Control<IOptions> {
    protected readonly _template: TemplateFunction = template;
    protected _sorting?: Sorting;
@@ -24,7 +27,6 @@ export class List extends Control<IOptions> {
 
    static getDefaultOptions(): Partial<IOptions> {
       return {
-         navigation,
          headers,
          columns,
          sorting: [{ size: 'ASC' }]

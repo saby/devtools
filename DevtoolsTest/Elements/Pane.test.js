@@ -363,10 +363,12 @@ define([
 
          it('should create new editingConfig', function() {
             const oldOptions = {
-               isControl: false
+               isControl: false,
+               caption: 'Options'
             };
             const newOptions = {
-               isControl: true
+               isControl: true,
+               caption: 'Options'
             };
             instance._editingConfig = undefined;
             instance.saveOptions(oldOptions);
@@ -379,12 +381,34 @@ define([
             });
          });
 
-         it('should set _editingConfig to undefined', function() {
+         it('should set _editingConfig to undefined because this is not a control', function() {
             const oldOptions = {
-               isControl: true
+               isControl: true,
+               caption: 'Options'
             };
             const newOptions = {
-               isControl: false
+               isControl: false,
+               caption: 'Options'
+            };
+            instance._editingConfig = {
+               sequentialEditing: false,
+               toolbarVisibility: true
+            };
+            instance.saveOptions(oldOptions);
+
+            instance._beforeUpdate(newOptions);
+
+            assert.isUndefined(instance._editingConfig);
+         });
+
+         it("should set _editingConfig to undefined because the Events tab doesn't support editing", function() {
+            const oldOptions = {
+               isControl: true,
+               caption: 'Options'
+            };
+            const newOptions = {
+               isControl: true,
+               caption: 'Events'
             };
             instance._editingConfig = {
                sequentialEditing: false,
@@ -685,7 +709,7 @@ define([
                );
             });
 
-            it("should return false because the item has a breakpoint", function() {
+            it('should return false because the item has a breakpoint', function() {
                const action = {
                   id: 'addBreakpoint'
                };

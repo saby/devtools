@@ -12,7 +12,8 @@ import {
    getChanges,
    getChangesDescription,
    getSelfDuration,
-   getSynchronizationOverview
+   getSynchronizationOverview,
+   stringifyProfilingData
 } from '../_utils/Utils';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import Controller from '../../Search/Controller';
@@ -24,6 +25,8 @@ import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import template = require('wml!Profiler/_Profiler/Profiler');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { WARNING_NAMES, WARNINGS, IWarning } from 'Profiler/_Warning/const';
+import { Getter as FileSystem } from 'File/ResourceGetter/fileSystem';
+import { Confirmation } from 'Controls/popup';
 
 interface IOptions extends IControlOptions {
    store: Store;
@@ -117,11 +120,15 @@ class Profiler extends Control<IOptions> {
 
    protected _searchValue: string = '';
 
-   protected _searchController: Controller = new Controller('name');
+   protected _searchController: Controller<'name'> = new Controller('name');
 
    protected _lastFoundItemIndex: number = 0;
 
    protected _searchTotal: number = 0;
+
+   protected readonly _supportedFileExtensions: string[] = ['json'];
+
+   private fileGetter?: FileSystem;
 
    constructor(options: IOptions) {
       super(options);
@@ -163,7 +170,358 @@ class Profiler extends Control<IOptions> {
    }
 
    private __setSynchronization(synchronizationKey: string): void {
+      const snapshot = this.getSnapshot(synchronizationKey);
+
+      this._synchronizationOverview = getSynchronizationOverview(
+         snapshot,
+         this._destroyedCountBySynchronization.get(synchronizationKey)
+      );
+      this._snapshot = snapshot;
+      this.__updateSelectedCommitChanges();
+
+      this.__updateSearch(this._searchValue);
+   }
+
+   private __updateSelectedCommitChanges(): void {
+      if (typeof this._selectedCommitId === 'undefined') {
+         this._selectedCommitChanges = undefined;
+      } else {
+         const changes = getChangesDescription(
+            this._profilingData,
+            this._selectedSynchronizationId,
+            this._selectedCommitId
+         );
+
+         if (changes) {
+            this._selectedCommitChanges = {
+               updateReason: changes.updateReason,
+               changedOptions: changes.changedOptions,
+               changedAttributes: changes.changedAttributes,
+               warnings: this.__getWarnings()
+            };
+         } else {
+            this._selectedCommitChanges = {
+               updateReason: 'unchanged'
+            };
+         }
+      }
+   }
+
+   /**
+    * Takes warnings of the item and if they exist transforms them into array of objects.
+    * @returns Array of IWarning objects or undefined if there are no warnings for the commit.
+    */
+   private __getWarnings(): IWarning[] | undefined {
+      let warnings;
+      if (this._snapshot) {
+         const item = this._snapshot.find(
+            ({ id }) => id === this._selectedCommitId
+         );
+         if (item && item.warnings) {
+            warnings = item.warnings
+               .map((name) => WARNINGS[name])
+               // filter out nonexistent warnings to support importing profiles from different versions
+               .filter((warning) => warning);
+         }
+      }
+      return warnings;
+   }
+
+   protected _masterMarkedKeyChanged(
+      e: Event,
+      id: Profiler['_selectedSynchronizationId']
+   ): void {
+      if (
+         (this
+            ._synchronizations as SynchronizationsList['_options']['synchronizations']).find(
+            (item) => item.id === id
+         )
+      ) {
+         this._selectedSynchronizationId = id;
+         this.__setSynchronization(this._selectedSynchronizationId);
+      }
+   }
+
+   protected _detailMarkedKeyChanged(
+      e: Event,
+      id?: IFrontendControlNode['id']
+   ): void {
+      this._selectedCommitId = id;
+      this.__updateSelectedCommitChanges();
+   }
+
+   private __getElementsBySynchronization(
+      synchronizationId: string
+   ): Store['_elements'] {
+      let result = this._elementsBySynchronization.get(synchronizationId);
+
+      if (!result) {
+         const changes = Array.from(this._changesBySynchronization);
+         let previousElements = this._elementsSnapshot;
+
+         if (this._elementsBySynchronization.size > 0) {
+            previousElements = Array.from(
+               this._elementsBySynchronization.values()
+            )[this._elementsBySynchronization.size - 1];
+         }
+
+         for (const [currentId, operations] of changes) {
+            const elements = applyOperations(previousElements, operations);
+            this._elementsBySynchronization.set(currentId, elements);
+            this._changesBySynchronization.delete(currentId);
+            this._destroyedCountBySynchronization.set(
+               synchronizationId,
+               operations.reduce((acc, [type]) => {
+                  return type === OperationType.DELETE ? acc + 1 : acc;
+               }, 0)
+            );
+
+            if (currentId === synchronizationId) {
+               result = elements;
+               break;
+            }
+
+            previousElements = elements;
+         }
+
+         if (!result) {
+            throw new Error(
+               `Synchronization with id ${synchronizationId} didn't happen during this profiling session.`
+            );
+         }
+      }
+
+      return result;
+   }
+
+   private __onOperation(args: IOperationEvent['args']): void {
+      if (this._isProfiling) {
+         this._currentOperations.push(args);
+      }
+   }
+
+   private __onEndSynchronization(id: string): void {
+      if (this._isProfiling) {
+         this._changesBySynchronization.set(id, this._currentOperations);
+         this._currentOperations = [];
+      }
+   }
+
+   protected _toggleProfiling(): void {
+      this._options.store.dispatch('toggleProfiling', !this._isProfiling);
+   }
+
+   private __onProfilingStatusChanged(status: boolean): void {
+      if (this._isProfiling !== status) {
+         this._isProfiling = status;
+         if (status) {
+            this.resetState();
+         } else {
+            this._options.store.dispatch('getSynchronizationsList');
+            this._options.store.dispatch('getProfilingData');
+         }
+      }
+   }
+
+   protected _reloadAndProfile(): void {
+      chrome.devtools.inspectedWindow.reload({
+         injectedScript: 'this.__WASABY_START_PROFILING = true'
+      });
+   }
+
+   protected _onSearchValueChanged(e: Event, value: string): void {
+      this.__updateSearch(value);
+   }
+
+   private __updateSearch(value: string): void {
+      const searchResult = this._searchController.updateSearch(
+         this._snapshot || [],
+         value,
+         this._selectedCommitId
+      );
+
+      if (typeof searchResult.id !== 'undefined') {
+         this._selectedCommitId = searchResult.id;
+         this.__updateSelectedCommitChanges();
+      }
+      this._lastFoundItemIndex = searchResult.index;
+      this._searchTotal = searchResult.total;
+   }
+
+   protected _onSearchKeydown(e: { nativeEvent: KeyboardEvent }): void {
+      if (e.nativeEvent.key === 'Enter') {
+         const searchResult = this._searchController.getNextItemId(
+            this._searchValue,
+            e.nativeEvent.shiftKey
+         );
+
+         if (typeof searchResult.id !== 'undefined') {
+            this._selectedCommitId = searchResult.id;
+            this.__updateSelectedCommitChanges();
+         }
+         this._lastFoundItemIndex = searchResult.index;
+         this._searchTotal = searchResult.total;
+      }
+   }
+
+   /**
+    * Stringifies the profiling data and saves it to JSON.
+    * Only 3 things are saved: changes descriptions, destroyed count and synchronization snapshots.
+    * If snapshots for some synchronizations do not exist at the moment of exporting, they'll be generated here.
+    */
+   protected _exportToJSON(): void {
+      function download(
+         content: string,
+         fileName: string,
+         fileType: string
+      ): void {
+         const a = document.createElement('a');
+         const file = new Blob([content], { type: fileType });
+         a.href = URL.createObjectURL(file);
+         a.download = fileName;
+         a.click();
+      }
+
+      // this will generate snapshot for every synchronization
+      (this
+         ._synchronizations as SynchronizationsList['_options']['synchronizations']).forEach(
+         ({ id }) => {
+            this.getSnapshot(id);
+         }
+      );
+
+      const MS_LENGTH = 3;
+      const date = new Date()
+         .toISOString()
+         .replace(/[-Z:.]/g, '')
+         .slice(0, -MS_LENGTH);
+
+      download(
+         stringifyProfilingData(
+            this._profilingData.synchronizationKeyToDescription,
+            this._snapshotBySynchronization,
+            this._destroyedCountBySynchronization
+         ),
+         `WasabyProfile-${date}.json`,
+         'application/json'
+      );
+   }
+
+   /**
+    * Opens native file chooser then imports profile from the selected file.
+    */
+   protected async _importFromJSON(): Promise<void> {
+      const files = await this.getFileGetter().getFiles();
+      return this.importFromFile(files);
+   }
+
+   /**
+    * Imports profile from the dropped file.
+    */
+   protected async _onFileDrop(
+      e: Event,
+      results: Array<{
+         message?: string;
+         getData: () => Blob;
+      }>
+   ): Promise<void> {
+      return this.importFromFile(results);
+   }
+
+   /**
+    * Handles importing of the files: parses, validates, applies, etc.
+    */
+   private async importFromFile(
+      files?: Array<{
+         message?: string;
+         getData: () => Blob;
+      }>
+   ): Promise<void> {
+      if (files) {
+         if (files[0].message) {
+            Profiler.openErrorPopup('Incorrect profile format.');
+            return;
+         }
+         const text = await new Response(files[0].getData()).text();
+
+         let parsedData: {
+            snapshotBySynchronization?: Profiler['_snapshotBySynchronization'];
+            destroyedCountBySynchronization?: Profiler['_destroyedCountBySynchronization'];
+            syncList?: IBackendProfilingData['syncList'];
+         };
+
+         try {
+            parsedData = JSON.parse(text);
+
+            if (
+               !parsedData.syncList ||
+               !parsedData.snapshotBySynchronization ||
+               !parsedData.destroyedCountBySynchronization
+            ) {
+               Profiler.openErrorPopup('Incorrect profile format.');
+               return;
+            }
+         } catch {
+            Profiler.openErrorPopup('Incorrect profile format.');
+            return;
+         }
+
+         this.resetState();
+
+         this._snapshotBySynchronization = new Map(
+            parsedData.snapshotBySynchronization
+         );
+         this._destroyedCountBySynchronization = new Map(
+            parsedData.destroyedCountBySynchronization
+         );
+         this.__setProfilingData({
+            initialIdToDuration: [],
+            syncList: parsedData.syncList
+         });
+      }
+   }
+   /**
+    * Returns a getter for getting files from the file system through native dialog.
+    */
+   private getFileGetter(): FileSystem {
+      if (!this.fileGetter) {
+         this.fileGetter = new FileSystem({
+            multiSelect: false,
+            extensions: this._supportedFileExtensions
+         });
+      }
+      return this.fileGetter;
+   }
+
+   /**
+    * Resets state before the start of a new profiling session.
+    */
+   private resetState(): void {
+      this._changesBySynchronization.clear();
+      this._elementsBySynchronization.clear();
+      this._snapshotBySynchronization.clear();
+      this._destroyedCountBySynchronization.clear();
+      this._profilingData = {
+         synchronizationKeyToDescription: new Map(),
+         initialIdToDuration: new Map()
+      };
+      this._currentOperations = [];
+      this._synchronizations = undefined;
+      this._snapshot = undefined;
+      this._selectedCommitChanges = undefined;
+      this._selectedCommitId = undefined;
+      this._selectedSynchronizationId = '';
+      this._elementsSnapshot = this._options.store.getElements().slice();
+   }
+
+   /**
+    * Returns snapshot of the synchronization. Generates and caches it if it didn't exist.
+    */
+   private getSnapshot(
+      synchronizationKey: string
+   ): Flamegraph['_options']['snapshot'] {
       let snapshot = this._snapshotBySynchronization.get(synchronizationKey);
+
       if (!snapshot) {
          /*
          We have two sources of information:
@@ -255,6 +613,9 @@ class Profiler extends Control<IOptions> {
                if (elementChanges.unusedReceivedState) {
                   warnings.push('unusedReceivedState');
                }
+               if (elementChanges.asyncControl) {
+                  warnings.push('asyncControl');
+               }
             }
 
             snapshot.push({
@@ -274,199 +635,24 @@ class Profiler extends Control<IOptions> {
          );
       }
 
-      this._synchronizationOverview = getSynchronizationOverview(
-         snapshot,
-         this._destroyedCountBySynchronization.get(synchronizationKey)
-      );
-      this._snapshot = snapshot;
-      this.__updateSelectedCommitChanges();
-
-      this.__updateSearch(this._searchValue);
-   }
-
-   private __updateSelectedCommitChanges(): void {
-      if (typeof this._selectedCommitId === 'undefined') {
-         this._selectedCommitChanges = undefined;
-      } else {
-         const changes = getChangesDescription(
-            this._profilingData,
-            this._selectedSynchronizationId,
-            this._selectedCommitId
-         );
-
-         if (changes) {
-            this._selectedCommitChanges = {
-               updateReason: changes.updateReason,
-               changedOptions: changes.changedOptions,
-               changedAttributes: changes.changedAttributes,
-               warnings: this.__getWarnings()
-            };
-         } else {
-            this._selectedCommitChanges = {
-               updateReason: 'unchanged'
-            };
-         }
-      }
-   }
-
-   /**
-    * Takes warnings of the item and if they exist transforms them into array of objects.
-    * @returns Array of IWarning objects or undefined if there are no warnings for the commit.
-    * @private
-    */
-   private __getWarnings(): IWarning[] | undefined {
-      let warnings;
-      if (this._snapshot) {
-         const item = this._snapshot.find(
-            ({ id }) => id === this._selectedCommitId
-         );
-         if (item && item.warnings) {
-            warnings = item.warnings.map((name) => WARNINGS[name]);
-         }
-      }
-      return warnings;
-   }
-
-   private __masterMarkedKeyChanged(
-      e: Event,
-      id: Profiler['_selectedSynchronizationId']
-   ): void {
-      this._selectedSynchronizationId = id;
-      this.__setSynchronization(this._selectedSynchronizationId);
-   }
-
-   private __detailMarkedKeyChanged(
-      e: Event,
-      id?: IFrontendControlNode['id']
-   ): void {
-      this._selectedCommitId = id;
-      this.__updateSelectedCommitChanges();
-   }
-
-   private __getElementsBySynchronization(
-      synchronizationId: string
-   ): Store['_elements'] {
-      let result = this._elementsBySynchronization.get(synchronizationId);
-
-      if (!result) {
-         const changes = Array.from(this._changesBySynchronization);
-         let previousElements = this._elementsSnapshot;
-
-         if (this._elementsBySynchronization.size > 0) {
-            previousElements = Array.from(
-               this._elementsBySynchronization.values()
-            )[this._elementsBySynchronization.size - 1];
-         }
-
-         for (const [currentId, operations] of changes) {
-            const elements = applyOperations(previousElements, operations);
-            this._elementsBySynchronization.set(currentId, elements);
-            this._changesBySynchronization.delete(currentId);
-            this._destroyedCountBySynchronization.set(
-               synchronizationId,
-               operations.reduce((acc, [type]) => {
-                  return type === OperationType.DELETE ? acc + 1 : acc;
-               }, 0)
-            );
-
-            if (currentId === synchronizationId) {
-               result = elements;
-               break;
-            }
-
-            previousElements = elements;
-         }
-
-         if (!result) {
-            throw new Error(
-               `Synchronization with id ${synchronizationId} didn't happen during this profiling session.`
-            );
-         }
-      }
-
-      return result;
-   }
-
-   private __onOperation(args: IOperationEvent['args']): void {
-      if (this._isProfiling) {
-         this._currentOperations.push(args);
-      }
-   }
-
-   private __onEndSynchronization(id: string): void {
-      if (this._isProfiling) {
-         this._changesBySynchronization.set(id, this._currentOperations);
-         this._currentOperations = [];
-      }
-   }
-
-   private __toggleProfiling(): void {
-      this._options.store.dispatch('toggleProfiling', !this._isProfiling);
-   }
-
-   private __onProfilingStatusChanged(status: boolean): void {
-      if (this._isProfiling !== status) {
-         this._isProfiling = status;
-         if (status) {
-            this._changesBySynchronization.clear();
-            this._elementsBySynchronization.clear();
-            this._snapshotBySynchronization.clear();
-            this._currentOperations = [];
-            this._synchronizations = undefined;
-            this._snapshot = undefined;
-            this._selectedCommitChanges = undefined;
-            this._selectedCommitId = undefined;
-            this._selectedSynchronizationId = '';
-            this._elementsSnapshot = this._options.store.getElements().slice();
-         } else {
-            this._options.store.dispatch('getSynchronizationsList');
-            this._options.store.dispatch('getProfilingData');
-         }
-      }
-   }
-
-   private __reloadAndProfile(): void {
-      chrome.devtools.inspectedWindow.reload({
-         injectedScript: 'this.__WASABY_START_PROFILING = true'
-      });
-   }
-
-   private __onSearchValueChanged(e: Event, value: string): void {
-      this.__updateSearch(value);
-   }
-
-   private __updateSearch(value: string): void {
-      const searchResult = this._searchController.updateSearch(
-         this._snapshot || [],
-         value,
-         this._selectedCommitId
-      );
-
-      if (typeof searchResult.id !== 'undefined') {
-         this._selectedCommitId = searchResult.id;
-         this.__updateSelectedCommitChanges();
-      }
-      this._lastFoundItemIndex = searchResult.index;
-      this._searchTotal = searchResult.total;
-   }
-
-   private __onSearchKeydown(e: { nativeEvent: KeyboardEvent }): void {
-      if (e.nativeEvent.key === 'Enter') {
-         const searchResult = this._searchController.getNextItemId(
-            this._searchValue,
-            e.nativeEvent.shiftKey
-         );
-
-         if (typeof searchResult.id !== 'undefined') {
-            this._selectedCommitId = searchResult.id;
-            this.__updateSelectedCommitChanges();
-         }
-         this._lastFoundItemIndex = searchResult.index;
-         this._searchTotal = searchResult.total;
-      }
+      return snapshot;
    }
 
    static _theme: string[] = ['Profiler/profiler'];
+
+   /**
+    * Opens popup with the passed error text.
+    * @param errorText
+    */
+   private static openErrorPopup(
+      errorText: string
+   ): Promise<boolean | undefined> {
+      return Confirmation.openPopup({
+         type: 'ok',
+         style: 'danger',
+         details: errorText
+      });
+   }
 }
 
 export default Profiler;

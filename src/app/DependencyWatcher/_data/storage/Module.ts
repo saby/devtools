@@ -14,10 +14,14 @@ interface IItemQueryResult extends IQueryResult<number> {}
 interface IItemQueryParam
    extends Partial<IQueryParam<IRPCModule, IRPCModuleFilter>> {}
 
+/**
+ * Module storage on the frontend.
+ * @author Зайцев А.С.
+ */
 export class Module {
    private _items: Map<number, ITransferRPCModule> = new Map();
    constructor(private _rpc: RPC) {}
-   query(queryParams: IItemQueryParam = {}): Promise<IItemQueryResult> {
+   query(queryParams: IItemQueryParam): Promise<IItemQueryResult> {
       return this._rpc.execute<IItemQueryResult, IItemQueryParam>({
          methodName: RPCMethodNames.moduleQuery,
          args: queryParams
