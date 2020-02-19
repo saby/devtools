@@ -219,7 +219,10 @@ class Profiler extends Control<IOptions> {
             ({ id }) => id === this._selectedCommitId
          );
          if (item && item.warnings) {
-            warnings = item.warnings.map((name) => WARNINGS[name]);
+            warnings = item.warnings
+               .map((name) => WARNINGS[name])
+               // filter out nonexistent warnings to support importing profiles from different versions
+               .filter((warning) => warning);
          }
       }
       return warnings;
@@ -416,20 +419,25 @@ class Profiler extends Control<IOptions> {
    /**
     * Imports profile from the dropped file.
     */
-   protected async _onFileDrop(e: Event, results: Array<{
-      message?: string;
-      getData: () => Blob;
-   }>): Promise<void> {
+   protected async _onFileDrop(
+      e: Event,
+      results: Array<{
+         message?: string;
+         getData: () => Blob;
+      }>
+   ): Promise<void> {
       return this.importFromFile(results);
    }
 
    /**
     * Handles importing of the files: parses, validates, applies, etc.
     */
-   private async importFromFile(files?: Array<{
-      message?: string;
-      getData: () => Blob;
-   }>): Promise<void> {
+   private async importFromFile(
+      files?: Array<{
+         message?: string;
+         getData: () => Blob;
+      }>
+   ): Promise<void> {
       if (files) {
          if (files[0].message) {
             Profiler.openErrorPopup('Incorrect profile format.');
@@ -606,6 +614,9 @@ class Profiler extends Control<IOptions> {
                if (elementChanges.unusedReceivedState) {
                   warnings.push('unusedReceivedState');
                }
+               if (elementChanges.asyncControl) {
+                  warnings.push('asyncControl');
+               }
             }
 
             snapshot.push({
@@ -632,7 +643,9 @@ class Profiler extends Control<IOptions> {
     * Opens popup with the passed error text.
     * @param errorText
     */
-   private static openErrorPopup(errorText: string): Promise<boolean | undefined> {
+   private static openErrorPopup(
+      errorText: string
+   ): Promise<boolean | undefined> {
       return Confirmation.openPopup({
          type: 'ok',
          style: 'danger',

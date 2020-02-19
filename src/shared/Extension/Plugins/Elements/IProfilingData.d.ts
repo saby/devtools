@@ -7,6 +7,7 @@ export interface IChangesDescription {
    domChanged: boolean;
    isVisible: boolean;
    unusedReceivedState: boolean;
+   asyncControl: boolean;
    changedOptions?: string[];
    changedAttributes?: string[];
 }

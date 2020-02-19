@@ -1,6 +1,6 @@
 <div class="CommitDetails">
     <ws:if data="{{ _options.updateReason === 'unchanged' }}">
-        <div>This firstControl didn't re-render during this synchronization.</div>
+        <div>This control didn't re-render during this synchronization.</div>
     </ws:if>
     <ws:else>
         <ws:if data="{{ _options.warnings }}">
@@ -19,13 +19,13 @@
         <div class="CommitDetails__changesContainer">
             <Controls.scroll:Container>
                 <ws:if data="{{ _options.updateReason === 'mounted' }}">
-                    <div>This was the first time this firstControl was rendered.</div>
+                    <div>This was the first time this control was rendered.</div>
                 </ws:if>
                 <ws:else data="{{ _options.updateReason === 'forceUpdated' }}">
                     <div>This component was force updated.</div>
                 </ws:else>
                 <ws:else data="{{ _options.updateReason === 'parentUpdated' }}">
-                    <div>The parent firstControl re-rendered.</div>
+                    <div>The parent control re-rendered.</div>
                 </ws:else>
                 <ws:else>
                     <ws:if data="{{ _options.changedOptions }}">

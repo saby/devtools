@@ -245,7 +245,8 @@ define([
                                  updateReason: 'forceUpdated',
                                  domChanged: true,
                                  isVisible: true,
-                                 unusedReceivedState: true
+                                 unusedReceivedState: true,
+                                 asyncControl: true
                               }
                            ],
                            [
@@ -345,7 +346,7 @@ define([
                   selfDuration: 5,
                   actualBaseDuration: 42,
                   actualDuration: 37,
-                  warnings: ['unusedReceivedState'],
+                  warnings: ['unusedReceivedState', 'asyncControl'],
                   hasChangesInSubtree: true
                },
                {

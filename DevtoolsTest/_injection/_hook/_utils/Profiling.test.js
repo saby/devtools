@@ -70,7 +70,8 @@ define([
                   selfDuration: 9,
                   domChanged: true,
                   isVisible: true,
-                  unusedReceivedState: true
+                  unusedReceivedState: true,
+                  asyncControl: true
                },
                operation: OperationType.CREATE
             });
@@ -93,7 +94,8 @@ define([
                               isVisible: true,
                               unusedReceivedState: false,
                               changedOptions: undefined,
-                              changedAttributes: undefined
+                              changedAttributes: undefined,
+                              asyncControl: false
                            }
                         ],
                         [
@@ -105,7 +107,8 @@ define([
                               isVisible: true,
                               unusedReceivedState: false,
                               changedOptions: ['value', 'anotherValue'],
-                              changedAttributes: ['class']
+                              changedAttributes: ['class'],
+                              asyncControl: false
                            }
                         ],
                         [
@@ -117,7 +120,8 @@ define([
                               isVisible: false,
                               unusedReceivedState: false,
                               changedOptions: undefined,
-                              changedAttributes: undefined
+                              changedAttributes: undefined,
+                              asyncControl: false
                            }
                         ],
                         [
@@ -129,7 +133,8 @@ define([
                               isVisible: false,
                               unusedReceivedState: false,
                               changedOptions: undefined,
-                              changedAttributes: undefined
+                              changedAttributes: undefined,
+                              asyncControl: false
                            }
                         ]
                      ]
@@ -149,7 +154,8 @@ define([
                               isVisible: true,
                               unusedReceivedState: true,
                               changedOptions: undefined,
-                              changedAttributes: undefined
+                              changedAttributes: undefined,
+                              asyncControl: true
                            }
                         ]
                      ]

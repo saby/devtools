@@ -54,6 +54,7 @@ export interface IBackendControlNode extends IControlNode {
    parentId?: IBackendControlNode['id'];
    isVisible?: boolean;
    unusedReceivedState?: boolean;
+   asyncControl?: boolean;
 }
 
 export interface IFrontendControlNode {
