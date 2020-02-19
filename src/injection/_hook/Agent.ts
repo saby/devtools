@@ -348,6 +348,7 @@ class Agent {
             data.instance &&
             data.instance._$resultBeforeMount
          ) {
+            changedNode.node.asyncControl = true;
             if (
                this.controlsWithReceivedStates.has(node.key)
             ) {

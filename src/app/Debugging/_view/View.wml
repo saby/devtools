@@ -18,7 +18,8 @@
                         selectedKeys="{{ _selectedKeys }}"
                         minSearchLength="{{ 3 }}"
                         sorting="{{ _sorting }}"
-                        on:selectedKeysChanged="_onSelectedKeysChanged()" attr:class="devtools-Debugging__browser">
+                        on:selectedKeysChanged="_onSelectedKeysChanged()"
+                        attr:class="devtools-Debugging__browser">
             <ws:search>
                 <Controls.search:Input bind:value="_searchValue" />
             </ws:search>

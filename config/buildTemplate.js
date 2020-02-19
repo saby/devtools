@@ -32,8 +32,8 @@ const WASABY_MODULES = [
     "path": "sbis3.engine/client/Layout"
   },
   {
-    "name": "Layout-theme",
-    "path": "sbis3.engine/client/Layout-theme"
+    "name": "Layout-default-theme",
+    "path": "sbis3.engine/client/Layout-default-theme"
   },
   {
     "name": "Application",
@@ -69,7 +69,7 @@ const WASABY_MODULES = [
   },
   {
     "name": "Inferno",
-    "path": "sbis3-ws/Inferno"
+    "path": "saby-inferno/Inferno"
   },
   {
     "name": "UI",

@@ -1,3 +1,3 @@
 <div class="ws-fragment">
-    <span>This firstControl returned a Promise from <code>_beforeMount</code> even though it received state from a server.</span>
+    <span>This control returned a Promise from <code>_beforeMount</code> even though it received state from a server.</span>
 </div>

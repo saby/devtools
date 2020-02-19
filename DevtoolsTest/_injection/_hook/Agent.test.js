@@ -1319,7 +1319,8 @@ define([
                               selfDuration: 10,
                               domChanged: true,
                               isVisible: true,
-                              unusedReceivedState: false
+                              unusedReceivedState: false,
+                              asyncControl: false
                            },
                            operation: OperationType.CREATE
                         }
@@ -1354,7 +1355,8 @@ define([
                                           isVisible: true,
                                           unusedReceivedState: false,
                                           changedOptions: undefined,
-                                          changedAttributes: undefined
+                                          changedAttributes: undefined,
+                                          asyncControl: false
                                        }
                                     ]
                                  ]
@@ -2054,7 +2056,7 @@ define([
             assert.deepEqual(instance.componentsStack, []);
          });
 
-         it('should set unusedReceivedState to true', function() {
+         it('should set unusedReceivedState and asyncControl to true', function() {
             const node = {
                key: '_'
             };
@@ -2108,7 +2110,8 @@ define([
                      value: '123'
                   },
                   instance: controlInstance,
-                  unusedReceivedState: true
+                  unusedReceivedState: true,
+                  asyncControl: true
                },
                operation: OperationType.CREATE
             });
@@ -2231,7 +2234,7 @@ define([
             assert.isTrue(instance.controlsWithReceivedStates.has('_'));
          });
 
-         it("should not set unusedReceivedState because this control doesn't have receivedState", function() {
+         it("should not set unusedReceivedState because this control doesn't have receivedState (but still should set asyncControl to true)", function() {
             const node = {
                key: '_'
             };
@@ -2283,7 +2286,8 @@ define([
                   options: {
                      value: '123'
                   },
-                  instance: controlInstance
+                  instance: controlInstance,
+                  asyncControl: true
                },
                operation: OperationType.CREATE
             });

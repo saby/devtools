@@ -60,7 +60,8 @@ function getChangesDescription(
       selfDuration: node.selfDuration,
       domChanged: !!node.domChanged,
       isVisible: !!node.isVisible,
-      unusedReceivedState: !!node.unusedReceivedState
+      unusedReceivedState: !!node.unusedReceivedState,
+      asyncControl: !!node.asyncControl
    };
 }
 
