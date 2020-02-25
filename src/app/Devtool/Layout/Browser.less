@@ -1,20 +1,18 @@
-.Browser {
+.devtools-Browser {
    height: calc(100vh - 31px);
-   display: flex;
-   flex-direction: column;
 }
 
-.Browser__head {
-   flex-shrink: 0;
-   border-bottom: 1px solid #ccc;
+.devtools-Browser__head {
    height: 31px;
-   display: flex;
-   align-items: center;
    padding-left: 6px;
 }
 
-.Browser__content {
-   display: flex;
+.devtools-Browser__head_theme_@{themeName} {
+   border-bottom: @border-thickness solid @color_separator;
+   background-color: @background-color_toolbar;
+}
+
+.devtools-Browser__content {
    overflow: hidden;
    height: 100%;
 }

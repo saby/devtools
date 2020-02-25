@@ -1,12 +1,11 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import template = require('wml!Profiler/_TimeRender/TimeRender');
 import { descriptor } from 'Types/entity';
-import 'css!Profiler/profiler';
 import { formatTime } from '../_utils/Utils';
 
 interface IOptions extends IControlOptions {
    value: number;
-   barColor: string;
+   barColor: number;
    length?: number;
 }
 
@@ -28,10 +27,12 @@ class TimeRender extends Control<IOptions> {
       }
    }
 
+   static _theme: string[] = ['Profiler/profiler'];
+
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          value: descriptor(Number).required(),
-         barColor: descriptor(String).required(),
+         barColor: descriptor(Number).required(),
          length: descriptor(Number),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui_module for_cdn="0" id="87addb9a-b1a3-4827-ad3a-abc0a0028184" name="Elements-devtools-theme" required="0" responsible="Зайцев А. С." version="1.00">
+
+  <description/>
+
+  <depends/>
+
+  <load_after/>
+
+  <parameters/>
+
+  <resources/>
+
+  <preload/>
+
+</ui_module>

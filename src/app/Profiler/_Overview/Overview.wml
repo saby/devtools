@@ -1,11 +1,11 @@
 <ws:template name="row">
-    <div class="Overview__row">
+    <div class="ws-flexbox ws-align-items-center">
         <Profiler._ReasonTag.ReasonTag updateReason="{{ updateReason }}"
-                                      attr:class="Overview__reasonTag" />{{ caption }}: {{ count }}
+                                      attr:class="devtools-Overview__reasonTag" />{{ caption }}: {{ count }}
     </div>
 </ws:template>
 
-<div class="Overview">
+<div class="devtools-Overview devtools-Overview_theme-{{ _options.theme }} ws-flexbox ws-flex-column">
     <Controls.heading:Title caption="Synchronization overview"
                             size="s"
                             style="secondary" />

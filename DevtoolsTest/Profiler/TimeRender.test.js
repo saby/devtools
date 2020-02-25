@@ -89,7 +89,7 @@ define([
             });
             testOption(optionTypes, 'barColor', {
                required: true,
-               args: [String]
+               args: [Number]
             });
             testOption(optionTypes, 'length', {
                args: [Number]

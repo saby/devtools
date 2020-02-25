@@ -1,24 +1,18 @@
-.CommitDetails {
-   border-left: 1px solid #ccc;
-   display: flex;
-   flex-direction: column;
+.devtools-CommitDetails {
    width: 400px;
    margin-left: auto;
    padding: 4px;
 }
 
-.CommitDetails__changesContainer {
-   display: flex;
-   flex-direction: column;
+.devtools-CommitDetails_theme_@{themeName} {
+   border-left: @border-thickness solid @color_separator;
+}
+
+.devtools-CommitDetails__changesContainer {
    width: 100%;
    padding-left: 4px;
 }
 
-.CommitDetails__image {
-   width: 100%;
-   cursor: zoom-in;
-}
-
-.CommitDetails__changedValueName {
+.devtools-CommitDetails__changedValueName {
    margin-left: 10px;
 }

@@ -1,47 +1,48 @@
-.Profiler__headElement {
+.devtools-Profiler__headElement {
    margin-right: 6px;
 }
 
-.Profiler__masterDetail {
-   flex-grow: 1;
-}
-
-.Profiler__detail {
-   flex-grow: 1;
-}
-
-.Profiler__master {
+.devtools-Profiler__master {
    height: 100%;
 }
 
-.Profiler__greeting {
+.devtools-Profiler__greeting {
    margin: auto;
-   display: flex;
-   align-items: center;
 }
 
-.Profiler__status {
-   display: flex;
-   flex-direction: column;
-}
-
-.Profiler__stopButton {
+.devtools-Profiler__stopButton {
    margin-top: 6px;
-   align-self: center;
 }
 
-.Profiler__synchronizationPreview {
-   object-fit: contain;
-   max-width: 50vw;
-   max-height: 50vh;
-   padding: 6px;
-}
-
-.Profiler__headRadioGroup {
-   align-self: flex-end;
-}
-
-.Profiler__content {
+.devtools-Profiler__content {
    overflow: hidden;
    height: 100%;
+}
+
+.devtools-reason_background_noChangesInSubtree_theme_@{themeName} {
+   background: @background-color_reason_noChangesInSubtree;
+}
+
+.devtools-reason_background_mounted_theme_@{themeName} {
+   background: @background-color_reason_mounted;
+}
+
+.devtools-reason_background_forceUpdated_theme_@{themeName} {
+   background: @background-color_reason_forceUpdated;
+}
+
+.devtools-reason_background_selfUpdated_theme_@{themeName} {
+   background: @background-color_reason_selfUpdated;
+}
+
+.devtools-reason_background_parentUpdated_theme_@{themeName} {
+   background: @background-color_reason_parentUpdated;
+}
+
+.devtools-reason_background_unchanged_theme_@{themeName} {
+   background: @background-color_reason_unchanged;
+}
+
+.devtools-reason_background_destroyed_theme_@{themeName} {
+   background: @background-color_reason_destroyed;
 }

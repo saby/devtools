@@ -29,7 +29,7 @@
     </ws:topTemplate>
     <ws:content>
         <Controls.scroll:Container
-            attr:class="DependencyWatcher_Page__scroll"
+            attr:class="devtools-DependencyWatcher_Page__scroll"
         >
             <Controls.explorer:View
                 name="listView"

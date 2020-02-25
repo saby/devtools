@@ -1,10 +1,10 @@
-<div class="TimeRender">
-    <span class="TimeRender__value">{{ _formattedValue }}</span>
+<div class="devtools-TimeRender ws-flexbox ws-align-items-center">
+    <span class="devtools-TimeRender__value ws-flex-shrink-0">{{ _formattedValue }}</span>
     <ws:if data="{{ _options.length }}">
-        <div class="TimeRender__barWrapper">
+        <div class="ws-flex-grow-1">
             <div title="{{ _formattedValue }}"
-                 class="TimeRender__bar"
-                 attr:style="width: {{_options.length}}%; background: {{ _options.barColor }}"></div>
+                 class="devtools-TimeRender__bar devtools-TimeRender__bar_backgroundColor_{{ _options.barColor }}_theme_{{ _options.theme }}"
+                 attr:style="width: {{_options.length}}%;"></div>
         </div>
     </ws:if>
 </div>

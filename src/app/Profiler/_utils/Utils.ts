@@ -98,77 +98,33 @@ export function getSelfDuration(
    }
 }
 
-type BACKGROUND_COLOR =
-   | '#e2e2e2'
-   | '#baf7c8'
-   | '#c4f1ba'
-   | '#cdeaac'
-   | '#d5e49e'
-   | '#dbde90'
-   | '#e1d782'
-   | '#e6d174'
-   | '#ebca66'
-   | '#efc457';
-
-const colors: Array<Exclude<BACKGROUND_COLOR, '#e2e2e2'>> = [
-   '#baf7c8',
-   '#c4f1ba',
-   '#cdeaac',
-   '#d5e49e',
-   '#dbde90',
-   '#e1d782',
-   '#e6d174',
-   '#ebca66',
-   '#efc457'
-];
-
 /**
  * Returns background color corresponding to the duration of an operation.
  * @param value Duration of an operation.
  * @return Background color corresponding to the duration of an operation.
  */
-export function getBackgroundColorBasedOnTiming(
-   value: number
-): Exclude<BACKGROUND_COLOR, '#e2e2e2'> {
+export function getBackgroundColorBasedOnTiming(value: number): number {
+   const NUMBER_OF_COLORS = 9;
    const index =
-      Math.max(0, Math.min(colors.length - 1, value)) * (colors.length - 1);
-   return colors[Math.round(index)];
+      Math.max(0, Math.min(NUMBER_OF_COLORS - 1, value)) *
+      (NUMBER_OF_COLORS - 1);
+   return Math.round(index);
 }
 
 /**
- * Returns background color corresponding to the update reason.
+ * Returns background class corresponding to the update reason.
  * @param updateReason Reason for the update.
  * @param hasChangesInSubtree Whether control and its subtree took part in a synchronization.
- * @return Background color corresponding to the update reason.
+ * @return Background class corresponding to the update reason.
  */
-export function getBackgroundColorBasedOnReason(
+export function getBackgroundClassBasedOnReason(
    updateReason: ControlUpdateReason,
    hasChangesInSubtree: boolean = true
-):
-   | '#e2e2e2'
-   | '#ffab66'
-   | '#e6d174'
-   | '#b3e6e6'
-   | '#000'
-   | '#baf7c8'
-   | 'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)' {
+): string {
    if (!hasChangesInSubtree) {
-      return 'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)';
+      return 'devtools-reason_background_noChangesInSubtree';
    }
-   switch (updateReason) {
-      case 'mounted':
-         return '#ffab66';
-      case 'forceUpdated':
-         return '#baf7c8';
-      case 'selfUpdated':
-         return '#e6d174';
-      case 'parentUpdated':
-         return '#b3e6e6';
-      case 'unchanged':
-         return '#e2e2e2';
-      case 'destroyed':
-         return '#000';
-   }
+   return `devtools-reason_background_${updateReason}`;
 }
 
 /**
@@ -233,11 +189,12 @@ const LENGTH_SCALE = 100;
 /**
  * Adds information about the color and length of a bar that represents duration.
  * @param initialData An initial array with timing information.
+ * @param theme Devtools theme.
  * @return A new array where each item has 2 new fields: barColor and length.
  */
 export function getDataWithLengths(
    initialData: Array<{ selfDuration: number }>
-): Array<{ selfDuration: number; length: number; barColor: string }> {
+): Array<{ selfDuration: number; length: number; barColor: number }> {
    const maxDuration = initialData.reduce(
       (max, { selfDuration }) => Math.max(max, selfDuration),
       0

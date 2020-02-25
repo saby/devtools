@@ -1,5 +1,5 @@
 <Controls.scroll:Container on:click="_onMarkedKeyChanged()">
-    <div class="Flamegraph"
+    <div class="devtools-Flamegraph"
          on:keydown="_onKeyDown()">
         <ws:for data="rowData in _depthToItemData">
             <ws:for data="index, itemData in rowData">

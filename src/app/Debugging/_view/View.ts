@@ -5,7 +5,6 @@ import { Confirmation } from 'Controls/popup';
 import template = require('wml!Debugging/_view/View');
 import Cookie = chrome.cookies.Cookie;
 import Tab = chrome.tabs.Tab;
-import 'css!Debugging/debugging';
 
 const AVAILABLE_COOKIE_SPACE = 4096;
 
@@ -156,6 +155,8 @@ class View extends Control<IControlOptions, void[]> {
          );
       });
    }
+
+   static _theme: string[] = ['Debugging/debugging'];
 
    private static openPopup(): Promise<void> {
       return Confirmation.openPopup({

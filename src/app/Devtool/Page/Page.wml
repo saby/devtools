@@ -1,6 +1,6 @@
-<Devtool.Page.Application>
+<Devtool.Page.Application attr:class="{{ _options.theme }}">
 <div
-    class="Devtool_Page"
+    class="devtools-Devtool_Page"
     attr:key="{{ _rootKey }}"
 >
     <ws:if data="{{ _hasWasabyOnPage }}">
@@ -8,15 +8,15 @@
                 bind:selectedKey="_activeTab"
                 keyProperty="id"
                 source="{{ _tabsSource }}"
-                attr:class="Devtool_Page__tabButtons"
+                attr:class="devtools-Devtool_Page__tabButtons devtools-Devtool_Page__tabButtons_theme_{{ _options.theme }}"
         >
             <ws:tabSpaceTemplate>
                 <Controls.buttons:Button icon="icon-Settings"
                                          tooltip="Options"
                                          viewMode="link"
                                          iconSize="s"
-                                         attr:class="Devtool_Page__settings"
-                                         on:click="__openOptionsPage()" />
+                                         attr:class="devtools-Devtool_Page__settings"
+                                         on:click="_openOptionsPage()" />
             </ws:tabSpaceTemplate>
         </Controls.tabs:Buttons>
 

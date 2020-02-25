@@ -1,15 +1,92 @@
-body {
-  background: white;
-}
-.Devtool_Page {
+.devtools-Devtool_Page {
   max-height: 100vh;
   overflow: hidden;
 }
-.Devtool_Page__tabButtons {
+
+.devtools-Devtool_Page__tabButtons {
   width: 100%;
 }
 
-.Devtool_Page__settings {
+.devtools-Devtool_Page__tabButtons_theme_@{themeName} {
+  background-color: @background-color_toolbar;
+}
+
+.devtools-Devtool_Page__settings {
   margin-left: auto;
   margin-right: 6px;
+}
+
+// TODO: эти контролы не переехали на новую темизацию, так что пока придётся оставить так
+.devtools__dark {
+  .controls-FilterPanel__vertical.controls-DialogTemplate,
+  .controls-FilterPanel__vertical .controls-DialogTemplate__top-area {
+    background-color: @background-color_toolbar;
+  }
+
+  .controls-StickyHeader__background {
+    background-color: @background-color;
+  }
+
+  .controls-itemActionsV_style_default {
+    background-color: @hover_background-color;
+  }
+
+  .controls-itemActionsV__action_iconStyle_secondary {
+    color: @secondary_color;
+    &:hover {
+      color: @link_hover_text-color;
+    }
+  }
+
+  .controls-MasterDetail_master {
+    background-color: @background-color_toolbar;
+  }
+
+  .controls-MasterDetail_master-template {
+    &:before {
+      background-color: @color_separator;
+    }
+  }
+
+  .controls-ListView__item_master {
+    &:hover {
+      background-color: @background-color !important;
+    }
+  }
+
+  .controls-ListView__item__marked_master {
+    background-color: @background-color;
+
+    &:before {
+      border-color: @color_separator transparent @color_separator transparent;
+    }
+
+    &:after {
+      background-color: @background-color;
+    }
+  }
+
+  .controls-ListView__itemV_marker {
+    background-color: @marker_color;
+  }
+
+  .controls-ListView__groupSeparator-left,
+  .controls-ListView__groupSeparator-right {
+    border-bottom: @border-thickness solid @color_separator;
+  }
+
+  .controls-ListView__groupExpander {
+    &:hover {
+      color: @link_hover_text-color;
+    }
+
+    &:active {
+      color: @link_hover_text-color;
+    }
+  }
+}
+
+.layout-Browser__header_theme-devtools__dark {
+  background-color: @background-color_toolbar;
+  border-bottom: @border-thickness solid @color_separator;
 }

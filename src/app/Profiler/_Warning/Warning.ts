@@ -1,6 +1,5 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import template = require('wml!Profiler/_Warning/Warning');
-import 'css!Profiler/profiler';
 import { descriptor } from 'Types/entity';
 
 export interface IWarningOptions extends IControlOptions {
@@ -23,6 +22,8 @@ class Warning extends Control<IWarningOptions> {
    protected _toggleExpanded(): void {
       this._expanded = !this._expanded;
    }
+
+   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof IWarningOptions, unknown> {
       return {

@@ -5,34 +5,34 @@
                                  iconStyle="{{ _isProfiling ? 'danger' : 'secondary' }}"
                                  viewMode="link"
                                  tooltip="{{ _isProfiling ? 'Stop recording' : 'Start recording' }}"
-                                 attr:class="Profiler__headElement"
+                                 attr:class="devtools-Profiler__headElement"
                                  on:click="_toggleProfiling()"/>
         <Controls.buttons:Button icon="icon-Refresh"
                                  iconSize="s"
                                  viewMode="link"
                                  readOnly="{{ _isProfiling }}"
                                  tooltip="Reload the page and start recording"
-                                 attr:class="Profiler__headElement"
+                                 attr:class="devtools-Profiler__headElement"
                                  on:click="_reloadAndProfile()"/>
         <Controls.buttons:Button icon="icon-DownloadNew"
                                  iconSize="s"
                                  viewMode="link"
                                  readOnly="{{ _isProfiling || !_snapshot }}"
                                  tooltip="Save profile"
-                                 attr:class="Profiler__headElement"
+                                 attr:class="devtools-Profiler__headElement"
                                  on:click="_exportToJSON()"/>
         <Controls.buttons:Button icon="icon-UnloadNew"
                                  iconSize="s"
                                  viewMode="link"
                                  readOnly="{{ _isProfiling }}"
                                  tooltip="Load profile"
-                                 attr:class="Profiler__headElement"
+                                 attr:class="devtools-Profiler__headElement"
                                  on:click="_importFromJSON()"/>
         <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
             <Controls.toggle:RadioGroup source="{{ _radioGroupSource }}"
                                         direction="horizontal"
                                         keyProperty="title"
-                                        attr:class="Profiler__headRadioGroup Profiler__headElement"
+                                        attr:class="ws-align-self-end devtools-Profiler__headElement"
                                         bind:selectedKey="_selectedTab" />
         </ws:if>
         <!--TODO: включить поиск и в RankedView, после того как ключи станут нормальными-->
@@ -40,7 +40,7 @@
             <Controls.search:Input bind:value="_searchValue"
                                    on:valueChanged="_onSearchValueChanged()"
                                    on:keydown="_onSearchKeydown()"
-                                   attr:class="Profiler__headElement" />
+                                   attr:class="devtools-Profiler__headElement" />
             <ws:if data="{{ _searchTotal > 0 }}">
                 <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchTotal }}</span>
             </ws:if>
@@ -52,11 +52,11 @@
                 dragText="Drop profile here"
                 dropText="Drop profile here"
                 extensions="{{ _supportedFileExtensions }}"
-                elementClass="ws-flexbox Profiler__content">
+                elementClass="ws-flexbox devtools-Profiler__content">
             <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
-                <Controls.masterDetail:Base attr:class="Profiler__masterDetail" masterWidth="{{300}}">
+                <Controls.masterDetail:Base attr:class="ws-flex-grow-1" masterWidth="{{300}}">
                     <ws:master>
-                        <Controls.scroll:Container attr:class="Profiler__master">
+                        <Controls.scroll:Container attr:class="devtools-Profiler__master">
                             <Profiler._SynchronizationsList.SynchronizationsList synchronizations="{{ _synchronizations }}"
                                                                                  markedKey="{{ _selectedSynchronizationId }}"
                                                                                  filter="{{ _masterFilter }}"
@@ -68,14 +68,14 @@
                             <Profiler._Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
                                                              markedKey="{{ _selectedCommitId }}"
                                                              on:markedKeyChanged="_detailMarkedKeyChanged()"
-                                                             attr:class="Profiler__detail"/>
+                                                             attr:class="ws-flex-grow-1"/>
                         </ws:if>
                         <ws:else>
                             <Profiler._RankedView.RankedView snapshot="{{ _snapshot }}"
                                                              markedKey="{{ _selectedCommitId }}"
                                                              filter="{{ _detailFilter }}"
                                                              on:markedKeyChanged="_detailMarkedKeyChanged()"
-                                                             attr:class="Profiler__detail"/>
+                                                             attr:class="ws-flex-grow-1"/>
                         </ws:else>
                     </ws:detail>
                 </Controls.masterDetail:Base>
@@ -95,19 +95,19 @@
                 </ws:else>
             </ws:if>
             <ws:else>
-                <div class="Profiler__greeting">
+                <div class="devtools-Profiler__greeting ws-flexbox ws-align-items-center">
                     <ws:if data="{{ _isProfiling }}">
-                        <div class="Profiler__status">
+                        <div class="ws-flexbox ws-flex-column">
                             Profiling...
                             <Controls.buttons:Button caption="Stop"
                                                      style="secondary"
                                                      viewMode="link"
-                                                     attr:class="Profiler__stopButton"
+                                                     attr:class="devtools-Profiler__stopButton ws-align-self-center"
                                                      on:click="_toggleProfiling()"/>
                         </div>
                     </ws:if>
                     <ws:else>
-                        <div class="Profiler__status">
+                        <div class="ws-flexbox ws-flex-column">
                             <ws:if data="{{ _didProfile }}">
                                 <div>There were no synchronizations during the last profiling session.</div>
                             </ws:if>

@@ -121,6 +121,34 @@ const EXTENSION_MODULES = [
     "name": "Injection",
     "path": resolve(input.injectionDir)
   },
+  {
+    "name": "Controls-devtools-theme",
+    "path": resolve(input.app, "Controls-devtools-theme")
+  },
+  {
+    "name": "Layout-devtools-theme",
+    "path": resolve(input.app, "Layout-devtools-theme")
+  },
+  {
+    "name": "Debugging-devtools-theme",
+    "path": resolve(input.app, "Debugging-devtools-theme")
+  },
+  {
+    "name": "DependencyWatcher-devtools-theme",
+    "path": resolve(input.app, "DependencyWatcher-devtools-theme")
+  },
+  {
+    "name": "Debugging-devtools-theme",
+    "path": resolve(input.app, "Devtool-devtools-theme")
+  },
+  {
+    "name": "Elements-devtools-theme",
+    "path": resolve(input.app, "Elements-devtools-theme")
+  },
+  {
+    "name": "Profiler-devtools-theme",
+    "path": resolve(input.app, "Profiler-devtools-theme")
+  }
 ];
 
 const MODULES = [].concat(WASABY_MODULES, EXTENSION_MODULES);
@@ -135,7 +163,7 @@ module.exports = {
   "typescript": true,
   "less": true,
   "contents": true,
-  "themes": true,
+  "themes": ["devtools__light", "devtools__dark"],
   "sources": false,
   "symlinks": false,
   "minimize": minimize,

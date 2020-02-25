@@ -16,6 +16,9 @@
         <module id="f27abe12-19df-4c9f-b886-634bd20a0011" name="UI"/>
         <module id="f6fdf353-3ab3-4dbb-8671-01c2b418bf0a" name="Controls"/>
         <module id="d61e9307-ee6b-47f5-8a16-5d056fe644f4" name="Layout"/>
+        <module id="a696c0f9-8a5b-44da-ad11-8fb084e002da" name="Controls-devtools-theme"/>
+        <module id="606ba894-c3c1-4631-9853-d8c3826d92bd" name="DependencyWatcher-devtools-theme"/>
+        <module id="4b105013-c6bb-4bd5-b324-c7395edb0d62" name="Layout-devtools-theme"/>
     </depends>
 
   <load_after/>

@@ -365,31 +365,31 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                   id: 0,
                   depth: 0,
                   name: '0',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                },
                {
                   id: 1,
                   depth: 1,
                   name: '1',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                },
                {
                   id: 2,
                   depth: 2,
                   name: '2',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                },
                {
                   id: 3,
                   depth: 2,
                   name: '3',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                },
                {
                   id: 4,
                   depth: 3,
                   name: '4',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                }
             ];
 
@@ -397,17 +397,17 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                {
                   id: 0,
                   name: '0',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                },
                {
                   id: 1,
                   name: '1',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                },
                {
                   id: 3,
                   name: '3',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                }
             ]);
          });
@@ -418,19 +418,19 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                   id: 0,
                   depth: 0,
                   name: '0',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                },
                {
                   id: 1,
                   depth: 1,
                   name: '1',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                },
                {
                   id: 2,
                   depth: 2,
                   name: '2',
-                  class: 'Elements__node_control'
+                  class: 'devtools-Elements__node_control'
                }
             ];
 
@@ -630,7 +630,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1
             };
             sandbox.stub(instance, '__getImmediateChildren').returns([]);
@@ -642,7 +642,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1,
                isExpanded: false,
                hasChildren: false
@@ -654,14 +654,14 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1
             };
             const element = {
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1,
                isExpanded: false,
                hasChildren: false
@@ -675,7 +675,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1,
                isExpanded: false,
                hasChildren: false
@@ -689,7 +689,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1,
                isExpanded: false,
                hasChildren: false
@@ -705,7 +705,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1,
                isExpanded: true,
                hasChildren: false
@@ -718,7 +718,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1
             };
             instance._items = [element];
@@ -732,7 +732,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                id: 2,
                name: 'test',
                depth: 2,
-               class: 'Elements__node_hoc',
+               class: 'devtools-Elements__node_hoc',
                parentId: 1,
                isExpanded: true,
                hasChildren: false

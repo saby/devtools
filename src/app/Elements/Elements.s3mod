@@ -18,6 +18,8 @@
         <module id="d61e9307-ee6b-47f5-8a16-5d056fe644f4" name="Layout"/>
         <module id="8c7f5a73-e594-404f-ac3e-0615cc8ae4f3" name="Search"/>
         <module id="fe7ac5f4-313e-4fea-93be-9f54fca9a946" name="Extension"/>
+        <module id="a696c0f9-8a5b-44da-ad11-8fb084e002da" name="Controls-devtools-theme"/>
+        <module id="87addb9a-b1a3-4827-ad3a-abc0a0028184" name="Elements-devtools-theme"/>
   </depends>
 
   <load_after/>

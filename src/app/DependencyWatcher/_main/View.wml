@@ -5,7 +5,7 @@
                                  iconStyle="{{ _isRecording ? 'danger' : 'secondary' }}"
                                  viewMode="link"
                                  tooltip="{{ _isRecording ? 'Stop recording' : 'Start recording' }}"
-                                 attr:class="Profiler__headElement"
+                                 attr:class="devtools-DependencyWatcher__headElement"
                                  on:click="__toggleRecording()"/>
     </ws:headTemplate>
     <ws:content>

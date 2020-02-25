@@ -37,7 +37,7 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ]);
@@ -49,7 +49,7 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ];
@@ -68,14 +68,14 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   },
                   {
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
-                     class: 'Elements__node_template',
+                     class: 'devtools-Elements__node_template',
                      depth: 1
                   }
                ]);
@@ -87,21 +87,21 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   },
                   {
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
-                     class: 'Elements__node_template',
+                     class: 'devtools-Elements__node_template',
                      depth: 1
                   },
                   {
                      id: 2,
                      name: 'Test2',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ];
@@ -120,28 +120,28 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   },
                   {
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
-                     class: 'Elements__node_template',
+                     class: 'devtools-Elements__node_template',
                      depth: 1
                   },
                   {
                      id: 3,
                      name: 'Test3',
                      parentId: 0,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 1
                   },
                   {
                      id: 2,
                      name: 'Test2',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ]);
@@ -153,7 +153,7 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ];
@@ -174,7 +174,7 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ]);
@@ -188,7 +188,7 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ];
@@ -205,7 +205,7 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ];
@@ -218,7 +218,7 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ]);
@@ -232,35 +232,35 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   },
                   {
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
-                     class: 'Elements__node_template',
+                     class: 'devtools-Elements__node_template',
                      depth: 1
                   },
                   {
                      id: 3,
                      name: 'Test3',
                      parentId: 0,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 1
                   },
                   {
                      id: 4,
                      name: 'Test4',
                      parentId: 3,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 2
                   },
                   {
                      id: 2,
                      name: 'Test2',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ];
@@ -273,35 +273,35 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   },
                   {
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
-                     class: 'Elements__node_template',
+                     class: 'devtools-Elements__node_template',
                      depth: 1
                   },
                   {
                      id: 3,
                      name: 'Test3',
                      parentId: 0,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 1
                   },
                   {
                      id: 4,
                      name: 'Test4',
                      parentId: 3,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 2
                   },
                   {
                      id: 2,
                      name: 'Test2',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ]);
@@ -313,35 +313,35 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   },
                   {
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
-                     class: 'Elements__node_template',
+                     class: 'devtools-Elements__node_template',
                      depth: 1
                   },
                   {
                      id: 3,
                      name: 'Test3',
                      parentId: 0,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 1
                   },
                   {
                      id: 4,
                      name: 'Test4',
                      parentId: 3,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 2
                   },
                   {
                      id: 2,
                      name: 'Test2',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ];
@@ -354,35 +354,35 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   },
                   {
                      id: 3,
                      name: 'Test3',
                      parentId: 0,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 1
                   },
                   {
                      id: 4,
                      name: 'Test4',
                      parentId: 3,
-                     class: 'Elements__node_hoc',
+                     class: 'devtools-Elements__node_hoc',
                      depth: 2
                   },
                   {
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
-                     class: 'Elements__node_template',
+                     class: 'devtools-Elements__node_template',
                      depth: 1
                   },
                   {
                      id: 2,
                      name: 'Test2',
                      parentId: undefined,
-                     class: 'Elements__node_control',
+                     class: 'devtools-Elements__node_control',
                      depth: 0
                   }
                ]);

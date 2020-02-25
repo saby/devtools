@@ -1,5 +1,5 @@
-<div attr:class="Details">
-   <div attr:class="Details__buttons">
+<div attr:class="devtools-Details devtools-Details_theme_{{ _options.theme }} ws-flexbox ws-flex-column">
+   <div attr:class="ws-flexbox ws-flex-column ws-flex-shrink-0">
       <Controls.buttons:Button caption="View template"
                                viewMode="link"
                                on:click="_viewTemplate()" />

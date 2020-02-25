@@ -2,7 +2,6 @@ import { Control, TemplateFunction } from 'UI/Base';
 import template = require('wml!Elements/_Details/Pane/templates/StringTemplate');
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
-import 'css!Elements/elements';
 
 interface IOptions extends ITemplateOptions {
    value: string;
@@ -21,6 +20,8 @@ class StringTemplate extends Control {
          }
       );
    }
+
+   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

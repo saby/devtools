@@ -24,7 +24,7 @@
             </ws:search>
             <ws:content>
                 <Controls.scroll:Container
-                    attr:class="DependencyFilter__FilePanel_scroll"
+                    attr:class="devtools-DependencyFilter__FilePanel_scroll"
                 >
                     <DependencyWatcher.file:List
                         scope="{{ _options }}"

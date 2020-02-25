@@ -1,37 +1,41 @@
-.Breadcrumbs {
-   display: flex;
+.devtools-Breadcrumbs {
    white-space: nowrap;
-   border-top: 1px solid #ccc;
-   background: #fff;
    width: 100%;
    overflow-x: auto;
-   flex-shrink: 0;
    /*
    TODO: пока нет горизонтального скролл контейнера делаем нечто очень похожее на него
    сделают по этой задаче: https://online.sbis.ru/opendoc.html?guid=f6171d86-08f1-4503-b8fc-b0b82ec528b7
- */
+   */
    &::-webkit-scrollbar {
       height: 8px;
    }
    &::-webkit-scrollbar-thumb {
       height: 200%;
       border-radius: 5px;
-      background-color: rgba(0, 0, 0, 0.1);
-   }
-   &::-webkit-scrollbar-thumb:hover {
-      background-color: rgba(0, 0, 0, 0.15);
    }
 }
 
-.Breadcrumbs__crumb {
+.devtools-Breadcrumbs_theme_@{themeName} {
+   border-top: @border-thickness solid @color_separator;
+   background: @background-color;
+
+   &::-webkit-scrollbar-thumb {
+      background-color: @bg_Scrollbar-thumb_normal;
+   }
+   &::-webkit-scrollbar-thumb:hover {
+      background-color: @bg_Scrollbar-thumb_active_normal;
+   }
+}
+
+.devtools-Breadcrumbs__crumb {
    padding: 0 6px;
    cursor: pointer;
 }
 
-.Breadcrumbs__crumb:hover {
-   background: #F0F5FB;
+.devtools-Breadcrumbs__crumb_theme_@{themeName}:hover {
+   background: @hover_background-color;
 }
 
-.Breadcrumbs__crumb_selected {
-   background: #e4e4e4;
+.devtools-Breadcrumbs__crumb_selected_theme_@{themeName} {
+   background: @background-color_selected_breadCrumbs;
 }

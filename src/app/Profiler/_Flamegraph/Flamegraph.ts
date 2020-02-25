@@ -1,9 +1,8 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
-import 'css!Profiler/profiler';
 import { getWidth } from './Utils';
-import { formatTime, getBackgroundColorBasedOnReason } from '../_utils/Utils';
+import { formatTime, getBackgroundClassBasedOnReason } from '../_utils/Utils';
 import template = require('wml!Profiler/_Flamegraph/Flamegraph');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { WARNING_NAMES } from 'Profiler/_Warning/const';
@@ -29,6 +28,7 @@ interface INodeItemData {
    leftOffset: number;
    width: number;
    isSelected: boolean;
+   class: string;
    warnings?: WARNING_NAMES[];
    parentId?: IFrontendControlNode['parentId'];
    caption?: string;
@@ -267,10 +267,11 @@ function getItemDataForDepth(
             parentId,
             leftOffset,
             width,
-            style: `width: ${width}px; background: ${getBackgroundColorBasedOnReason(
+            style: `width: ${width}px; left: ${leftOffset}px; top: ${topOffset}px;`,
+            class: getBackgroundClassBasedOnReason(
                updateReason,
                hasChangesInSubtree
-            )}; left: ${leftOffset}px; top: ${topOffset}px;`,
+            ),
             tooltip: getTooltip(name, selfDuration, actualDuration, didRender),
             caption: getCaption(
                width,
@@ -501,6 +502,8 @@ class Flamegraph extends Control<IOptions> {
       this._shouldRestoreFocus = true;
       this._notify('markedKeyChanged', [id]);
    }
+
+   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

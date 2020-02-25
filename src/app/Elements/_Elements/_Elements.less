@@ -1,7 +1,5 @@
-.Elements__treeContainer {
+.devtools-Elements__treeContainer {
    width: 100%;
-   display: flex;
-   flex-direction: column;
    overflow-x: auto;
 }
 
@@ -9,7 +7,7 @@
 TODO: пока нет горизонтального скролл контейнера делаем нечто очень похожее на него
 сделают по этой задаче: https://online.sbis.ru/opendoc.html?guid=f6171d86-08f1-4503-b8fc-b0b82ec528b7
  */
-.Elements__treeContainer {
+.devtools-Elements__treeContainer {
    .controls-Scroll {
       overflow-x: auto;
    }
@@ -24,57 +22,67 @@ TODO: пока нет горизонтального скролл контейн
       &::-webkit-scrollbar-thumb {
          height: 200%;
          border-radius: 5px;
-         background-color: rgba(0, 0, 0, 0.1);
-      }
-      &::-webkit-scrollbar-thumb:hover {
-         background-color: rgba(0, 0, 0, 0.15);
       }
    }
 }
 
-.Elements__treeWrapper {
+.devtools-Elements__treeContainer_theme_@{themeName} {
+   .controls-Scroll__content_hideNativeScrollbar {
+      &::-webkit-scrollbar-thumb {
+         background-color: @bg_Scrollbar-thumb_normal;
+      }
+      &::-webkit-scrollbar-thumb:hover {
+         background-color: @bg_Scrollbar-thumb_active_normal;
+      }
+   }
+}
+
+.devtools-Elements__treeWrapper {
    height: 100%;
 }
 
-.Elements__tree {
+.devtools-Elements__tree {
    width: min-content;
    min-width: 100%;
 }
 
-.Elements__node {
+.devtools-Elements__node {
    cursor: pointer;
    white-space: nowrap;
 }
 
-.Elements__node:hover {
-   background-color: rgba(0, 190, 210, 0.1);
+.devtools-Elements__node_theme_@{themeName}:hover {
+   background-color: @hover_background-color_list;
 }
 
-.Elements__node_control {
-   color: #D94700;
+.devtools-Elements__node_control_theme_@{themeName} {
+   color: @color_control_elements;
 }
 
-.Elements__node_hoc {
-   color: #313E78;
+.devtools-Elements__node_hoc_theme_@{themeName} {
+   color: @color_hoc_elements;
 }
 
-.Elements__node_template {
-   color: #555;
+.devtools-Elements__node_template_theme_@{themeName} {
+   color: @color_template_elements;
 }
 
-.Elements__node_selected {
-   background-color: rgba(0, 190, 210, 0.2);
+.devtools-Elements__node_selected_theme_@{themeName} {
+   background-color: @background-color_selected_elements;
 }
 
-.Elements__headElement {
+.devtools-Elements__headElement {
    margin-right: 6px;
 }
 
-.Elements__node_childless {
+.devtools-Elements__node_childless {
    padding-left: 16px;
 }
 
-.Elements__hint {
-   color: #999;
+.devtools-Elements__hint {
    font-size: 13px;
+}
+
+.devtools-Elements__hint_theme_@{themeName} {
+   color: @unaccented_color;
 }

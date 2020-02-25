@@ -2,7 +2,6 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import template = require('wml!Elements/_Breadcrumbs/Breadcrumbs');
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
-import 'css!Elements/elements';
 
 interface IOptions extends IControlOptions {
    items: Array<{
@@ -65,6 +64,8 @@ class Breadcrumbs extends Control<IOptions> {
          });
       }
    }
+
+   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
