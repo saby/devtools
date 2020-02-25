@@ -1,4 +1,4 @@
-import { Control } from 'UI/Base';
+import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import template = require('wml!Devtool/Page/Page');
 import { Memory } from 'Types/source';
 import { ContentChannel } from 'Devtool/Event/ContentChannel';
@@ -9,7 +9,7 @@ import { Store } from 'Elements/elements';
 const logger = new ConsoleLogger('Wasaby');
 logger.log('main component loaded');
 class Extension extends Control {
-   protected _template: Function = template;
+   protected _template: TemplateFunction = template;
    protected _activeTab: string = 'Elements';
    protected _tabsSource: Memory = new Memory({
       keyProperty: 'id',
@@ -41,9 +41,8 @@ class Extension extends Control {
    protected _store?: Store;
    protected _tabChanged: boolean = false;
    protected _rootKey: number = 0;
-   protected _currentTheme: string = 'devtools:dark'; // TODO: брать из опций, как-то резолвить тему перед этим...
-   constructor() {
-      super();
+   constructor(options: IControlOptions) {
+      super(options);
       logger.log('сообщаем странице об активности вкладки');
       this._channel.dispatch(GlobalMessages.devtoolsInitialized);
       this._channel.addListener(GlobalMessages.wasabyInitialized, () => {
@@ -78,7 +77,7 @@ class Extension extends Control {
       }
    }
 
-   private __openOptionsPage(): void {
+   protected _openOptionsPage(): void {
       chrome.runtime.openOptionsPage();
    }
 

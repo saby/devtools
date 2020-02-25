@@ -3,9 +3,13 @@
 }
 
 .devtools-Browser__head {
-   border-bottom: 1px solid #ccc;
    height: 31px;
    padding-left: 6px;
+}
+
+.devtools-Browser__head_theme_@{themeName} {
+   border-bottom: @border-thickness solid @color_separator;
+   background-color: @background-color_toolbar;
 }
 
 .devtools-Browser__content {

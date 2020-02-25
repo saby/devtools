@@ -18,7 +18,6 @@ define([
          sandbox.restore();
       });
 
-
       describe('_afterMount', function() {
          it('stores container width and calls _updateGraph', function() {
             const options = {};
@@ -334,8 +333,8 @@ define([
                      parentId: undefined,
                      leftOffset: 0,
                      width: 200,
-                     style:
-                        'width: 200px; background: #baf7c8; left: 0px; top: 0px;',
+                     style: 'width: 200px; left: 0px; top: 0px;',
+                     class: 'devtools-reason_background_forceUpdated',
                      tooltip: 'Application 50.00ms of 50.00ms',
                      caption: 'Application (50.00ms)',
                      isSelected: false,
@@ -348,8 +347,8 @@ define([
                      parentId: '0',
                      leftOffset: 0,
                      width: 20,
-                     style:
-                        'width: 20px; background: #e2e2e2; left: 0px; top: 20px;',
+                     style: 'width: 20px; left: 0px; top: 20px;',
+                     class: 'devtools-reason_background_unchanged',
                      tooltip: 'Text',
                      caption: '',
                      isSelected: false,
@@ -360,8 +359,8 @@ define([
                      parentId: '0',
                      leftOffset: 20,
                      width: 80,
-                     style:
-                        'width: 80px; background: #e6d174; left: 20px; top: 20px;',
+                     style: 'width: 80px; left: 20px; top: 20px;',
+                     class: 'devtools-reason_background_selfUpdated',
                      tooltip: 'List 10.00ms of 40.00ms',
                      caption: 'List',
                      isSelected: false,
@@ -374,8 +373,8 @@ define([
                      parentId: '2',
                      leftOffset: 20,
                      width: 20,
-                     style:
-                        'width: 20px; background: #b3e6e6; left: 20px; top: 40px;',
+                     style: 'width: 20px; left: 20px; top: 40px;',
+                     class: 'devtools-reason_background_parentUpdated',
                      tooltip: 'ListItem 10.00ms of 10.00ms',
                      caption: '',
                      isSelected: false,
@@ -386,8 +385,8 @@ define([
                      parentId: '2',
                      leftOffset: 40,
                      width: 60,
-                     style:
-                        'width: 60px; background: #b3e6e6; left: 40px; top: 40px;',
+                     style: 'width: 60px; left: 40px; top: 40px;',
+                     class: 'devtools-reason_background_parentUpdated',
                      tooltip: 'ListItem 10.00ms of 10.00ms',
                      caption: 'ListItem',
                      isSelected: false,
@@ -400,8 +399,8 @@ define([
                      parentId: '4',
                      leftOffset: 40,
                      width: 40,
-                     style:
-                        'width: 40px; background: #e2e2e2; left: 40px; top: 60px;',
+                     style: 'width: 40px; left: 40px; top: 60px;',
+                     class: 'devtools-reason_background_unchanged',
                      tooltip: 'ContentTemplate',
                      caption: 'ContentTemplate',
                      isSelected: false,
@@ -496,7 +495,8 @@ define([
                      leftOffset: 0,
                      width: 2500,
                      style:
-                        'width: 2500px; background: #baf7c8; left: 0px; top: 0px;',
+                        'width: 2500px; left: 0px; top: 0px;',
+                     class: 'devtools-reason_background_forceUpdated',
                      tooltip: 'Application 50.00ms of 50.00ms',
                      caption: 'Application (50.00ms of 50.00ms)',
                      isSelected: false,
@@ -510,7 +510,8 @@ define([
                      leftOffset: 0,
                      width: 1000,
                      style:
-                        'width: 1000px; background: #e6d174; left: 0px; top: 20px;',
+                        'width: 1000px; left: 0px; top: 20px;',
+                     class: 'devtools-reason_background_selfUpdated',
                      tooltip: 'List 10.00ms of 40.00ms',
                      caption: 'List (10.00ms of 40.00ms)',
                      isSelected: true,
@@ -524,7 +525,8 @@ define([
                      leftOffset: 0,
                      width: 250,
                      style:
-                        'width: 250px; background: #b3e6e6; left: 0px; top: 40px;',
+                        'width: 250px; left: 0px; top: 40px;',
+                     class: 'devtools-reason_background_parentUpdated',
                      tooltip: 'ListItem 10.00ms of 10.00ms',
                      caption: 'ListItem (10.00ms of 10.00ms)',
                      isSelected: false,
@@ -536,7 +538,8 @@ define([
                      leftOffset: 250,
                      width: 750,
                      style:
-                        'width: 750px; background: #b3e6e6; left: 250px; top: 40px;',
+                        'width: 750px; left: 250px; top: 40px;',
+                     class: 'devtools-reason_background_parentUpdated',
                      tooltip: 'ListItem 10.00ms of 10.00ms',
                      caption: 'ListItem (10.00ms of 10.00ms)',
                      isSelected: false,
@@ -550,7 +553,8 @@ define([
                      leftOffset: 250,
                      width: 500,
                      style:
-                        'width: 500px; background: #e2e2e2; left: 250px; top: 60px;',
+                        'width: 500px; left: 250px; top: 60px;',
+                     class: 'devtools-reason_background_unchanged',
                      tooltip: 'ContentTemplate',
                      caption: 'ContentTemplate',
                      isSelected: false,
@@ -609,7 +613,8 @@ define([
                      leftOffset: 0,
                      width: 100,
                      style:
-                        'width: 100px; background: #baf7c8; left: 0px; top: 0px;',
+                        'width: 100px; left: 0px; top: 0px;',
+                     class: 'devtools-reason_background_forceUpdated',
                      tooltip: 'Application 50.00ms of 50.00ms',
                      caption: 'Application',
                      isSelected: false,
@@ -623,7 +628,8 @@ define([
                      leftOffset: 0,
                      width: 46,
                      style:
-                        'width: 46px; background: #e6d174; left: 0px; top: 20px;',
+                        'width: 46px; left: 0px; top: 20px;',
+                     class: 'devtools-reason_background_selfUpdated',
                      tooltip: 'Text 46.00ms of 46.00ms',
                      caption: 'Text',
                      isSelected: false,

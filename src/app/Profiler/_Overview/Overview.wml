@@ -5,7 +5,7 @@
     </div>
 </ws:template>
 
-<div class="devtools-Overview ws-flexbox ws-flex-column">
+<div class="devtools-Overview devtools-Overview_theme-{{ _options.theme }} ws-flexbox ws-flex-column">
     <Controls.heading:Title caption="Synchronization overview"
                             size="s"
                             style="secondary" />

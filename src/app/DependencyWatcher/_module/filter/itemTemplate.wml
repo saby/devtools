@@ -5,7 +5,8 @@
     />
 </ws:template>
 <ws:template name="fileInput">
-    <span style="width:120px">{{ caption }}</span>
+    <span class="controls-text-secondary_theme-{{ _options.theme }}"
+          style="width:120px">{{ caption }}</span>
     <DependencyWatcher._module.filter.file.input
             attr:style="width: 334px"
             bind:textValue="item.textValue"

@@ -126,6 +126,10 @@ const EXTENSION_MODULES = [
     "path": resolve(input.app, "Controls-devtools-theme")
   },
   {
+    "name": "Layout-devtools-theme",
+    "path": resolve(input.app, "Layout-devtools-theme")
+  },
+  {
     "name": "Debugging-devtools-theme",
     "path": resolve(input.app, "Debugging-devtools-theme")
   },
@@ -159,7 +163,7 @@ module.exports = {
   "typescript": true,
   "less": true,
   "contents": true,
-  "themes": true,
+  "themes": ["devtools__light", "devtools__dark"],
   "sources": false,
   "symlinks": false,
   "minimize": minimize,

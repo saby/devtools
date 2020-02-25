@@ -313,74 +313,80 @@ define([
       it('getBackgroundColorBasedOnTiming', function() {
          const getBackgroundColorBasedOnTiming =
             Utils.getBackgroundColorBasedOnTiming;
-         assert.equal(getBackgroundColorBasedOnTiming(0.05), '#baf7c8');
-         assert.equal(getBackgroundColorBasedOnTiming(0.15), '#c4f1ba');
-         assert.equal(getBackgroundColorBasedOnTiming(0.25), '#cdeaac');
-         assert.equal(getBackgroundColorBasedOnTiming(0.35), '#d5e49e');
-         assert.equal(getBackgroundColorBasedOnTiming(0.45), '#dbde90');
-         assert.equal(getBackgroundColorBasedOnTiming(0.58), '#e1d782');
-         assert.equal(getBackgroundColorBasedOnTiming(0.7), '#e6d174');
-         assert.equal(getBackgroundColorBasedOnTiming(0.85), '#ebca66');
-         assert.equal(getBackgroundColorBasedOnTiming(0.95), '#efc457');
+         assert.equal(getBackgroundColorBasedOnTiming(0.05), 0);
+         assert.equal(getBackgroundColorBasedOnTiming(0.15), 1);
+         assert.equal(getBackgroundColorBasedOnTiming(0.25), 2);
+         assert.equal(getBackgroundColorBasedOnTiming(0.35), 3);
+         assert.equal(getBackgroundColorBasedOnTiming(0.45), 4);
+         assert.equal(getBackgroundColorBasedOnTiming(0.58), 5);
+         assert.equal(getBackgroundColorBasedOnTiming(0.7), 6);
+         assert.equal(getBackgroundColorBasedOnTiming(0.85), 7);
+         assert.equal(getBackgroundColorBasedOnTiming(0.95), 8);
       });
 
-      describe('getBackgroundColorBasedOnReason', function() {
-         const getBackgroundColorBasedOnReason =
-            Utils.getBackgroundColorBasedOnReason;
+      describe('getBackgroundClassBasedOnReason', function() {
+         const getBackgroundClassBasedOnReason =
+            Utils.getBackgroundClassBasedOnReason;
          it('should return color for mounted', function() {
-            assert.equal(getBackgroundColorBasedOnReason('mounted'), '#ffab66');
+            assert.equal(
+               getBackgroundClassBasedOnReason('mounted'),
+               'devtools-reason_background_mounted'
+            );
          });
          it('should return color for forceUpdated', function() {
             assert.equal(
-               getBackgroundColorBasedOnReason('forceUpdated'),
-               '#baf7c8'
+               getBackgroundClassBasedOnReason('forceUpdated'),
+               'devtools-reason_background_forceUpdated'
             );
          });
          it('should return color for selfUpdated', function() {
             assert.equal(
-               getBackgroundColorBasedOnReason('selfUpdated'),
-               '#e6d174'
+               getBackgroundClassBasedOnReason('selfUpdated'),
+               'devtools-reason_background_selfUpdated'
             );
          });
          it('should return color for parentUpdated', function() {
             assert.equal(
-               getBackgroundColorBasedOnReason('parentUpdated'),
-               '#b3e6e6'
+               getBackgroundClassBasedOnReason('parentUpdated'),
+               'devtools-reason_background_parentUpdated'
             );
          });
          it('should return color for unchanged', function() {
             assert.equal(
-               getBackgroundColorBasedOnReason('unchanged'),
-               '#e2e2e2'
+               getBackgroundClassBasedOnReason('unchanged'),
+               'devtools-reason_background_unchanged'
             );
          });
          it('should return color for destroyed', function() {
-            assert.equal(getBackgroundColorBasedOnReason('destroyed'), '#000');
+            assert.equal(
+               getBackgroundClassBasedOnReason('destroyed'),
+               'devtools-reason_background_destroyed'
+            );
          });
          it('should return color for element with no changes in the subtree no matter what the updateReason is', function() {
             assert.equal(
-               getBackgroundColorBasedOnReason('mounted', false),
-               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+               getBackgroundClassBasedOnReason('mounted', false),
+               'devtools-reason_background_noChangesInSubtree'
             );
             assert.equal(
-               getBackgroundColorBasedOnReason('forceUpdated', false),
-               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+               getBackgroundClassBasedOnReason('forceUpdated', false),
+               'devtools-reason_background_noChangesInSubtree'
             );
             assert.equal(
-               getBackgroundColorBasedOnReason('selfUpdated', false),
-               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+               getBackgroundClassBasedOnReason('selfUpdated', false),
+               'devtools-reason_background_noChangesInSubtree'
             );
             assert.equal(
-               getBackgroundColorBasedOnReason('parentUpdated', false),
-               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+               getBackgroundClassBasedOnReason('parentUpdated', false),
+               'devtools-reason_background_noChangesInSubtree'
             );
             assert.equal(
-               getBackgroundColorBasedOnReason('unchanged', false),
-               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+               getBackgroundClassBasedOnReason('unchanged', false),
+               'devtools-reason_background_noChangesInSubtree'
             );
             assert.equal(
-               getBackgroundColorBasedOnReason('destroyed', false),
-               'repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px)'
+               getBackgroundClassBasedOnReason('destroyed', false),
+               'devtools-reason_background_noChangesInSubtree'
             );
          });
       });

@@ -22,10 +22,17 @@ TODO: пока нет горизонтального скролл контейн
       &::-webkit-scrollbar-thumb {
          height: 200%;
          border-radius: 5px;
-         background-color: rgba(0, 0, 0, 0.1);
+      }
+   }
+}
+
+.devtools-Elements__treeContainer_theme_@{themeName} {
+   .controls-Scroll__content_hideNativeScrollbar {
+      &::-webkit-scrollbar-thumb {
+         background-color: @bg_Scrollbar-thumb_normal;
       }
       &::-webkit-scrollbar-thumb:hover {
-         background-color: rgba(0, 0, 0, 0.15);
+         background-color: @bg_Scrollbar-thumb_active_normal;
       }
    }
 }
@@ -44,24 +51,24 @@ TODO: пока нет горизонтального скролл контейн
    white-space: nowrap;
 }
 
-.devtools-Elements__node:hover {
-   background-color: rgba(0, 190, 210, 0.1);
+.devtools-Elements__node_theme_@{themeName}:hover {
+   background-color: @hover_background-color_list;
 }
 
-.devtools-Elements__node_control {
-   color: #D94700;
+.devtools-Elements__node_control_theme_@{themeName} {
+   color: @color_control_elements;
 }
 
-.devtools-Elements__node_hoc {
-   color: #313E78;
+.devtools-Elements__node_hoc_theme_@{themeName} {
+   color: @color_hoc_elements;
 }
 
-.devtools-Elements__node_template {
-   color: #555;
+.devtools-Elements__node_template_theme_@{themeName} {
+   color: @color_template_elements;
 }
 
-.devtools-Elements__node_selected {
-   background-color: rgba(0, 190, 210, 0.2);
+.devtools-Elements__node_selected_theme_@{themeName} {
+   background-color: @background-color_selected_elements;
 }
 
 .devtools-Elements__headElement {
@@ -73,6 +80,9 @@ TODO: пока нет горизонтального скролл контейн
 }
 
 .devtools-Elements__hint {
-   color: #999;
    font-size: 13px;
+}
+
+.devtools-Elements__hint_theme_@{themeName} {
+   color: @unaccented_color;
 }

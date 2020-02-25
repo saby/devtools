@@ -61,21 +61,21 @@ define([
                {
                   id: '0',
                   selfDuration: 100,
-                  barColor: '#d5e49e',
+                  barColor: 3,
                   length: 33.33333333333333,
                   updateReason: 'mounted'
                },
                {
                   id: '1',
                   selfDuration: 300,
-                  barColor: '#efc457',
+                  barColor: 8,
                   length: 100,
                   updateReason: 'mounted'
                },
                {
                   id: '3',
                   selfDuration: 200,
-                  barColor: '#e1d782',
+                  barColor: 5,
                   length: 66.66666666666666,
                   updateReason: 'parentUpdated'
                }
@@ -138,14 +138,14 @@ define([
                {
                   id: '1',
                   selfDuration: 300,
-                  barColor: '#efc457',
+                  barColor: 8,
                   length: 100,
                   updateReason: 'mounted'
                },
                {
                   id: '3',
                   selfDuration: 200,
-                  barColor: '#e1d782',
+                  barColor: 5,
                   length: 66.66666666666666,
                   updateReason: 'parentUpdated'
                }
@@ -167,7 +167,7 @@ define([
                {
                   id: '0',
                   selfDuration: 150,
-                  barColor: '#efc457',
+                  barColor: 8,
                   length: 100,
                   updateReason: 'mounted'
                }

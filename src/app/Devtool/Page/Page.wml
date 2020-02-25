@@ -1,4 +1,4 @@
-<Devtool.Page.Application theme="{{ _currentTheme }}">
+<Devtool.Page.Application attr:class="{{ _options.theme }}">
 <div
     class="devtools-Devtool_Page"
     attr:key="{{ _rootKey }}"
@@ -8,7 +8,7 @@
                 bind:selectedKey="_activeTab"
                 keyProperty="id"
                 source="{{ _tabsSource }}"
-                attr:class="devtools-Devtool_Page__tabButtons"
+                attr:class="devtools-Devtool_Page__tabButtons devtools-Devtool_Page__tabButtons_theme_{{ _options.theme }}"
         >
             <ws:tabSpaceTemplate>
                 <Controls.buttons:Button icon="icon-Settings"
@@ -16,7 +16,7 @@
                                          viewMode="link"
                                          iconSize="s"
                                          attr:class="devtools-Devtool_Page__settings"
-                                         on:click="__openOptionsPage()" />
+                                         on:click="_openOptionsPage()" />
             </ws:tabSpaceTemplate>
         </Controls.tabs:Buttons>
 

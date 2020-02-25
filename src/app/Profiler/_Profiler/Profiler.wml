@@ -19,14 +19,14 @@
                                  viewMode="link"
                                  readOnly="{{ _isProfiling || !_snapshot }}"
                                  tooltip="Save profile"
-                                 attr:class="Profiler__headElement"
+                                 attr:class="devtools-Profiler__headElement"
                                  on:click="_exportToJSON()"/>
         <Controls.buttons:Button icon="icon-UnloadNew"
                                  iconSize="s"
                                  viewMode="link"
                                  readOnly="{{ _isProfiling }}"
                                  tooltip="Load profile"
-                                 attr:class="Profiler__headElement"
+                                 attr:class="devtools-Profiler__headElement"
                                  on:click="_importFromJSON()"/>
         <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
             <Controls.toggle:RadioGroup source="{{ _radioGroupSource }}"
@@ -52,7 +52,7 @@
                 dragText="Drop profile here"
                 dropText="Drop profile here"
                 extensions="{{ _supportedFileExtensions }}"
-                elementClass="ws-flexbox Profiler__content">
+                elementClass="ws-flexbox devtools-Profiler__content">
             <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
                 <Controls.masterDetail:Base attr:class="ws-flex-grow-1" masterWidth="{{300}}">
                     <ws:master>

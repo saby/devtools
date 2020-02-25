@@ -3,8 +3,8 @@
     <ws:if data="{{ _options.length }}">
         <div class="ws-flex-grow-1">
             <div title="{{ _formattedValue }}"
-                 class="devtools-TimeRender__bar"
-                 attr:style="width: {{_options.length}}%; background: {{ _options.barColor }}"></div>
+                 class="devtools-TimeRender__bar devtools-TimeRender__bar_backgroundColor_{{ _options.barColor }}_theme_{{ _options.theme }}"
+                 attr:style="width: {{_options.length}}%;"></div>
         </div>
     </ws:if>
 </div>

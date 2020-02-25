@@ -9,7 +9,10 @@
    position: absolute;
    box-sizing: border-box;
    transition: width ease-in-out 500ms;
-   border-right: 1px solid white;
+}
+
+.devtools-Flamegraph__node_theme_@{themeName} {
+   border-right: @border-thickness solid @color_separator;
 }
 
 .devtools-Flamegraph__node_withCaption {
@@ -18,8 +21,11 @@
 
 .devtools-Flamegraph__node_selected {
    padding: 0 4px;
-   outline: 2px solid rgb(77, 144, 254);
    outline-offset: -2px;
+}
+
+.devtools-Flamegraph__node_selected_theme_@{themeName} {
+   outline: 2px solid @border-color_Flamegraph_focus;
 }
 
 .devtools-Flamegraph__node_warning {
@@ -29,7 +35,6 @@
    top: 0;
    border-style: solid;
    border-width: 0 8px 8px 0;
-   border-right-color: #D04D4D;
    border-top-color: transparent;
    border-left-color: transparent;
    border-bottom-color: transparent;
@@ -37,4 +42,8 @@
    height: 8px;
    cursor: pointer;
    box-sizing: border-box;
+}
+
+.devtools-Flamegraph__node_warning_theme_@{themeName} {
+   border-right-color: @danger_color;
 }

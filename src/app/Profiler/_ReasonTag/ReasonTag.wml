@@ -1,2 +1,1 @@
-<div attr:class="devtools-ReasonTag ws-inline-flexbox"
-     attr:style="background-color: {{ _getColor(_options.updateReason) }};"></div>
+<div attr:class="devtools-ReasonTag ws-inline-flexbox {{ _getClass(_options.updateReason) + '_theme_' + _options.theme }}"></div>

@@ -1,4 +1,4 @@
-<div class="devtools-CommitDetails ws-flexbox ws-flex-column">
+<div class="devtools-CommitDetails devtools-CommitDetails_theme_{{ _options.theme }} ws-flexbox ws-flex-column">
     <ws:if data="{{ _options.updateReason === 'unchanged' }}">
         <div>This control didn't re-render during this synchronization.</div>
     </ws:if>

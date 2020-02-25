@@ -2,9 +2,10 @@
    height: 100%;
 }
 
-.devtools-Pane__header {
-   border-top: 1px solid #ccc;
-   border-bottom: 1px solid #ccc;
+.devtools-Pane__header_theme_@{themeName} {
+   background-color: @background-color_toolbar;
+   border-top: @border-thickness solid @color_separator;
+   border-bottom: @border-thickness solid @color_separator;
 }
 
 .devtools-Pane__listWrapper {
@@ -12,5 +13,9 @@
 }
 
 .devtools-Pane__searchInput {
-   margin: 6px 6px 0;
+   margin: 6px 6px;
+}
+
+.devtools-Pane__searchInputWrapper_theme_@{themeName} {
+   background-color: @background-color_toolbar;
 }

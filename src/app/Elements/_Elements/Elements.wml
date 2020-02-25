@@ -19,7 +19,7 @@
     </ws:headTemplate>
    <ws:content>
       <ws:if data="{{_model.getVisibleItems().length > 0}}">
-         <div attr:class="devtools-Elements__treeContainer ws-flexbox ws-flex-column"
+         <div attr:class="devtools-Elements__treeContainer devtools-Elements__treeContainer_theme_{{ _options.theme }} ws-flexbox ws-flex-column"
               on:keydown="_onListKeyDown()">
             <!--TODO: удалить task1178703223 после https://online.sbis.ru/opendoc.html?guid=bcc4b6be-7513-4f3d-8f26-eb27512d0a28 -->
             <Controls.scroll:Container attr:class="devtools-Elements__treeWrapper"

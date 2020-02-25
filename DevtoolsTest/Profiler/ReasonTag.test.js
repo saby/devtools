@@ -20,22 +20,40 @@ define([
 
       describe('_getColor', function() {
          it('should return color for mounted', function() {
-            assert.equal(instance._getColor('mounted'), '#ffab66');
+            assert.equal(
+               instance._getClass('mounted'),
+               'devtools-reason_background_mounted'
+            );
          });
          it('should return color for forceUpdated', function() {
-            assert.equal(instance._getColor('forceUpdated'), '#baf7c8');
+            assert.equal(
+               instance._getClass('forceUpdated'),
+               'devtools-reason_background_forceUpdated'
+            );
          });
          it('should return color for selfUpdated', function() {
-            assert.equal(instance._getColor('selfUpdated'), '#e6d174');
+            assert.equal(
+               instance._getClass('selfUpdated'),
+               'devtools-reason_background_selfUpdated'
+            );
          });
          it('should return color for parentUpdated', function() {
-            assert.equal(instance._getColor('parentUpdated'), '#b3e6e6');
+            assert.equal(
+               instance._getClass('parentUpdated'),
+               'devtools-reason_background_parentUpdated'
+            );
          });
          it('should return color for unchanged', function() {
-            assert.equal(instance._getColor('unchanged'), '#e2e2e2');
+            assert.equal(
+               instance._getClass('unchanged'),
+               'devtools-reason_background_unchanged'
+            );
          });
          it('should return color for destroyed', function() {
-            assert.equal(instance._getColor('destroyed'), '#000');
+            assert.equal(
+               instance._getClass('destroyed'),
+               'devtools-reason_background_destroyed'
+            );
          });
       });
 
