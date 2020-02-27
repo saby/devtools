@@ -131,6 +131,21 @@ export function findControlByDomNode(
    return;
 }
 
+function findControlNodeByInstance(
+   instance: IControlNode['instance'],
+   domToIds: Agent['domToIds'],
+   elements: Agent['elements']
+): IBackendControlNode | void {
+   const container = instance._container[0] ? instance._container[0] : instance._container;
+   const nodes = domToIds.get(container) as Array<IBackendControlNode['id']>;
+   for (let i = 0; i < nodes.length; i++) {
+      const currentNode = elements.get(nodes[i]);
+      if (currentNode && currentNode.instance === instance) {
+         return currentNode;
+      }
+   }
+}
+
 const EVENT_NAME_OFFSET = 3;
 
 /**
@@ -184,7 +199,11 @@ export function getEvents(
                function: userHandler ? userHandler : handler.fn,
                arguments: handler.args,
                controlNode: needControlNode
-                  ? findControlByDomNode(handler.fn.control._container, domToIds, elements)
+                  ? findControlNodeByInstance(
+                       handler.fn.control,
+                       domToIds,
+                       elements
+                    )
                   : undefined
             };
          });

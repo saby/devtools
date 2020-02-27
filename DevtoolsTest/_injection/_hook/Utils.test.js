@@ -351,7 +351,7 @@ define([
                instance: control
             };
             elements.set(0, controlNode);
-            domToIds.set(container, [0]);
+            domToIds.set(container, [0, 1]);
 
             assert.deepEqual(Utils.getEvents(elements, domToIds, 0, true), {
                valueChanged: [
@@ -364,6 +364,58 @@ define([
                      function: secondHandler,
                      arguments: [],
                      controlNode
+                  }
+               ]
+            });
+         });
+
+         it('should find the right control node (handler.control === node.instance)', function() {
+            const elements = new Map();
+            const domToIds = new WeakMap();
+            const container = document.createElement('div');
+            const onValueChanged = sandbox.stub();
+            const control = {
+               onValueChanged,
+               _container: container
+            };
+            container.eventProperties = {
+               'on:valueChanged': [
+                  {
+                     fn: {
+                        control
+                     },
+                     value: 'onValueChanged',
+                     args: ['1']
+                  }
+               ]
+            };
+            const firstControlNode = {
+               container
+            };
+            const secondControlNode = {
+               container,
+               instance: {}
+            };
+            const thirdControlNode = {
+               container,
+               instance: control
+            };
+            const fourthControlNode = {
+               container,
+               instance: control
+            };
+            elements.set(0, firstControlNode);
+            elements.set(1, secondControlNode);
+            elements.set(2, thirdControlNode);
+            elements.set(3, fourthControlNode);
+            domToIds.set(container, [0, 1, 2, 3]);
+
+            assert.deepEqual(Utils.getEvents(elements, domToIds, 2, true), {
+               valueChanged: [
+                  {
+                     function: onValueChanged,
+                     arguments: ['1'],
+                     controlNode: thirdControlNode
                   }
                ]
             });
