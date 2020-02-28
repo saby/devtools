@@ -3330,6 +3330,59 @@ define([
 
             assert.deepEqual(instance.domToIds.get(document.body), [0, 2, 1]);
          });
+
+         it('should remove dead controls (and their children) even if remove was not called for them', function() {
+            stubWasabyDevHook();
+            sandbox
+               .stub(guid, 'guid')
+               .returns('90ba6e97-ed16-4853-a635-ea4c6a929162');
+            instance.rootStack.push(0);
+            sandbox.stub(instance.channel, 'dispatch');
+
+            instance.elements.set(0, {
+               id: 0,
+               selfDuration: 15,
+               treeDuration: 10
+            });
+            instance.elements.set(1, {
+               id: 1,
+               parentId: 0,
+               selfDuration: 4,
+               treeDuration: 2,
+               container: document.createElement('div')
+            });
+            instance.elements.set(2, {
+               id: 2,
+               selfDuration: 2,
+               treeDuration: 0,
+               container: document.body
+            });
+
+            instance.changedRoots.set(0, new Map());
+            // setup end
+
+            instance.onEndSync(0);
+
+            assert.deepEqual(
+               instance.elements,
+               new Map([
+                  [
+                     2,
+                     {
+                        id: 2,
+                        selfDuration: 2,
+                        treeDuration: 0,
+                        container: document.body
+                     }
+                  ]
+               ])
+            );
+            sinon.assert.notCalled(window.__WASABY_DEV_HOOK__.pushMessage);
+            sinon.assert.notCalled(instance.channel.dispatch);
+
+            // cleanup
+            delete window.__WASABY_DEV_HOOK__;
+         });
       });
 
       describe('selectByDomNode', function() {
