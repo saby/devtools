@@ -18,28 +18,43 @@ function createPanelIfNeeded(): void {
                'devtool/app-index.html',
                (panel: chrome.devtools.panels.ExtensionPanel): void => {
                   panelCreated = true;
-                  let elementsPanel: Window['elementsPanel'];
+                  let elementsPanel: Window['elementsPanel'] | undefined;
                   let loadInterval: number;
+                  let panelVisible = false;
+
+                  function addLoadInterval(): void {
+                     loadInterval = window.setInterval(() => {
+                        if (window.elementsPanel) {
+                           elementsPanel = window.elementsPanel;
+                           elementsPanel.panelShownCallback();
+                           window.clearInterval(loadInterval);
+                        }
+                     }, WASABY_INIT_TIMEOUT);
+                  }
+
                   panel.onShown.addListener((window) => {
+                     panelVisible = true;
                      if (window.elementsPanel) {
                         elementsPanel = window.elementsPanel;
                         elementsPanel.panelShownCallback();
                      } else {
-                        loadInterval = window.setInterval(() => {
-                           if (window.elementsPanel) {
-                              elementsPanel = window.elementsPanel;
-                              elementsPanel.panelShownCallback();
-                              window.clearInterval(loadInterval);
-                           }
-                        }, WASABY_INIT_TIMEOUT);
+                        addLoadInterval();
                      }
                   });
                   panel.onHidden.addListener(() => {
+                     panelVisible = false;
                      if (elementsPanel) {
                         elementsPanel.panelHiddenCallback();
                      }
                      if (loadInterval) {
                         window.clearInterval(loadInterval);
+                     }
+                  });
+
+                  chrome.devtools.network.onNavigated.addListener(() => {
+                     elementsPanel = undefined;
+                     if (panelVisible) {
+                        addLoadInterval();
                      }
                   });
                }

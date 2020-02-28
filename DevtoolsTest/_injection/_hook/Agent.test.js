@@ -180,6 +180,31 @@ define([
                   delete window.__WASABY_DEV_HOOK__;
                });
             });
+
+            it('should not send elements to devtools', function() {
+               stubWasabyDevHook();
+               sandbox.stub(instance.channel, 'dispatch');
+               instance.elements.set(0, {
+                  id: 0,
+                  name: 'Controls/Application',
+                  instance: {},
+                  options: {
+                     content: {}
+                  }
+               });
+               instance.isDevtoolsOpened = true;
+
+               postMessage('devtoolsInitialized');
+
+               return waitForMessageHandler(() => {
+                  assert.isTrue(instance.isDevtoolsOpened);
+                  sinon.assert.notCalled(window.__WASABY_DEV_HOOK__.pushMessage);
+                  sinon.assert.notCalled(instance.channel.dispatch);
+
+                  // cleanup
+                  delete window.__WASABY_DEV_HOOK__;
+               });
+            });
          });
 
          describe('inspectElement', function() {
