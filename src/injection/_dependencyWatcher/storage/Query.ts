@@ -25,7 +25,7 @@ export abstract class Query<TItem extends IId, TFilter extends object> {
       const filteredItems = applyWhere(items, where, this._getFilters());
       const sortedItems = applySort(filteredItems, sortBy, this._getSorting());
       const resultKeys = sortedItems.map(({ id }: TItem) => id);
-      return applyPaging(resultKeys, offset, limit as number);
+      return applyPaging(resultKeys, offset, limit);
    }
    protected abstract _getItems(keys?: number[]): TItem[];
    protected abstract _getFilters(): Record<
