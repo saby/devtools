@@ -11,6 +11,7 @@ const NAME_INDEX = 2;
 const CONTROL_TYPE_INDEX = 3;
 const PARENT_ID_INDEX = 4;
 const REORDER_ARGS_OFFSET = 2;
+const POLLING_INTERVAL = 1000;
 
 export function applyOperation(
    elements: Store['_elements'],
@@ -18,7 +19,13 @@ export function applyOperation(
 ): void {
    switch (args[0]) {
       case OperationType.CREATE:
-         addNode(elements, args[1], args[NAME_INDEX], args[CONTROL_TYPE_INDEX], args[PARENT_ID_INDEX]);
+         addNode(
+            elements,
+            args[1],
+            args[NAME_INDEX],
+            args[CONTROL_TYPE_INDEX],
+            args[PARENT_ID_INDEX]
+         );
          break;
       case OperationType.DELETE:
          removeNode(elements, args[1]);
@@ -92,6 +99,25 @@ class Store {
       if (state !== this._devtoolsOpened) {
          this._devtoolsOpened = state;
          this._channel.dispatch('devtoolsInitialized');
+
+         /**
+          * Store gets recreated when a user navigates to another page.
+          * Due to lazy initialization, Store can ask for items before the Agent was initialized.
+          * So, we should poll devtools until the first operation comes in, to ensure that the Agent has received the message.
+          */
+         let pollingInterval: number | undefined;
+         const operationListener = () => {
+            this._channel.removeListener('operation', operationListener);
+            if (pollingInterval) {
+               window.clearInterval(pollingInterval);
+            }
+         };
+
+         this._channel.addListener('operation', operationListener);
+
+         pollingInterval = window.setInterval(() => {
+            this._channel.dispatch('devtoolsInitialized');
+         }, POLLING_INTERVAL);
       }
    }
 }

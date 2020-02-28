@@ -2,12 +2,28 @@ define([
    'DevtoolsTest/mockChrome',
    'Elements/_store/Store',
    'Devtool/Event/ContentChannel',
-   'Extension/Plugins/Elements/const'
-], function(mockChrome, Store_1, ContentChannel, elementsConsts) {
+   'Extension/Plugins/Elements/const',
+   'DevtoolsTest/getJSDOM'
+], function(mockChrome, Store_1, ContentChannel, elementsConsts, getJSDOM) {
    let sandbox;
    const { default: Store, applyOperation } = Store_1;
+   const needJSDOM = typeof window === 'undefined';
 
    describe('Elements/_store/Store', function() {
+      before(async function() {
+         if (needJSDOM) {
+            const { JSDOM } = await getJSDOM();
+            const dom = new JSDOM('');
+            global.window = dom.window;
+         }
+      });
+
+      after(function() {
+         if (needJSDOM) {
+            delete global.window;
+         }
+      });
+
       beforeEach(function() {
          sandbox = sinon.createSandbox();
       });
@@ -490,15 +506,40 @@ define([
             assert.isTrue(stub.notCalled);
          });
 
-         it('should dispatch devtoolsInitialized event and change state to _devtoolsOpened', function() {
+         it('should dispatch devtoolsInitialized event and change state to _devtoolsOpened, then dispatch devtoolsInitialized event every second until the first operation', function() {
+            const clock = sinon.useFakeTimers();
             const instance = new Store();
             instance._devtoolsOpened = false;
-            const stub = sandbox.stub(instance._channel, 'dispatch');
+            let listener;
+            sandbox.stub(instance._channel, 'addListener').callsFake((eventName, handler) => {
+               assert.equal(eventName, 'operation');
+               listener = handler;
+            });
+            sandbox.stub(instance._channel, 'removeListener').callsFake((eventName, handler) => {
+               assert.equal(eventName, 'operation');
+               assert.equal(handler, listener);
+               listener = undefined;
+            });
+            sandbox.stub(instance._channel, 'dispatch');
 
             instance.toggleDevtoolsOpened(true);
 
             assert.isTrue(instance._devtoolsOpened);
-            assert.isTrue(stub.calledOnceWithExactly('devtoolsInitialized'));
+            sinon.assert.calledOnce(instance._channel.dispatch);
+
+            clock.tick(1000);
+            sinon.assert.calledTwice(instance._channel.dispatch);
+            clock.tick(1000);
+            sinon.assert.calledThrice(instance._channel.dispatch);
+
+            listener();
+
+            clock.tick(1000);
+            sinon.assert.calledThrice(instance._channel.dispatch);
+            sinon.assert.alwaysCalledWithExactly(instance._channel.dispatch, 'devtoolsInitialized');
+
+            // cleanup
+            clock.restore();
          });
       });
    });

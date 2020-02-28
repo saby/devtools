@@ -1,13 +1,13 @@
 <Devtool.Layout.Browser>
     <ws:headTemplate>
-        <Controls.buttons:Button icon="icon-Handwrite1"
-                                 iconSize="s"
-                                 iconStyle="{{ _selectingFromPage ? 'primary' : 'secondary' }}"
-                                 tooltip="Select an element from the page"
-                                 viewMode="link"
-                                 on:click="__toggleSelectElementFromPage()"
-                                 attr:class="devtools-Elements__headElement" />
         <ws:if data="{{_model.getVisibleItems().length > 0}}">
+            <Controls.buttons:Button icon="icon-Handwrite1"
+                                     iconSize="s"
+                                     iconStyle="{{ _selectingFromPage ? 'primary' : 'secondary' }}"
+                                     tooltip="Select an element from the page"
+                                     viewMode="link"
+                                     on:click="__toggleSelectElementFromPage()"
+                                     attr:class="devtools-Elements__headElement" />
             <Controls.search:Input bind:value="_searchValue"
                                    on:valueChanged="__onSearchValueChanged()"
                                    on:keydown="__onSearchKeydown()"

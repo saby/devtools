@@ -220,6 +220,10 @@ class Agent {
    }
 
    private onDevtoolsOpened(): void {
+      if (this.isDevtoolsOpened) {
+         return;
+      }
+
       this.isDevtoolsOpened = true;
 
       this.elements.forEach((node) => {

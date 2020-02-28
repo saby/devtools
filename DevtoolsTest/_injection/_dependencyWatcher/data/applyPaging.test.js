@@ -26,12 +26,12 @@ define(['injection/_dependencyWatcher/data/applyPaging'], function(applyPaging) 
 
          assert.deepEqual(applyPaging(items, 0), {
             data: [0, 1, 2, 3, 4, 5],
-            hasMore: true
+            hasMore: false
          });
 
          assert.deepEqual(applyPaging(items, 2), {
             data: [2, 3, 4, 5],
-            hasMore: true
+            hasMore: false
          });
       });
    });
