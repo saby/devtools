@@ -60,6 +60,9 @@
                                       on:setBreakpoint="_setBreakpoint()"
                                       on:removeBreakpoint="_removeAllBreakpoints()" />
          </ws:if>
+         <ws:else>
+             <div class="devtools-Elements__emptyDetails devtools-Elements__emptyDetails_theme_{{ _options.theme }}"></div>
+         </ws:else>
       </ws:if>
       <ws:else>
          <div>Connecting to Wasaby...</div>

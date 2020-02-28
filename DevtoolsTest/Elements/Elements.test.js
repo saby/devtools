@@ -859,7 +859,7 @@ define([
             delete window.elementsPanel;
          });
 
-         it('should set _itemsChanged to true', function() {
+         it('should set _itemsChanged to true and remove selection from the item', function() {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -870,11 +870,43 @@ define([
             };
             const instance = new Elements(options);
             instance.saveOptions(options);
+            instance._selectedItemId = 0;
+            instance._inspectedItem = {};
+            instance._path = [];
             instance._itemsChanged = false;
 
             instance._operationHandler([OperationType.DELETE, 0]);
 
             assert.isTrue(instance._itemsChanged);
+            assert.isUndefined(instance._selectedItemId);
+            assert.isUndefined(instance._inspectedItem);
+            assert.isUndefined(instance._path);
+
+            delete window.elementsPanel;
+         });
+
+         it('should set _itemsChanged to true and without touching selection', function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               },
+               selected: true
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._selectedItemId = 1;
+            instance._inspectedItem = {};
+            instance._path = [];
+            instance._itemsChanged = false;
+
+            instance._operationHandler([OperationType.DELETE, 0]);
+
+            assert.isTrue(instance._itemsChanged);
+            assert.equal(instance._selectedItemId, 1);
+            assert.deepEqual(instance._inspectedItem, {});
+            assert.deepEqual(instance._path, []);
 
             delete window.elementsPanel;
          });

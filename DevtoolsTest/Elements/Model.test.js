@@ -250,6 +250,148 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
             assert.isTrue(visibleItemsClearStub.calledOnceWithExactly());
             assert.isTrue(expandedItemsClearStub.calledOnceWithExactly());
          });
+
+         it('should update parent\'s hasChildren property', function() {
+            const oldItems = [
+               {
+                  id: 0,
+                  depth: 0
+               }
+            ];
+            instance._items = oldItems;
+            instance._visibleItems.set(0, oldItems[0]);
+            const newItems = [
+               oldItems[0],
+               {
+                  id: 1,
+                  parentId: 0,
+                  depth: 1
+               },
+               {
+                  id: 2,
+                  parentId: 1,
+                  depth: 2
+               }
+            ];
+            sandbox.stub(instance, '__nextVersion');
+            sandbox.stub(instance, '__getElement').returnsArg(0);
+            sandbox.stub(instance, '__updateElement');
+
+            instance.setItems(newItems);
+
+            assert.isTrue(instance._itemsChanged);
+            assert.notEqual(instance._items, oldItems);
+            assert.notEqual(instance._items, newItems);
+            assert.deepEqual(instance._items, [
+               {
+                  id: 0,
+                  depth: 0
+               },
+               {
+                  id: 1,
+                  parentId: 0,
+                  depth: 1
+               },
+               {
+                  id: 2,
+                  parentId: 1,
+                  depth: 2
+               }
+            ]);
+            sinon.assert.calledOnce(instance.__nextVersion);
+            sinon.assert.calledWithExactly(instance.__updateElement, 0, {
+               hasChildren: true
+            });
+            assert.deepEqual(
+               instance._visibleItems,
+               new Map([
+                  [
+                     0,
+                     {
+                        id: 0,
+                        depth: 0
+                     }
+                  ]
+               ])
+            );
+         });
+
+         it('should update parent\'s hasChildren property and add new children to visible items', function() {
+            const oldItems = [
+               {
+                  id: 0,
+                  depth: 0
+               }
+            ];
+            instance._items = oldItems;
+            instance._visibleItems.set(0, oldItems[0]);
+            instance._expandedItems.add(0);
+            const newItems = [
+               oldItems[0],
+               {
+                  id: 1,
+                  parentId: 0,
+                  depth: 1
+               },
+               {
+                  id: 2,
+                  parentId: 1,
+                  depth: 2
+               }
+            ];
+            sandbox.stub(instance, '__nextVersion');
+            sandbox.stub(instance, '__getElement').returnsArg(0);
+            sandbox.stub(instance, '__updateElement');
+
+            instance.setItems(newItems);
+
+            assert.isTrue(instance._itemsChanged);
+            assert.notEqual(instance._items, oldItems);
+            assert.notEqual(instance._items, newItems);
+            assert.deepEqual(instance._items, [
+               {
+                  id: 0,
+                  depth: 0
+               },
+               {
+                  id: 1,
+                  parentId: 0,
+                  depth: 1
+               },
+               {
+                  id: 2,
+                  parentId: 1,
+                  depth: 2
+               }
+            ]);
+            sinon.assert.calledOnce(instance.__nextVersion);
+            sinon.assert.calledWithExactly(instance.__updateElement, 0, {
+               hasChildren: true
+            });
+            sinon.assert.calledWithExactly(instance.__updateElement, 1, {
+               hasChildren: true
+            });
+            assert.deepEqual(
+               instance._visibleItems,
+               new Map([
+                  [
+                     0,
+                     {
+                        id: 0,
+                        depth: 0
+                     }
+                  ],
+                  [
+                     1,
+                     {
+                        id: 1,
+                        parentId: 0,
+                        depth: 1
+                     }
+                  ]
+               ])
+            );
+         });
       });
 
       describe('onOrderChanged', function() {

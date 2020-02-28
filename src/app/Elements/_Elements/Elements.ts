@@ -34,7 +34,7 @@ class Elements extends Control {
    protected _selectedItemId: IFrontendControlNode['id'] | undefined;
    protected _inspectedItem: IBackendControlNode | undefined;
    protected _children: Record<IFrontendControlNode['id'], HTMLElement>;
-   protected _path: BreadcrumbsOptions['items'];
+   protected _path?: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
    protected _scrollToId?: IFrontendControlNode['id'];
@@ -210,6 +210,11 @@ class Elements extends Control {
                break;
             case OperationType.DELETE:
                this._itemsChanged = true;
+               if (this._selectedItemId === args[1]) {
+                  this._inspectedItem = undefined;
+                  this._selectedItemId = undefined;
+                  this._path = undefined;
+               }
                this.__removeBreakpoint(args[1]);
                break;
             case OperationType.REORDER:

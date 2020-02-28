@@ -477,6 +477,9 @@ class Agent {
          }
          this.addProfilingData(node, operation);
       });
+      this.getDeadControls().forEach((node) => {
+         this.removeNode(node);
+      });
       const id = guid();
       if (this.isProfiling) {
          this.changedNodesBySynchronization.set(id, changes);
@@ -488,6 +491,20 @@ class Agent {
       }
       this.changedRoots.delete(rootId);
       this.rootStack.splice(this.rootStack.indexOf(rootId), 1);
+   }
+
+   private getDeadControls(): IBackendControlNode[] {
+      const result: ReturnType<Agent['getDeadControls']> = [];
+      const deadParents: Set<IBackendControlNode['id']> = new Set();
+
+      this.elements.forEach((node, key) => {
+         if (!node.container || typeof node.parentId !== 'undefined' && deadParents.has(node.parentId)) {
+            result.push(node);
+            deadParents.add(key);
+         }
+      });
+
+      return result;
    }
 
    private handleAdd(node: IBackendControlNode): void {

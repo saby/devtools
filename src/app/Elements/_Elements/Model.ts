@@ -51,6 +51,9 @@ class Model {
                         hasChildren: true
                      });
                   }
+                  if (this._expandedItems.has(item.parentId)) {
+                     this._visibleItems.set(item.id, this.__getElement(item));
+                  }
                }
             });
             diff.removed.forEach((item: IModelItem) => {
