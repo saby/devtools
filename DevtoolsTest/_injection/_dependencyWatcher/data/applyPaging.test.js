@@ -20,5 +20,19 @@ define(['injection/_dependencyWatcher/data/applyPaging'], function(applyPaging) 
             hasMore: false
          });
       });
+
+      it('should return slice of items starting from offset', function() {
+         const items = [0, 1, 2, 3, 4, 5];
+
+         assert.deepEqual(applyPaging(items, 0), {
+            data: [0, 1, 2, 3, 4, 5],
+            hasMore: true
+         });
+
+         assert.deepEqual(applyPaging(items, 2), {
+            data: [2, 3, 4, 5],
+            hasMore: true
+         });
+      });
    });
 });
