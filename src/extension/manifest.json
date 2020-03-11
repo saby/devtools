@@ -23,9 +23,7 @@
   },
 
   "permissions": [
-    "activeTab",
     "tabs",
-    "webRequest",
     "storage",
     "<all_urls>",
     "cookies"
