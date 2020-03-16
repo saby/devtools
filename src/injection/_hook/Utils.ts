@@ -2,8 +2,8 @@
  * Contains utility functions used by agent.
  * @author Зайцев А.С.
  */
-import { ControlType } from 'Extension/Plugins/Elements/const';
-import Agent, { IChangedNode } from './Agent';
+import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
+import Agent from './Agent';
 import {
    IBackendControlNode,
    IControlNode,
@@ -61,28 +61,112 @@ export function isTemplateNode(node: object): node is ITemplateNode {
    return node.type === 'TemplateNode';
 }
 
-export function addRef(
-   changedNode: IChangedNode,
-   ...oldRefs: Array<Function | undefined>
+const refSymbol = Symbol('ref');
+
+/**
+ * Creates a function which will be used to catch node's container.
+ * @param idToContainer
+ * @param idToParentId
+ * @param domToIds
+ * @param id
+ * @param childRef
+ */
+export function getRef(
+   idToContainer: Agent['idToContainer'],
+   idToParentId: Agent['idToParentId'],
+   domToIds: Agent['domToIds'],
+   id: IBackendControlNode['id'],
+   childRef?: Function
 ): Function {
-   return (element?: Element) => {
-      oldRefs.forEach((ref) => {
-         if (ref) {
-            ref(element);
-         }
-      });
-      changedNode.node.container = element as IWasabyElement;
+   if (childRef && childRef[refSymbol]) {
+      return childRef;
+   }
+   const newRef = (element: IWasabyElement | null) => {
+      if (childRef) {
+         childRef(element);
+      }
+      updateContainer(
+         idToContainer,
+         idToParentId,
+         domToIds,
+         id,
+         element,
+         idToParentId.get(id)
+      );
    };
+   newRef[refSymbol] = true;
+   return newRef;
 }
 
-export function getContainerForNode(node: IBackendControlNode): IWasabyElement {
-   if (node.container) {
-      return node.container;
+function updateDomToIds(
+   domToIds: Agent['domToIds'],
+   operation: OperationType,
+   dom: Element,
+   id: IBackendControlNode['id']
+): void {
+   const ids = domToIds.get(dom);
+   switch (operation) {
+      case OperationType.DELETE:
+         if (ids) {
+            if (ids.length === 1) {
+               domToIds.delete(dom);
+            } else {
+               const index = ids.indexOf(id);
+               ids.splice(index, 1);
+            }
+         }
+         break;
+      case OperationType.CREATE:
+         if (ids) {
+            ids.push(id);
+         } else {
+            domToIds.set(dom, [id]);
+         }
+         break;
    }
-   if (node.instance && node.instance._container) {
-      return node.instance._container;
+}
+
+/**
+ * Links container to id. Also updates parent if it had the same container.
+ * @param idToContainer
+ * @param idToParentId
+ * @param domToIds
+ * @param id
+ * @param newContainer
+ */
+export function updateContainer(
+   idToContainer: Agent['idToContainer'],
+   idToParentId: Agent['idToParentId'],
+   domToIds: Agent['domToIds'],
+   id: IBackendControlNode['id'],
+   newContainer: IWasabyElement | null
+): void {
+   const oldContainer = idToContainer.get(id);
+   if (oldContainer === newContainer) {
+      return;
    }
-   return document.body;
+   const parentId = idToParentId.get(id);
+   if (typeof parentId !== 'undefined') {
+      const parentContainer = idToContainer.get(parentId);
+      if (!parentContainer || oldContainer === parentContainer) {
+         updateContainer(
+            idToContainer,
+            idToParentId,
+            domToIds,
+            parentId,
+            newContainer
+         );
+      }
+   }
+   if (oldContainer) {
+      updateDomToIds(domToIds, OperationType.DELETE, oldContainer, id);
+   }
+   if (newContainer) {
+      updateDomToIds(domToIds, OperationType.CREATE, newContainer, id);
+      idToContainer.set(id, newContainer);
+   } else {
+      idToContainer.delete(id);
+   }
 }
 
 function isParentVisible(element: HTMLElement): boolean {
@@ -136,7 +220,9 @@ function findControlNodeByInstance(
    domToIds: Agent['domToIds'],
    elements: Agent['elements']
 ): IBackendControlNode | void {
-   const container = instance._container[0] ? instance._container[0] : instance._container;
+   const container = instance._container[0]
+      ? instance._container[0]
+      : instance._container;
    const nodes = domToIds.get(container) as Array<IBackendControlNode['id']>;
    for (let i = 0; i < nodes.length; i++) {
       const currentNode = elements.get(nodes[i]);

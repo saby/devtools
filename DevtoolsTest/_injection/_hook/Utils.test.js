@@ -159,29 +159,219 @@ define([
          });
       });
 
-      describe('getContainerForNode', function() {
-         it('should return the container calculated by the devtools', function() {
+      describe('getRef', function() {
+         let idToContainer;
+         let idToParentId;
+         let domToIds;
+
+         beforeEach(function() {
+            idToContainer = new Map();
+            idToParentId = new Map();
+            domToIds = new WeakMap();
+         });
+
+         it('should create a new ref which will link container to the id when called', function() {
+            const ref = Utils.getRef(idToContainer, idToParentId, domToIds, 0);
+
+            assert.deepEqual(idToContainer, new Map());
+            assert.isUndefined(domToIds.get(document.body));
+
+            ref(document.body);
+
+            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
+            assert.deepEqual(domToIds.get(document.body), [0]);
+         });
+
+         it('should create a new ref which will link container to the id when called and also call childRef', function() {
+            const childRef = sandbox.stub();
+            const ref = Utils.getRef(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               0,
+               childRef
+            );
+
+            assert.deepEqual(idToContainer, new Map());
+            assert.isUndefined(domToIds.get(document.body));
+            sinon.assert.notCalled(childRef);
+
+            ref(document.body);
+
+            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
+            assert.deepEqual(domToIds.get(document.body), [0]);
+            sinon.assert.calledWithExactly(childRef, document.body);
+         });
+
+         it('should return childRef if it was created by devtools', function() {
+            const childRef = Utils.getRef(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               0
+            );
+
+            const ref = Utils.getRef(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               0,
+               childRef
+            );
+
+            assert.equal(ref, childRef);
+         });
+      });
+
+      describe('updateContainer', function() {
+         let idToContainer;
+         let idToParentId;
+         let domToIds;
+
+         beforeEach(function() {
+            idToContainer = new Map();
+            idToParentId = new Map();
+            domToIds = new WeakMap();
+         });
+
+         it('should not change anything because container is the same', function() {
+            idToContainer.set(0, document.body);
+            domToIds.set(document.body, [0]);
+            sandbox.stub(idToContainer, 'set');
+            sandbox.stub(domToIds, 'set');
+
+            Utils.updateContainer(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               0,
+               document.body
+            );
+
+            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
+            assert.deepEqual(domToIds.get(document.body), [0]);
+            sinon.assert.notCalled(idToContainer.set);
+            sinon.assert.notCalled(domToIds.set);
+         });
+
+         it('should link container with the id', function() {
+            Utils.updateContainer(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               0,
+               document.body
+            );
+
+            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
+            assert.deepEqual(domToIds.get(document.body), [0]);
+         });
+
+         it('should unlink container from the id', function() {
+            idToContainer.set(0, document.body);
+            domToIds.set(document.body, [0]);
+
+            Utils.updateContainer(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               0,
+               null
+            );
+
+            assert.deepEqual(idToContainer, new Map());
+            assert.isUndefined(domToIds.get(document.body));
+         });
+
+         it('should unlink container from the id but leave the parent', function() {
+            idToContainer.set(0, document.body);
+            idToContainer.set(1, document.body);
+            domToIds.set(document.body, [0, 1]);
+
+            Utils.updateContainer(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               1,
+               null
+            );
+
+            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
+            assert.deepEqual(domToIds.get(document.body), [0]);
+         });
+
+         it('should link container with the id and do the same with parents', function() {
+            idToParentId.set(1, 0);
+            idToParentId.set(2, 1);
+
+            Utils.updateContainer(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               2,
+               document.body
+            );
+
+            assert.deepEqual(
+               idToContainer,
+               new Map([
+                  [0, document.body],
+                  [1, document.body],
+                  [2, document.body]
+               ])
+            );
+            assert.deepEqual(domToIds.get(document.body), [0, 1, 2]);
+         });
+
+         it('should link container with the id and parentId (parent did have a container)', function() {
+            idToParentId.set(1, 0);
+            idToContainer.set(0, document.body);
+            idToContainer.set(1, document.body);
             const container = document.createElement('div');
-            const node = {
+
+            Utils.updateContainer(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               1,
                container
-            };
+            );
 
-            assert.equal(Utils.getContainerForNode(node), container);
+            assert.deepEqual(
+               idToContainer,
+               new Map([
+                  [0, container],
+                  [1, container]
+               ])
+            );
+            assert.deepEqual(domToIds.get(container), [0, 1]);
          });
 
-         it('should return the container from the instance', function() {
+         it('should link container with the id but not touch the parent', function() {
+            const parentContainer = document.createElement('div');
+            idToParentId.set(1, 0);
+            idToContainer.set(0, parentContainer);
+            idToContainer.set(1, document.body);
+            domToIds.set(parentContainer, [0]);
             const container = document.createElement('div');
-            const node = {
-               instance: {
-                  _container: container
-               }
-            };
 
-            assert.equal(Utils.getContainerForNode(node), container);
-         });
+            Utils.updateContainer(
+               idToContainer,
+               idToParentId,
+               domToIds,
+               1,
+               container
+            );
 
-         it('should return body', function() {
-            assert.equal(Utils.getContainerForNode({}), document.body);
+            assert.deepEqual(
+               idToContainer,
+               new Map([
+                  [0, parentContainer],
+                  [1, container]
+               ])
+            );
+            assert.deepEqual(domToIds.get(parentContainer), [0]);
+            assert.deepEqual(domToIds.get(container), [1]);
          });
       });
 

@@ -16,16 +16,16 @@ import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
 import {
-   addRef,
+   getRef,
+   findControlByDomNode,
    getCondition,
-   getContainerForNode,
    getControlType,
    getEvents,
    getObjectDiff,
    isControlNode,
    isTemplateNode,
    isVisible,
-   findControlByDomNode
+   updateContainer
 } from './Utils';
 import Highlighter from './Highlighter';
 import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData';
@@ -35,7 +35,12 @@ import { INamedLogger } from 'Extension/Logger/ILogger';
 import { GlobalMessages } from 'Extension/const';
 import { getGlobalChannel } from '../_devtool/globalChannel';
 import { getSyncList } from './_utils/Profiling';
-import { endMark, endSyncMark, startMark, startSyncMark } from './_utils/UserTimingAPI';
+import {
+   endMark,
+   endSyncMark,
+   startMark,
+   startSyncMark
+} from './_utils/UserTimingAPI';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -63,6 +68,15 @@ class Agent {
       Node,
       Array<IBackendControlNode['id']>
    > = new WeakMap();
+   /**
+    * This map stores container for each node. There're two reasons for this:
+    * 1) Nodes are recreated on each update, so we have to store containers somewhere.
+    * 2) It will make adding support for multiple containers easier in the future.
+    */
+   private idToContainer: Map<
+      IBackendControlNode['id'],
+      IWasabyElement | null
+   > = new Map();
    /**
     * This map is the source of truth for devtools.
     * This map updates after every synchronization and makes following assumptions:
@@ -131,6 +145,13 @@ class Agent {
       IControlNode | ITemplateNode,
       IBackendControlNode['id']
    > = new WeakMap();
+   /**
+    * This map is mostly used to determine relationships between uncommitted nodes.
+    */
+   private idToParentId: Map<
+      IBackendControlNode['id'],
+      IBackendControlNode['id']
+   > = new Map();
 
    /**
     * Mutation observer is used for tracking DOM changes during profiling.
@@ -287,6 +308,7 @@ class Agent {
          changedNode.node.selfStartTime = performance.now();
          startMark(name, id, changedNode.operation);
       } else {
+         const idToContainer = this.idToContainer;
          currentRoot.set(id, {
             /**
              * TODO: придумать как тут не игнорить ts
@@ -296,7 +318,14 @@ class Agent {
                name,
                selfStartTime: performance.now(),
                selfDuration: 0,
-               treeDuration: 0
+               treeDuration: 0,
+               get container(this: IBackendControlNode): IWasabyElement {
+                  // This is control with invisible-node as it's container.
+                  if (this.instance && !this.instance._container) {
+                     return document.body as IWasabyElement;
+                  }
+                  return idToContainer.get(id) as IWasabyElement;
+               }
             },
             operation
          });
@@ -311,38 +340,95 @@ class Agent {
    ): void {
       const currentRoot = this.getCurrentRoot();
       const changedNode = this.getCurrentNode();
+      const id = changedNode.node.id;
 
       const commitDuration = performance.now() - changedNode.node.selfStartTime;
       changedNode.node.selfDuration += commitDuration;
-      endMark(
-         changedNode.node.name,
-         changedNode.node.id,
-         changedNode.operation
-      );
+      endMark(changedNode.node.name, id, changedNode.operation);
 
       changedNode.node.parentId = this.getParentId(node);
 
       const parentId = changedNode.node.parentId;
-      if (typeof parentId !== 'undefined' && currentRoot.has(parentId)) {
-         const parent = currentRoot.get(parentId) as IChangedNode;
-         parent.node.treeDuration += commitDuration;
-         if (!this.componentsStack.includes(parentId)) {
-            parent.node.selfDuration += commitDuration;
+      if (typeof parentId !== 'undefined') {
+         this.idToParentId.set(id, parentId);
+
+         const parent = currentRoot.get(parentId);
+         if (parent) {
+            parent.node.treeDuration += commitDuration;
+            if (!this.componentsStack.includes(parentId)) {
+               parent.node.selfDuration += commitDuration;
+            }
          }
       }
 
       // TODO: подумать на тему 1 контрол - несколько контейнеров. Актуально для шаблонов с несколькими корнями
-      // TODO: подумать про невидимые ноды
       if (
          changedNode.operation === OperationType.CREATE ||
          changedNode.operation === OperationType.UPDATE
       ) {
-         if (isTemplateNode(node) && node.children && node.children[0]) {
-            node.children[0].ref = addRef(
-               changedNode,
-               node.ref,
-               node.children[0].ref
+         if (node.element) {
+            // This is a control which was already mounted. We can just use the existing container.
+            updateContainer(
+               this.idToContainer,
+               this.idToParentId,
+               this.domToIds,
+               id,
+               node.element
             );
+         } else if (node.markup) {
+            // This is a control that was not mounted, so we're proxying it's element property to catch its container.
+            const updateIdToContainer = (
+               newContainer: IWasabyElement | null
+            ) => {
+               updateContainer(
+                  this.idToContainer,
+                  this.idToParentId,
+                  this.domToIds,
+                  id,
+                  newContainer
+               );
+            };
+            let container: IWasabyElement | null;
+            Object.defineProperty(node, 'element', {
+               set(newContainer: IWasabyElement): void {
+                  if (container === newContainer) {
+                     return;
+                  }
+                  updateIdToContainer(newContainer);
+                  container = newContainer;
+               },
+               get(): IWasabyElement | null {
+                  return container;
+               },
+               configurable: true,
+               enumerable: true
+            });
+         } else if (isTemplateNode(node)) {
+            if (node.children && node.children[0]) {
+               // We only care about dom nodes inside template nodes. We'll catch it's element and propagate it.
+               if (
+                  !isControlNode(node.children[0]) &&
+                  !isTemplateNode(node.children[0])
+               ) {
+                  node.children[0].ref = getRef(
+                     this.idToContainer,
+                     this.idToParentId,
+                     this.domToIds,
+                     changedNode.node.id,
+                     node.children[0].ref
+                  );
+               }
+            } else {
+               // This is a template nodes which doesn\'t contain any children.
+               // Since every node has to have a container, we're setting document.body as the default.
+               updateContainer(
+                  this.idToContainer,
+                  this.idToParentId,
+                  this.domToIds,
+                  id,
+                  document.body as IWasabyElement
+               );
+            }
          }
       }
 
@@ -353,20 +439,15 @@ class Agent {
             data.instance._$resultBeforeMount
          ) {
             changedNode.node.asyncControl = true;
-            if (
-               this.controlsWithReceivedStates.has(node.key)
-            ) {
+            if (this.controlsWithReceivedStates.has(node.key)) {
                changedNode.node.unusedReceivedState = true;
                this.controlsWithReceivedStates.delete(node.key);
             }
          }
       }
 
-      this.vNodeToId.set(node, changedNode.node.id);
-      changedNode.node = {
-         ...changedNode.node,
-         ...data
-      };
+      this.vNodeToId.set(node, id);
+      Object.assign(changedNode.node, data);
       this.componentsStack.pop();
    }
 
@@ -502,7 +583,11 @@ class Agent {
       const deadParents: Set<IBackendControlNode['id']> = new Set();
 
       this.elements.forEach((node, key) => {
-         if (!node.container || typeof node.parentId !== 'undefined' && deadParents.has(node.parentId)) {
+         if (
+            !node.container ||
+            (typeof node.parentId !== 'undefined' &&
+               deadParents.has(node.parentId))
+         ) {
             result.push(node);
             deadParents.add(key);
          }
@@ -512,8 +597,6 @@ class Agent {
    }
 
    private handleAdd(node: IBackendControlNode): void {
-      node.container = getContainerForNode(node);
-      this.updateDomToIds(OperationType.CREATE, node.container, node.id);
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -535,9 +618,6 @@ class Agent {
          this.handleAdd(node);
          return;
       }
-      // We can either set container on every update or change a lot of code to use getter.
-      // Setting container in one place is easier and doesn't impact performance very much.
-      node.container = getContainerForNode(node);
       this.elements.set(node.id, node);
 
       if (this.isDevtoolsOpened) {
@@ -564,8 +644,10 @@ class Agent {
       });
    }
 
-   private removeNode({ id, container }: IBackendControlNode): void {
-      this.updateDomToIds(OperationType.DELETE, container, id);
+   private removeNode({ id, parentId }: IBackendControlNode): void {
+      if (typeof parentId !== 'undefined') {
+         this.idToParentId.delete(id);
+      }
       this.elements.delete(id);
 
       if (this.isDevtoolsOpened) {
@@ -857,33 +939,6 @@ class Agent {
          }
       }
       return getNodeId();
-   }
-
-   private updateDomToIds(
-      operation: OperationType,
-      dom: Element,
-      id: IBackendControlNode['id']
-   ): void {
-      const ids = this.domToIds.get(dom);
-      switch (operation) {
-         case OperationType.DELETE:
-            if (ids) {
-               if (ids.length === 1) {
-                  this.domToIds.delete(dom);
-               } else {
-                  const index = ids.indexOf(id);
-                  ids.splice(index, 1);
-               }
-            }
-            break;
-         case OperationType.CREATE:
-            if (ids) {
-               ids.push(id);
-            } else {
-               this.domToIds.set(dom, [id]);
-            }
-            break;
-      }
    }
 
    private getCurrentRoot(): Map<IBackendControlNode['id'], IChangedNode> {
