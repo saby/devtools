@@ -196,7 +196,7 @@ define([
             const selectedKeys = ['Controls', 'UI'];
             instance._selectedKeys = selectedKeys;
 
-            instance._onSelectedKeysChanged({}, selectedKeys);
+            instance._onSelectedKeysChanged({}, selectedKeys, [], []);
 
             assert.equal(instance._selectedKeys, selectedKeys);
          });
@@ -204,9 +204,86 @@ define([
          it('should save new keys on instance', function() {
             instance._selectedKeys = [];
 
-            instance._onSelectedKeysChanged({}, ['Controls']);
+            instance._onSelectedKeysChanged({}, ['Controls'], ['Controls'], []);
 
             assert.deepEqual(instance._selectedKeys, ['Controls']);
+         });
+
+         it('should add every module from WS_CORE_MODULES if WS.Core was selected', function() {
+            instance._selectedKeys = [];
+
+            instance._onSelectedKeysChanged({}, ['WS.Core'], ['WS.Core'], []);
+
+            assert.sameMembers(instance._selectedKeys, [
+               'WS',
+               'WS.Core',
+               'Lib',
+               'Ext',
+               'WS.Deprecated',
+               'Deprecated',
+               'Helpers',
+               'Transport',
+               'Core'
+            ]);
+         });
+
+         it('should remove every module from WS_CORE_MODULES if WS.Core was unselected', function() {
+            instance._selectedKeys = [
+               'WS',
+               'WS.Core',
+               'Lib',
+               'Ext',
+               'WS.Deprecated',
+               'Deprecated',
+               'Helpers',
+               'Transport',
+               'Core'
+            ];
+
+            instance._onSelectedKeysChanged({}, [], [], ['WS.Core']);
+
+            assert.deepEqual(instance._selectedKeys, []);
+         });
+
+         it('should add every module from WS_CORE_MODULES if WS.Deprecated was selected', function() {
+            instance._selectedKeys = [];
+
+            instance._onSelectedKeysChanged(
+               {},
+               ['WS.Deprecated'],
+               ['WS.Deprecated'],
+               []
+            );
+
+            assert.sameMembers(instance._selectedKeys, [
+               'WS',
+               'WS.Core',
+               'Lib',
+               'Ext',
+               'WS.Deprecated',
+               'Deprecated',
+               'Helpers',
+               'Transport',
+               'Core'
+            ]);
+         });
+
+         it('should remove every module from WS_CORE_MODULES if WS.Deprecated was unselected', function() {
+            instance._selectedKeys = [
+               'WS',
+               'WS.Core',
+               'Lib',
+               'Ext',
+               'WS.Deprecated',
+               'Deprecated',
+               'Helpers',
+               'Transport',
+               'Core'
+            ];
+
+            instance._onSelectedKeysChanged({}, [], [], ['WS.Deprecated']);
+
+            assert.deepEqual(instance._selectedKeys, []);
          });
       });
 
@@ -309,7 +386,7 @@ define([
             );
          });
 
-         it('should show popup because cookies don\'t fit in the available space', async function() {
+         it("should show popup because cookies don't fit in the available space", async function() {
             instance._selectedKeys = ['Controls', 'UI', 'Core'];
             const url = 'https://online.sbis.ru';
             sandbox
@@ -344,7 +421,7 @@ define([
             await instance._applyChanges();
          });
 
-         it('should show popup because there\'s no available space', async function() {
+         it("should show popup because there's no available space", async function() {
             instance._selectedKeys = ['Controls', 'UI', 'Core'];
             const url = 'https://online.sbis.ru';
             sandbox
