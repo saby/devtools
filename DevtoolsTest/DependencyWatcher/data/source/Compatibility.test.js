@@ -42,8 +42,12 @@ define([
          assert.deepEqual(instance.getOptions(), {});
       });
 
-      it('should return idProperty', function() {
-         assert.equal(instance.getIdProperty(), 'test');
+      it('should return keyProperty', function() {
+         assert.equal(instance.getKeyProperty(), 'test');
+      });
+
+      it('should return default model name', function() {
+         assert.equal(instance.getModel(), 'Types/entity:Model');
       });
 
       it('should return adapter', function() {
