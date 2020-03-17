@@ -13,11 +13,11 @@ const ERROR_TEXT = 'Not implemented';
  */
 export class Compatibility {
    readonly '[Types/_source/ICrud]': boolean = true;
-   protected _idProperty: string;
+   protected _keyProperty: string;
    private _opt: unknown;
    protected _adapter: adapter.IAdapter = new adapter.Json();
    constructor({ idProperty }: ICompatibilityConfig) {
-      this._idProperty = idProperty;
+      this._keyProperty = idProperty;
    }
    setOptions(opt: unknown): void {
       this._opt = opt;
@@ -25,11 +25,14 @@ export class Compatibility {
    getOptions(): unknown {
       return this._opt || {};
    }
-   getIdProperty(): string {
-      return this._idProperty;
+   getKeyProperty(): string {
+      return this._keyProperty;
    }
    getAdapter(): adapter.IAdapter {
       return this._adapter;
+   }
+   getModel(): string {
+      return 'Types/entity:Model';
    }
 
    read<TKey extends string, TMeta = unknown>(
