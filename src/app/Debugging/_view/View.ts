@@ -7,6 +7,17 @@ import Cookie = chrome.cookies.Cookie;
 import Tab = chrome.tabs.Tab;
 
 const AVAILABLE_COOKIE_SPACE = 4096;
+const WS_CORE_MODULES = [
+   'WS',
+   'WS.Core',
+   'Lib',
+   'Ext',
+   'WS.Deprecated',
+   'Deprecated',
+   'Helpers',
+   'Transport',
+   'Core'
+];
 
 class View extends Control<IControlOptions, void[]> {
    protected _template: TemplateFunction = template;
@@ -31,11 +42,30 @@ class View extends Control<IControlOptions, void[]> {
       }
    }
 
-   protected _onSelectedKeysChanged(e: Event, keys: string[]): void {
+   protected _onSelectedKeysChanged(
+      e: Event,
+      keys: string[],
+      added: string[],
+      removed: string[]
+   ): void {
       if (keys === this._selectedKeys) {
          return;
       }
-      this._selectedKeys = keys;
+      if (added.some((itemID) => WS_CORE_MODULES.includes(itemID))) {
+         const newKeys = new Set(keys);
+         WS_CORE_MODULES.forEach((module) => {
+            newKeys.add(module);
+         });
+         this._selectedKeys = Array.from(newKeys);
+      } else if (removed.some((itemID) => WS_CORE_MODULES.includes(itemID))) {
+         const newKeys = new Set(keys);
+         WS_CORE_MODULES.forEach((module) => {
+            newKeys.delete(module);
+         });
+         this._selectedKeys = Array.from(newKeys);
+      } else {
+         this._selectedKeys = keys;
+      }
    }
 
    protected async _applyChanges(): Promise<void> {
@@ -48,11 +78,7 @@ class View extends Control<IControlOptions, void[]> {
 
          let currentSize = 0;
 
-         for (
-            let i = 0;
-            i < this._selectedKeys.length;
-            i++
-         ) {
+         for (let i = 0; i < this._selectedKeys.length; i++) {
             const value = this._selectedKeys[i];
             const length = i === 0 ? value.length : value.length + 1;
 
@@ -96,7 +122,7 @@ class View extends Control<IControlOptions, void[]> {
    private getUrl(): Promise<string> {
       return new Promise((resolve) => {
          chrome.tabs.get(chrome.devtools.inspectedWindow.tabId, (tab: Tab) => {
-            resolve(tab.url);
+            resolve(new URL(tab.url as string).origin);
          });
       });
    }
@@ -177,7 +203,10 @@ class View extends Control<IControlOptions, void[]> {
       if (!where.title) {
          return true;
       } else {
-         return item.get('title').toLowerCase().includes(where.title.toLowerCase());
+         return item
+            .get('title')
+            .toLowerCase()
+            .includes(where.title.toLowerCase());
       }
    }
 }

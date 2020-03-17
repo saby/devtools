@@ -18,6 +18,8 @@
                         selectedKeys="{{ _selectedKeys }}"
                         minSearchLength="{{ 3 }}"
                         sorting="{{ _sorting }}"
+                        virtualScrolling="{{ true }}"
+                        virtualPageSize="{{ 50 }}"
                         on:selectedKeysChanged="_onSelectedKeysChanged()"
                         attr:class="devtools-Debugging__browser">
             <ws:search>
