@@ -1610,7 +1610,7 @@ define([
          it('should log error because startCommit for the node was called several times in a row without calling endCommit', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
             instance.changedRoots.set(0, new Map());
@@ -1685,7 +1685,7 @@ define([
          it('should generate id for the node and save information about it on the current root', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
             instance.changedRoots.set(0, new Map());
@@ -1732,7 +1732,7 @@ define([
             const oldVNode = {};
             instance.vNodeToId.set(oldVNode, 0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
             instance.changedRoots.set(
@@ -1798,7 +1798,7 @@ define([
             };
             instance.vNodeToId.set(oldVNode.vnode, 0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
             instance.changedRoots.set(
@@ -1861,7 +1861,7 @@ define([
          it('should take body as a container', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
             instance.changedRoots.set(0, new Map());
@@ -1914,7 +1914,7 @@ define([
          it('should take container from instance.idToContainer  (control has an instance)', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
             instance.changedRoots.set(0, new Map());
@@ -1971,7 +1971,7 @@ define([
          it('should take container from instance.idToContainer (control doesnt have an instance)', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             instance.rootStack.push(0);
             instance.changedRoots.set(0, new Map());
@@ -2075,7 +2075,7 @@ define([
                operation: OperationType.CREATE
             });
             instance.componentsStack.push(0);
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
 
@@ -2142,7 +2142,7 @@ define([
             instance.vNodeToParentId.set(node, 0);
             instance.componentsStack.push(0);
             instance.componentsStack.push(1);
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
 
@@ -2214,7 +2214,7 @@ define([
             });
             instance.vNodeToParentId.set(node, 0);
             instance.componentsStack.push(1);
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
 
@@ -2277,7 +2277,7 @@ define([
                operation: OperationType.CREATE
             });
             instance.componentsStack.push(0);
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.isProfiling = true;
@@ -2337,7 +2337,7 @@ define([
                operation: OperationType.CREATE
             });
             instance.componentsStack.push(0);
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.isProfiling = true;
@@ -2394,7 +2394,7 @@ define([
                operation: OperationType.UPDATE
             });
             instance.componentsStack.push(0);
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.isProfiling = true;
@@ -2455,7 +2455,7 @@ define([
                operation: OperationType.CREATE
             });
             instance.componentsStack.push(0);
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.isProfiling = true;
@@ -2521,7 +2521,7 @@ define([
             };
             instance.changedRoots.get(0).set(0, changedNode);
             instance.componentsStack.push(0);
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
             sandbox.stub(hookUtils, 'getRef').returns(generatedRef);
@@ -2948,7 +2948,7 @@ define([
          });
 
          it('should put the node on the stack and update its selfStartTime', function() {
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             instance.changedRoots.set(
@@ -3056,7 +3056,7 @@ define([
          });
 
          it('should remove the node from the stack and update selfDuration', function() {
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.changedRoots.set(
@@ -3134,7 +3134,7 @@ define([
          });
 
          it('should remove the node from the stack, update selfDuration and update treeDuration and selfDuration of its parent', function() {
-            const currentTime = performance.now();
+            const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
             instance.changedRoots.set(
