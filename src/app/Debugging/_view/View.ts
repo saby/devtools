@@ -1,7 +1,9 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import { Memory } from 'Types/source';
-import { adapter } from 'Types/entity';
+import { adapter, Record } from 'Types/entity';
+import { RecordSet } from 'Types/collection';
 import { Confirmation } from 'Controls/popup';
+import { View as ListView } from 'Controls/list';
 import template = require('wml!Debugging/_view/View');
 import Cookie = chrome.cookies.Cookie;
 import Tab = chrome.tabs.Tab;
@@ -19,58 +21,106 @@ const WS_CORE_MODULES = [
    'Core'
 ];
 
+interface IItem {
+   id: string;
+   title: string;
+}
+
+const enum ShowType {
+   MENU,
+   MENU_TOOLBAR,
+   TOOLBAR
+}
+
 class View extends Control<IControlOptions, void[]> {
    protected _template: TemplateFunction = template;
-   protected _source: Memory;
-   protected _selectedKeys: string[];
-   protected _searchValue: string = '';
+   protected _unselectedSource: Memory;
+   protected _selectedSource: Memory;
+   protected _unselectedSearchValue: string = '';
+   protected _selectedSearchValue: string = '';
    protected _sorting: object = [{ title: 'ASC' }];
+   protected _selectedItems: RecordSet;
+   protected _selectedItemsReadyCallback: (items: RecordSet) => void;
+   protected _existingModules: Set<string>;
+   protected _unselectedActions: object[] = [
+      {
+         id: 'moveLeft',
+         showType: ShowType.TOOLBAR,
+         icon: 'icon-DayForward',
+         handler: (item: Record) =>
+            this.moveItems(item, this._unselectedSource, this._selectedSource)
+      }
+   ];
+   protected _selectedActions: object[] = [
+      {
+         id: 'moveRight',
+         showType: ShowType.TOOLBAR,
+         icon: 'icon-DayBackward',
+         handler: (item: Record) =>
+            this.moveItems(item, this._selectedSource, this._unselectedSource)
+      }
+   ];
+   protected _children: {
+      unselectedList: ListView;
+      selectedList: ListView;
+   };
 
    protected async _beforeMount(): Promise<void> {
+      this._selectedItemsReadyCallback = (items) => {
+         this._selectedItems = items;
+      };
       const [modules, url]: [string[], string] = await Promise.all([
          this.getModules(),
          this.getUrl()
       ]);
       const cookieValue = await this.getCookieValue(url);
+      const selectedModules: IItem[] = [];
+      const unselectedModules: IItem[] = [];
 
       if (cookieValue === 'true') {
-         this._selectedKeys = modules.slice();
+         modules.forEach((value) => {
+            selectedModules.push({
+               id: value,
+               title: value
+            });
+         });
       } else {
-         this._selectedKeys = cookieValue
-            .split(',')
-            .filter((value) => value.length !== 0);
-      }
-   }
+         const selectedModulesSet = new Set(
+            cookieValue.split(',').filter((value) => value.length !== 0)
+         );
 
-   protected _onSelectedKeysChanged(
-      e: Event,
-      keys: string[],
-      added: string[],
-      removed: string[]
-   ): void {
-      if (keys === this._selectedKeys) {
-         return;
-      }
-      if (added.some((itemID) => WS_CORE_MODULES.includes(itemID))) {
-         const newKeys = new Set(keys);
-         WS_CORE_MODULES.forEach((module) => {
-            newKeys.add(module);
+         modules.forEach((value) => {
+            const newItem = {
+               id: value,
+               title: value
+            };
+            if (selectedModulesSet.has(value)) {
+               selectedModules.push(newItem);
+            } else {
+               unselectedModules.push(newItem);
+            }
          });
-         this._selectedKeys = Array.from(newKeys);
-      } else if (removed.some((itemID) => WS_CORE_MODULES.includes(itemID))) {
-         const newKeys = new Set(keys);
-         WS_CORE_MODULES.forEach((module) => {
-            newKeys.delete(module);
-         });
-         this._selectedKeys = Array.from(newKeys);
-      } else {
-         this._selectedKeys = keys;
       }
+
+      this._unselectedSource = new Memory({
+         keyProperty: 'id',
+         data: unselectedModules,
+         filter: View.sourceFilter
+      });
+
+      this._selectedSource = new Memory({
+         keyProperty: 'id',
+         data: selectedModules,
+         filter: View.sourceFilter
+      });
    }
 
    protected async _applyChanges(): Promise<void> {
       const url = await this.getUrl();
-      if (this._selectedKeys.length) {
+      const selectedKeys = this._selectedItems
+         .getRawData()
+         .map((elem: { id: string }) => elem.id);
+      if (selectedKeys.length) {
          const availableSpace = await this.getAvailableCookieSpace(url);
          if (availableSpace === 0) {
             return View.openPopup();
@@ -78,8 +128,8 @@ class View extends Control<IControlOptions, void[]> {
 
          let currentSize = 0;
 
-         for (let i = 0; i < this._selectedKeys.length; i++) {
-            const value = this._selectedKeys[i];
+         for (let i = 0; i < selectedKeys.length; i++) {
+            const value = selectedKeys[i];
             const length = i === 0 ? value.length : value.length + 1;
 
             if (currentSize + length <= availableSpace) {
@@ -93,7 +143,7 @@ class View extends Control<IControlOptions, void[]> {
             {
                name: 's3debug',
                url,
-               value: this._selectedKeys.join(',')
+               value: selectedKeys.join(',')
             },
             chrome.devtools.inspectedWindow.reload
          );
@@ -146,16 +196,7 @@ class View extends Control<IControlOptions, void[]> {
          chrome.devtools.inspectedWindow.eval(
             'contents ? Object.keys(contents.modules) : []',
             (result: string[]) => {
-               this._source = new Memory({
-                  keyProperty: 'id',
-                  data: result.map((value) => {
-                     return {
-                        id: value,
-                        title: value
-                     };
-                  }),
-                  filter: View.sourceFilter
-               });
+               this._existingModules = new Set(result);
                resolve(result);
             }
          );
@@ -180,6 +221,37 @@ class View extends Control<IControlOptions, void[]> {
             }
          );
       });
+   }
+
+   private async moveItems(
+      item: Record,
+      sourceSource: Memory,
+      targetSource: Memory
+   ): Promise<void> {
+      const itemKey = item.get('id');
+      let items;
+      if (WS_CORE_MODULES.includes(itemKey)) {
+         items = WS_CORE_MODULES.filter((module) =>
+            this._existingModules.has(module)
+         );
+      } else {
+         items = [itemKey];
+      }
+      await sourceSource.destroy(items);
+      await Promise.all(
+         items.map((elem) =>
+            targetSource.update(
+               new Record({
+                  rawData: {
+                     id: elem,
+                     title: elem
+                  }
+               })
+            )
+         )
+      );
+      this._children.unselectedList.reload();
+      this._children.selectedList.reload();
    }
 
    static _theme: string[] = ['Debugging/debugging'];

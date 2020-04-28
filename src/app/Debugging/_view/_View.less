@@ -1,5 +1,22 @@
-.devtools-Debugging__browser {
+.devtools-Debugging {
+   display: flex;
    width: 100%;
+}
+
+.devtools-Debugging__browser {
+   height: 100%;
+}
+
+.devtools-Debugging__browserWrapper {
+   flex-grow: 1;
+}
+
+.devtools-Debugging__header {
+   padding-left: @offset_s;
+}
+
+.devtools-Debugging__browserWrapper_@{themeName}:first-child {
+   border-right: @border-thickness solid @color_separator;
 }
 
 .devtools-Debugging__scrollContainer {
