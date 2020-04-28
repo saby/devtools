@@ -2,12 +2,16 @@ define([
    'DevtoolsTest/mockChrome',
    'Debugging/_view/View',
    'Types/entity',
+   'Types/collection',
    'Controls/popup'
-], function(mockChrome, View, entityLib, popupLib) {
+], function(mockChrome, View, entityLib, collectionLib, popupLib) {
    let sandbox;
    let instance;
    View = View.default;
    const Confirmation = popupLib.Confirmation;
+   const RecordSet = collectionLib.RecordSet;
+   const Model = entityLib.Model;
+   const Record = entityLib.Record;
 
    describe('Debugging/_view/View', function() {
       beforeEach(function() {
@@ -44,12 +48,8 @@ define([
 
             await instance._beforeMount();
 
-            assert.deepEqual(instance._selectedKeys, [
-               'Controls',
-               'UI',
-               'Core'
-            ]);
-            assert.deepEqual(instance._source.data, [
+            assert.deepEqual(instance._unselectedSource.data, []);
+            assert.deepEqual(instance._selectedSource.data, [
                {
                   id: 'Controls',
                   title: 'Controls'
@@ -89,12 +89,8 @@ define([
 
             await instance._beforeMount();
 
-            assert.deepEqual(instance._selectedKeys, [
-               'Controls',
-               'UI',
-               'Core'
-            ]);
-            assert.deepEqual(instance._source.data, [
+            assert.deepEqual(instance._unselectedSource.data, []);
+            assert.deepEqual(instance._selectedSource.data, [
                {
                   id: 'Controls',
                   title: 'Controls'
@@ -134,8 +130,7 @@ define([
 
             await instance._beforeMount();
 
-            assert.deepEqual(instance._selectedKeys, []);
-            assert.deepEqual(instance._source.data, [
+            assert.deepEqual(instance._unselectedSource.data, [
                {
                   id: 'Controls',
                   title: 'Controls'
@@ -149,6 +144,7 @@ define([
                   title: 'Core'
                }
             ]);
+            assert.deepEqual(instance._selectedSource.data, []);
          });
 
          it('should not fail if the cookie is not set', async function() {
@@ -173,8 +169,7 @@ define([
 
             await instance._beforeMount();
 
-            assert.deepEqual(instance._selectedKeys, []);
-            assert.deepEqual(instance._source.data, [
+            assert.deepEqual(instance._unselectedSource.data, [
                {
                   id: 'Controls',
                   title: 'Controls'
@@ -188,108 +183,155 @@ define([
                   title: 'Core'
                }
             ]);
+            assert.deepEqual(instance._selectedSource.data, []);
          });
       });
 
-      describe('_onSelectedKeysChanged', function() {
-         it('should not do anything because the keys did not change', function() {
-            const selectedKeys = ['Controls', 'UI'];
-            instance._selectedKeys = selectedKeys;
+      describe('moveItems', function() {
+         it('should remove the item from the unselected source and add it to the selected source', async function() {
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               },
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._unselectedSource = {
+               destroy: sandbox.stub()
+            };
+            instance._selectedSource = {
+               update: sandbox.stub()
+            };
 
-            instance._onSelectedKeysChanged({}, selectedKeys, [], []);
-
-            assert.equal(instance._selectedKeys, selectedKeys);
-         });
-
-         it('should save new keys on instance', function() {
-            instance._selectedKeys = [];
-
-            instance._onSelectedKeysChanged({}, ['Controls'], ['Controls'], []);
-
-            assert.deepEqual(instance._selectedKeys, ['Controls']);
-         });
-
-         it('should add every module from WS_CORE_MODULES if WS.Core was selected', function() {
-            instance._selectedKeys = [];
-
-            instance._onSelectedKeysChanged({}, ['WS.Core'], ['WS.Core'], []);
-
-            assert.sameMembers(instance._selectedKeys, [
-               'WS',
-               'WS.Core',
-               'Lib',
-               'Ext',
-               'WS.Deprecated',
-               'Deprecated',
-               'Helpers',
-               'Transport',
-               'Core'
-            ]);
-         });
-
-         it('should remove every module from WS_CORE_MODULES if WS.Core was unselected', function() {
-            instance._selectedKeys = [
-               'WS',
-               'WS.Core',
-               'Lib',
-               'Ext',
-               'WS.Deprecated',
-               'Deprecated',
-               'Helpers',
-               'Transport',
-               'Core'
-            ];
-
-            instance._onSelectedKeysChanged({}, [], [], ['WS.Core']);
-
-            assert.deepEqual(instance._selectedKeys, []);
-         });
-
-         it('should add every module from WS_CORE_MODULES if WS.Deprecated was selected', function() {
-            instance._selectedKeys = [];
-
-            instance._onSelectedKeysChanged(
-               {},
-               ['WS.Deprecated'],
-               ['WS.Deprecated'],
-               []
+            await instance._unselectedActions[0].handler(
+               new Record({
+                  rawData: {
+                     id: 'UI',
+                     title: 'UI'
+                  }
+               })
             );
 
-            assert.sameMembers(instance._selectedKeys, [
-               'WS',
-               'WS.Core',
-               'Lib',
-               'Ext',
-               'WS.Deprecated',
-               'Deprecated',
-               'Helpers',
-               'Transport',
-               'Core'
+            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
+               'UI'
             ]);
+            assert.deepEqual(
+               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI'
+               }
+            );
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
          });
 
-         it('should remove every module from WS_CORE_MODULES if WS.Deprecated was unselected', function() {
-            instance._selectedKeys = [
-               'WS',
+         it('should remove the item from the selected source and add it to the unselected source', async function() {
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               },
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._unselectedSource = {
+               update: sandbox.stub()
+            };
+            instance._selectedSource = {
+               destroy: sandbox.stub()
+            };
+
+            await instance._selectedActions[0].handler(
+               new Record({
+                  rawData: {
+                     id: 'UI',
+                     title: 'UI'
+                  }
+               })
+            );
+
+            assert.deepEqual(
+               instance._unselectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI'
+               }
+            );
+            sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
+               'UI'
+            ]);
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
+         });
+
+         it('should remove existing WS.Core modules from the unselected source and add it to the selected source', async function() {
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               },
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._unselectedSource = {
+               destroy: sandbox.stub()
+            };
+            instance._selectedSource = {
+               update: sandbox.stub()
+            };
+            instance._existingModules = new Set([
                'WS.Core',
-               'Lib',
-               'Ext',
                'WS.Deprecated',
-               'Deprecated',
-               'Helpers',
-               'Transport',
                'Core'
-            ];
+            ]);
 
-            instance._onSelectedKeysChanged({}, [], [], ['WS.Deprecated']);
+            await instance._unselectedActions[0].handler(
+               new Record({
+                  rawData: {
+                     id: 'WS.Core',
+                     title: 'WS.Core'
+                  }
+               })
+            );
 
-            assert.deepEqual(instance._selectedKeys, []);
+            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
+               'WS.Core',
+               'WS.Deprecated',
+               'Core'
+            ]);
+            assert.deepEqual(
+               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'WS.Core',
+                  title: 'WS.Core'
+               }
+            );
+            assert.deepEqual(
+               instance._selectedSource.update.secondCall.args[0].getRawData(),
+               {
+                  id: 'WS.Deprecated',
+                  title: 'WS.Deprecated'
+               }
+            );
+            assert.deepEqual(
+               instance._selectedSource.update.thirdCall.args[0].getRawData(),
+               {
+                  id: 'Core',
+                  title: 'Core'
+               }
+            );
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
          });
       });
 
       describe('_applyChanges', function() {
          it('should remove s3debug cookie', async function() {
-            instance._selectedKeys = [];
+            instance._selectedItems = new RecordSet({
+               rawData: []
+            });
             const url = 'https://online.sbis.ru';
             sandbox
                .stub(chrome.tabs, 'get')
@@ -313,7 +355,18 @@ define([
          });
 
          it('should set keys as s3debug cookie value', async function() {
-            instance._selectedKeys = ['Controls', 'UI'];
+            instance._selectedItems = new RecordSet({
+               rawData: [
+                  {
+                     id: 'Controls',
+                     title: 'Controls'
+                  },
+                  {
+                     id: 'UI',
+                     title: 'UI'
+                  }
+               ]
+            });
             const url = 'https://online.sbis.ru';
             sandbox
                .stub(chrome.tabs, 'get')
@@ -350,7 +403,18 @@ define([
          });
 
          it('should overwrite s3debug cookie value', async function() {
-            instance._selectedKeys = ['Controls', 'UI'];
+            instance._selectedItems = new RecordSet({
+               rawData: [
+                  {
+                     id: 'Controls',
+                     title: 'Controls'
+                  },
+                  {
+                     id: 'UI',
+                     title: 'UI'
+                  }
+               ]
+            });
             const url = 'https://online.sbis.ru';
             sandbox
                .stub(chrome.tabs, 'get')
@@ -387,7 +451,22 @@ define([
          });
 
          it("should show popup because cookies don't fit in the available space", async function() {
-            instance._selectedKeys = ['Controls', 'UI', 'Core'];
+            instance._selectedItems = new RecordSet({
+               rawData: [
+                  {
+                     id: 'Controls',
+                     title: 'Controls'
+                  },
+                  {
+                     id: 'UI',
+                     title: 'UI'
+                  },
+                  {
+                     id: 'Core',
+                     title: 'Core'
+                  }
+               ]
+            });
             const url = 'https://online.sbis.ru';
             sandbox
                .stub(chrome.tabs, 'get')
@@ -422,7 +501,22 @@ define([
          });
 
          it("should show popup because there's no available space", async function() {
-            instance._selectedKeys = ['Controls', 'UI', 'Core'];
+            instance._selectedItems = new RecordSet({
+               rawData: [
+                  {
+                     id: 'Controls',
+                     title: 'Controls'
+                  },
+                  {
+                     id: 'UI',
+                     title: 'UI'
+                  },
+                  {
+                     id: 'Core',
+                     title: 'Core'
+                  }
+               ]
+            });
             const url = 'https://online.sbis.ru';
             sandbox
                .stub(chrome.tabs, 'get')
@@ -459,7 +553,7 @@ define([
 
       describe('sourceFilter', function() {
          it('should return true because the filter is empty', function() {
-            const item = new entityLib.Model({
+            const item = new Model({
                rawData: {
                   title: 'Controls'
                }
@@ -470,7 +564,7 @@ define([
          });
 
          it('should return false because the item does not match the filter', function() {
-            const item = new entityLib.Model({
+            const item = new Model({
                rawData: {
                   title: 'Controls'
                }
@@ -483,7 +577,7 @@ define([
          });
 
          it('should return true because the item matches the filter', function() {
-            const item = new entityLib.Model({
+            const item = new Model({
                rawData: {
                   title: 'Controls'
                }
@@ -493,6 +587,39 @@ define([
             };
 
             assert.isTrue(View.sourceFilter(item, filter));
+         });
+      });
+
+      describe('_selectedItemsReadyCallback', function() {
+         it('should save items on instance', async function() {
+            const items = new RecordSet({
+               rawData: []
+            });
+            const url = 'https://online.sbis.ru';
+            sandbox
+               .stub(chrome.devtools.inspectedWindow, 'eval')
+               .withArgs('contents ? Object.keys(contents.modules) : []')
+               .callsArgWith(1, ['Controls', 'UI', 'Core']);
+            sandbox
+               .stub(chrome.tabs, 'get')
+               .withArgs(chrome.devtools.inspectedWindow.tabId)
+               .callsArgWith(1, {
+                  url
+               });
+            sandbox
+               .stub(chrome.cookies, 'get')
+               .withArgs({
+                  name: 's3debug',
+                  url
+               })
+               .callsArgWith(1, {
+                  value: 'true'
+               });
+            await instance._beforeMount();
+
+            instance._selectedItemsReadyCallback(items);
+
+            assert.equal(instance._selectedItems, items);
          });
       });
    });
