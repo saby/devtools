@@ -159,4 +159,6 @@ export default class List extends Control<IOptions> {
       item.visibility = true;
       return true;
    }
+
+   static _theme: string[] = ['DependencyWatcher/module'];
 }
