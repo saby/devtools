@@ -1,6 +1,6 @@
 {
    "name": "saby-devtool",
-   "version": "0.1.0",
+   "version": "20.3200.0",
    "license": "MS-RL",
    "repository": {
       "type": "git",
@@ -31,25 +31,25 @@
       "tslint": "^5.15.0"
    },
    "dependencies": {
-      "cdn": "git+https://platform-git.sbis.ru/saby/wasaby-cdn.git#rc-20.3100",
+      "cdn": "git+https://platform-git.sbis.ru/saby/wasaby-cdn.git#rc-20.3200",
       "gulp": "^4.0.0",
       "rollup": "^1.6.0",
       "rollup-plugin-terser": "^5.0.0",
       "rollup-plugin-typescript": "^1.0.0",
       "tslib": "^1.9.3",
       "typescript": "^3.7.2",
-      "rmi": "git+https://git.sbis.ru/sbis/rmi.git#rc-20.3100",
-      "saby-i18n": "git+https://platform-git.sbis.ru/saby/i18n.git#rc-20.3100",
-      "saby-types": "git+https://platform-git.sbis.ru/saby/Types.git#rc-20.3100",
-      "saby-typescript": "git+https://platform-git.sbis.ru/saby/TypeScript.git#rc-20.3100",
-      "sbis3-json-generator": "git+ssh://git@git.sbis.ru:root/sbis3-json-generator.git#rc-20.3100",
-      "sbis3-builder": "git+https://platform-git.sbis.ru/saby/Builder.git#rc-20.3100",
-      "wasaby-controls": "git+https://platform-git.sbis.ru/saby/wasaby-controls.git#rc-20.3100",
-      "saby-ui": "git+https://platform-git.sbis.ru/saby/UI.git#rc-20.3100",
-      "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-20.3100",
-      "wasaby-app": "git+https://platform-git.sbis.ru/saby/wasaby-app.git#rc-20.3100",
-      "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-20.3100",
-      "saby-inferno": "git+https://platform-git.sbis.ru/saby/inferno.git#rc-20.3100"
+      "rmi": "git+https://git.sbis.ru/sbis/rmi.git#rc-20.3200",
+      "saby-i18n": "git+https://platform-git.sbis.ru/saby/i18n.git#rc-20.3200",
+      "saby-types": "git+https://platform-git.sbis.ru/saby/Types.git#rc-20.3200",
+      "saby-typescript": "git+https://platform-git.sbis.ru/saby/TypeScript.git#rc-20.3200",
+      "sbis3-json-generator": "git+ssh://git@git.sbis.ru:root/sbis3-json-generator.git#rc-20.3200",
+      "sbis3-builder": "git+https://platform-git.sbis.ru/saby/Builder.git#rc-20.3200",
+      "wasaby-controls": "git+https://platform-git.sbis.ru/saby/wasaby-controls.git#rc-20.3200",
+      "saby-ui": "git+https://platform-git.sbis.ru/saby/UI.git#rc-20.3200",
+      "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-20.3200",
+      "wasaby-app": "git+https://platform-git.sbis.ru/saby/wasaby-app.git#rc-20.3200",
+      "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-20.3200",
+      "saby-inferno": "git+https://platform-git.sbis.ru/saby/inferno.git#rc-20.3200"
    },
    "saby-units": {
       "moduleType": "amd",
