@@ -5,8 +5,8 @@
                                iconSize="s"
                                viewMode="link" />
       <Controls.heading:Title caption="{{ _options.caption }}"
-                              size="s"
-                              style="secondary" />
+                              fontSize="m"
+                              fontColorStyle="secondary" />
    </div>
    <ws:if data="{{ _options.expanded }}">
        <Controls.list:DataContainer source="{{ _source }}"
