@@ -2,7 +2,7 @@
     <ws:headTemplate>
         <Controls.buttons:Button tooltip="Apply changes and reload the page"
                                  caption="Apply"
-                                 style="primary"
+                                 fontColorStyle="primary"
                                  attr:class="devtools-Debugging__headElement"
                                  on:click="_applyChanges()" />
         <Controls.buttons:Button tooltip="Remove s3debug cookie and reload the page"
@@ -13,8 +13,8 @@
         <div class="devtools-Debugging">
             <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }}">
                 <Controls.heading:Title caption="Minified modules"
-                                        size="m"
-                                        style="secondary"
+                                        fontSize="l"
+                                        fontColorStyle="secondary"
                                         attr:class="devtools-Debugging__header" />
                 <Layout.Browser source="{{ _unselectedSource }}"
                                 keyProperty="id"
@@ -36,8 +36,8 @@
             </div>
             <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }}">
                 <Controls.heading:Title caption="Unminified modules"
-                                        size="m"
-                                        style="secondary"
+                                        fontSize="l"
+                                        fontColorStyle="secondary"
                                         attr:class="devtools-Debugging__header" />
                 <Layout.Browser source="{{ _selectedSource }}"
                                 keyProperty="id"
