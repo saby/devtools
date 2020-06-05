@@ -12,41 +12,6 @@
    border-left: @border-thickness solid @color_separator;
 }
 
-
-/*
-TODO: пока нет горизонтального скролл контейнера делаем нечто очень похожее на него
-сделают по этой задаче: https://online.sbis.ru/opendoc.html?guid=f6171d86-08f1-4503-b8fc-b0b82ec528b7
- */
-.devtools-Elements__treeContainer {
-   .controls-Scroll {
-      overflow-x: auto;
-   }
-   .controls-Scroll__content_scroll {
-      overflow-x: auto;
-   }
-   .controls-Scroll__content_hideNativeScrollbar {
-      &::-webkit-scrollbar {
-         height: 8px;
-         display: block;
-      }
-      &::-webkit-scrollbar-thumb {
-         height: 200%;
-         border-radius: 5px;
-      }
-   }
-}
-
-.devtools-Elements__treeContainer_theme_@{themeName} {
-   .controls-Scroll__content_hideNativeScrollbar {
-      &::-webkit-scrollbar-thumb {
-         background-color: @accented_thumb_background-color_scrollbar;
-      }
-      &::-webkit-scrollbar-thumb:hover {
-         background-color: @accented_thumb_hover_background-color_scrollbar;
-      }
-   }
-}
-
 .devtools-Elements__treeWrapper {
    height: 100%;
 }
