@@ -24,11 +24,38 @@ export class Require implements IDescriptor {
       const logger = this._logger;
       return {
          set: (value: IRequire | IRequireInitObject): void => {
-            if (typeof value === 'function') {
+            /**
+             * We use isWasaby field to determine if we should proxy require and define.
+             * If require doesn't have it then we just remember the value.
+             * If require has this field then we should proxy it.
+             * Also, if define was defined before require we have to call its setter again to create proxy.
+             */
+            if (value.isWasaby && typeof value === 'function') {
                this._require = value;
                this._proxy = proxyRequire(this._require, storage, logger);
+               if (window.define) {
+                  window.define = window.define;
+               }
             } else {
                this._init = value;
+               try {
+                  Object.defineProperty(value, 'isWasaby', {
+                     enumerable: false,
+                     configurable: true,
+                     set: (): void => {
+                        this._require = value;
+                        this._proxy = proxyRequire(this._require, storage, logger);
+                        if (window.define) {
+                           window.define = window.define;
+                        }
+                     },
+                     get: (): boolean => {
+                        return !!this._require;
+                     }
+                  });
+               } catch (e) {
+                  // we don't care about the error, it just shouldn't break things
+               }
             }
          },
          get: (): IRequire | IRequireInitObject | void => {

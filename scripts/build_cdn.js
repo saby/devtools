@@ -10,7 +10,8 @@ const WHITE_FOLDER_LIST = [
     'LoaderIndicator',
     'EmojiFont',
     'TensorFont',
-    'Maintenance'
+    'Maintenance',
+    'CbucIcons'
 ].map(str => resolve(CDN_ROOT, str));
 const BLACK_EXTENSION_LIST = ['.s3mod', '.md', '.json', '-IE'];
 

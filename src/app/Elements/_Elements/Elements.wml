@@ -23,6 +23,7 @@
               on:keydown="_onListKeyDown()">
             <!--TODO: удалить task1178703223 после https://online.sbis.ru/opendoc.html?guid=bcc4b6be-7513-4f3d-8f26-eb27512d0a28 -->
             <Controls.scroll:Container attr:class="devtools-Elements__treeWrapper"
+                                       scrollMode="verticalHorizontal"
                                        task1178703223="{{ true }}">
                 <div attr:class="devtools-Elements__tree">
                     <ws:for data="element in _model.getVisibleItems()">

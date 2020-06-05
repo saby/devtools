@@ -1,11 +1,27 @@
 define([
    'injection/_dependencyWatcher/Require',
-   'injection/_dependencyWatcher/require/proxy'
-], function(Require, proxyRequire) {
+   'injection/_dependencyWatcher/require/proxy',
+   'DevtoolsTest/getJSDOM'
+], function(Require, proxyRequire, getJSDOM) {
    let sandbox;
    Require = Require.Require;
+   const needJSDOM = typeof window === 'undefined';
 
    describe('injection/_dependencyWatcher/Require', function() {
+      before(async function() {
+         if (needJSDOM) {
+            const { JSDOM } = await getJSDOM();
+            const dom = new JSDOM('');
+            global.window = dom.window;
+         }
+      });
+
+      after(function() {
+         if (needJSDOM) {
+            delete global.window;
+         }
+      });
+
       beforeEach(function() {
          sandbox = sinon.createSandbox();
       });
@@ -30,7 +46,7 @@ define([
       });
 
       describe('getDescriptor', function() {
-         it('should return correct descriptor', function() {
+         it('should not proxy require if it doesn\'t have isWasaby property', function() {
             const moduleStorage = {};
             const logger = {};
             const instance = new Require({
@@ -56,8 +72,39 @@ define([
             assert.isUndefined(instance._proxy);
             assert.equal(instance._init, requireConfig);
             assert.equal(descriptor.get(), requireConfig);
+         });
+
+         it('should return correct descriptor', function() {
+            const moduleStorage = {};
+            const logger = {};
+            const instance = new Require({
+               moduleStorage,
+               logger
+            });
+
+            const descriptor = instance.getDescriptor();
+
+            assert.hasAllKeys(descriptor, [
+               'set',
+               'get',
+               'configurable',
+               'enumerable'
+            ]);
+            assert.isTrue(descriptor.configurable);
+            assert.isTrue(descriptor.enumerable);
+
+            const requireConfig = {
+               isWasaby: true
+            };
+            descriptor.set(requireConfig);
+
+            assert.isUndefined(instance._require);
+            assert.isUndefined(instance._proxy);
+            assert.equal(instance._init, requireConfig);
+            assert.equal(descriptor.get(), requireConfig);
 
             const fakeRequire = () => {};
+            fakeRequire.isWasaby = true;
             const requireProxy = () => {};
             sandbox
                .stub(proxyRequire, 'proxyRequire')
