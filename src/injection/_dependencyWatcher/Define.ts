@@ -18,7 +18,15 @@ export class Define implements IDescriptor {
    getDescriptor(): PropertyDescriptor {
       return {
          set: (value: IDefine): void => {
-            if (!this._define) {
+            /**
+             * We use require.isWasaby to detect if we should proxy anything at all,
+             * so if require was not proxied or not even available yet, we shouldn't proxy define.
+             */
+            if (window.require && !window.require.isWasaby) {
+               this._proxy = value;
+               return;
+            }
+            if (window.require && !this._define) {
                this._define = value;
                this._proxy = proxyDefine(
                   this._define,
