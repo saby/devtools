@@ -14,8 +14,8 @@
             </ws:for>
         </ws:if>
         <Controls.heading:Title caption="Why did this render:"
-                                size="s"
-                                style="secondary" />
+                                fontSize="m"
+                                fontColorStyle="secondary" />
         <div class="devtools-CommitDetails__changesContainer ws-flexbox ws-flex-column">
             <Controls.scroll:Container>
                 <ws:if data="{{ _options.updateReason === 'mounted' }}">

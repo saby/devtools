@@ -13,8 +13,8 @@
         <div class="devtools-Debugging">
             <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }}">
                 <Controls.heading:Title caption="Minified modules"
-                                        size="m"
-                                        style="secondary"
+                                        fontSize="l"
+                                        fontColorStyle="secondary"
                                         attr:class="devtools-Debugging__header" />
                 <Layout.Browser source="{{ _unselectedSource }}"
                                 keyProperty="id"
@@ -36,8 +36,8 @@
             </div>
             <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }}">
                 <Controls.heading:Title caption="Unminified modules"
-                                        size="m"
-                                        style="secondary"
+                                        fontSize="l"
+                                        fontColorStyle="secondary"
                                         attr:class="devtools-Debugging__header" />
                 <Layout.Browser source="{{ _selectedSource }}"
                                 keyProperty="id"
