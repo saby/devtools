@@ -100,7 +100,7 @@
                         <div class="ws-flexbox ws-flex-column">
                             Profiling...
                             <Controls.buttons:Button caption="Stop"
-                                                     style="secondary"
+                                                     buttonStyle="secondary" fontColorStyle="link"
                                                      viewMode="link"
                                                      attr:class="devtools-Profiler__stopButton ws-align-self-center"
                                                      on:click="_toggleProfiling()"/>
