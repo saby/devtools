@@ -1,6 +1,6 @@
 <ws:template name="filterPopup">
     <Controls.filterPopup:Text
-        bind:value="item.value"
+        value="{{ true }}"
         caption="{{ item.itemText }}"
     />
 </ws:template>
