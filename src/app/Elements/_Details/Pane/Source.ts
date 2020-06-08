@@ -217,8 +217,12 @@ function stubValue<
       if (value === null) {
          newValue = null;
       } else if (value instanceof Array) {
-         // We have to preserve length in order to provide accurate description
-         newValue = new Array(value.length);
+         /**
+          * We have to preserve length in order to provide accurate description.
+          * But we don't need values here and this array gets cloned when the item gets converted to Record.
+          * So we substitute each value with 1 to speed up the cloning.
+          */
+         newValue = new Array(value.length).fill(1);
       } else {
          const numberOfKeys = Object.keys(value).length;
          // With objects we care only about emptiness, so one key is enough
