@@ -380,7 +380,7 @@ define([
                         },
                         {
                            key: 1,
-                           value: [],
+                           value: [1, 1, 1],
                            name: 'items',
                            parent: null,
                            hasChildren: true
@@ -461,14 +461,14 @@ define([
                      data: [
                         {
                            key: 1,
-                           value: [],
+                           value: [1, 1, 1],
                            name: 'items',
                            parent: null,
                            hasChildren: true
                         },
                         {
                            key: 2,
-                           value: [],
+                           value: [1, 1, 1],
                            name: 'otherItems',
                            parent: null,
                            hasChildren: true
@@ -593,7 +593,7 @@ define([
                         },
                         {
                            key: 1,
-                           value: [],
+                           value: [1, 1, 1],
                            name: 'items',
                            parent: null,
                            hasChildren: true
