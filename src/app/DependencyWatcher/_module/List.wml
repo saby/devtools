@@ -11,12 +11,9 @@
     searchStartingWith="current"
     viewMode="table"
     root="{{ _root }}"
-    searchValue="{{ _searchValue }}"
 >
     <ws:search>
-        <Controls.search:Input
-                bind:value="_searchValue"
-        />
+        <Controls.search:Input />
     </ws:search>
     <ws:filterButton>
         <Controls.filter:View

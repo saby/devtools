@@ -52,7 +52,6 @@ export default class List extends Control<IOptions> {
    protected _filterButtonSource: IFilterItem[];
    protected _filter?: source.IWhere<IRPCModuleFilter>;
    protected _root?: string;
-   protected _searchValue?: string;
    protected _sorting?: object;
    protected _itemActions: IItemAction[];
    constructor(options: IOptions) {
