@@ -10,6 +10,7 @@ export interface IChangesDescription {
    asyncControl: boolean;
    changedOptions?: string[];
    changedAttributes?: string[];
+   changedReactiveProps?: string[];
 }
 
 export interface IBackendSynchronizationDescription {

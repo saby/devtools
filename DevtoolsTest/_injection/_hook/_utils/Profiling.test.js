@@ -15,7 +15,8 @@ define([
                   selfDuration: 10,
                   domChanged: true,
                   isVisible: true,
-                  unusedReceivedState: false
+                  unusedReceivedState: false,
+                  changedReactiveProps: ['value']
                },
                operation: OperationType.UPDATE
             });
@@ -37,6 +38,7 @@ define([
                   changedAttributes: {
                      'attr:class': 'collapsed'
                   },
+                  changedReactiveProps: ['selectedKeys'],
                   domChanged: true,
                   isVisible: true,
                   unusedReceivedState: false
@@ -95,6 +97,7 @@ define([
                               unusedReceivedState: false,
                               changedOptions: undefined,
                               changedAttributes: undefined,
+                              changedReactiveProps: ['value'],
                               asyncControl: false
                            }
                         ],
@@ -108,6 +111,7 @@ define([
                               unusedReceivedState: false,
                               changedOptions: ['value', 'anotherValue'],
                               changedAttributes: ['class'],
+                              changedReactiveProps: ['selectedKeys'],
                               asyncControl: false
                            }
                         ],
@@ -121,6 +125,7 @@ define([
                               unusedReceivedState: false,
                               changedOptions: undefined,
                               changedAttributes: undefined,
+                              changedReactiveProps: undefined,
                               asyncControl: false
                            }
                         ],
@@ -134,6 +139,7 @@ define([
                               unusedReceivedState: false,
                               changedOptions: undefined,
                               changedAttributes: undefined,
+                              changedReactiveProps: undefined,
                               asyncControl: false
                            }
                         ]
@@ -155,6 +161,7 @@ define([
                               unusedReceivedState: true,
                               changedOptions: undefined,
                               changedAttributes: undefined,
+                              changedReactiveProps: undefined,
                               asyncControl: true
                            }
                         ]

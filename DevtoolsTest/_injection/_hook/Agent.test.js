@@ -1387,6 +1387,7 @@ define([
                                           unusedReceivedState: false,
                                           changedOptions: undefined,
                                           changedAttributes: undefined,
+                                          changedReactiveProps: undefined,
                                           asyncControl: false
                                        }
                                     ]

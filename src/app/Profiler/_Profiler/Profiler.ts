@@ -197,6 +197,7 @@ class Profiler extends Control<IOptions> {
                updateReason: changes.updateReason,
                changedOptions: changes.changedOptions,
                changedAttributes: changes.changedAttributes,
+               changedReactiveProps: changes.changedReactiveProps,
                warnings: this.__getWarnings()
             };
          } else {
@@ -536,12 +537,8 @@ class Profiler extends Control<IOptions> {
             synchronizationKey
          );
 
-         const parentsOfElementsWithDOMChanges: Set<
-            IFrontendControlNode['id']
-         > = new Set();
-         const parentsOfSynchronizedElements: Set<
-            IFrontendControlNode['id']
-         > = new Set();
+         const parentsOfElementsWithDOMChanges: Set<IFrontendControlNode['id']> = new Set();
+         const parentsOfSynchronizedElements: Set<IFrontendControlNode['id']> = new Set();
          const parentsDuration: Map<
             IFrontendControlNode['id'],
             {

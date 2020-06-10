@@ -8,6 +8,7 @@ export interface ICommitDetailsOptions {
    updateReason: ControlUpdateReason;
    changedOptions?: string[];
    changedAttributes?: string[];
+   changedReactiveProps?: string[];
    warnings?: IWarning[];
 }
 
@@ -27,6 +28,7 @@ class CommitDetails extends Control<Options> {
          updateReason: descriptor(String).required(),
          changedOptions: descriptor(Array),
          changedAttributes: descriptor(Array),
+         changedReactiveProps: descriptor(Array),
          warnings: descriptor(Array),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
