@@ -29,6 +29,7 @@ define([
                'updateReason',
                'changedOptions',
                'changedAttributes',
+               'changedReactiveProps',
                'warnings',
                'readOnly',
                'theme'
@@ -41,6 +42,9 @@ define([
                args: [Array]
             });
             testOption(optionTypes, 'changedAttributes', {
+               args: [Array]
+            });
+            testOption(optionTypes, 'changedReactiveProps', {
                args: [Array]
             });
             testOption(optionTypes, 'warnings', {

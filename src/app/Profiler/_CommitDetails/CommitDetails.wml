@@ -45,6 +45,14 @@
                         </div>
                     </ws:if>
                 </ws:else>
+                <ws:if data="{{ _options.changedReactiveProps }}">
+                    <div>
+                        Changed reactive properties:
+                        <ws:for data="item in _options.changedReactiveProps">
+                            <div class="devtools-CommitDetails__changedValueName">{{ item }}</div>
+                        </ws:for>
+                    </div>
+                </ws:if>
             </Controls.scroll:Container>
         </div>
     </ws:else>

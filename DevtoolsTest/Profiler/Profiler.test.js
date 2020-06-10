@@ -519,6 +519,7 @@ define([
                updateReason: 'mounted',
                changedOptions: ['value', 'iconSize'],
                changedAttributes: ['class', 'style'],
+               changedReactiveProps: ['_selectedKeys, _listViewModel'],
                warnings: undefined
             };
             instance._profilingData = {
@@ -550,6 +551,7 @@ define([
                updateReason: 'mounted',
                changedOptions: ['value', 'iconSize'],
                changedAttributes: ['class', 'style'],
+               changedReactiveProps: undefined,
                warnings: ['domUnchanged']
             };
             instance._profilingData = {

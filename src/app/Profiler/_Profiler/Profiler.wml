@@ -83,6 +83,7 @@
                     <Profiler._CommitDetails.CommitDetails updateReason="{{ _selectedCommitChanges.updateReason }}"
                                                            changedOptions="{{ _selectedCommitChanges.changedOptions }}"
                                                            changedAttributes="{{ _selectedCommitChanges.changedAttributes }}"
+                                                           changedReactiveProps="{{ _selectedCommitChanges.changedReactiveProps }}"
                                                            warnings="{{ _selectedCommitChanges.warnings }}"/>
                 </ws:if>
                 <ws:else>

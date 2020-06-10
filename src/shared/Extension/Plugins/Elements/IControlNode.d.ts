@@ -43,6 +43,7 @@ interface IControlNode extends Exclude<ITemplateNode, 'children'> {
    state?: object;
    context?: object;
    changedContext?: IControlNode['context'];
+   changedReactiveProps?: string[];
 }
 
 export interface IBackendControlNode extends IControlNode {
