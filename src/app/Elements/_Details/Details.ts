@@ -21,6 +21,7 @@ interface IOptions extends IControlOptions {
    events?: object;
    attributes?: object;
    changedAttributes?: object;
+   logicParentName?: string;
 }
 
 const DEFAULT_EVAL_TIMEOUT = 100;
@@ -135,6 +136,7 @@ class Details extends Control<IOptions> {
          events: descriptor(Object),
          state: descriptor(Object),
          changedState: descriptor(Object),
+         logicParentName: descriptor(String),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

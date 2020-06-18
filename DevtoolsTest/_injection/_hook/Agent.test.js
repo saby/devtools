@@ -138,6 +138,7 @@ define([
                instance.elements.set(1, {
                   id: 1,
                   parentId: 0,
+                  logicParentId: 0,
                   name: 'Controls/List:View',
                   instance: {}
                });
@@ -164,6 +165,7 @@ define([
                         1,
                         'Controls/List:View',
                         ControlType.CONTROL,
+                        0,
                         0
                      ]
                   );
@@ -2102,6 +2104,7 @@ define([
                   selfDuration: currentTime - 10,
                   treeDuration: 0,
                   parentId: undefined,
+                  logicParentId: undefined,
                   options: {
                      value: '123'
                   }
@@ -2145,11 +2148,14 @@ define([
             const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
+            const controlInstance = {};
+            instance.instanceToId.set(controlInstance, 0);
 
             instance.onEndCommit(node, {
                options: {
                   value: '123'
-               }
+               },
+               logicParent: controlInstance
             });
 
             assert.equal(instance.vNodeToId.get(node), 1);
@@ -2170,6 +2176,8 @@ define([
                node: {
                   id: 1,
                   parentId: 0,
+                  logicParentId: 0,
+                  logicParent: controlInstance,
                   name: 'Controls/SwitchableArea:View',
                   selfStartTime: 5,
                   selfDuration: commitDuration,
@@ -2242,6 +2250,7 @@ define([
                node: {
                   id: 1,
                   parentId: 0,
+                  logicParentId: undefined,
                   name: 'Controls/SwitchableArea:View',
                   selfStartTime: 5,
                   selfDuration: commitDuration,
@@ -2297,6 +2306,7 @@ define([
                OperationType.CREATE
             );
             assert.equal(instance.vNodeToId.get(node), 0);
+            assert.equal(instance.instanceToId.get(controlInstance), 0);
             const expectedChangedRoots = new Map();
             expectedChangedRoots.set(0, new Map());
             expectedChangedRoots.get(0).set(0, {
@@ -2307,6 +2317,7 @@ define([
                   selfDuration: currentTime - 10,
                   treeDuration: 0,
                   parentId: undefined,
+                  logicParentId: undefined,
                   options: {
                      value: '123'
                   },
@@ -2365,6 +2376,7 @@ define([
                   selfDuration: currentTime - 10,
                   treeDuration: 0,
                   parentId: undefined,
+                  logicParentId: undefined,
                   options: {
                      value: '123'
                   }
@@ -2424,6 +2436,7 @@ define([
                   selfDuration: currentTime - 10,
                   treeDuration: 0,
                   parentId: undefined,
+                  logicParentId: undefined,
                   options: {
                      value: '123'
                   },
@@ -2474,6 +2487,7 @@ define([
                OperationType.CREATE
             );
             assert.equal(instance.vNodeToId.get(node), 0);
+            assert.equal(instance.instanceToId.get(controlInstance), 0);
             const expectedChangedRoots = new Map();
             expectedChangedRoots.set(0, new Map());
             expectedChangedRoots.get(0).set(0, {
@@ -2484,6 +2498,7 @@ define([
                   selfDuration: currentTime - 10,
                   treeDuration: 0,
                   parentId: undefined,
+                  logicParentId: undefined,
                   options: {
                      value: '123'
                   },
@@ -2549,6 +2564,7 @@ define([
                   selfDuration: currentTime - 10,
                   treeDuration: 0,
                   parentId: undefined,
+                  logicParentId: undefined,
                   options: {
                      value: '123'
                   }
@@ -3214,30 +3230,37 @@ define([
             let removedContainer;
             let addedContainer;
             let expectedElements;
+            let firstInstance;
+            let secondInstance;
             beforeEach(() => {
                sandbox.stub(UserTimingAPIUtils, 'endSyncMark');
                instance.rootStack.push(0);
                const changes = new Map();
 
                removedContainer = document.createElement('div');
+               firstInstance = {};
                instance.elements.set(0, {
                   id: 0,
                   container: removedContainer,
                   selfDuration: 5,
-                  treeDuration: 0
+                  treeDuration: 0,
+                  instance: firstInstance
                });
                instance.domToIds.set(removedContainer, [0]);
+               instance.instanceToId.set(firstInstance, 0);
                changes.set(0, {
                   node: {
                      id: 0,
                      container: removedContainer,
                      selfDuration: 2,
-                     treeDuration: 0
+                     treeDuration: 0,
+                     instance: firstInstance
                   },
                   operation: OperationType.DELETE
                });
 
                addedContainer = document.createElement('div');
+               secondInstance = {};
                changes.set(1, {
                   node: {
                      id: 1,
@@ -3247,7 +3270,8 @@ define([
                      },
                      selfDuration: 15,
                      treeDuration: 5,
-                     container: addedContainer
+                     container: addedContainer,
+                     instance: secondInstance
                   },
                   operation: OperationType.CREATE
                });
@@ -3284,8 +3308,10 @@ define([
                   },
                   selfDuration: 10,
                   treeDuration: 5,
-                  container: addedContainer
+                  container: addedContainer,
+                  instance: secondInstance
                });
+               instance.instanceToId.set(secondInstance, 1);
                expectedElements.set(2, {
                   id: 2,
                   options: {
@@ -3307,6 +3333,8 @@ define([
                );
                assert.deepEqual(instance.rootStack, []);
                assert.deepEqual(instance.changedRoots, new Map());
+               assert.isFalse(instance.instanceToId.has(firstInstance));
+               assert.equal(instance.instanceToId.get(secondInstance), 1);
             });
 
             it('should notify devtools', function() {
@@ -3339,7 +3367,7 @@ define([
                      OperationType.CREATE,
                      1,
                      'Controls/Application',
-                     ControlType.TEMPLATE
+                     ControlType.CONTROL
                   ]
                );
                sinon.assert.calledWithExactly(
@@ -3361,6 +3389,8 @@ define([
                   instance.channel.dispatch,
                   'longMessage'
                );
+               assert.isFalse(instance.instanceToId.has(firstInstance));
+               assert.equal(instance.instanceToId.get(secondInstance), 1);
 
                // cleanup
                delete window.__WASABY_DEV_HOOK__;
@@ -3503,6 +3533,7 @@ define([
                node: {
                   id: 1,
                   parentId: 0,
+                  logicParentId: 0,
                   name: 'Controls/SwitchableArea:View',
                   selfDuration: 15,
                   treeDuration: 5,
@@ -3527,6 +3558,7 @@ define([
             expectedElements.set(1, {
                id: 1,
                parentId: 0,
+               logicParentId: 0,
                name: 'Controls/SwitchableArea:View',
                selfDuration: 10,
                treeDuration: 5,
@@ -3545,8 +3577,9 @@ define([
                   OperationType.CREATE,
                   1,
                   'Controls/SwitchableArea:View',
+                  ControlType.TEMPLATE,
                   0,
-                  ControlType.TEMPLATE
+                  0
                ]
             );
             sinon.assert.calledWithExactly(

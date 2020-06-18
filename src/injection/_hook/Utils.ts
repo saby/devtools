@@ -215,6 +215,7 @@ export function findControlByDomNode(
    return;
 }
 
+// TODO: это можно переписать, раз уж теперь есть instanceToId
 function findControlNodeByInstance(
    instance: IControlNode['instance'],
    domToIds: Agent['domToIds'],

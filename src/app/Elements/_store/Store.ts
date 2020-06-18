@@ -10,6 +10,7 @@ import { IHandler, ISerializable } from 'Extension/Event/IEventEmitter';
 const NAME_INDEX = 2;
 const CONTROL_TYPE_INDEX = 3;
 const PARENT_ID_INDEX = 4;
+const LOGIC_PARENT_ID_INDEX = 5;
 const REORDER_ARGS_OFFSET = 2;
 const POLLING_INTERVAL = 1000;
 
@@ -24,7 +25,8 @@ export function applyOperation(
             args[1],
             args[NAME_INDEX],
             args[CONTROL_TYPE_INDEX],
-            args[PARENT_ID_INDEX]
+            args[PARENT_ID_INDEX],
+            args[LOGIC_PARENT_ID_INDEX]
          );
          break;
       case OperationType.DELETE:
@@ -137,13 +139,15 @@ function addNode(
    id: IBackendControlNode['id'],
    name: IBackendControlNode['name'],
    controlType: ControlType,
-   parentId?: IBackendControlNode['parentId']
+   parentId?: IBackendControlNode['parentId'],
+   logicParentId?: IBackendControlNode['logicParentId']
 ): void {
    if (typeof parentId === 'undefined') {
       elements.push({
          id,
          name,
          parentId,
+         logicParentId,
          class: getClassByControlType(controlType),
          depth: 0
       });
@@ -154,7 +158,7 @@ function addNode(
       let lastChildIndex = parentIndex + 1;
       if (parentIndex === -1) {
          throw new Error(
-            `Can't find the parent. Element id: ${id}, parentId: ${parentId}, name: ${name}`
+            `Can't find the parent. Element id: ${id}, parentId: ${parentId}, logicParentId: ${logicParentId}, name: ${name}`
          );
       } else {
          while (
@@ -168,6 +172,7 @@ function addNode(
          id,
          name,
          parentId,
+         logicParentId,
          class: getClassByControlType(controlType),
          depth: elements[parentIndex].depth + 1
       });

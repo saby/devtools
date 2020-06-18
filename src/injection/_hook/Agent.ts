@@ -173,6 +173,14 @@ class Agent {
     * If a control has received state from a server and returns Promise from _beforeMount we should show a warning in the profiler.
     */
    private controlsWithReceivedStates: Set<string> = new Set();
+   /**
+    * This map is used to map instance of control to the id of its controlNode.
+    * For example, it is used to calculate id of the logicParent.
+    */
+   private instanceToId: WeakMap<
+      IControlNode['control'],
+      IBackendControlNode['id']
+   > = new WeakMap();
 
    constructor(config: { logger: INamedLogger }) {
       getGlobalChannel().addListener(
@@ -256,6 +264,9 @@ class Agent {
          ];
          if (typeof node.parentId !== 'undefined') {
             message.push(node.parentId);
+         }
+         if (typeof node.logicParentId !== 'undefined') {
+            message.push(node.logicParentId);
          }
 
          window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
@@ -347,6 +358,7 @@ class Agent {
       endMark(changedNode.node.name, id, changedNode.operation);
 
       changedNode.node.parentId = this.getParentId(node);
+      changedNode.node.logicParentId = this.getLogicParentId(data);
 
       const parentId = changedNode.node.parentId;
       if (typeof parentId !== 'undefined') {
@@ -447,6 +459,13 @@ class Agent {
       }
 
       this.vNodeToId.set(node, id);
+      if (
+         changedNode.operation === OperationType.CREATE &&
+         data &&
+         data.instance
+      ) {
+         this.instanceToId.set(data.instance, id);
+      }
       Object.assign(changedNode.node, data);
       this.componentsStack.pop();
    }
@@ -609,6 +628,9 @@ class Agent {
          if (typeof node.parentId !== 'undefined') {
             message.push(node.parentId);
          }
+         if (typeof node.logicParentId !== 'undefined') {
+            message.push(node.logicParentId);
+         }
          window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       }
    }
@@ -644,9 +666,12 @@ class Agent {
       });
    }
 
-   private removeNode({ id, parentId }: IBackendControlNode): void {
+   private removeNode({ id, parentId, instance }: IBackendControlNode): void {
       if (typeof parentId !== 'undefined') {
          this.idToParentId.delete(id);
+      }
+      if (instance) {
+         this.instanceToId.delete(instance);
       }
       this.elements.delete(id);
 
@@ -952,10 +977,18 @@ class Agent {
 
    private getParentId(
       node: IControlNode | ITemplateNode
-   ): IBackendControlNode['id'] | undefined {
+   ): IBackendControlNode['parentId'] {
       return (
          this.vNodeToParentId.get(node) ?? this.vNodeToParentId.get(node.vnode)
       );
+   }
+
+   private getLogicParentId(
+      data?: ITemplateChanges | IControlChanges
+   ): IBackendControlNode['logicParentId'] {
+      return data && data.logicParent
+         ? this.instanceToId.get(data.logicParent)
+         : undefined;
    }
 
    private addProfilingData(

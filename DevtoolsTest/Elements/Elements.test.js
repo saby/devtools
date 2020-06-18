@@ -1024,11 +1024,16 @@ define([
                   class: 'devtools-Elements__node_hoc'
                }
             ];
+            const tree = [{
+               id: 0,
+               name: 'Test'
+            }];
             const options = {
                store: {
                   addListener: sandbox.stub(),
                   toggleDevtoolsOpened: sandbox.stub(),
-                  getFullTree: sandbox.stub().resolves([])
+                  getFullTree: sandbox.stub().resolves(tree),
+                  getElements: sandbox.stub().returns(tree)
                }
             };
             const instance = new Elements(options);
@@ -1077,11 +1082,16 @@ define([
                   class: 'devtools-Elements__node_hoc'
                }
             ];
+            const tree = [{
+               id: 0,
+               name: 'Test'
+            }];
             const options = {
                store: {
                   addListener: sandbox.stub(),
                   toggleDevtoolsOpened: sandbox.stub(),
-                  getFullTree: sandbox.stub().resolves([])
+                  getFullTree: sandbox.stub().resolves(tree),
+                  getElements: sandbox.stub().returns(tree)
                }
             };
             const instance = new Elements(options);

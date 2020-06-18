@@ -57,6 +57,10 @@ class Elements extends Control {
    protected _eventsExpanded: boolean = false;
    protected _attributesExpanded: boolean = false;
 
+   protected _logicParentName: string = '';
+   protected _logicParentId: IFrontendControlNode['logicParentId'];
+   protected _logicParentHovered: boolean = false;
+
    protected _elementsWithBreakpoints: Set<
       IFrontendControlNode['id']
    > = new Set();
@@ -214,6 +218,8 @@ class Elements extends Control {
                   this._inspectedItem = undefined;
                   this._selectedItemId = undefined;
                   this._path = undefined;
+                  this._logicParentId = undefined;
+                  this._logicParentName = '';
                }
                this.__removeBreakpoint(args[1]);
                break;
@@ -222,6 +228,18 @@ class Elements extends Control {
                break;
          }
       }
+   }
+
+   protected _logicParentHoverChanged(e: Event, state: boolean): void {
+      // TODO: можно и на странице подсвечивать потом
+      this._logicParentHovered = state;
+   }
+
+   protected _onLogicParentClick(): void {
+      // TODO: а тут сбрасывать подсветку на странице
+      this.__selectElement(
+         this._logicParentId as IFrontendControlNode['id']
+      );
    }
 
    /**
@@ -349,6 +367,22 @@ class Elements extends Control {
       this._model.expandParents(id);
       this._path = this._model.getPath(id);
       this._selectedItemId = id;
+      const elements = this._options.store.getElements();
+      const item = elements.find(
+         (elem) => elem.id === id
+      ) as IFrontendControlNode;
+      if (
+         typeof item.logicParentId !== 'undefined' &&
+         item.parentId !== item.logicParentId
+      ) {
+         this._logicParentId = item.logicParentId;
+         this._logicParentName = (elements.find(
+            (elem) => elem.id === item.logicParentId
+         ) as IFrontendControlNode).name;
+      } else {
+         this._logicParentId = undefined;
+         this._logicParentName = '';
+      }
       this._scrollToId = id;
       this.__inspectElement(this._options.store, {
          reset: true

@@ -52,6 +52,7 @@ export interface IBackendControlNode extends IControlNode {
    selfStartTime: number;
    domChanged?: boolean;
    parentId?: IBackendControlNode['id'];
+   logicParentId?: IBackendControlNode['id'];
    isVisible?: boolean;
    unusedReceivedState?: boolean;
    asyncControl?: boolean;
@@ -63,11 +64,13 @@ export interface IFrontendControlNode {
    depth: number;
    class: string;
    parentId?: IBackendControlNode['parentId'];
+   logicParentId?: IBackendControlNode['logicParentId'];
 }
 
 export interface ITemplateChanges {
    template: Function;
    options: object;
+   logicParent: IControlNode['instance'] | null;
    changedOptions?: object;
    attributes: Record<string, string | number>;
    changedAttributes?: Record<string, string | number>;

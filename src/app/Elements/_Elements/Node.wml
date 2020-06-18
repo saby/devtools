@@ -1,5 +1,5 @@
 <div>
-    <div attr:class="devtools-Elements__node devtools-Elements__node_theme_{{ _options.theme }} ws-flexbox ws-align-items-center {{_options.selectedItemId === _options.id ? 'devtools-Elements__node_selected_theme_' + _options.theme }}"
+    <div attr:class="devtools-Elements__node devtools-Elements__node_theme_{{ _options.theme }} ws-flexbox ws-align-items-center {{_options.selectedItemId === _options.id ? 'devtools-Elements__node_selected_theme_' + _options.theme }} {{ _options.logicParentId === _options.id ? 'devtools-Elements__node_logicParent_theme_' + _options.theme }}"
          attr:style="padding-left: {{16 * _options.depth}}px;">
         <ws:if data="{{ _options.hasChildren }}">
             <i attr:class="controls-icon {{_options.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} controls-icon_size-s_theme-{{ _options.theme }} controls-icon_style-secondary_theme-{{ _options.theme }}"

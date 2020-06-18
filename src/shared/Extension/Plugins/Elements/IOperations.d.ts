@@ -20,7 +20,8 @@ type OperationPayload =
         IBackendControlNode['id'],
         IBackendControlNode['name'],
         ControlType,
-        IBackendControlNode['parentId']
+        IBackendControlNode['parentId'],
+        IBackendControlNode['logicParentId']
      ] // add leaf
    | [
         OperationType.REORDER,

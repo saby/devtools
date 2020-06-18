@@ -20,6 +20,7 @@
         <module id="fe7ac5f4-313e-4fea-93be-9f54fca9a946" name="Extension"/>
         <module id="a696c0f9-8a5b-44da-ad11-8fb084e002da" name="Controls-devtools-theme"/>
         <module id="87addb9a-b1a3-4827-ad3a-abc0a0028184" name="Elements-devtools-theme"/>
+        <module id="4fa34966-41cf-495b-94ba-456b7e1ec53c" name="LogicParentPanel"/>
   </depends>
 
   <load_after/>
