@@ -25,7 +25,7 @@
             <Controls.scroll:Container attr:class="devtools-Elements__treeWrapper"
                                        scrollMode="verticalHorizontal"
                                        task1178703223="{{ true }}">
-                <div attr:class="devtools-Elements__tree">
+                <div attr:class="devtools-Elements__tree {{ _logicParentHovered ? 'devtools-Elements__tree_logicParentHovered' }}">
                     <ws:for data="element in _model.getVisibleItems()">
                         <ws:partial template="wml!Elements/_Elements/Node"
                                     attr:key="{{element.id}}"
@@ -34,6 +34,7 @@
                                     on:mouseleave="__highlightElement()"
                                     on:click="_onItemClick(element.id)"
                                     selectedItemId="{{ _selectedItemId }}"
+                                    logicParentId="{{ _logicParentId }}"
                                     searchValue="{{ _searchValue }}"
                                     hasBreakpoint="{{ _elementsWithBreakpoints.has(element.id) }}"
                                     task1178532066="{{ _task1178532066 }}"
@@ -53,6 +54,9 @@
             <Elements._Details.Details scope="{{_inspectedItem}}"
                                       store="{{_options.store}}"
                                       inspectedItem="{{ _inspectedItem }}"
+                                      logicParentName="{{ _logicParentName }}"
+                                      on:logicParentHoverChanged="_logicParentHoverChanged()"
+                                      on:logicParentClick="_onLogicParentClick()"
                                       on:expandedChanged="__onDetailsTabExpanded()"
                                       optionsExpanded="{{_optionsExpanded}}"
                                       stateExpanded="{{_stateExpanded}}"

@@ -303,6 +303,7 @@ define([
                   name: '2',
                   depth: 1,
                   parentId: 1,
+                  logicParentId: 1,
                   class: ''
                },
                {
@@ -310,6 +311,7 @@ define([
                   name: '5',
                   depth: 2,
                   parentId: 2,
+                  logicParentId: 1,
                   class: ''
                },
                {
@@ -317,12 +319,13 @@ define([
                   name: '6',
                   depth: 2,
                   parentId: 2,
+                  logicParentId: 2,
                   class: ''
                }
             ];
             const changesBySynchronization = new Map([
                ['test', [[3, 1], [3, 2]]],
-               ['test2', [[3, 1], [3, 2], [1, 3, '3', 0, 1], [1, 4, '4', 0, 1]]]
+               ['test2', [[3, 1], [3, 2], [1, 3, '3', 0, 1, 1], [1, 4, '4', 0, 1, 1]]]
             ]);
             instance._profilingData = profilingData;
             instance._synchronizations = synchronizations;
@@ -354,6 +357,7 @@ define([
                   name: '2',
                   depth: 1,
                   parentId: 1,
+                  logicParentId: 1,
                   class: '',
                   updateReason: 'parentUpdated',
                   selfDuration: 7,
@@ -367,6 +371,7 @@ define([
                   name: '5',
                   depth: 2,
                   parentId: 2,
+                  logicParentId: 1,
                   class: '',
                   updateReason: 'unchanged',
                   selfDuration: 2,
@@ -380,6 +385,7 @@ define([
                   name: '6',
                   depth: 2,
                   parentId: 2,
+                  logicParentId: 2,
                   class: '',
                   updateReason: 'unchanged',
                   selfDuration: 3,
@@ -393,6 +399,7 @@ define([
                   name: '3',
                   depth: 1,
                   parentId: 1,
+                  logicParentId: 1,
                   class: 'devtools-Elements__node_template',
                   updateReason: 'mounted',
                   selfDuration: 10,
@@ -406,6 +413,7 @@ define([
                   name: '4',
                   depth: 1,
                   parentId: 1,
+                  logicParentId: 1,
                   class: 'devtools-Elements__node_template',
                   updateReason: 'mounted',
                   selfDuration: 15,
@@ -805,11 +813,12 @@ define([
                   name: '2',
                   depth: 1,
                   parentId: 1,
+                  logicParentId: 1,
                   class: ''
                }
             ];
             const changesBySynchronization = new Map([
-               ['test', [[3, 2], [1, 3, '3', 0, 2]]]
+               ['test', [[3, 2], [1, 3, '3', 0, 2, 2]]]
             ]);
             instance._elementsSnapshot = elementsSnapshot;
             instance._changesBySynchronization = changesBySynchronization;
@@ -828,12 +837,14 @@ define([
                   name: '2',
                   depth: 1,
                   parentId: 1,
+                  logicParentId: 1,
                   class: ''
                },
                {
                   id: 3,
                   name: '3',
                   parentId: 2,
+                  logicParentId: 2,
                   class: 'devtools-Elements__node_template',
                   depth: 2
                }
@@ -846,7 +857,7 @@ define([
          });
          it('should use cached elements from the previous synchronization', function() {
             const changesBySynchronization = new Map([
-               ['test2', [[1, 4, '4', 0, 3]]]
+               ['test2', [[1, 4, '4', 0, 3, 2]]]
             ]);
             instance._elementsSnapshot = [];
             instance._changesBySynchronization = changesBySynchronization;
@@ -862,12 +873,14 @@ define([
                   name: '2',
                   depth: 1,
                   parentId: 1,
+                  logicParentId: 1,
                   class: ''
                },
                {
                   id: 3,
                   name: '3',
                   parentId: 2,
+                  logicParentId: 2,
                   class: 'devtools-Elements__node_template',
                   depth: 2
                }
@@ -887,12 +900,14 @@ define([
                   name: '2',
                   depth: 1,
                   parentId: 1,
+                  logicParentId: 1,
                   class: ''
                },
                {
                   id: 3,
                   name: '3',
                   parentId: 2,
+                  logicParentId: 2,
                   class: 'devtools-Elements__node_template',
                   depth: 2
                },
@@ -900,6 +915,7 @@ define([
                   id: 4,
                   name: '4',
                   parentId: 3,
+                  logicParentId: 2,
                   class: 'devtools-Elements__node_template',
                   depth: 3
                }

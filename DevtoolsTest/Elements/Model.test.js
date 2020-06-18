@@ -773,7 +773,8 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                name: 'test',
                depth: 2,
                class: 'devtools-Elements__node_hoc',
-               parentId: 1
+               parentId: 1,
+               logicParentId: 0
             };
             sandbox.stub(instance, '__getImmediateChildren').returns([]);
 
@@ -786,6 +787,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                depth: 2,
                class: 'devtools-Elements__node_hoc',
                parentId: 1,
+               logicParentId: 0,
                isExpanded: false,
                hasChildren: false
             });
@@ -861,7 +863,8 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                name: 'test',
                depth: 2,
                class: 'devtools-Elements__node_hoc',
-               parentId: 1
+               parentId: 1,
+               logicParentId: 1
             };
             instance._items = [element];
 
@@ -876,6 +879,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
                depth: 2,
                class: 'devtools-Elements__node_hoc',
                parentId: 1,
+               logicParentId: 1,
                isExpanded: true,
                hasChildren: false
             });

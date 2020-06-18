@@ -148,6 +148,10 @@ const EXTENSION_MODULES = [
   {
     "name": "Profiler-devtools-theme",
     "path": resolve(input.app, "Profiler-devtools-theme")
+  },
+  {
+    "name": "LogicParentPanel",
+    "path": resolve(input.app, "LogicParentPanel")
   }
 ];
 

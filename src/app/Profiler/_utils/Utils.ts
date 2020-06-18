@@ -189,7 +189,6 @@ const LENGTH_SCALE = 100;
 /**
  * Adds information about the color and length of a bar that represents duration.
  * @param initialData An initial array with timing information.
- * @param theme Devtools theme.
  * @return A new array where each item has 2 new fields: barColor and length.
  */
 export function getDataWithLengths(

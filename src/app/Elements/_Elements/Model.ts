@@ -11,6 +11,7 @@ interface IModelItem {
    isExpanded: boolean;
    hasChildren: boolean;
    parentId?: IFrontendControlNode['parentId'];
+   logicParentId?: IFrontendControlNode['logicParentId'];
 }
 
 /**
@@ -210,6 +211,7 @@ class Model {
             depth: originalElement.depth,
             class: originalElement.class,
             parentId: originalElement.parentId,
+            logicParentId: originalElement.logicParentId,
             isExpanded: this._expandedItems.has(originalElement.id),
             hasChildren:
                this.__getImmediateChildren(originalElement.id).length > 0

@@ -53,6 +53,7 @@ define([
                      id: 0,
                      name: 'Test',
                      parentId: undefined,
+                     logicParentId: undefined,
                      class: 'devtools-Elements__node_control',
                      depth: 0
                   }
@@ -74,6 +75,7 @@ define([
                   1,
                   'Test1',
                   ControlType.TEMPLATE,
+                  0,
                   0
                ];
 
@@ -91,6 +93,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
+                     logicParentId: 0,
                      class: 'devtools-Elements__node_template',
                      depth: 1
                   }
@@ -110,6 +113,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
+                     logicParentId: 0,
                      class: 'devtools-Elements__node_template',
                      depth: 1
                   },
@@ -126,6 +130,7 @@ define([
                   3,
                   'Test3',
                   ControlType.HOC,
+                  0,
                   0
                ];
 
@@ -143,6 +148,7 @@ define([
                      id: 1,
                      name: 'Test1',
                      parentId: 0,
+                     logicParentId: 0,
                      class: 'devtools-Elements__node_template',
                      depth: 1
                   },
@@ -150,6 +156,7 @@ define([
                      id: 3,
                      name: 'Test3',
                      parentId: 0,
+                     logicParentId: 0,
                      class: 'devtools-Elements__node_hoc',
                      depth: 1
                   },
@@ -178,12 +185,13 @@ define([
                   2,
                   'Test2',
                   ControlType.TEMPLATE,
-                  1
+                  1,
+                  0
                ];
 
                assert.throws(
                   () => applyOperation(elements, args),
-                  `Can't find the parent. Element id: 2, parentId: 1, name: Test2`
+                  `Can't find the parent. Element id: 2, parentId: 1, logicParentId: 0, name: Test2`
                );
                assert.deepEqual(elements, [
                   {

@@ -280,6 +280,7 @@ define([
                'events',
                'state',
                'changedState',
+               'logicParentName',
                'readOnly',
                'theme'
             ]);
@@ -331,6 +332,9 @@ define([
             });
             testOption(optionTypes, 'changedState', {
                args: [Object]
+            });
+            testOption(optionTypes, 'logicParentName', {
+               args: [String]
             });
             testOption(optionTypes, 'readOnly', {
                args: [Boolean]
