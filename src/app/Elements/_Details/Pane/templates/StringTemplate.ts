@@ -7,6 +7,10 @@ interface IOptions extends ITemplateOptions {
    value: string;
 }
 
+/**
+ * Template for strings.
+ * @author Зайцев А.С.
+ */
 class StringTemplate extends Control {
    protected _template: TemplateFunction = template;
    protected readonly _options: Readonly<IOptions>;
