@@ -11,6 +11,10 @@
    transition: width ease-in-out 500ms;
 }
 
+.devtools-Flamegraph__node:hover {
+   filter: brightness(0.9);
+}
+
 .devtools-Flamegraph__node_theme_@{themeName} {
    border-right: @border-thickness solid @color_separator;
 }
@@ -46,4 +50,8 @@
 
 .devtools-Flamegraph__node_warning_theme_@{themeName} {
    border-right-color: @danger_color;
+}
+
+.devtools-Profiler__content_logicParentHovered .devtools-Flamegraph__node__logicParent {
+   filter: brightness(0.9);
 }

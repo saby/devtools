@@ -3,7 +3,7 @@ import { Memory } from 'Types/source';
 import { Store } from 'Elements/elements';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { ICommitDetailsOptions } from 'Profiler/_CommitDetails/CommitDetails';
-import Flamegraph from '../_Flamegraph/Flamegraph';
+import Flamegraph, { IFlamegraphControlNode } from '../_Flamegraph/Flamegraph';
 import RankedView from '../_RankedView/RankedView';
 import SynchronizationsList from '../_SynchronizationsList/SynchronizationsList';
 import {
@@ -126,6 +126,10 @@ class Profiler extends Control<IOptions> {
 
    protected _searchTotal: number = 0;
 
+   protected _logicParentName: string = '';
+   protected _logicParentId: IFrontendControlNode['logicParentId'];
+   protected _logicParentHovered: boolean = false;
+
    protected readonly _supportedFileExtensions: string[] = ['json'];
 
    private fileGetter?: FileSystem;
@@ -185,6 +189,8 @@ class Profiler extends Control<IOptions> {
    private __updateSelectedCommitChanges(): void {
       if (typeof this._selectedCommitId === 'undefined') {
          this._selectedCommitChanges = undefined;
+         this._logicParentId = undefined;
+         this._logicParentName = '';
       } else {
          const changes = getChangesDescription(
             this._profilingData,
@@ -192,13 +198,33 @@ class Profiler extends Control<IOptions> {
             this._selectedCommitId
          );
 
+         const item = (this
+            ._snapshot as Flamegraph['_options']['snapshot']).find(
+            ({ id }) => id === this._selectedCommitId
+         );
+
+         if (
+            item &&
+            typeof item.logicParentId !== 'undefined' &&
+            item.parentId !== item.logicParentId
+         ) {
+            this._logicParentId = item.logicParentId;
+            this._logicParentName = ((this
+               ._snapshot as Flamegraph['_options']['snapshot']).find(
+               (elem) => elem.id === this._logicParentId
+            ) as IFrontendControlNode).name;
+         } else {
+            this._logicParentId = undefined;
+            this._logicParentName = '';
+         }
+
          if (changes) {
             this._selectedCommitChanges = {
                updateReason: changes.updateReason,
                changedOptions: changes.changedOptions,
                changedAttributes: changes.changedAttributes,
                changedReactiveProps: changes.changedReactiveProps,
-               warnings: this.__getWarnings()
+               warnings: this.__getWarnings(item)
             };
          } else {
             this._selectedCommitChanges = {
@@ -212,18 +238,15 @@ class Profiler extends Control<IOptions> {
     * Takes warnings of the item and if they exist transforms them into array of objects.
     * @returns Array of IWarning objects or undefined if there are no warnings for the commit.
     */
-   private __getWarnings(): IWarning[] | undefined {
+   private __getWarnings(
+      item?: IFlamegraphControlNode
+   ): IWarning[] | undefined {
       let warnings;
-      if (this._snapshot) {
-         const item = this._snapshot.find(
-            ({ id }) => id === this._selectedCommitId
-         );
-         if (item && item.warnings) {
-            warnings = item.warnings
-               .map((name) => WARNINGS[name])
-               // filter out nonexistent warnings to support importing profiles from different versions
-               .filter((warning) => warning);
-         }
+      if (item && item.warnings) {
+         warnings = item.warnings
+            .map((name) => WARNINGS[name])
+            // filter out nonexistent warnings to support importing profiles from different versions
+            .filter((warning) => warning);
       }
       return warnings;
    }
@@ -427,6 +450,10 @@ class Profiler extends Control<IOptions> {
       }>
    ): Promise<void> {
       return this.importFromFile(results);
+   }
+
+   protected _logicParentHoverChanged(e: Event, state: boolean): void {
+      this._logicParentHovered = state;
    }
 
    /**

@@ -30,6 +30,8 @@ define([
                'changedOptions',
                'changedAttributes',
                'changedReactiveProps',
+               'logicParentId',
+               'logicParentName',
                'warnings',
                'readOnly',
                'theme'
@@ -46,6 +48,12 @@ define([
             });
             testOption(optionTypes, 'changedReactiveProps', {
                args: [Array]
+            });
+            testOption(optionTypes, 'logicParentId', {
+               args: [Number]
+            });
+            testOption(optionTypes, 'logicParentName', {
+               args: [String]
             });
             testOption(optionTypes, 'warnings', {
                args: [Array]

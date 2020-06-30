@@ -7,6 +7,7 @@
                             itemData="{{ itemData }}"
                             attr:key="{{ itemData.id }}"
                             attr:name="{{ itemData.id }}"
+                            attr:class="{{ _options.logicParentId === itemData.id ? 'devtools-Flamegraph__node__logicParent' }}"
                             on:click="_onMarkedKeyChanged(itemData.id)" />
             </ws:for>
         </ws:for>

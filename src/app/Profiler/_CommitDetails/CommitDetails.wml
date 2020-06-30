@@ -56,4 +56,9 @@
             </Controls.scroll:Container>
         </div>
     </ws:else>
+    <ws:if data="{{ _options.logicParentName }}">
+        <LogicParentPanel.logicParentPanel:LogicParentPanel controlName="{{ _options.logicParentName }}"
+                                                            on:hoveredItemChanged="_notifyHandler('logicParentHoverChanged')"
+                                                            on:itemClick="_notifyHandler('logicParentClick')" />
+    </ws:if>
 </div>
