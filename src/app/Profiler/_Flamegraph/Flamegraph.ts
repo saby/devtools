@@ -7,7 +7,7 @@ import template = require('wml!Profiler/_Flamegraph/Flamegraph');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { WARNING_NAMES } from 'Profiler/_Warning/const';
 
-interface IFlamegraphControlNode extends IFrontendControlNode {
+export interface IFlamegraphControlNode extends IFrontendControlNode {
    selfDuration: number;
    actualDuration: number;
    actualBaseDuration: number;

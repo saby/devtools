@@ -1,8 +1,10 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import template = require('wml!Profiler/_CommitDetails/CommitDetails');
 import { descriptor } from 'Types/entity';
+import tmplNotify = require('Controls/Utils/tmplNotify');
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { IWarning } from 'Profiler/_Warning/const';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
 export interface ICommitDetailsOptions {
    updateReason: ControlUpdateReason;
@@ -10,6 +12,8 @@ export interface ICommitDetailsOptions {
    changedAttributes?: string[];
    changedReactiveProps?: string[];
    warnings?: IWarning[];
+   logicParentId?: IFrontendControlNode['logicParentId'];
+   logicParentName?: IFrontendControlNode['name'];
 }
 
 type Options = IControlOptions & ICommitDetailsOptions;
@@ -21,6 +25,8 @@ type Options = IControlOptions & ICommitDetailsOptions;
 class CommitDetails extends Control<Options> {
    protected _template: TemplateFunction = template;
 
+   protected _notifyHandler: Function = tmplNotify;
+
    static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof Options, unknown> {
@@ -30,6 +36,8 @@ class CommitDetails extends Control<Options> {
          changedAttributes: descriptor(Array),
          changedReactiveProps: descriptor(Array),
          warnings: descriptor(Array),
+         logicParentId: descriptor(Number),
+         logicParentName: descriptor(String),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

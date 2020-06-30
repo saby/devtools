@@ -119,7 +119,10 @@ define([
             });
          });
          it('should correctly transform profiling data to a list of synchronizations', function() {
-            const initialIdToDuration = [[1, 10], [2, 15]];
+            const initialIdToDuration = [
+               [1, 10],
+               [2, 15]
+            ];
             const changes = [
                [
                   1,
@@ -209,7 +212,12 @@ define([
          });
          it('should correctly calculate snapshot of the synchronization', function() {
             const profilingData = {
-               initialIdToDuration: new Map([[1, 10], [2, 15], [5, 2], [6, 3]]),
+               initialIdToDuration: new Map([
+                  [1, 10],
+                  [2, 15],
+                  [5, 2],
+                  [6, 3]
+               ]),
                synchronizationKeyToDescription: new Map([
                   [
                      'test',
@@ -324,8 +332,22 @@ define([
                }
             ];
             const changesBySynchronization = new Map([
-               ['test', [[3, 1], [3, 2]]],
-               ['test2', [[3, 1], [3, 2], [1, 3, '3', 0, 1, 1], [1, 4, '4', 0, 1, 1]]]
+               [
+                  'test',
+                  [
+                     [3, 1],
+                     [3, 2]
+                  ]
+               ],
+               [
+                  'test2',
+                  [
+                     [3, 1],
+                     [3, 2],
+                     [1, 3, '3', 0, 1, 1],
+                     [1, 4, '4', 0, 1, 1]
+                  ]
+               ]
             ]);
             instance._profilingData = profilingData;
             instance._synchronizations = synchronizations;
@@ -516,10 +538,14 @@ define([
             instance._selectedCommitChanges = {
                updateReason: 'unchanged'
             };
+            instance._logicParentId = 2;
+            instance._logicParentName = 'Test';
 
             instance.__updateSelectedCommitChanges();
 
             assert.isUndefined(instance._selectedCommitChanges);
+            assert.isUndefined(instance._logicParentId);
+            assert.equal(instance._logicParentName, '');
          });
 
          it('should find the correct changesDescription', function() {
@@ -537,14 +563,41 @@ define([
                      'test1',
                      {
                         selfDuration: 10,
-                        changes: new Map([[1, changesDescription]])
+                        changes: new Map([[2, changesDescription]])
                      }
                   ]
                ])
             };
             instance._selectedSynchronizationId = 'test1';
-            instance._selectedCommitId = 1;
-            sandbox.stub(instance, '__getWarnings').returns(undefined);
+            instance._selectedCommitId = 2;
+            instance._snapshot = [
+               {
+                  id: 0,
+                  name: 'LogicParent'
+               },
+               {
+                  id: 1,
+                  name: 'Parent',
+                  parentId: 0,
+                  logicParentId: 0
+               },
+               {
+                  id: 2,
+                  name: 'Child',
+                  parentId: 1,
+                  logicParentId: 0
+               }
+            ];
+            sandbox
+               .stub(instance, '__getWarnings')
+               .withArgs({
+                  id: 2,
+                  name: 'Child',
+                  parentId: 1,
+                  logicParentId: 0,
+                  warnings: undefined
+               })
+               .returns(undefined);
 
             instance.__updateSelectedCommitChanges();
 
@@ -552,6 +605,8 @@ define([
                instance._selectedCommitChanges,
                changesDescription
             );
+            assert.equal(instance._logicParentId, 0);
+            assert.equal(instance._logicParentName, 'LogicParent');
          });
 
          it('should find the correct changesDescription and correct warnings', function() {
@@ -574,9 +629,29 @@ define([
                   ]
                ])
             };
+            instance._snapshot = [
+               {
+                  id: 0,
+                  name: 'LogicParent'
+               },
+               {
+                  id: 1,
+                  name: 'Parent',
+                  parentId: 0,
+                  logicParentId: 0
+               }
+            ];
             instance._selectedSynchronizationId = 'test1';
             instance._selectedCommitId = 1;
-            sandbox.stub(instance, '__getWarnings').returns(['domUnchanged']);
+            sandbox
+               .stub(instance, '__getWarnings')
+               .withArgs({
+                  id: 1,
+                  name: 'Parent',
+                  parentId: 0,
+                  logicParentId: 0
+               })
+               .returns(['domUnchanged']);
 
             instance.__updateSelectedCommitChanges();
 
@@ -584,6 +659,8 @@ define([
                instance._selectedCommitChanges,
                changesDescription
             );
+            assert.isUndefined(instance._logicParentId);
+            assert.equal(instance._logicParentName, '');
          });
 
          it("should set update reason as unchanged because there're no changes for the selected commit", function() {
@@ -601,12 +678,26 @@ define([
             };
             instance._selectedSynchronizationId = 'test1';
             instance._selectedCommitId = 1;
+            instance._snapshot = [
+               {
+                  id: 0,
+                  name: 'LogicParent'
+               },
+               {
+                  id: 1,
+                  name: 'Parent',
+                  parentId: 0,
+                  logicParentId: 0
+               }
+            ];
 
             instance.__updateSelectedCommitChanges();
 
             assert.deepEqual(instance._selectedCommitChanges, {
                updateReason: 'unchanged'
             });
+            assert.isUndefined(instance._logicParentId);
+            assert.equal(instance._logicParentName, '');
          });
       });
 
@@ -622,77 +713,40 @@ define([
             });
          });
 
-         it('should return undefined because there is no snapshot', function() {
-            assert.isUndefined(instance.__getWarnings());
-         });
-
-         it('should return undefined because snapshot does not contain selected commit', function() {
-            instance._snapshot = [
-               {
-                  id: 1,
-                  name: '1',
-                  depth: 0,
-                  class: ''
-               },
-               {
-                  id: 2,
-                  name: '2',
-                  depth: 1,
-                  parentId: 1,
-                  class: ''
-               }
-            ];
-            instance._selectedCommitId = 3;
-
+         it('should return undefined because there is no item', function() {
             assert.isUndefined(instance.__getWarnings());
          });
 
          it('should return undefined because selected commit does not contain warnings', function() {
-            instance._snapshot = [
-               {
-                  id: 1,
-                  name: '1',
-                  depth: 0,
-                  class: ''
-               },
-               {
+            assert.isUndefined(
+               instance.__getWarnings({
                   id: 2,
                   name: '2',
                   depth: 1,
                   parentId: 1,
-                  class: ''
-               }
-            ];
-            instance._selectedCommitId = 2;
-
-            assert.isUndefined(instance.__getWarnings());
+                  class: '',
+                  warnings: undefined
+               })
+            );
          });
 
          it('should return warnings', function() {
-            instance._snapshot = [
-               {
-                  id: 1,
-                  name: '1',
-                  depth: 0,
-                  class: ''
-               },
-               {
+            assert.deepEqual(
+               instance.__getWarnings({
                   id: 2,
                   name: '2',
                   depth: 1,
                   parentId: 1,
                   class: '',
                   warnings: ['domUnchanged']
-               }
-            ];
-            instance._selectedCommitId = 2;
-
-            assert.deepEqual(instance.__getWarnings(), [
-               {
-                  caption: 'Needless synchronization',
-                  template: 'Profiler/profiler:domUnchanged'
-               }
-            ]);
+               }),
+               [
+                  {
+                     caption: 'Needless synchronization',
+                     template: 'Profiler/profiler:domUnchanged'
+                  }
+               ]
+            );
          });
       });
 
@@ -772,6 +826,32 @@ define([
          });
       });
 
+      describe('_logicParentHoverChanged', function() {
+         let instance;
+         beforeEach(function() {
+            instance = new Profiler({
+               store: {
+                  addListener() {},
+                  toggleDevtoolsOpened() {},
+                  dispatch() {}
+               }
+            });
+         });
+
+         it('should set instance._logicParentHovered to the passed state', function() {
+            instance._logicParentHovered = false;
+
+            instance._logicParentHoverChanged({}, false);
+            assert.isFalse(instance._logicParentHovered);
+
+            instance._logicParentHoverChanged({}, true);
+            assert.isTrue(instance._logicParentHovered);
+
+            instance._logicParentHoverChanged({}, false);
+            assert.isFalse(instance._logicParentHovered);
+         });
+      });
+
       describe('__getElementsBySynchronization', function() {
          let instance;
          beforeEach(function() {
@@ -818,7 +898,13 @@ define([
                }
             ];
             const changesBySynchronization = new Map([
-               ['test', [[3, 2], [1, 3, '3', 0, 2, 2]]]
+               [
+                  'test',
+                  [
+                     [3, 2],
+                     [1, 3, '3', 0, 2, 2]
+                  ]
+               ]
             ]);
             instance._elementsSnapshot = elementsSnapshot;
             instance._changesBySynchronization = changesBySynchronization;
@@ -950,7 +1036,13 @@ define([
                }
             ];
             const changesBySynchronization = new Map([
-               ['test', [[0, 2], [0, 3]]]
+               [
+                  'test',
+                  [
+                     [0, 2],
+                     [0, 3]
+                  ]
+               ]
             ]);
             instance._elementsSnapshot = elementsSnapshot;
             instance._changesBySynchronization = changesBySynchronization;
@@ -1730,7 +1822,10 @@ define([
             );
             assert.deepEqual(
                instance._destroyedCountBySynchronization,
-               new Map([['0', 0], ['1', 1]])
+               new Map([
+                  ['0', 0],
+                  ['1', 1]
+               ])
             );
             assert.isTrue(instance._didProfile);
             assert.deepEqual(instance._profilingData, {
@@ -1989,7 +2084,10 @@ define([
             );
             assert.deepEqual(
                instance._destroyedCountBySynchronization,
-               new Map([['0', 0], ['1', 1]])
+               new Map([
+                  ['0', 0],
+                  ['1', 1]
+               ])
             );
             assert.isTrue(instance._didProfile);
             assert.deepEqual(instance._profilingData, {

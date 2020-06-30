@@ -67,8 +67,9 @@
                         <ws:if data="{{ _selectedTab === 'Flamegraph' }}">
                             <Profiler._Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
                                                              markedKey="{{ _selectedCommitId }}"
+                                                             logicParentId="{{ _logicParentId }}"
                                                              on:markedKeyChanged="_detailMarkedKeyChanged()"
-                                                             attr:class="ws-flex-grow-1"/>
+                                                             attr:class="ws-flex-grow-1 {{ _logicParentHovered ? 'devtools-Profiler__content_logicParentHovered' }}"/>
                         </ws:if>
                         <ws:else>
                             <Profiler._RankedView.RankedView snapshot="{{ _snapshot }}"
@@ -84,7 +85,10 @@
                                                            changedOptions="{{ _selectedCommitChanges.changedOptions }}"
                                                            changedAttributes="{{ _selectedCommitChanges.changedAttributes }}"
                                                            changedReactiveProps="{{ _selectedCommitChanges.changedReactiveProps }}"
-                                                           warnings="{{ _selectedCommitChanges.warnings }}"/>
+                                                           warnings="{{ _selectedCommitChanges.warnings }}"
+                                                           logicParentName="{{ _selectedTab === 'Flamegraph' ? _logicParentName : '' }}"
+                                                           on:logicParentHoverChanged="_logicParentHoverChanged()"
+                                                           on:logicParentClick="_detailMarkedKeyChanged(_logicParentId)" />
                 </ws:if>
                 <ws:else>
                     <Profiler._Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"
