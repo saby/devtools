@@ -32,6 +32,11 @@ const enum ShowType {
    TOOLBAR
 }
 
+/**
+ * Controller of the "Debugging" tab.
+ * Manages the s3debug cookie and forms data for lists.
+ * @author Зайцев А.С.
+ */
 class View extends Control<IControlOptions, void[]> {
    protected _template: TemplateFunction = template;
    protected _unselectedSource: Memory;
