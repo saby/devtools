@@ -315,7 +315,7 @@ define([
          });
       });
 
-      describe('moveItems', function() {
+      describe('_moveItems', function() {
          it('should remove the item from the unselected source and add it to the selected source', async function() {
             instance._children = {
                unselectedList: {
@@ -333,7 +333,10 @@ define([
             };
             instance.pinnedModules = new Set();
 
-            await instance._unselectedActions[0].handler(
+            await instance._moveItems(
+               {},
+               instance._unselectedSource,
+               instance._selectedSource,
                new Record({
                   rawData: {
                      id: 'UI',
@@ -375,7 +378,10 @@ define([
             };
             instance.pinnedModules = new Set();
 
-            await instance._selectedActions[0].handler(
+            await instance._moveItems(
+               {},
+               instance._selectedSource,
+               instance._unselectedSource,
                new Record({
                   rawData: {
                      id: 'UI',
@@ -422,7 +428,10 @@ define([
             ]);
             instance.pinnedModules = new Set();
 
-            await instance._unselectedActions[0].handler(
+            await instance._moveItems(
+               {},
+               instance._unselectedSource,
+               instance._selectedSource,
                new Record({
                   rawData: {
                      id: 'WS.Core',
@@ -482,7 +491,10 @@ define([
             };
             instance.pinnedModules = new Set(['UI']);
 
-            await instance._unselectedActions[0].handler(
+            await instance._moveItems(
+               {},
+               instance._unselectedSource,
+               instance._selectedSource,
                new Record({
                   rawData: {
                      id: 'UI',
@@ -828,7 +840,7 @@ define([
                }
             });
 
-            await instance._unselectedActions[1].handler(oldItem);
+            await instance._unselectedActions[0].handler(oldItem);
 
             assert.notEqual(
                instance._unselectedSource.update.firstCall.args[0],
@@ -868,7 +880,7 @@ define([
                }
             });
 
-            await instance._unselectedActions[2].handler(oldItem);
+            await instance._unselectedActions[1].handler(oldItem);
 
             assert.notEqual(
                instance._unselectedSource.update.firstCall.args[0],
@@ -908,7 +920,7 @@ define([
                }
             });
 
-            await instance._selectedActions[1].handler(oldItem);
+            await instance._selectedActions[0].handler(oldItem);
 
             assert.notEqual(
                instance._selectedSource.update.firstCall.args[0],
@@ -948,7 +960,7 @@ define([
                }
             });
 
-            await instance._selectedActions[2].handler(oldItem);
+            await instance._selectedActions[1].handler(oldItem);
 
             assert.notEqual(
                instance._selectedSource.update.firstCall.args[0],

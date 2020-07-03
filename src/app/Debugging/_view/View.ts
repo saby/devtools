@@ -47,13 +47,6 @@ class View extends Control<IControlOptions, void[]> {
    protected _selectedItemsReadyCallback: (items: RecordSet) => void;
    protected _unselectedActions: IItemAction[] = [
       {
-         id: 'moveLeft',
-         showType: ShowType.TOOLBAR,
-         icon: 'icon-DayForward',
-         handler: (item) =>
-            this.moveItems(item, this._unselectedSource, this._selectedSource)
-      },
-      {
          id: 'pin',
          showType: ShowType.TOOLBAR,
          icon: 'icon-PinNull',
@@ -79,13 +72,6 @@ class View extends Control<IControlOptions, void[]> {
       }
    ];
    protected _selectedActions: IItemAction[] = [
-      {
-         id: 'moveRight',
-         showType: ShowType.TOOLBAR,
-         icon: 'icon-DayBackward',
-         handler: (item) =>
-            this.moveItems(item, this._selectedSource, this._unselectedSource)
-      },
       {
          id: 'pin',
          showType: ShowType.TOOLBAR,
@@ -244,6 +230,39 @@ class View extends Control<IControlOptions, void[]> {
       }
    }
 
+   protected async _moveItems(
+      e: Event,
+      sourceSource: Memory,
+      targetSource: Memory,
+      item: Record
+   ): Promise<void> {
+      const itemKey = item.get('id');
+      let items;
+      if (WS_CORE_MODULES.includes(itemKey)) {
+         items = WS_CORE_MODULES.filter((module) =>
+            this.existingModules.has(module)
+         );
+      } else {
+         items = [itemKey];
+      }
+      await sourceSource.destroy(items);
+      await Promise.all(
+         items.map((elem) =>
+            targetSource.update(
+               new Record({
+                  rawData: {
+                     id: elem,
+                     title: elem,
+                     isPinned: this.pinnedModules.has(elem)
+                  }
+               })
+            )
+         )
+      );
+      this._children.unselectedList.reload();
+      this._children.selectedList.reload();
+   }
+
    private getUrl(): Promise<string> {
       return new Promise((resolve) => {
          chrome.tabs.get(chrome.devtools.inspectedWindow.tabId, (tab: Tab) => {
@@ -296,38 +315,6 @@ class View extends Control<IControlOptions, void[]> {
             }
          );
       });
-   }
-
-   private async moveItems(
-      item: Record,
-      sourceSource: Memory,
-      targetSource: Memory
-   ): Promise<void> {
-      const itemKey = item.get('id');
-      let items;
-      if (WS_CORE_MODULES.includes(itemKey)) {
-         items = WS_CORE_MODULES.filter((module) =>
-            this.existingModules.has(module)
-         );
-      } else {
-         items = [itemKey];
-      }
-      await sourceSource.destroy(items);
-      await Promise.all(
-         items.map((elem) =>
-            targetSource.update(
-               new Record({
-                  rawData: {
-                     id: elem,
-                     title: elem,
-                     isPinned: this.pinnedModules.has(elem)
-                  }
-               })
-            )
-         )
-      );
-      this._children.unselectedList.reload();
-      this._children.selectedList.reload();
    }
 
    private async getPinnedModules(): Promise<Set<string>> {

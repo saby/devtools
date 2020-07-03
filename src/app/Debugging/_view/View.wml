@@ -30,7 +30,8 @@
                         <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
                             <Controls.list:View name="unselectedList"
                                                 itemActions="{{ _unselectedActions }}"
-                                                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}">
+                                                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
+                                                on:itemClick="_moveItems(_unselectedSource, _selectedSource)">
                                 <ws:itemTemplate>
                                     <ws:partial template="Controls/list:ItemTemplate"
                                                 attr:class="{{ itemTemplate.itemData.item.isPinned ? 'devtools-Debugging__listItem' }}" />
@@ -60,7 +61,8 @@
                             <Controls.list:View name="selectedList"
                                                 itemActions="{{ _selectedActions }}"
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
-                                                itemsReadyCallback="{{ _selectedItemsReadyCallback }}">
+                                                itemsReadyCallback="{{ _selectedItemsReadyCallback }}"
+                                                on:itemClick="_moveItems(_selectedSource, _unselectedSource)">
                                 <ws:itemTemplate>
                                     <ws:partial template="Controls/list:ItemTemplate"
                                                 attr:class="{{ itemTemplate.itemData.item.isPinned ? 'devtools-Debugging__listItem' }}" />
