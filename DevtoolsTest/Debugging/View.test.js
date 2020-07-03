@@ -45,6 +45,10 @@ define([
                .callsArgWith(1, {
                   value: 'true'
                });
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('debuggingPinnedModules')
+               .callsArgWith(1, []);
 
             await instance._beforeMount();
 
@@ -52,15 +56,18 @@ define([
             assert.deepEqual(instance._selectedSource.data, [
                {
                   id: 'Controls',
-                  title: 'Controls'
+                  title: 'Controls',
+                  isPinned: false
                },
                {
                   id: 'UI',
-                  title: 'UI'
+                  title: 'UI',
+                  isPinned: false
                },
                {
                   id: 'Core',
-                  title: 'Core'
+                  title: 'Core',
+                  isPinned: false
                }
             ]);
          });
@@ -86,6 +93,10 @@ define([
                .callsArgWith(1, {
                   value: 'Controls,UI,Core'
                });
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('debuggingPinnedModules')
+               .callsArgWith(1, []);
 
             await instance._beforeMount();
 
@@ -93,15 +104,18 @@ define([
             assert.deepEqual(instance._selectedSource.data, [
                {
                   id: 'Controls',
-                  title: 'Controls'
+                  title: 'Controls',
+                  isPinned: false
                },
                {
                   id: 'UI',
-                  title: 'UI'
+                  title: 'UI',
+                  isPinned: false
                },
                {
                   id: 'Core',
-                  title: 'Core'
+                  title: 'Core',
+                  isPinned: false
                }
             ]);
          });
@@ -127,21 +141,28 @@ define([
                .callsArgWith(1, {
                   value: ''
                });
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('debuggingPinnedModules')
+               .callsArgWith(1, []);
 
             await instance._beforeMount();
 
             assert.deepEqual(instance._unselectedSource.data, [
                {
                   id: 'Controls',
-                  title: 'Controls'
+                  title: 'Controls',
+                  isPinned: false
                },
                {
                   id: 'UI',
-                  title: 'UI'
+                  title: 'UI',
+                  isPinned: false
                },
                {
                   id: 'Core',
-                  title: 'Core'
+                  title: 'Core',
+                  isPinned: false
                }
             ]);
             assert.deepEqual(instance._selectedSource.data, []);
@@ -166,28 +187,135 @@ define([
                   url
                })
                .callsArgWith(1, null);
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('debuggingPinnedModules')
+               .callsArgWith(1, []);
 
             await instance._beforeMount();
 
             assert.deepEqual(instance._unselectedSource.data, [
                {
                   id: 'Controls',
-                  title: 'Controls'
+                  title: 'Controls',
+                  isPinned: false
                },
                {
                   id: 'UI',
-                  title: 'UI'
+                  title: 'UI',
+                  isPinned: false
                },
                {
                   id: 'Core',
-                  title: 'Core'
+                  title: 'Core',
+                  isPinned: false
                }
             ]);
             assert.deepEqual(instance._selectedSource.data, []);
          });
+
+         it('should correctly set isPinned for modules from s3debug', async function() {
+            const url = 'https://online.sbis.ru';
+            sandbox
+               .stub(chrome.devtools.inspectedWindow, 'eval')
+               .withArgs('contents ? Object.keys(contents.modules) : []')
+               .callsArgWith(1, ['Controls', 'UI', 'Core']);
+            sandbox
+               .stub(chrome.tabs, 'get')
+               .withArgs(chrome.devtools.inspectedWindow.tabId)
+               .callsArgWith(1, {
+                  url
+               });
+            sandbox
+               .stub(chrome.cookies, 'get')
+               .withArgs({
+                  name: 's3debug',
+                  url
+               })
+               .callsArgWith(1, {
+                  value: 'Controls,UI,Core'
+               });
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('debuggingPinnedModules')
+               .callsArgWith(1, {
+                  debuggingPinnedModules: ['UI']
+               });
+
+            await instance._beforeMount();
+
+            assert.deepEqual(instance._unselectedSource.data, []);
+            assert.deepEqual(instance._selectedSource.data, [
+               {
+                  id: 'Controls',
+                  title: 'Controls',
+                  isPinned: false
+               },
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: true
+               },
+               {
+                  id: 'Core',
+                  title: 'Core',
+                  isPinned: false
+               }
+            ]);
+         });
+
+         it('should correctly set isPinned if s3debug=true', async function() {
+            const url = 'https://online.sbis.ru';
+            sandbox
+               .stub(chrome.devtools.inspectedWindow, 'eval')
+               .withArgs('contents ? Object.keys(contents.modules) : []')
+               .callsArgWith(1, ['Controls', 'UI', 'Core']);
+            sandbox
+               .stub(chrome.tabs, 'get')
+               .withArgs(chrome.devtools.inspectedWindow.tabId)
+               .callsArgWith(1, {
+                  url
+               });
+            sandbox
+               .stub(chrome.cookies, 'get')
+               .withArgs({
+                  name: 's3debug',
+                  url
+               })
+               .callsArgWith(1, {
+                  value: 'true'
+               });
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('debuggingPinnedModules')
+               .callsArgWith(1, {
+                  debuggingPinnedModules: ['UI']
+               });
+
+            await instance._beforeMount();
+
+            assert.deepEqual(instance._unselectedSource.data, []);
+            assert.deepEqual(instance._selectedSource.data, [
+               {
+                  id: 'Controls',
+                  title: 'Controls',
+                  isPinned: false
+               },
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: true
+               },
+               {
+                  id: 'Core',
+                  title: 'Core',
+                  isPinned: false
+               }
+            ]);
+         });
       });
 
-      describe('moveItems', function() {
+      describe('_moveItems', function() {
          it('should remove the item from the unselected source and add it to the selected source', async function() {
             instance._children = {
                unselectedList: {
@@ -203,12 +331,17 @@ define([
             instance._selectedSource = {
                update: sandbox.stub()
             };
+            instance.pinnedModules = new Set();
 
-            await instance._unselectedActions[0].handler(
+            await instance._moveItems(
+               {},
+               instance._unselectedSource,
+               instance._selectedSource,
                new Record({
                   rawData: {
                      id: 'UI',
-                     title: 'UI'
+                     title: 'UI',
+                     isPinned: false
                   }
                })
             );
@@ -220,7 +353,8 @@ define([
                instance._selectedSource.update.firstCall.args[0].getRawData(),
                {
                   id: 'UI',
-                  title: 'UI'
+                  title: 'UI',
+                  isPinned: false
                }
             );
             sinon.assert.calledOnce(instance._children.unselectedList.reload);
@@ -242,12 +376,17 @@ define([
             instance._selectedSource = {
                destroy: sandbox.stub()
             };
+            instance.pinnedModules = new Set();
 
-            await instance._selectedActions[0].handler(
+            await instance._moveItems(
+               {},
+               instance._selectedSource,
+               instance._unselectedSource,
                new Record({
                   rawData: {
                      id: 'UI',
-                     title: 'UI'
+                     title: 'UI',
+                     isPinned: false
                   }
                })
             );
@@ -256,7 +395,8 @@ define([
                instance._unselectedSource.update.firstCall.args[0].getRawData(),
                {
                   id: 'UI',
-                  title: 'UI'
+                  title: 'UI',
+                  isPinned: false
                }
             );
             sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
@@ -281,17 +421,22 @@ define([
             instance._selectedSource = {
                update: sandbox.stub()
             };
-            instance._existingModules = new Set([
+            instance.existingModules = new Set([
                'WS.Core',
                'WS.Deprecated',
                'Core'
             ]);
+            instance.pinnedModules = new Set();
 
-            await instance._unselectedActions[0].handler(
+            await instance._moveItems(
+               {},
+               instance._unselectedSource,
+               instance._selectedSource,
                new Record({
                   rawData: {
                      id: 'WS.Core',
-                     title: 'WS.Core'
+                     title: 'WS.Core',
+                     isPinned: false
                   }
                })
             );
@@ -305,21 +450,69 @@ define([
                instance._selectedSource.update.firstCall.args[0].getRawData(),
                {
                   id: 'WS.Core',
-                  title: 'WS.Core'
+                  title: 'WS.Core',
+                  isPinned: false
                }
             );
             assert.deepEqual(
                instance._selectedSource.update.secondCall.args[0].getRawData(),
                {
                   id: 'WS.Deprecated',
-                  title: 'WS.Deprecated'
+                  title: 'WS.Deprecated',
+                  isPinned: false
                }
             );
             assert.deepEqual(
                instance._selectedSource.update.thirdCall.args[0].getRawData(),
                {
                   id: 'Core',
-                  title: 'Core'
+                  title: 'Core',
+                  isPinned: false
+               }
+            );
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
+         });
+
+         it('should not lose isPinned during the move', async function() {
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               },
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._unselectedSource = {
+               destroy: sandbox.stub()
+            };
+            instance._selectedSource = {
+               update: sandbox.stub()
+            };
+            instance.pinnedModules = new Set(['UI']);
+
+            await instance._moveItems(
+               {},
+               instance._unselectedSource,
+               instance._selectedSource,
+               new Record({
+                  rawData: {
+                     id: 'UI',
+                     title: 'UI',
+                     isPinned: true
+                  }
+               })
+            );
+
+            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
+               'UI'
+            ]);
+            assert.deepEqual(
+               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: true
                }
             );
             sinon.assert.calledOnce(instance._children.unselectedList.reload);
@@ -615,12 +808,260 @@ define([
                .callsArgWith(1, {
                   value: 'true'
                });
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('debuggingPinnedModules')
+               .callsArgWith(1, []);
             await instance._beforeMount();
 
             instance._selectedItemsReadyCallback(items);
 
             assert.equal(instance._selectedItems, items);
          });
+      });
+
+      describe('togglePin', function() {
+         it('should pin the item, update it in the source and reload the unselectedList', async function() {
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._unselectedSource = {
+               update: sandbox.stub().resolves()
+            };
+            instance.pinnedModules = new Set();
+            sandbox.stub(chrome.storage.sync, 'set');
+            const oldItem = new Record({
+               rawData: {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            });
+
+            await instance._unselectedActions[0].handler(oldItem);
+
+            assert.notEqual(
+               instance._unselectedSource.update.firstCall.args[0],
+               oldItem
+            );
+            assert.deepEqual(
+               instance._unselectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: true
+               }
+            );
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            assert.deepEqual(instance.pinnedModules, new Set(['UI']));
+            sinon.assert.calledWithExactly(chrome.storage.sync.set, {
+               debuggingPinnedModules: ['UI']
+            });
+         });
+
+         it('should unpin the item, update it in the source and reload the unselectedList', async function() {
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._unselectedSource = {
+               update: sandbox.stub().resolves()
+            };
+            instance.pinnedModules = new Set(['UI']);
+            sandbox.stub(chrome.storage.sync, 'set');
+            const oldItem = new Record({
+               rawData: {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: true
+               }
+            });
+
+            await instance._unselectedActions[1].handler(oldItem);
+
+            assert.notEqual(
+               instance._unselectedSource.update.firstCall.args[0],
+               oldItem
+            );
+            assert.deepEqual(
+               instance._unselectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            );
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            assert.deepEqual(instance.pinnedModules, new Set());
+            sinon.assert.calledWithExactly(chrome.storage.sync.set, {
+               debuggingPinnedModules: []
+            });
+         });
+
+         it('should pin the item, update it in the source and reload the selectedList', async function() {
+            instance._children = {
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._selectedSource = {
+               update: sandbox.stub().resolves()
+            };
+            instance.pinnedModules = new Set();
+            sandbox.stub(chrome.storage.sync, 'set');
+            const oldItem = new Record({
+               rawData: {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            });
+
+            await instance._selectedActions[0].handler(oldItem);
+
+            assert.notEqual(
+               instance._selectedSource.update.firstCall.args[0],
+               oldItem
+            );
+            assert.deepEqual(
+               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: true
+               }
+            );
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
+            assert.deepEqual(instance.pinnedModules, new Set(['UI']));
+            sinon.assert.calledWithExactly(chrome.storage.sync.set, {
+               debuggingPinnedModules: ['UI']
+            });
+         });
+
+         it('should unpin the item, update it in the source and reload the selectedList', async function() {
+            instance._children = {
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._selectedSource = {
+               update: sandbox.stub().resolves()
+            };
+            instance.pinnedModules = new Set(['UI']);
+            sandbox.stub(chrome.storage.sync, 'set');
+            const oldItem = new Record({
+               rawData: {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: true
+               }
+            });
+
+            await instance._selectedActions[1].handler(oldItem);
+
+            assert.notEqual(
+               instance._selectedSource.update.firstCall.args[0],
+               oldItem
+            );
+            assert.deepEqual(
+               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            );
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
+            assert.deepEqual(instance.pinnedModules, new Set());
+            sinon.assert.calledWithExactly(chrome.storage.sync.set, {
+               debuggingPinnedModules: []
+            });
+         });
+      });
+
+      it('_itemActionVisibilityCallback', function() {
+         const pinnedItem = new Record({
+            rawData: {
+               id: 'UI',
+               title: 'UI',
+               isPinned: true
+            }
+         });
+         const unpinnedItem = new Record({
+            rawData: {
+               id: 'UI',
+               title: 'UI',
+               isPinned: false
+            }
+         });
+
+         assert.isFalse(
+            instance._itemActionVisibilityCallback(
+               {
+                  id: 'pin'
+               },
+               pinnedItem
+            )
+         );
+         assert.isTrue(
+            instance._itemActionVisibilityCallback(
+               {
+                  id: 'pin'
+               },
+               unpinnedItem
+            )
+         );
+         assert.isTrue(
+            instance._itemActionVisibilityCallback(
+               {
+                  id: 'unpin'
+               },
+               pinnedItem
+            )
+         );
+         assert.isFalse(
+            instance._itemActionVisibilityCallback(
+               {
+                  id: 'unpin'
+               },
+               unpinnedItem
+            )
+         );
+         assert.isTrue(
+            instance._itemActionVisibilityCallback(
+               {
+                  id: 'moveRight'
+               },
+               unpinnedItem
+            )
+         );
+         assert.isTrue(
+            instance._itemActionVisibilityCallback(
+               {
+                  id: 'moveRight'
+               },
+               pinnedItem
+            )
+         );
+         assert.isTrue(
+            instance._itemActionVisibilityCallback(
+               {
+                  id: 'moveLeft'
+               },
+               unpinnedItem
+            )
+         );
+         assert.isTrue(
+            instance._itemActionVisibilityCallback(
+               {
+                  id: 'moveLeft'
+               },
+               pinnedItem
+            )
+         );
       });
    });
 });

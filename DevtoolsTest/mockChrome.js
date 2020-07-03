@@ -51,5 +51,11 @@ GLOBAL.chrome = {
    },
    tabs: {
       get() {}
+   },
+   storage: {
+      sync: {
+         get() {},
+         set() {}
+      }
    }
 };
