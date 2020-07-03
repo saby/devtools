@@ -29,7 +29,13 @@
                     <ws:content>
                         <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
                             <Controls.list:View name="unselectedList"
-                                                itemActions="{{ _unselectedActions }}" />
+                                                itemActions="{{ _unselectedActions }}"
+                                                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}">
+                                <ws:itemTemplate>
+                                    <ws:partial template="Controls/list:ItemTemplate"
+                                                attr:class="{{ itemTemplate.itemData.item.isPinned ? 'devtools-Debugging__listItem' }}" />
+                                </ws:itemTemplate>
+                            </Controls.list:View>
                         </Controls.scroll:Container>
                     </ws:content>
                 </Layout.Browser>
@@ -53,7 +59,13 @@
                         <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
                             <Controls.list:View name="selectedList"
                                                 itemActions="{{ _selectedActions }}"
-                                                itemsReadyCallback="{{ _selectedItemsReadyCallback }}" />
+                                                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
+                                                itemsReadyCallback="{{ _selectedItemsReadyCallback }}">
+                                <ws:itemTemplate>
+                                    <ws:partial template="Controls/list:ItemTemplate"
+                                                attr:class="{{ itemTemplate.itemData.item.isPinned ? 'devtools-Debugging__listItem' }}" />
+                                </ws:itemTemplate>
+                            </Controls.list:View>
                         </Controls.scroll:Container>
                     </ws:content>
                 </Layout.Browser>

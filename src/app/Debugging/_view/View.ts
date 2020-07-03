@@ -4,6 +4,10 @@ import { adapter, Record } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
 import { Confirmation } from 'Controls/popup';
 import { View as ListView } from 'Controls/list';
+import {
+   IItemAction,
+   TItemActionShowType as ShowType
+} from 'Controls/itemActions';
 import template = require('wml!Debugging/_view/View');
 import Cookie = chrome.cookies.Cookie;
 import Tab = chrome.tabs.Tab;
@@ -24,12 +28,7 @@ const WS_CORE_MODULES = [
 interface IItem {
    id: string;
    title: string;
-}
-
-const enum ShowType {
-   MENU,
-   MENU_TOOLBAR,
-   TOOLBAR
+   isPinned: boolean;
 }
 
 /**
@@ -43,26 +42,73 @@ class View extends Control<IControlOptions, void[]> {
    protected _selectedSource: Memory;
    protected _unselectedSearchValue: string = '';
    protected _selectedSearchValue: string = '';
-   protected _sorting: object = [{ title: 'ASC' }];
+   protected _sorting: object = [{ isPinned: 'DESC' }, { title: 'ASC' }];
    protected _selectedItems: RecordSet;
    protected _selectedItemsReadyCallback: (items: RecordSet) => void;
-   protected _existingModules: Set<string>;
-   protected _unselectedActions: object[] = [
+   protected _unselectedActions: IItemAction[] = [
       {
          id: 'moveLeft',
          showType: ShowType.TOOLBAR,
          icon: 'icon-DayForward',
-         handler: (item: Record) =>
+         handler: (item) =>
             this.moveItems(item, this._unselectedSource, this._selectedSource)
+      },
+      {
+         id: 'pin',
+         showType: ShowType.TOOLBAR,
+         icon: 'icon-PinNull',
+         handler: (item) =>
+            this.togglePin(
+               item,
+               true,
+               this._unselectedSource,
+               this._children.unselectedList
+            )
+      },
+      {
+         id: 'unpin',
+         showType: ShowType.TOOLBAR,
+         icon: 'icon-PinOff',
+         handler: (item) =>
+            this.togglePin(
+               item,
+               false,
+               this._unselectedSource,
+               this._children.unselectedList
+            )
       }
    ];
-   protected _selectedActions: object[] = [
+   protected _selectedActions: IItemAction[] = [
       {
          id: 'moveRight',
          showType: ShowType.TOOLBAR,
          icon: 'icon-DayBackward',
-         handler: (item: Record) =>
+         handler: (item) =>
             this.moveItems(item, this._selectedSource, this._unselectedSource)
+      },
+      {
+         id: 'pin',
+         showType: ShowType.TOOLBAR,
+         icon: 'icon-PinNull',
+         handler: (item) =>
+            this.togglePin(
+               item,
+               true,
+               this._selectedSource,
+               this._children.selectedList
+            )
+      },
+      {
+         id: 'unpin',
+         showType: ShowType.TOOLBAR,
+         icon: 'icon-PinOff',
+         handler: (item) =>
+            this.togglePin(
+               item,
+               false,
+               this._selectedSource,
+               this._children.selectedList
+            )
       }
    ];
    protected _children: {
@@ -70,13 +116,21 @@ class View extends Control<IControlOptions, void[]> {
       selectedList: ListView;
    };
 
+   private existingModules: Set<string>;
+   private pinnedModules: Set<string>;
+
    protected async _beforeMount(): Promise<void> {
       this._selectedItemsReadyCallback = (items) => {
          this._selectedItems = items;
       };
-      const [modules, url]: [string[], string] = await Promise.all([
+      const [modules, url, pinnedModules]: [
+         string[],
+         string,
+         Set<string>
+      ] = await Promise.all([
          this.getModules(),
-         this.getUrl()
+         this.getUrl(),
+         this.getPinnedModules()
       ]);
       const cookieValue = await this.getCookieValue(url);
       const selectedModules: IItem[] = [];
@@ -86,7 +140,8 @@ class View extends Control<IControlOptions, void[]> {
          modules.forEach((value) => {
             selectedModules.push({
                id: value,
-               title: value
+               title: value,
+               isPinned: pinnedModules.has(value)
             });
          });
       } else {
@@ -97,7 +152,8 @@ class View extends Control<IControlOptions, void[]> {
          modules.forEach((value) => {
             const newItem = {
                id: value,
-               title: value
+               title: value,
+               isPinned: pinnedModules.has(value)
             };
             if (selectedModulesSet.has(value)) {
                selectedModules.push(newItem);
@@ -174,6 +230,20 @@ class View extends Control<IControlOptions, void[]> {
       );
    }
 
+   protected _itemActionVisibilityCallback(
+      action: IItemAction,
+      item: Record
+   ): boolean {
+      switch (action.id) {
+         case 'pin':
+            return !item.get('isPinned');
+         case 'unpin':
+            return item.get('isPinned');
+         default:
+            return true;
+      }
+   }
+
    private getUrl(): Promise<string> {
       return new Promise((resolve) => {
          chrome.tabs.get(chrome.devtools.inspectedWindow.tabId, (tab: Tab) => {
@@ -201,7 +271,7 @@ class View extends Control<IControlOptions, void[]> {
          chrome.devtools.inspectedWindow.eval(
             'contents ? Object.keys(contents.modules) : []',
             (result: string[]) => {
-               this._existingModules = new Set(result);
+               this.existingModules = new Set(result);
                resolve(result);
             }
          );
@@ -237,7 +307,7 @@ class View extends Control<IControlOptions, void[]> {
       let items;
       if (WS_CORE_MODULES.includes(itemKey)) {
          items = WS_CORE_MODULES.filter((module) =>
-            this._existingModules.has(module)
+            this.existingModules.has(module)
          );
       } else {
          items = [itemKey];
@@ -249,7 +319,8 @@ class View extends Control<IControlOptions, void[]> {
                new Record({
                   rawData: {
                      id: elem,
-                     title: elem
+                     title: elem,
+                     isPinned: this.pinnedModules.has(elem)
                   }
                })
             )
@@ -257,6 +328,39 @@ class View extends Control<IControlOptions, void[]> {
       );
       this._children.unselectedList.reload();
       this._children.selectedList.reload();
+   }
+
+   private async getPinnedModules(): Promise<Set<string>> {
+      return new Promise((resolve) => {
+         chrome.storage.sync.get(
+            'debuggingPinnedModules',
+            (result: { debuggingPinnedModules?: string[] }) => {
+               this.pinnedModules = new Set(result.debuggingPinnedModules);
+               resolve(this.pinnedModules);
+            }
+         );
+      });
+   }
+
+   private togglePin(
+      item: Record,
+      state: boolean,
+      source: Memory,
+      list: ListView
+   ): void {
+      const newItem = item.clone();
+      newItem.set('isPinned', state);
+      source.update(newItem).then(() => {
+         list.reload();
+      });
+      if (state) {
+         this.pinnedModules.add(item.get('id'));
+      } else {
+         this.pinnedModules.delete(item.get('id'));
+      }
+      chrome.storage.sync.set({
+         debuggingPinnedModules: Array.from(this.pinnedModules)
+      });
    }
 
    static _theme: string[] = ['Debugging/debugging'];
