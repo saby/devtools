@@ -27,7 +27,7 @@
       "@types/jsdom": "^12.2.4",
       "@types/sinon": "^7.5.0",
       "cross-env": "^5.2.0",
-      "saby-units": "git+https://platform-git.sbis.ru/saby/Units.git#rc-20.4000",
+      "saby-units": "git+https://platform-git.sbis.ru/saby/Units.git#rc-20.4100",
       "tslint": "^5.15.0"
    },
    "dependencies": {
