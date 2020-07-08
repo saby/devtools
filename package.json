@@ -48,7 +48,7 @@
       "saby-ui": "git+https://platform-git.sbis.ru/saby/UI.git#rc-20.5000",
       "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-20.5000",
       "wasaby-app": "git+https://platform-git.sbis.ru/saby/wasaby-app.git#rc-20.5000",
-      "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-20.5000",
+      "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-20.5100",
       "saby-inferno": "git+https://platform-git.sbis.ru/saby/inferno.git#rc-20.5000"
    },
    "saby-units": {
