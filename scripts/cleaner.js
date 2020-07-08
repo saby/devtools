@@ -4,7 +4,7 @@ const config = require('../config/config');
 
 async function deleteFile(dir, file) {
    const filePath = join(dir, file);
-   const stats = await lstat(filePath);
+   // const stats = await lstat(filePath);
    return stats.isDirectory() ? deleteDirectory(filePath) : unlink(filePath);
 }
 
