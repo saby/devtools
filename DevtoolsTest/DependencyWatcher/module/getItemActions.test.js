@@ -1,10 +1,9 @@
 define([
    'DevtoolsTest/mockChrome',
    'DependencyWatcher/_module/getItemActions',
-   'Core/i18n'
-], function(mockChrome, getItemActions, i18n) {
+   'i18n!DevtoolsTest'
+], function(mockChrome, getItemActions, rk) {
    getItemActions = getItemActions.getItemActions;
-   const rk = i18n.rk;
 
    describe('DependencyWatcher/_module/getItemActions', function() {
       describe('getItemActions', function() {
