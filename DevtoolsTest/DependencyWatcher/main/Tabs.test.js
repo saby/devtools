@@ -3,10 +3,9 @@ define([
    'DependencyWatcher/_main/Tabs',
    'DependencyWatcher/_main/ViewMode',
    'DependencyWatcher/data',
-   'Core/i18n'
-], function(mockChrome, Tabs, ViewMode, dataLib, i18n) {
+   'i18n!DevtoolsTest'
+], function(mockChrome, Tabs, ViewMode, dataLib, rk) {
    ViewMode = ViewMode.ViewMode;
-   const rk = i18n.rk;
 
    describe('DependencyWatcher/_main/Tabs', function() {
       describe('getTabConfig', function() {

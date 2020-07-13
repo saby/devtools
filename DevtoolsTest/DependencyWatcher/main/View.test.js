@@ -4,14 +4,13 @@ define([
    'DependencyWatcher/_main/ViewMode',
    'DependencyWatcher/data',
    'Extension/Plugins/DependencyWatcher/const',
-   'Core/i18n',
+   'i18n!DevtoolsTest',
    'Types/entity'
-], function(mockChrome, View, ViewMode, dataLib, DWConst, i18n, entityLib) {
+], function(mockChrome, View, ViewMode, dataLib, DWConst, rk, entityLib) {
    let sandbox;
    let instance;
    View = View.default;
    ViewMode = ViewMode.ViewMode;
-   const rk = i18n.rk;
    const Model = entityLib.Model;
 
    describe('DependencyWatcher/_main/View', function() {

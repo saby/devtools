@@ -1,10 +1,9 @@
 define([
    'DevtoolsTest/mockChrome',
    'DependencyWatcher/_module/getButtonSource',
-   'Core/i18n'
-], function(mockChrome, getButtonSource, i18n) {
+   'i18n!DevtoolsTest'
+], function(mockChrome, getButtonSource, rk) {
    getButtonSource = getButtonSource.getButtonSource;
-   const rk = i18n.rk;
 
    describe('DependencyWatcher/_module/getButtonSource', function() {
       describe('getButtonSource', function() {
