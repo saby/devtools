@@ -13,6 +13,7 @@ import Store from '../_store/Store';
 import Model from './Model';
 import { throttle } from 'Types/function';
 import Controller from 'Search/Controller';
+import { SyntheticEvent } from 'Vdom/Vdom';
 
 interface IOptions {
    store: Store;
@@ -429,9 +430,16 @@ class Elements extends Control {
       }
    }
 
-   private __toggleExpanded(e: Event, id: IFrontendControlNode['id']): void {
+   private __toggleExpanded(
+      e: SyntheticEvent<MouseEvent>,
+      id: IFrontendControlNode['id']
+   ): void {
       e.stopPropagation();
-      this._model.toggleExpanded(id);
+      if (e.nativeEvent.altKey) {
+         this._model.toggleExpandedRecursive(id);
+      } else {
+         this._model.toggleExpanded(id);
+      }
    }
 
    private __onEndSynchronization(): void {
@@ -588,11 +596,11 @@ class Elements extends Control {
 
    /**
     * We should always try to fit the widest child without overflowing.
-    * Usually, the deepest child is also the widest, but it's now always the case.
+    * Usually, the deepest child is also the widest, but it's not always the case.
     *
     * So, this function computes max indentation size for each child and then takes the
     * smallest indentation.
-    * Because child width is fixed, we can do this efficiently by caching the width of each child.
+    * Because child's width is fixed, we can do this efficiently by caching the width of each child.
     *
     * There's one caveat. We don't make indentation larger unless the width of the panel increases.
     * If we did that, the items would move too often.
