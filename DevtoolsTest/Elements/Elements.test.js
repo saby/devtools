@@ -1415,15 +1415,46 @@ define([
                }
             };
             const event = {
-               stopPropagation: sandbox.stub()
+               stopPropagation: sandbox.stub(),
+               nativeEvent: {
+                  altKey: false
+               }
             };
             const instance = new Elements(options);
-            const stub = sandbox.stub(instance._model, 'toggleExpanded');
+            sandbox.stub(instance._model, 'toggleExpanded');
 
             instance.__toggleExpanded(event, 0);
 
-            assert.isTrue(event.stopPropagation.calledOnceWithExactly());
-            assert.isTrue(stub.calledOnceWithExactly(0));
+            sinon.assert.calledOnce(event.stopPropagation);
+            sinon.assert.calledWithExactly(instance._model.toggleExpanded, 0);
+
+            delete window.elementsPanel;
+         });
+
+         it('should stop propagation of the event and call toggleExpandedRecursive', function() {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               }
+            };
+            const event = {
+               stopPropagation: sandbox.stub(),
+               nativeEvent: {
+                  altKey: true
+               }
+            };
+            const instance = new Elements(options);
+            sandbox.stub(instance._model, 'toggleExpandedRecursive');
+
+            instance.__toggleExpanded(event, 0);
+
+            sinon.assert.calledOnce(event.stopPropagation);
+            sinon.assert.calledWithExactly(
+               instance._model.toggleExpandedRecursive,
+               0
+            );
 
             delete window.elementsPanel;
          });

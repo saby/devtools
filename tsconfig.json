@@ -38,6 +38,9 @@
       ],
       "SbisFile/*": [
         "../node_modules/rmi/src/client/SbisFile/*"
+      ],
+      "Vdom/*": [
+        "../node_modules/sbis3-ws/Vdom/*"
       ]
     },
     "types": ["chrome"]
