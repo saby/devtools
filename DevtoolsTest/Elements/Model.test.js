@@ -251,7 +251,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
             assert.isTrue(expandedItemsClearStub.calledOnceWithExactly());
          });
 
-         it('should update parent\'s hasChildren property', function() {
+         it("should update parent's hasChildren property", function() {
             const oldItems = [
                {
                   id: 0,
@@ -316,7 +316,7 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
             );
          });
 
-         it('should update parent\'s hasChildren property and add new children to visible items', function() {
+         it("should update parent's hasChildren property and add new children to visible items", function() {
             const oldItems = [
                {
                   id: 0,
@@ -496,6 +496,87 @@ define(['DevtoolsTest/mockChrome', 'Elements/_Elements/Model'], function(
             );
             assert.isTrue(visibleSetStub.calledWithExactly(3, sibling));
             assert.isTrue(nextVersionStub.calledOnceWithExactly());
+            assert.isTrue(instance._itemsChanged);
+         });
+      });
+
+      describe('toggleExpandedRecursive', function() {
+         it('should delete item and its children from expanded and visible items and update version', function() {
+            instance._itemsChanged = false;
+            instance._expandedItems.add(0);
+            sandbox.stub(instance._expandedItems, 'delete');
+            sandbox.stub(instance._visibleItems, 'delete');
+            sandbox.stub(instance, '__updateElement');
+            sandbox
+               .stub(instance, '__getChildren')
+               .withArgs(0)
+               .returns([
+                  {
+                     id: 1
+                  },
+                  {
+                     id: 2
+                  }
+               ]);
+            sandbox.stub(instance, '__nextVersion');
+
+            instance.toggleExpandedRecursive(0);
+
+            sinon.assert.calledWithExactly(instance._expandedItems.delete, 0);
+            sinon.assert.calledWithExactly(instance.__updateElement, 0, {
+               isExpanded: false
+            });
+            sinon.assert.calledWithExactly(instance._expandedItems.delete, 1);
+            sinon.assert.calledWithExactly(instance._expandedItems.delete, 2);
+            sinon.assert.calledWithExactly(instance._visibleItems.delete, 1);
+            sinon.assert.calledWithExactly(instance._visibleItems.delete, 2);
+            sinon.assert.calledOnce(instance.__nextVersion);
+            assert.isTrue(instance._itemsChanged);
+         });
+
+         it('should expand all elements in the subtree', function() {
+            const item = {
+               id: 1,
+               depth: 1
+            };
+            const parent = {
+               id: 0,
+               depth: 0
+            };
+            const child = {
+               id: 2,
+               depth: 2
+            };
+            const grandChild = {
+               id: 4,
+               depth: 3
+            };
+            const sibling = {
+               id: 3,
+               depth: 1
+            };
+            instance._itemsChanged = false;
+            sandbox.stub(instance._expandedItems, 'add');
+            sandbox.stub(instance, '__updateElement');
+            sandbox.stub(instance, '__getElement').returnsArg(0);
+            sandbox.stub(instance, '__nextVersion');
+            instance._items = [parent, item, child, grandChild, sibling];
+
+            instance.toggleExpandedRecursive(1);
+
+            sinon.assert.calledWithExactly(instance._expandedItems.add, 1);
+            sinon.assert.calledWithExactly(instance._expandedItems.add, 2);
+            sinon.assert.calledWithExactly(instance._expandedItems.add, 4);
+            sinon.assert.calledWithExactly(instance.__updateElement, 1, {
+               isExpanded: true
+            });
+            sinon.assert.calledWithExactly(instance.__updateElement, 2, {
+               isExpanded: true
+            });
+            sinon.assert.calledWithExactly(instance.__updateElement, 4, {
+               isExpanded: true
+            });
+            sinon.assert.calledOnce(instance.__nextVersion);
             assert.isTrue(instance._itemsChanged);
          });
       });

@@ -46,8 +46,14 @@ class Model {
             diff.added.forEach((item: IModelItem) => {
                if (item.depth === 0) {
                   this._visibleItems.set(item.id, this.__getElement(item));
-               } else if (typeof item.parentId !== 'undefined' && this._visibleItems.has(item.parentId)) {
-                  if (!(this._visibleItems.get(item.parentId) as IModelItem).hasChildren) {
+               } else if (
+                  typeof item.parentId !== 'undefined' &&
+                  this._visibleItems.has(item.parentId)
+               ) {
+                  if (
+                     !(this._visibleItems.get(item.parentId) as IModelItem)
+                        .hasChildren
+                  ) {
                      this.__updateElement(item.parentId, {
                         hasChildren: true
                      });
@@ -118,6 +124,39 @@ class Model {
       }
       this.__nextVersion();
       this._itemsChanged = true;
+   }
+
+   toggleExpandedRecursive(
+      key: IFrontendControlNode['id'],
+      newStatus: boolean = !this._expandedItems.has(key)
+   ): void {
+      if (newStatus) {
+         this._expandedItems.add(key);
+         this.__updateElement(key, {
+            isExpanded: true
+         });
+
+         const startIndex = this._items.findIndex(({ id }) => id === key);
+         const rootItemDepth = this._items[startIndex].depth;
+
+         for (let i = startIndex + 1; i < this._items.length; i++) {
+            const item = this._items[i];
+            // Children are always stored immediately after their parents.
+            // We use this fact to avoid traversing the whole array.
+            if (item.depth <= rootItemDepth) {
+               break;
+            }
+            this._expandedItems.add(item.id);
+            this.__updateElement(item.id, {
+               isExpanded: true
+            });
+         }
+
+         this.__nextVersion();
+         this._itemsChanged = true;
+      } else {
+         this.toggleExpanded(key, false);
+      }
    }
 
    getPath(id: IFrontendControlNode['id']): BreadcrumbsOptions['items'] {
@@ -225,9 +264,11 @@ class Model {
    ): IModelItem {
       const oldItem =
          this._visibleItems.get(key) ||
-         this.__getElement(this._items.find(
-            (element) => element.id === key
-         ) as IFrontendControlNode);
+         this.__getElement(
+            this._items.find(
+               (element) => element.id === key
+            ) as IFrontendControlNode
+         );
       const newItem = {
          ...oldItem,
          ...newState
