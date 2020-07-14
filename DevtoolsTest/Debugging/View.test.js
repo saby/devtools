@@ -48,7 +48,7 @@ define([
             sandbox
                .stub(chrome.storage.sync, 'get')
                .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, []);
+               .callsArgWith(1, {});
 
             await instance._beforeMount();
 
@@ -96,7 +96,7 @@ define([
             sandbox
                .stub(chrome.storage.sync, 'get')
                .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, []);
+               .callsArgWith(1, {});
 
             await instance._beforeMount();
 
@@ -144,7 +144,7 @@ define([
             sandbox
                .stub(chrome.storage.sync, 'get')
                .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, []);
+               .callsArgWith(1, {});
 
             await instance._beforeMount();
 
@@ -190,7 +190,7 @@ define([
             sandbox
                .stub(chrome.storage.sync, 'get')
                .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, []);
+               .callsArgWith(1, {});
 
             await instance._beforeMount();
 
@@ -811,7 +811,7 @@ define([
             sandbox
                .stub(chrome.storage.sync, 'get')
                .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, []);
+               .callsArgWith(1, {});
             await instance._beforeMount();
 
             instance._selectedItemsReadyCallback(items);
