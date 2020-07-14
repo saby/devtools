@@ -18,12 +18,14 @@ define([
             const { JSDOM } = await getJSDOM();
             const dom = new JSDOM('');
             global.window = dom.window;
+            global.document = dom.window.document;
          }
       });
 
       after(function() {
          if (needJSDOM) {
             delete global.window;
+            delete global.document;
          }
       });
 
@@ -67,6 +69,54 @@ define([
                options.store.toggleDevtoolsOpened.calledOnceWithExactly(true)
             );
             assert.isTrue(options.store.getFullTree.calledOnceWithExactly());
+
+            delete window.elementsPanel;
+         });
+      });
+
+      describe('_beforeMount', function() {
+         it('should set _detailsWidth to default value because the storage is empty', async function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               }
+            };
+            const instance = new Elements(options);
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('elementsDetailsWidth')
+               .callsArgWith(1, {});
+
+            await instance._beforeMount();
+
+            assert.equal(instance._detailsWidth, 300);
+
+            delete window.elementsPanel;
+         });
+
+         it('should set _detailsWidth to value from the storage', async function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               }
+            };
+            const instance = new Elements(options);
+            sandbox
+               .stub(chrome.storage.sync, 'get')
+               .withArgs('elementsDetailsWidth')
+               .callsArgWith(1, {
+                  elementsDetailsWidth: 123
+               });
+
+            await instance._beforeMount();
+
+            assert.equal(instance._detailsWidth, 123);
 
             delete window.elementsPanel;
          });
@@ -146,6 +196,183 @@ define([
             assert.isTrue(inspectElementStub.notCalled);
             assert.isTrue(throttledUpdateSearchStub.notCalled);
             assert.isFalse(instance._itemsChanged);
+
+            delete window.elementsPanel;
+         });
+      });
+
+      describe('_afterRender', function() {
+         it('should not do anything because the panel is not selected', function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               },
+               selected: false
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._currentIndentationSize = 15;
+            instance._children = {
+               list: document.createElement('div')
+            };
+
+            instance._afterRender();
+
+            assert.equal(instance._currentIndentationSize, 15);
+
+            delete window.elementsPanel;
+         });
+
+         it("should not do anything because there's no items in the panel", function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               },
+               selected: true
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._currentIndentationSize = 15;
+
+            instance._afterRender();
+
+            assert.equal(instance._currentIndentationSize, 15);
+
+            delete window.elementsPanel;
+         });
+
+         function addChild(parent, width, depth) {
+            const child = document.createElement('div');
+            child.setAttribute('data-depth', depth);
+
+            const innerChild = document.createElement('div');
+            innerChild.classList.add('js-devtools-Elements__name');
+            sandbox.stub(innerChild, 'clientWidth').value(width);
+
+            child.appendChild(innerChild);
+
+            parent.appendChild(child);
+         }
+
+         it('should calculate dynamic indentation based on the width of the children', function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               },
+               selected: true
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._currentIndentationSize = 15;
+            instance._listWidth = 150;
+            const list = document.createElement('div');
+            sandbox.stub(list.style, 'setProperty');
+            sandbox.stub(list, 'clientWidth').value(150);
+
+            addChild(list, 50, 0);
+            addChild(list, 60, 1);
+
+            instance._children = {
+               list
+            };
+
+            instance._afterRender();
+
+            sinon.assert.calledWithExactly(
+               list.style.setProperty,
+               '--indentation-size',
+               '5px'
+            );
+            assert.equal(instance._currentIndentationSize, 5);
+            assert.equal(instance._listWidth, 150);
+
+            delete window.elementsPanel;
+         });
+
+         it('should calculate dynamic indentation based on the width of the children (should not pick default value even though the list got wider)', function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               },
+               selected: true
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._currentIndentationSize = 15;
+            const list = document.createElement('div');
+            sandbox.stub(list.style, 'setProperty');
+            sandbox.stub(list, 'clientWidth').value(150);
+
+            addChild(list, 50, 0);
+            addChild(list, 60, 1);
+
+            instance._children = {
+               list
+            };
+
+            instance._afterRender();
+
+            sinon.assert.calledWithExactly(
+               list.style.setProperty,
+               '--indentation-size',
+               '5px'
+            );
+            assert.equal(instance._currentIndentationSize, 5);
+            assert.equal(instance._listWidth, 150);
+
+            delete window.elementsPanel;
+         });
+
+         it('should use cached children widths', function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               },
+               selected: true
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._currentIndentationSize = 15;
+            instance._listWidth = 150;
+            const list = document.createElement('div');
+            sandbox.stub(list.style, 'setProperty');
+            sandbox.stub(list, 'clientWidth').value(150);
+
+            addChild(list, 50, 0);
+            addChild(list, 60, 1);
+
+            // children don't actually have these widths, so the test is going to fail if cached values aren't used
+            instance._elementsWidths.set(list.children[0], 130);
+            instance._elementsWidths.set(list.children[1], 141);
+
+            instance._children = {
+               list
+            };
+
+            instance._afterRender();
+
+            sinon.assert.calledWithExactly(
+               list.style.setProperty,
+               '--indentation-size',
+               '9px'
+            );
+            assert.equal(instance._currentIndentationSize, 9);
+            assert.equal(instance._listWidth, 150);
 
             delete window.elementsPanel;
          });
@@ -1024,10 +1251,12 @@ define([
                   class: 'devtools-Elements__node_hoc'
                }
             ];
-            const tree = [{
-               id: 0,
-               name: 'Test'
-            }];
+            const tree = [
+               {
+                  id: 0,
+                  name: 'Test'
+               }
+            ];
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1082,10 +1311,12 @@ define([
                   class: 'devtools-Elements__node_hoc'
                }
             ];
-            const tree = [{
-               id: 0,
-               name: 'Test'
-            }];
+            const tree = [
+               {
+                  id: 0,
+                  name: 'Test'
+               }
+            ];
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2219,6 +2450,31 @@ define([
                oldElementsWithBreakpoints
             );
             assert.deepEqual(instance._elementsWithBreakpoints, new Set());
+
+            delete window.elementsPanel;
+         });
+      });
+
+      describe('_offsetHandler', function() {
+         it('should change _offsetWidth on instance and save it', function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               }
+            };
+            const instance = new Elements(options);
+            instance._detailsWidth = 50;
+            sandbox.stub(chrome.storage.sync, 'set');
+
+            instance._offsetHandler({}, 150);
+
+            assert.equal(instance._detailsWidth, 200);
+            sinon.assert.calledWithExactly(chrome.storage.sync.set, {
+               elementsDetailsWidth: 200
+            });
 
             delete window.elementsPanel;
          });

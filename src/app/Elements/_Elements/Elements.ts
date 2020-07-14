@@ -24,6 +24,10 @@ const SEARCH_THROTTLE_DURATION = 200;
 const EVENT_NAME_OFFSET = -8;
 const DEFAULT_EVAL_TIMEOUT = 100;
 const BREAKPOINTS = 'window.__WASABY_DEV_HOOK__._breakpoints';
+const MAX_INDENTATION_SIZE = 10;
+const BREAKPOINT_ICON_WIDTH = 16;
+const HINT_WIDTH = 69;
+const DEFAULT_DETAILS_WIDTH = 300;
 
 /**
  * Controller of the elements tab.
@@ -33,7 +37,9 @@ class Elements extends Control {
    protected _template: Function = template;
    protected _selectedItemId: IFrontendControlNode['id'] | undefined;
    protected _inspectedItem: IBackendControlNode | undefined;
-   protected _children: Record<IFrontendControlNode['id'], HTMLElement>;
+   protected _children: Record<IFrontendControlNode['id'], HTMLElement> & {
+      list?: HTMLDivElement;
+   };
    protected _path?: BreadcrumbsOptions['items'];
    protected _options: IOptions;
    protected _selectingFromPage: boolean = false;
@@ -60,6 +66,12 @@ class Elements extends Control {
    protected _logicParentName: string = '';
    protected _logicParentId: IFrontendControlNode['logicParentId'];
    protected _logicParentHovered: boolean = false;
+
+   protected _elementsWidths: WeakMap<HTMLElement, number> = new WeakMap();
+   protected _listWidth: number = 0;
+   protected _currentIndentationSize: number;
+
+   protected _detailsWidth: number;
 
    protected _elementsWithBreakpoints: Set<
       IFrontendControlNode['id']
@@ -98,7 +110,20 @@ class Elements extends Control {
       });
    }
 
-   _beforeUpdate(newOptions: IOptions): void {
+   protected _beforeMount(): Promise<void> {
+      return new Promise((resolve) => {
+         chrome.storage.sync.get('elementsDetailsWidth', (result) => {
+            if (result.elementsDetailsWidth) {
+               this._detailsWidth = result.elementsDetailsWidth;
+            } else {
+               this._detailsWidth = DEFAULT_DETAILS_WIDTH;
+            }
+            resolve();
+         });
+      });
+   }
+
+   protected _beforeUpdate(newOptions: IOptions): void {
       if (newOptions.selected && !this._options.selected) {
          this._model.setItems(newOptions.store.getElements());
          this.__inspectElement(newOptions.store, {
@@ -109,7 +134,11 @@ class Elements extends Control {
       }
    }
 
-   _afterUpdate(): void {
+   protected _afterRender(): void {
+      this.__updateIndentation();
+   }
+
+   protected _afterUpdate(): void {
       if (typeof this._scrollToId !== 'undefined') {
          const child = this._children[this._scrollToId] as HTMLElement;
          if (child) {
@@ -237,9 +266,14 @@ class Elements extends Control {
 
    protected _onLogicParentClick(): void {
       // TODO: а тут сбрасывать подсветку на странице
-      this.__selectElement(
-         this._logicParentId as IFrontendControlNode['id']
-      );
+      this.__selectElement(this._logicParentId as IFrontendControlNode['id']);
+   }
+
+   protected _offsetHandler(e: Event, offset: number): void {
+      this._detailsWidth = this._detailsWidth + offset;
+      chrome.storage.sync.set({
+         elementsDetailsWidth: this._detailsWidth
+      });
    }
 
    /**
@@ -550,6 +584,68 @@ class Elements extends Control {
          };
          this._inspectedItem = { ...this._inspectedItem };
       }
+   }
+
+   /**
+    * We should always try to fit the widest child without overflowing.
+    * Usually, the deepest child is also the widest, but it's now always the case.
+    *
+    * So, this function computes max indentation size for each child and then takes the
+    * smallest indentation.
+    * Because child width is fixed, we can do this efficiently by caching the width of each child.
+    *
+    * There's one caveat. We don't make indentation larger unless the width of the panel increases.
+    * If we did that, the items would move too often.
+    * @private
+    */
+   private __updateIndentation(): void {
+      // We don't need to do anything if the panel is hidden or if it doesn't have any items
+      if (!this._options.selected || !this._children.list) {
+         return;
+      }
+
+      const listWidth = this._children.list.clientWidth;
+
+      // We should try to make indentation larger when the width of the panel increases
+      if (listWidth > this._listWidth) {
+         this._currentIndentationSize = MAX_INDENTATION_SIZE;
+      }
+
+      this._listWidth = listWidth;
+
+      let maxIndentationSize = this._currentIndentationSize;
+
+      for (const child of this._children.list.children) {
+         const depth = parseInt(child.getAttribute('data-depth'), 10);
+
+         let childWidth = this._elementsWidths.get(child);
+
+         if (typeof childWidth === 'undefined') {
+            childWidth =
+               parseInt(
+                  child.getElementsByClassName('js-devtools-Elements__name')[0]
+                     .clientWidth,
+                  10
+               ) +
+               BREAKPOINT_ICON_WIDTH +
+               HINT_WIDTH;
+            this._elementsWidths.set(child, childWidth);
+         }
+
+         const remainingWidth = Math.max(0, listWidth - childWidth);
+
+         maxIndentationSize = Math.min(
+            maxIndentationSize,
+            remainingWidth / depth
+         );
+      }
+
+      this._currentIndentationSize = maxIndentationSize;
+
+      this._children.list.style.setProperty(
+         '--indentation-size',
+         `${maxIndentationSize}px`
+      );
    }
 
    static _theme: string[] = ['Elements/elements'];
