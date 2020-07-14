@@ -1,24 +1,25 @@
 .devtools-Elements__treeContainer {
-   width: 100%;
-   overflow-x: auto;
+   flex-grow: 1;
+   flex-shrink: 1;
+   min-width: 0;
 }
 
-.devtools-Elements__emptyDetails {
-   width: 550px;
-   margin-left: auto;
+.devtools-Elements__DetailsContainer {
+   position: relative;
 }
 
-.devtools-Elements__emptyDetails_theme_@{themeName} {
+.devtools-Elements__DetailsContainer_theme_@{themeName} {
    border-left: @border-thickness solid @color_separator;
+}
+
+.devtools-Elements__resizingLine {
+   position: absolute;
+   height: 100%;
+   width: 5px;
 }
 
 .devtools-Elements__treeWrapper {
    height: 100%;
-}
-
-.devtools-Elements__tree {
-   width: min-content;
-   min-width: 100%;
 }
 
 .devtools-Elements__node {

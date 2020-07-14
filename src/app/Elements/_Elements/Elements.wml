@@ -23,13 +23,15 @@
               on:keydown="_onListKeyDown()">
             <!--TODO: удалить task1178703223 после https://online.sbis.ru/opendoc.html?guid=bcc4b6be-7513-4f3d-8f26-eb27512d0a28 -->
             <Controls.scroll:Container attr:class="devtools-Elements__treeWrapper"
-                                       scrollMode="verticalHorizontal"
+                                       scrollMode="vertical"
                                        task1178703223="{{ true }}">
-                <div attr:class="devtools-Elements__tree {{ _logicParentHovered ? 'devtools-Elements__tree_logicParentHovered' }}">
+                <div attr:class="devtools-Elements__tree {{ _logicParentHovered ? 'devtools-Elements__tree_logicParentHovered' }}"
+                     name="list">
                     <ws:for data="element in _model.getVisibleItems()">
                         <ws:partial template="wml!Elements/_Elements/Node"
                                     attr:key="{{element.id}}"
                                     attr:name="{{element.id}}"
+                                    attr:data-depth="{{ element.depth }}"
                                     on:mouseenter="__highlightElement(element.id)"
                                     on:mouseleave="__highlightElement()"
                                     on:click="_onItemClick(element.id)"
@@ -50,24 +52,28 @@
                                                  on:itemClick="_onItemClick()"/>
             </ws:if>
          </div>
-         <ws:if data="{{_inspectedItem}}">
-            <Elements._Details.Details scope="{{_inspectedItem}}"
-                                      store="{{_options.store}}"
-                                      inspectedItem="{{ _inspectedItem }}"
-                                      logicParentName="{{ _logicParentName }}"
-                                      on:logicParentHoverChanged="_logicParentHoverChanged()"
-                                      on:logicParentClick="_onLogicParentClick()"
-                                      on:expandedChanged="__onDetailsTabExpanded()"
-                                      optionsExpanded="{{_optionsExpanded}}"
-                                      stateExpanded="{{_stateExpanded}}"
-                                      eventsExpanded="{{_eventsExpanded}}"
-                                      attributesExpanded="{{_attributesExpanded}}"
-                                      on:setBreakpoint="_setBreakpoint()"
-                                      on:removeBreakpoint="_removeAllBreakpoints()" />
-         </ws:if>
-         <ws:else>
-             <div class="devtools-Elements__emptyDetails devtools-Elements__emptyDetails_theme_{{ _options.theme }}"></div>
-         </ws:else>
+          <div attr:class="ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer_theme_{{ _options.theme }}"
+               attr:style="width: {{ _detailsWidth }}px;">
+              <Controls.dragnDrop:ResizingLine direction="reverse"
+                                               attr:class="devtools-Elements__resizingLine"
+                                               on:offset="_offsetHandler()"/>
+              <ws:if data="{{_inspectedItem}}">
+                  <Elements._Details.Details scope="{{_inspectedItem}}"
+                                             attr:style="width: {{ _detailsWidth }}px;"
+                                             store="{{_options.store}}"
+                                             inspectedItem="{{ _inspectedItem }}"
+                                             logicParentName="{{ _logicParentName }}"
+                                             on:logicParentHoverChanged="_logicParentHoverChanged()"
+                                             on:logicParentClick="_onLogicParentClick()"
+                                             on:expandedChanged="__onDetailsTabExpanded()"
+                                             optionsExpanded="{{_optionsExpanded}}"
+                                             stateExpanded="{{_stateExpanded}}"
+                                             eventsExpanded="{{_eventsExpanded}}"
+                                             attributesExpanded="{{_attributesExpanded}}"
+                                             on:setBreakpoint="_setBreakpoint()"
+                                             on:removeBreakpoint="_removeAllBreakpoints()" />
+              </ws:if>
+          </div>
       </ws:if>
       <ws:else>
          <div>Connecting to Wasaby...</div>
