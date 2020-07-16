@@ -2,7 +2,7 @@
     <ws:headTemplate>
         <Controls.buttons:Button tooltip="Apply changes and reload the page"
                                  caption="Apply"
-                                 style="primary"
+                                 buttonStyle="primary"
                                  attr:class="devtools-Debugging__headElement"
                                  on:click="_applyChanges()" />
         <Controls.buttons:Button tooltip="Remove s3debug cookie and reload the page"
