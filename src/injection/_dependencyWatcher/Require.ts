@@ -30,7 +30,7 @@ export class Require implements IDescriptor {
              * If require has this field then we should proxy it.
              * Also, if define was defined before require we have to call its setter again to create proxy.
              */
-            if (value.isWasaby && typeof value === 'function') {
+            if (value && value.isWasaby && typeof value === 'function') {
                this._require = value;
                this._proxy = proxyRequire(this._require, storage, logger);
                if (window.define) {
