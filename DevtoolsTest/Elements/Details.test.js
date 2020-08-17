@@ -186,16 +186,6 @@ define([
          });
       });
 
-      it('_hasData', function() {
-         assert.isFalse(instance._hasData());
-         assert.isFalse(instance._hasData({}));
-         assert.isTrue(
-            instance._hasData({
-               testKey: '123'
-            })
-         );
-      });
-
       describe('_forwardExpanded', function() {
          it('should fire the expandedChanged event', function() {
             const stub = sandbox.stub(instance, '_notify');

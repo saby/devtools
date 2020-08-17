@@ -1,16 +1,16 @@
 <ws:template name="valueTemplate">
-   <ws:if data="{{ _options.value.startsWith('function ') }}">
-      <Controls.buttons:Button caption='"{{_options.value}}"'
+   <ws:if data="{{ _options.caption.startsWith('function ') }}">
+      <Controls.buttons:Button caption='"{{_options.caption}}"'
                                viewMode="link"
                                on:click="_viewFunctionSource()" />
    </ws:if>
    <ws:else>
       <ws:if data="{{ _options.itemData.isEditing }}">
-         <Controls.input:Text bind:value="_options.itemData.item.value"
+         <Controls.input:Text bind:value="_options.itemData.item.caption"
                               selectOnClick="{{ true }}" />
       </ws:if>
       <ws:else>
-         "<span attr:class="devtools-StringTemplate__value">{{_options.value}}</span>"
+         "<span attr:class="devtools-StringTemplate__value">{{_options.caption}}</span>"
       </ws:else>
    </ws:else>
 </ws:template>

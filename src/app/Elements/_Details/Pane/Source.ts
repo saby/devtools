@@ -1,44 +1,39 @@
 import { ICrud, Query, DataSet } from 'Types/source';
 import { Record as EntityRecord } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
+import { isEqual } from 'Types/object';
+import { hydrate, INSPECTED_ITEM_META } from '../../_utils/hydrate';
+import { TEMPLATES } from './const';
+import Store from '../../_store/Store';
+import { InspectedElementPayload } from 'Types/ElementInspection';
+import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 
 interface IOptions {
-   idProperty: string;
-   parentProperty: string;
-   data: Array<{
-      value: unknown;
-      name: string;
-   }>;
+   data: Record<string, unknown>;
+   store: Store;
+   controlId: IFrontendControlNode['id'];
+   root: string;
 }
 
-const SEPARATOR = '---';
-
 /**
- * Source for the details pane. Avoids circular dependencies by generating new elements on the fly.
+ * Source for the details pane.
  * @author Зайцев А.С.
  */
 export class Source implements ICrud {
-   protected readonly _idProperty: IOptions['idProperty'];
-   protected readonly _parentProperty: IOptions['parentProperty'];
-   protected _data: Array<{
-      value: unknown;
-      hasChildren: true | null;
-      name: string;
-   }>;
+   protected _data: IItem[];
+   protected _store: IOptions['store'];
+   protected _controlId: IOptions['controlId'];
+   protected _root: IOptions['root'];
    readonly '[Types/_source/ICrud]': boolean = true;
-   readonly _mixins: string[] = {
+   readonly _mixins: Record<string, boolean> = {
       '[Types/_source/ICrud]': true
    };
 
    constructor(options: IOptions) {
-      this._idProperty = options.idProperty;
-      this._parentProperty = options.parentProperty;
-      this._data = options.data.map((item) => {
-         return {
-            ...item,
-            hasChildren: hasChildren(item.value)
-         };
-      });
+      this._data = getRawData(options.data);
+      this._store = options.store;
+      this._controlId = options.controlId;
+      this._root = options.root.toLowerCase();
    }
 
    create(meta?: object): Promise<EntityRecord> {
@@ -50,7 +45,7 @@ export class Source implements ICrud {
    }
 
    read(key: string): Promise<EntityRecord> {
-      const rawData = this._data.find((item) => item[this._idProperty] === key);
+      const rawData = this._data.find((item) => item.key === key);
       return Promise.resolve(
          new EntityRecord({
             rawData
@@ -58,31 +53,29 @@ export class Source implements ICrud {
       );
    }
 
-   update(data: EntityRecord | RecordSet): Promise<void> {
+   update(data: EntityRecord | RecordSet | object): Promise<void> {
       if (data instanceof RecordSet) {
          data.each((item) => {
+            this.__updateItem(item.getRawData());
+         });
+      } else if (data instanceof EntityRecord) {
+         this.__updateItem(data.getRawData());
+      } else {
+         const convertedData = getRawData(data);
+         convertedData.forEach((item) => {
             this.__updateItem(item);
          });
-      } else {
-         this.__updateItem(data);
       }
       return Promise.resolve();
    }
 
-   private __updateItem(item: EntityRecord): void {
-      const key = item.get(this._idProperty);
-      const itemIndex = this._data.findIndex(
-         (element) => element[this._idProperty] === key
-      );
-      const rawData = item.getRawData(true);
-      const newItem = {
-         ...rawData,
-         hasChildren: hasChildren(rawData.value)
-      };
+   private __updateItem(item: IItem): void {
+      const key = item.key;
+      const itemIndex = this._data.findIndex((element) => element.key === key);
       if (itemIndex !== -1) {
-         this._data[itemIndex] = newItem;
+         this._data[itemIndex] = item;
       } else {
-         this._data.push(newItem);
+         this._data.push(item);
       }
    }
 
@@ -98,140 +91,207 @@ export class Source implements ICrud {
    }
 
    private __deleteItem(key: string): void {
-      const itemIndex = this._data.findIndex(
-         (item) => item[this._idProperty] === key
-      );
+      const itemIndex = this._data.findIndex((item) => item.key === key);
       if (itemIndex !== -1) {
          this._data.splice(itemIndex, 1);
       }
    }
 
    query(query: Query): Promise<DataSet> {
-      const filter = query.getWhere();
-      let result: Source['_data'];
-      if (typeof filter === 'function') {
-         result = this._data.filter((item, index) => filter(item, index));
-      } else {
-         if (filter[this._parentProperty]) {
-            if (filter[this._parentProperty] instanceof Array) {
-               result = [];
-               filter[this._parentProperty].forEach((key) => {
-                  if (key === null) {
-                     result = this._data;
-                  } else {
-                     result = result.concat(this.__getImmediateChildren(key));
-                  }
+      const filter = query.getWhere() as {
+         parent?: null | string | string[];
+         name?: string;
+      };
+      if (filter.parent) {
+         if (filter.parent instanceof Array) {
+            const resultPromises: Array<Promise<Source['_data']>> = [];
+            filter.parent.forEach((key) => {
+               resultPromises.push(this.__getImmediateChildren(key));
+            });
+            return Promise.all(resultPromises).then((data) => {
+               return new DataSet({
+                  rawData: {
+                     data: data.reduce((acc, part) => {
+                        return acc.concat(part);
+                     }, []),
+                     meta: {
+                        more: false
+                     }
+                  },
+                  itemsProperty: 'data',
+                  metaProperty: 'meta'
                });
-            } else {
-               result = this.__getImmediateChildren(
-                  filter[this._parentProperty]
-               );
-            }
+            });
          } else {
-            result = this._data;
-
-            if (filter.name) {
-               result = result.filter(
-                  (item) =>
-                     item.name
-                        .toLowerCase()
-                        .indexOf(filter.name.toLowerCase()) !== -1
-               );
-            }
+            return this.__getImmediateChildren(filter.parent).then((data) => {
+               return new DataSet({
+                  rawData: {
+                     data,
+                     meta: {
+                        more: false
+                     }
+                  },
+                  itemsProperty: 'data',
+                  metaProperty: 'meta'
+               });
+            });
          }
+      } else {
+         let result = this._data.filter((item) => item.parent === null);
+
+         if (filter.name) {
+            result = result.filter(
+               (item) =>
+                  item.name
+                     .toLowerCase()
+                     .indexOf((filter.name as string).toLowerCase()) !== -1
+            );
+         }
+
+         return Promise.resolve(
+            new DataSet({
+               rawData: {
+                  data: result,
+                  meta: {
+                     more: false
+                  }
+               },
+               itemsProperty: 'data',
+               metaProperty: 'meta'
+            })
+         );
       }
-      return Promise.resolve(
-         new DataSet({
-            rawData: {
-               /**
-                * We don't really need an item's value to draw it if it's not a primitive,
-                * because only text description will be provided for it.
-                * But because the list will try to deep clone items using JSON.stringify we can't just leave it,
-                * we have to either remove circular references or substitute values with stubs.
-                */
-               data: result.map(stubValue),
-               meta: {
-                  more: false
-               }
-            },
-            itemsProperty: 'data',
-            metaProperty: 'meta'
-         })
-      );
    }
 
-   private __getImmediateChildren(parentId: string): Source['_data'] {
-      const parent = this._data.find(
-         (item) => item[this._idProperty] === parentId
+   private __getImmediateChildren(parentId: string): Promise<Source['_data']> {
+      const children = this._data.filter(
+         (element) => element.parent === parentId
       );
-      const result = [];
-
-      if (!parent) {
-         throw new Error('Trying to get contents of nonexistent item');
+      if (children.length) {
+         return Promise.resolve(children);
       }
 
-      Object.entries(parent.value).forEach(([key, value]) => {
-         const itemId = parentId + SEPARATOR + key;
-         const item = this._data.find((element) => {
-            return element[this._idProperty] === itemId;
+      const pathToParent = parentId.split(SEPARATOR).reverse();
+      const path = [this._root].concat(pathToParent);
+
+      return new Promise((resolve) => {
+         const handler = (payload: InspectedElementPayload) => {
+            if (
+               payload.type === 'path' &&
+               payload.id === this._controlId &&
+               isEqual(path, payload.path)
+            ) {
+               const { value } = payload;
+               const hydratedValue = getRawData(
+                  hydrate(
+                     value.data,
+                     value.cleaned.map((cleanedPath) =>
+                        cleanedPath.slice(pathToParent.length)
+                     )
+                  ) as Record<string, unknown>
+               );
+               hydratedValue.forEach((item) => {
+                  item.key = item.key + SEPARATOR + parentId;
+                  item.parent = item.parent
+                     ? item.parent + SEPARATOR + parentId
+                     : parentId;
+               });
+               this._data = this._data.concat(hydratedValue);
+
+               this._store.removeListener('inspectedElement', handler);
+               resolve(hydratedValue);
+            }
+         };
+         this._store.addListener('inspectedElement', handler);
+         this._store.dispatch('inspectElement', {
+            path,
+            id: this._controlId
          });
-
-         if (item) {
-            result.push(item);
-         } else {
-            const newItem = {
-               [this._idProperty]: itemId,
-               [this._parentProperty]: parentId,
-               hasChildren: hasChildren(value),
-               name: key,
-               value
-            };
-            result.push(newItem);
-            this._data.push(newItem);
-         }
       });
-
-      return result;
    }
 }
 
-function hasChildren(value: unknown): true | null {
-   if (
-      typeof value === 'object' &&
-      value !== null &&
-      Object.keys(value).length > 0
-   ) {
-      return true;
+interface IItem {
+   key: string;
+   caption: unknown;
+   name: string;
+   parent: string | null;
+   hasChildren: true | null;
+   template: string;
+   hasBreakpoint?: boolean;
+}
+
+function getHasChildren(value: unknown): true | null {
+   if (typeof value === 'object' && value !== null) {
+      if (typeof value[INSPECTED_ITEM_META.expandable] === 'boolean') {
+         return value[INSPECTED_ITEM_META.expandable] ? true : null;
+      } else if (Object.keys(value).length > 0) {
+         return true;
+      }
    }
    return null;
 }
 
-function stubValue<
-   T extends {
-      value: unknown;
+function getCaption(value: unknown): string {
+   if (value?.[INSPECTED_ITEM_META.caption]) {
+      return value[INSPECTED_ITEM_META.caption];
    }
->(item: T): T {
-   const value = item.value;
+
    if (typeof value === 'object') {
-      let newValue: null | undefined[] | Record<number, null>;
-      if (value === null) {
-         newValue = null;
-      } else if (value instanceof Array) {
-         /**
-          * We have to preserve length in order to provide accurate description.
-          * But we don't need values here and this array gets cloned when the item gets converted to Record.
-          * So we substitute each value with 1 to speed up the cloning.
-          */
-         newValue = new Array(value.length).fill(1);
+      if (value instanceof Array) {
+         return `Array[${value.length}]`;
+      } else if (value === null) {
+         return 'null';
       } else {
-         const numberOfKeys = Object.keys(value).length;
-         // With objects we care only about emptiness, so one key is enough
-         newValue = numberOfKeys === 0 ? {} : { 0: null };
+         return Object.keys(value).length === 0 ? 'Empty object' : 'Object';
       }
-      return {
-         ...item,
-         value: newValue
-      };
    }
-   return item;
+
+   return '' + value;
+}
+
+function getTemplate(value: unknown): string {
+   const type = value?.[INSPECTED_ITEM_META.type] ?? typeof value;
+   // TODO: отдельный шаблон для undefined, а то сейчас строка undefined не отличается от значения undefined
+   if (TEMPLATES.hasOwnProperty(type)) {
+      return TEMPLATES[type];
+   }
+   return TEMPLATES.string;
+}
+
+const SEPARATOR = '---';
+
+function addItem(
+   result: IItem[],
+   key: string,
+   value: unknown,
+   parent: string | null = null
+): void {
+   const hasChildren = getHasChildren(value);
+   const item: IItem = {
+      key: parent ? key + SEPARATOR + parent : key,
+      hasChildren,
+      parent,
+      caption: getCaption(value),
+      name: key,
+      template: getTemplate(value)
+   };
+
+   result.push(item);
+
+   if (item.hasChildren) {
+      Object.entries(value as object).forEach(([childKey, childValue]) => {
+         addItem(result, childKey, childValue, item.key);
+      });
+   }
+}
+
+function getRawData(initialData: Record<string, unknown>): IItem[] {
+   const result: IItem[] = [];
+
+   Object.entries(initialData).forEach(([key, value]: [string, unknown]) => {
+      addItem(result, key, value);
+   });
+
+   return result;
 }

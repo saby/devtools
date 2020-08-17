@@ -1,10 +1,11 @@
+import { IControlOptions } from 'UI/Base';
 /**
  * Base interface for template options.
  * @author Зайцев А.С.
  */
-export interface ITemplateOptions {
+export interface ITemplateOptions extends IControlOptions {
    key: string;
    name: string | number;
-   value: unknown;
+   caption: unknown;
    itemData: object;
 }

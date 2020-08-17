@@ -1,19 +1,14 @@
 import { Control, TemplateFunction } from 'UI/Base';
-import template = require('wml!Elements/_Details/Pane/templates/StringTemplate');
+import * as template from 'wml!Elements/_Details/Pane/templates/StringTemplate';
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
-
-interface IOptions extends ITemplateOptions {
-   value: string;
-}
 
 /**
  * Template for strings.
  * @author Зайцев А.С.
  */
-class StringTemplate extends Control {
+class StringTemplate extends Control<ITemplateOptions> {
    protected _template: TemplateFunction = template;
-   protected readonly _options: Readonly<IOptions>;
 
    protected _viewFunctionSource(): void {
       this._notify(
@@ -27,12 +22,14 @@ class StringTemplate extends Control {
 
    static _theme: string[] = ['Elements/elements'];
 
-   static getOptionTypes(): Record<keyof IOptions, unknown> {
+   static getOptionTypes(): Record<keyof ITemplateOptions, unknown> {
       return {
-         value: descriptor(String).required(),
+         caption: descriptor(String).required(),
          name: descriptor(String, Number).required(),
          key: descriptor(String).required(),
-         itemData: descriptor(Object)
+         itemData: descriptor(Object),
+         readOnly: descriptor(Boolean),
+         theme: descriptor(String)
       };
    }
 }

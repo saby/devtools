@@ -71,6 +71,10 @@ class Store {
       this._channel.addListener(eventName, handler);
    }
 
+   removeListener<T>(eventName: string, handler: IHandler<T>): void {
+      this._channel.removeListener(eventName, handler);
+   }
+
    destructor(): void {
       this._channel.destructor();
       this._elements = [];

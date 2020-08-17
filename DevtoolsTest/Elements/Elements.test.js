@@ -154,11 +154,7 @@ define([
             });
 
             assert.isTrue(setItemsStub.calledOnceWithExactly(items));
-            assert.isTrue(
-               inspectElementStub.calledOnceWithExactly(store, {
-                  reset: true
-               })
-            );
+            assert.isTrue(inspectElementStub.calledOnceWithExactly(store));
             assert.isTrue(throttledUpdateSearchStub.calledOnceWithExactly());
             assert.isFalse(instance._itemsChanged);
 
@@ -1295,9 +1291,7 @@ define([
             assert.equal(instance._selectedItemId, 0);
             assert.equal(instance._scrollToId, 0);
             assert.isTrue(
-               inspectElementStub.calledOnceWithExactly(options.store, {
-                  reset: true
-               })
+               inspectElementStub.calledOnceWithExactly(options.store)
             );
 
             delete window.elementsPanel;
@@ -1353,9 +1347,7 @@ define([
             assert.equal(instance._selectedItemId, 0);
             assert.equal(instance._scrollToId, 0);
             assert.isTrue(
-               inspectElementStub.calledOnceWithExactly(options.store, {
-                  reset: true
-               })
+               inspectElementStub.calledOnceWithExactly(options.store)
             );
 
             delete window.elementsPanel;
@@ -1804,13 +1796,14 @@ define([
 
             instance.__inspectElement(options.store);
 
-            assert.isTrue(
-               options.store.dispatch.calledOnceWithExactly('inspectElement', {
+            sinon.assert.calledWithExactly(
+               options.store.dispatch,
+               'inspectElement',
+               {
                   id: 1,
                   expandedTabs,
-                  newTab: undefined,
-                  reset: undefined
-               })
+                  path: undefined
+               }
             );
 
             delete window.elementsPanel;
@@ -1834,17 +1827,17 @@ define([
                .returns(expandedTabs);
 
             instance.__inspectElement(options.store, {
-               newTab: 'options',
-               reset: false
+               path: ['options']
             });
 
-            assert.isTrue(
-               options.store.dispatch.calledOnceWithExactly('inspectElement', {
+            sinon.assert.calledWithExactly(
+               options.store.dispatch,
+               'inspectElement',
+               {
                   id: 1,
-                  expandedTabs,
-                  newTab: 'options',
-                  reset: false
-               })
+                  path: ['options'],
+                  expandedTabs
+               }
             );
 
             delete window.elementsPanel;
@@ -1887,25 +1880,29 @@ define([
             const instance = new Elements(options);
             instance._selectedItemId = 0;
             instance._inspectedItem = undefined;
-            instance._eventWithBreakpoint = 'click';
-            instance._elementsWithBreakpoints.add(0);
 
             instance.__setInspectedElement({
+               id: 0,
                type: 'full',
-               node: {
-                  id: 0,
+               value: {
                   options: {
-                     test: '123'
+                     data: {
+                        test: '123'
+                     },
+                     cleaned: []
                   },
                   events: {
-                     mousedown: {
-                        function: 'mousedownHandler()',
-                        arguments: [1]
+                     data: {
+                        mousedown: {
+                           function: 'mousedownHandler()',
+                           arguments: [1]
+                        },
+                        click: {
+                           function: 'clickHandler()',
+                           arguments: []
+                        }
                      },
-                     click: {
-                        function: 'clickHandler()',
-                        arguments: []
-                     }
+                     cleaned: []
                   }
                }
             });
@@ -1913,23 +1910,16 @@ define([
             assert.deepEqual(instance._inspectedItem, {
                id: 0,
                options: {
-                  test: {
-                     value: '123'
-                  }
+                  test: '123'
                },
                events: {
                   mousedown: {
-                     value: {
-                        function: 'mousedownHandler()',
-                        arguments: [1]
-                     }
+                     function: 'mousedownHandler()',
+                     arguments: [1]
                   },
                   click: {
-                     value: {
-                        function: 'clickHandler()',
-                        arguments: []
-                     },
-                     hasBreakpoint: true
+                     function: 'clickHandler()',
+                     arguments: []
                   }
                }
             });
@@ -1950,19 +1940,20 @@ define([
             const oldInspectedItem = {
                id: 0,
                options: {
-                  test: {
-                     value: '123'
-                  }
+                  test: '123'
                }
             };
             instance._inspectedItem = oldInspectedItem;
 
             instance.__setInspectedElement({
+               id: 0,
                type: 'partial',
-               node: {
-                  id: 0,
+               value: {
                   changedOptions: {
-                     test: '456'
+                     data: {
+                        test: '456'
+                     },
+                     cleaned: []
                   }
                }
             });
@@ -1971,14 +1962,10 @@ define([
             assert.deepEqual(instance._inspectedItem, {
                id: 0,
                options: {
-                  test: {
-                     value: '123'
-                  }
+                  test: '123'
                },
                changedOptions: {
-                  test: {
-                     value: '456'
-                  }
+                  test: '456'
                }
             });
 
@@ -2028,8 +2015,8 @@ define([
          });
       });
 
-      describe('__onDetailsTabExpanded', function() {
-         it('should change state to false and call inspectElement with the name of the tab', function() {
+      describe('_onDetailsTabExpanded', function() {
+         it('should change state to false without calling inspectElement', function() {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2040,16 +2027,12 @@ define([
             const instance = new Elements(options);
             instance.saveOptions(options);
             instance._optionsExpanded = true;
-            const stub = sandbox.stub(instance, '__inspectElement');
+            sandbox.stub(instance, '__inspectElement');
 
-            instance.__onDetailsTabExpanded({}, '_optionsExpanded', false);
+            instance._onDetailsTabExpanded({}, '_optionsExpanded', false);
 
             assert.isFalse(instance._optionsExpanded);
-            assert.isTrue(
-               stub.calledOnceWithExactly(options.store, {
-                  newTab: undefined
-               })
-            );
+            sinon.assert.notCalled(instance.__inspectElement);
 
             delete window.elementsPanel;
          });
@@ -2065,37 +2048,18 @@ define([
             const instance = new Elements(options);
             instance.saveOptions(options);
             instance._optionsExpanded = false;
-            const stub = sandbox.stub(instance, '__inspectElement');
+            sandbox.stub(instance, '__inspectElement');
 
-            instance.__onDetailsTabExpanded({}, '_optionsExpanded', true);
+            instance._onDetailsTabExpanded({}, '_optionsExpanded', true);
 
             assert.isTrue(instance._optionsExpanded);
-            assert.isTrue(
-               stub.calledOnceWithExactly(options.store, {
-                  newTab: 'options'
-               })
-            );
-
-            delete window.elementsPanel;
-         });
-
-         it('should change state without calling inspectElement', function() {
-            const options = {
-               store: {
-                  addListener: sandbox.stub(),
-                  toggleDevtoolsOpened: sandbox.stub(),
-                  getFullTree: sandbox.stub().resolves([])
+            sinon.assert.calledWithExactly(
+               instance.__inspectElement,
+               options.store,
+               {
+                  path: ['options']
                }
-            };
-            const instance = new Elements(options);
-            instance.saveOptions(options);
-            instance._eventsExpanded = false;
-            const stub = sandbox.stub(instance, '__inspectElement');
-
-            instance.__onDetailsTabExpanded({}, '_eventsExpanded', true);
-
-            assert.isTrue(instance._eventsExpanded);
-            assert.isTrue(stub.notCalled);
+            );
 
             delete window.elementsPanel;
          });

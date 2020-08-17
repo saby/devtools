@@ -8,12 +8,13 @@ import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { IOptions as BreadcrumbsOptions } from '../_Breadcrumbs/Breadcrumbs';
 import { highlightUpdate } from '../_utils/highlightUpdate';
-import retrocycle from '../retrocycle';
 import Store from '../_store/Store';
 import Model from './Model';
 import { throttle } from 'Types/function';
 import Controller from 'Search/Controller';
 import { SyntheticEvent } from 'Vdom/Vdom';
+import { InspectedElementPayload } from 'Types/ElementInspection';
+import { hydrate } from '../_utils/hydrate';
 
 interface IOptions {
    store: Store;
@@ -127,9 +128,7 @@ class Elements extends Control {
    protected _beforeUpdate(newOptions: IOptions): void {
       if (newOptions.selected && !this._options.selected) {
          this._model.setItems(newOptions.store.getElements());
-         this.__inspectElement(newOptions.store, {
-            reset: true
-         });
+         this.__inspectElement(newOptions.store);
          this._throttledUpdateSearch();
          this._itemsChanged = false;
       }
@@ -277,6 +276,23 @@ class Elements extends Control {
       });
    }
 
+   protected _onDetailsTabExpanded(
+      e: Event,
+      eventName:
+         | '_optionsExpanded'
+         | '_stateExpanded'
+         | '_eventsExpanded'
+         | '_attributesExpanded',
+      value: boolean
+   ): void {
+      this[eventName] = value;
+      if (value) {
+         this.__inspectElement(this._options.store, {
+            path: [eventName.slice(1, EVENT_NAME_OFFSET)]
+         });
+      }
+   }
+
    /**
     * Removes every breakpoint and adds new ones.
     * Because every breakpoint is set through eval, it is difficult to check which breakpoints should be left and which should be removed, so it's safer to remove them all and add them again.
@@ -419,9 +435,7 @@ class Elements extends Control {
          this._logicParentName = '';
       }
       this._scrollToId = id;
-      this.__inspectElement(this._options.store, {
-         reset: true
-      });
+      this.__inspectElement(this._options.store);
    }
 
    private __highlightNode(id: IFrontendControlNode['id']): void {
@@ -497,52 +511,80 @@ class Elements extends Control {
    private __inspectElement(
       store: IOptions['store'],
       {
-         newTab,
-         reset
+         path
       }: {
-         newTab?: string;
-         reset?: boolean;
+         path?: Array<string | number>;
       } = {}
    ): void {
       store.dispatch('inspectElement', {
          id: this._selectedItemId,
          expandedTabs: this.__getVisibleTabs(),
-         newTab,
-         reset
+         path
       });
    }
 
-   private __setInspectedElement({
-      type,
-      node
-   }: {
-      type: 'full' | 'partial';
-      node: IBackendControlNode;
-   }): void {
-      if (this._selectedItemId === node.id) {
-         switch (type) {
+   private __setInspectedElement(payload: InspectedElementPayload): void {
+      const { id } = payload;
+
+      if (this._selectedItemId === id) {
+         switch (payload.type) {
             case 'full':
-               this._inspectedItem = updateInspectedItem(
-                  retrocycle(node),
-                  {},
-                  this._eventWithBreakpoint,
-                  this._elementsWithBreakpoints.has(node.id)
-               );
+               const { value: fullValue } = payload;
+               const tabs: Array<
+                  'attributes' | 'state' | 'options' | 'events'
+               > = ['attributes', 'state', 'options', 'events'];
+               tabs.forEach((field) => {
+                  if (fullValue[field]) {
+                     fullValue[field] = hydrate(
+                        fullValue[field].data,
+                        fullValue[field].cleaned
+                     );
+                  }
+               });
+               this._inspectedItem = {
+                  ...fullValue,
+                  id
+               };
                break;
             case 'partial':
-               this._inspectedItem = updateInspectedItem(
-                  retrocycle(node),
-                  this._inspectedItem as object,
-                  this._eventWithBreakpoint,
-                  this._elementsWithBreakpoints.has(node.id)
-               );
+               const { value: partialValue } = payload;
+               const changeableTabs: Array<
+                  'changedAttributes' | 'changedState' | 'changedOptions'
+               > = ['changedAttributes', 'changedState', 'changedOptions'];
+               changeableTabs.forEach((field) => {
+                  if (partialValue[field]) {
+                     partialValue[field] = hydrate(
+                        partialValue[field].data,
+                        partialValue[field].cleaned
+                     );
+                  }
+               });
+               this._inspectedItem = {
+                  ...this._inspectedItem,
+                  ...partialValue,
+                  id
+               };
                break;
+            case 'path':
+               const { path, value: pathValue } = payload;
+               if (path.length === 1) {
+                  this._inspectedItem[path[0]] = hydrate(
+                     pathValue.data,
+                     pathValue.cleaned
+                  );
+                  this._inspectedItem = { ...this._inspectedItem };
+               }
+               break;
+            case 'not-found':
+               this._inspectedItem = undefined;
          }
       }
    }
 
-   private __getVisibleTabs(): Array<'attributes' | 'state' | 'options'> {
-      const result: Array<'attributes' | 'state' | 'options'> = [];
+   private __getVisibleTabs(): Array<
+      'attributes' | 'state' | 'options' | 'events'
+   > {
+      const result: Array<'attributes' | 'state' | 'options' | 'events'> = [];
       if (this._optionsExpanded) {
          result.push('options');
       }
@@ -552,24 +594,10 @@ class Elements extends Control {
       if (this._attributesExpanded) {
          result.push('attributes');
       }
-      return result;
-   }
-
-   private __onDetailsTabExpanded(
-      e: Event,
-      eventName:
-         | '_optionsExpanded'
-         | '_stateExpanded'
-         | '_eventsExpanded'
-         | '_attributesExpanded',
-      value: boolean
-   ): void {
-      this[eventName] = value;
-      if (eventName !== '_eventsExpanded') {
-         this.__inspectElement(this._options.store, {
-            newTab: value ? eventName.slice(1, EVENT_NAME_OFFSET) : undefined
-         });
+      if (this._eventsExpanded) {
+         result.push('events');
       }
+      return result;
    }
 
    /**
@@ -657,41 +685,6 @@ class Elements extends Control {
    }
 
    static _theme: string[] = ['Elements/elements'];
-}
-
-/**
- * Merges the data from backend and current inspectedItem. Transforms every value for the consumption by details tab, adds information about breakpoints.
- * @param data
- * @param originalObject
- * @param eventName
- * @param needBreakpoint
- */
-function updateInspectedItem(
-   data: object,
-   originalObject: object,
-   eventName: string,
-   needBreakpoint: boolean
-): Elements['_inspectedItem'] {
-   const result = { ...originalObject };
-
-   Object.entries(data).forEach(([key, value]) => {
-      if (key === 'id' || key === 'isControl') {
-         result[key] = value;
-         return;
-      }
-      const innerResult = {};
-      Object.entries(value).forEach(([valueKey, valueValue]) => {
-         innerResult[valueKey] = {
-            value: valueValue
-         };
-         if (key === 'events' && eventName === valueKey) {
-            innerResult[valueKey].hasBreakpoint = needBreakpoint;
-         }
-      });
-      result[key] = innerResult;
-   });
-
-   return result;
 }
 
 export default Elements;

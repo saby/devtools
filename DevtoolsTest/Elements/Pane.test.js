@@ -5,9 +5,10 @@ define([
    'wml!Elements/_Details/Pane/columnTemplate',
    'Types/collection',
    'Elements/_utils/highlightUpdate',
-   'Elements/_Details/Pane/const',
+   'Elements/_utils/hydrate',
    'Types/entity',
-   'DevtoolsTest/optionTypesMocks'
+   'DevtoolsTest/optionTypesMocks',
+   'Elements/_store/Store'
 ], function(
    mockChrome,
    Pane,
@@ -15,14 +16,16 @@ define([
    columnTemplate,
    collectionLib,
    highlightUpdate,
-   PaneConst,
+   hydrate,
    entityLib,
-   optionTypesMocks
+   optionTypesMocks,
+   Store
 ) {
    let sandbox;
    let instance;
    Pane = Pane.default;
    PaneSource = PaneSource.Source;
+   Store = Store.default;
 
    describe('Elements/_Details/Pane/Pane', function() {
       beforeEach(function() {
@@ -36,17 +39,18 @@ define([
 
       describe('_beforeMount', function() {
          it('isControl: false, should correctly init state', function() {
-            const items = [1, 2, 3];
             const options = {
                data: {
-                  text: {
-                     value: 'test'
-                  },
+                  text: 'test',
                   items: {
-                     value: items
+                     [hydrate.INSPECTED_ITEM_META.type]: 'array',
+                     [hydrate.INSPECTED_ITEM_META.expandable]: true,
+                     [hydrate.INSPECTED_ITEM_META.caption]: 'Array[3]'
                   }
                },
-               isControl: false
+               isControl: false,
+               caption: 'options',
+               controlId: 0
             };
 
             instance._beforeMount(options);
@@ -55,22 +59,23 @@ define([
             assert.deepEqual(instance._source._data, [
                {
                   key: 'text',
-                  value: 'test',
+                  caption: 'test',
                   name: 'text',
                   parent: null,
-                  hasChildren: null
+                  hasChildren: null,
+                  template: 'Elements/elements:StringTemplate'
                },
                {
                   key: 'items',
-                  value: items,
+                  caption: 'Array[3]',
                   name: 'items',
                   parent: null,
-                  hasChildren: true
+                  hasChildren: true,
+                  template: 'Elements/elements:ObjectTemplate'
                }
             ]);
             assert.deepEqual(instance._columns, [
                {
-                  getTemplate: instance.__getTemplate,
                   template: columnTemplate
                }
             ]);
@@ -79,19 +84,19 @@ define([
             assert.isFunction(instance._visibilityCallback);
             assert.isUndefined(instance._editingConfig);
          });
-         it('isControl: true, should correctly init state', function() {
-            const items = [1, 2, 3];
+         it('isControl: true, should correctly init state (create editing config)', function() {
             const options = {
                data: {
-                  text: {
-                     value: 'test',
-                     hasBreakpoint: true
-                  },
+                  text: 'test',
                   items: {
-                     value: items
+                     [hydrate.INSPECTED_ITEM_META.type]: 'array',
+                     [hydrate.INSPECTED_ITEM_META.expandable]: true,
+                     [hydrate.INSPECTED_ITEM_META.caption]: 'Array[3]'
                   }
                },
-               isControl: true
+               isControl: true,
+               caption: 'options',
+               controlId: 0
             };
 
             instance._beforeMount(options);
@@ -100,23 +105,23 @@ define([
             assert.deepEqual(instance._source._data, [
                {
                   key: 'text',
-                  value: 'test',
+                  caption: 'test',
                   name: 'text',
                   parent: null,
                   hasChildren: null,
-                  hasBreakpoint: true
+                  template: 'Elements/elements:StringTemplate'
                },
                {
                   key: 'items',
-                  value: items,
+                  caption: 'Array[3]',
                   name: 'items',
                   parent: null,
-                  hasChildren: true
+                  hasChildren: true,
+                  template: 'Elements/elements:ObjectTemplate'
                }
             ]);
             assert.deepEqual(instance._columns, [
                {
-                  getTemplate: instance.__getTemplate,
                   template: columnTemplate
                }
             ]);
@@ -196,10 +201,6 @@ define([
                data,
                isControl: false
             };
-            const fakeRecordSet = {};
-            const recordSetStub = sandbox
-               .stub(collectionLib, 'RecordSet')
-               .returns(fakeRecordSet);
             instance._source = {
                update: sandbox.stub()
             };
@@ -212,23 +213,15 @@ define([
             Object.freeze(instance);
 
             assert.doesNotThrow(() => instance._beforeUpdate(newOptions));
-            assert.isTrue(
-               instance._source.update.calledOnceWithExactly(fakeRecordSet)
+            sinon.assert.calledWithExactly(
+               instance._source.update,
+               {
+                  text: {
+                     value: 'test2'
+                  }
+               }
             );
-            assert.isTrue(recordSetStub.calledWithNew());
-            assert.isTrue(
-               recordSetStub.calledOnceWithExactly({
-                  rawData: [
-                     {
-                        key: 'text',
-                        value: 'test2',
-                        name: 'text',
-                        parent: null
-                     }
-                  ]
-               })
-            );
-            assert.isTrue(instance._children.list.reload.notCalled);
+            sinon.assert.notCalled(instance._children.list.reload);
          });
 
          it('should update source and reload the list', function() {
@@ -259,10 +252,6 @@ define([
                isControl: false,
                expanded: true
             };
-            const fakeRecordSet = {};
-            const recordSetStub = sandbox
-               .stub(collectionLib, 'RecordSet')
-               .returns(fakeRecordSet);
             instance._source = {
                update: sandbox.stub()
             };
@@ -275,47 +264,32 @@ define([
             Object.freeze(instance);
 
             assert.doesNotThrow(() => instance._beforeUpdate(newOptions));
-            assert.isTrue(
-               instance._source.update.calledOnceWithExactly(fakeRecordSet)
+            sinon.assert.calledWithExactly(
+               instance._source.update,
+               {
+                  text: {
+                     value: 'test2'
+                  }
+               }
             );
-            assert.isTrue(recordSetStub.calledWithNew());
-            assert.isTrue(
-               recordSetStub.calledOnceWithExactly({
-                  rawData: [
-                     {
-                        key: 'text',
-                        value: 'test2',
-                        name: 'text',
-                        parent: null
-                     }
-                  ]
-               })
-            );
-            assert.isTrue(
-               instance._children.list.reload.calledOnceWithExactly()
-            );
+            sinon.assert.calledOnce(instance._children.list.reload);
          });
 
-         it('should create new source', function() {
+         it('should create new source because the controlId has changed', function() {
             const oldOptions = {
                data: {
-                  text: {
-                     value: 'test'
-                  },
-                  items: {
-                     value: [1, 2, 3]
-                  }
+                  text: 'test'
                },
                isControl: false,
+               caption: 'options',
                controlId: 0
             };
             const newOptions = {
                data: {
-                  text: {
-                     value: 'test123'
-                  }
+                  text: 'test'
                },
                isControl: false,
+               caption: 'options',
                controlId: 1
             };
             const oldSource = {};
@@ -329,27 +303,30 @@ define([
             assert.deepEqual(instance._source._data, [
                {
                   key: 'text',
-                  value: 'test123',
+                  caption: 'test',
                   name: 'text',
                   parent: null,
-                  hasChildren: null
+                  hasChildren: null,
+                  template: 'Elements/elements:StringTemplate'
                }
             ]);
          });
 
-         it('should not create new source', function() {
+         it('should create new source because the data changed', function() {
             const oldOptions = {
                data: {
-                  text: {
-                     value: 'test'
-                  }
+                  text: 'test'
                },
                isControl: false,
+               caption: 'options',
                controlId: 0
             };
             const newOptions = {
-               data: { ...oldOptions.data },
+               data: {
+                  text: 'test123'
+               },
                isControl: false,
+               caption: 'options',
                controlId: 0
             };
             const oldSource = {};
@@ -358,7 +335,18 @@ define([
 
             instance._beforeUpdate(newOptions);
 
-            assert.equal(instance._source, oldSource);
+            assert.notEqual(instance._source, oldSource);
+            assert.instanceOf(instance._source, PaneSource);
+            assert.deepEqual(instance._source._data, [
+               {
+                  key: 'text',
+                  caption: 'test123',
+                  name: 'text',
+                  parent: null,
+                  hasChildren: null,
+                  template: 'Elements/elements:StringTemplate'
+               }
+            ]);
          });
 
          it('should create new editingConfig', function() {
@@ -404,11 +392,19 @@ define([
          it("should set _editingConfig to undefined because the Events tab doesn't support editing", function() {
             const oldOptions = {
                isControl: true,
-               caption: 'Options'
+               caption: 'Options',
+               controlId: 0,
+               data: {
+                  text: 'test123'
+               }
             };
             const newOptions = {
                isControl: true,
-               caption: 'Events'
+               caption: 'Events',
+               controlId: 0,
+               data: {
+                  text: 'test123'
+               }
             };
             instance._editingConfig = {
                sequentialEditing: false,
@@ -717,13 +713,13 @@ define([
                   rawData: {
                      key: 'click',
                      value: {},
-                     hasBreakpoint: true,
                      parent: null
                   },
                   keyProperty: 'key'
                });
                instance.saveOptions({
-                  caption: 'Events'
+                  caption: 'Events',
+                  elementsWithBreakpoints: new Set(['click'])
                });
 
                assert.isFalse(
@@ -739,7 +735,6 @@ define([
                   rawData: {
                      key: 'click',
                      value: {},
-                     hasBreakpoint: false,
                      parent: null
                   },
                   keyProperty: 'key'
@@ -804,7 +799,6 @@ define([
                   rawData: {
                      key: 'click',
                      value: {},
-                     hasBreakpoint: false,
                      parent: null
                   },
                   keyProperty: 'key'
@@ -826,13 +820,13 @@ define([
                   rawData: {
                      key: 'click',
                      value: {},
-                     hasBreakpoint: true,
                      parent: null
                   },
                   keyProperty: 'key'
                });
                instance.saveOptions({
-                  caption: 'Events'
+                  caption: 'Events',
+                  elementsWithBreakpoints: new Set(['click'])
                });
 
                assert.isTrue(
@@ -840,37 +834,6 @@ define([
                );
             });
          });
-      });
-
-      it('__getTemplate', function() {
-         assert.equal(
-            PaneConst.TEMPLATES.string,
-            instance.__getTemplate(undefined)
-         );
-         assert.equal(PaneConst.TEMPLATES.string, instance.__getTemplate(''));
-         assert.equal(
-            PaneConst.TEMPLATES.string,
-            instance.__getTemplate('test')
-         );
-         assert.equal(
-            PaneConst.TEMPLATES.boolean,
-            instance.__getTemplate(true)
-         );
-         assert.equal(
-            PaneConst.TEMPLATES.boolean,
-            instance.__getTemplate(false)
-         );
-         assert.equal(PaneConst.TEMPLATES.number, instance.__getTemplate(0));
-         assert.equal(PaneConst.TEMPLATES.number, instance.__getTemplate(123));
-         assert.equal(PaneConst.TEMPLATES.object, instance.__getTemplate(null));
-         assert.equal(PaneConst.TEMPLATES.object, instance.__getTemplate({}));
-         assert.equal(
-            PaneConst.TEMPLATES.object,
-            instance.__getTemplate({
-               test: '123'
-            })
-         );
-         assert.equal(PaneConst.TEMPLATES.object, instance.__getTemplate([1]));
       });
 
       describe('__toggleExpanded', function() {
@@ -1095,8 +1058,10 @@ define([
                'expanded',
                'controlId',
                'isControl',
+               'store',
                'changedData',
                'canStoreAsGlobal',
+               'elementsWithBreakpoints',
                'readOnly',
                'theme',
                'highlightUpdates'
@@ -1121,11 +1086,18 @@ define([
                required: true,
                args: [Boolean]
             });
+            testOption(optionTypes, 'store', {
+               required: true,
+               args: [Store]
+            });
             testOption(optionTypes, 'changedData', {
                args: [Object, null]
             });
             testOption(optionTypes, 'canStoreAsGlobal', {
                args: [Boolean]
+            });
+            testOption(optionTypes, 'elementsWithBreakpoints', {
+               args: [Set]
             });
             testOption(optionTypes, 'readOnly', {
                args: [Boolean]
