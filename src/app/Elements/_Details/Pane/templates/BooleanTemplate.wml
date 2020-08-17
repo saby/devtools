@@ -1,11 +1,11 @@
 <span>
    <span attr:class="devtools-BooleanTemplate__fieldName">{{_options.name}}</span>:
    <ws:if data="{{ _options.itemData.isEditing }}">
-      <Controls.toggle:Checkbox bind:value="_options.itemData.item.value" />
+      <Controls.toggle:Checkbox bind:value="_options.itemData.item.caption" />
    </ws:if>
    <ws:else>
-      <Controls.toggle:Checkbox value="{{_options.value}}"
+      <Controls.toggle:Checkbox value="{{_options.caption === 'true'}}"
                                 readOnly="{{ true }}" />
    </ws:else>
-   <span attr:class="devtools-BooleanTemplate__value"> {{_options.value}}</span>
+   <span attr:class="devtools-BooleanTemplate__value"> {{_options.caption}}</span>
 </span>

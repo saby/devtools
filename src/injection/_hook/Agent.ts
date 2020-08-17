@@ -2,7 +2,6 @@
  * TODO: надо подумать на тему реордера, скорее всего я смогу сам диффить порядок детей старой и новой ноды, даже полный дифф не нужен, достаточно просто узнать одинаковый ли порядок
  * TODO: подумать в сторону редактирования, пока непонятно как его делать. У контрол нод иммутабельные опции
  */
-import prepareForSerialization from './prepareForSerialization';
 import {
    IBackendControlNode,
    IControlChanges,
@@ -41,6 +40,9 @@ import {
    startMark,
    startSyncMark
 } from './_utils/UserTimingAPI';
+import { dehydrateHelper } from './dehydrate';
+import { getValueByPath } from 'Extension/Utils/getValueByPath';
+import { IInspectedElement, InspectedPathsMap } from 'Types/ElementInspection';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -131,6 +133,17 @@ class Agent {
     * This is the id of the node closest to the element selected in the Elements tab of native devtools.
     */
    private idClosestToPreviousSelectedElement?: IBackendControlNode['id'];
+
+   /**
+    * Id of the element currently inspected by the frontend.
+    * Used to determine whether we should send changes only or the full data.
+    */
+   private currentInspectedElementId?: IBackendControlNode['id'];
+
+   /**
+    * Paths currently opened on the frontend. Used to prevent dehydration of opened paths.
+    */
+   private currentInspectedPaths: InspectedPathsMap = new Map();
 
    private selectedNodePreviousState?: object;
 
@@ -681,97 +694,176 @@ class Agent {
       }
    }
 
-   private inspectElement({
-      id,
-      expandedTabs,
-      newTab,
-      reset
-   }: {
+   private inspectElement(options: {
       id: IBackendControlNode['id'];
-      expandedTabs: Array<'attributes' | 'state' | 'options'>;
-      newTab?: 'attributes' | 'state' | 'options';
-      reset: boolean;
+      expandedTabs: Array<'attributes' | 'state' | 'options' | 'events'>;
+      path?: Array<string | number>;
    }): void {
+      const { id, expandedTabs } = options;
+      const sameId = this.currentInspectedElementId === id;
+      this.currentInspectedElementId = id;
       const node = this.elements.get(id);
       if (node) {
-         /**
-          * TODO: пока считаем, что события не меняются никогда
-          * TODO: посылать только содержимое раскрытых вкладок, всё остальное заменить на заглушки
-          */
-         const result: Partial<IBackendControlNode> & {
-            isControl?: boolean;
-            events?: Record<
-               string,
-               Array<{ function: Function; arguments: unknown[] }>
-            >;
-            changedState?: object;
-         } = {
-            id
-         };
-         if (reset) {
-            result.attributes = node.attributes;
-            result.state = node.state;
-            result.options = node.options;
-            result.events = getEvents(this.elements, this.domToIds, id);
-            result.isControl = !!node.instance;
-            this.selectedNodePreviousState = result.isControl
-               ? deepClone(node.state)
-               : undefined;
+         if (options.path) {
+            this.updateInspectedPaths(options.path);
+            let value;
+            if (options.path[0] === 'events') {
+               value = dehydrateHelper(
+                  getValueByPath(
+                     getEvents(this.elements, this.domToIds, id),
+                     options.path.slice(1)
+                  ) as object,
+                  this.currentInspectedPaths,
+                  options.path
+               );
+            } else {
+               value = dehydrateHelper(
+                  getValueByPath(node, options.path) as object,
+                  this.currentInspectedPaths,
+                  options.path
+               );
+               // we should remember the state the first time, so we can use it later for diffing
+               if (
+                  !!node.instance &&
+                  options.path.length === 1 &&
+                  options.path[0] === 'state'
+               ) {
+                  this.selectedNodePreviousState = deepClone(node.state);
+               }
+            }
             window.__WASABY_DEV_HOOK__.pushMessage('inspectedElement', {
-               type: 'full',
-               node: prepareForSerialization(result)
+               id,
+               value,
+               type: 'path',
+               path: options.path
             });
             this.channel.dispatch('longMessage');
          } else {
-            let hasChanges = false;
-            expandedTabs.forEach((tabName) => {
-               if (newTab === tabName) {
-                  hasChanges = true;
-                  result[tabName] = node[tabName];
-                  if (tabName === 'state') {
-                     this.selectedNodePreviousState = deepClone(node.state);
+            if (sameId) {
+               const result: IInspectedElement = {
+                  isControl: !!node.instance
+               };
+               let hasChanges = false;
+               expandedTabs.forEach((tabName) => {
+                  switch (tabName) {
+                     case 'attributes':
+                        if (node.changedAttributes) {
+                           hasChanges = true;
+                           result.changedAttributes = dehydrateHelper(
+                              node.changedAttributes,
+                              this.currentInspectedPaths,
+                              ['attributes']
+                           );
+                           node.changedAttributes = undefined;
+                        }
+                        break;
+                     case 'state':
+                        if (result.isControl) {
+                           const changedState = getObjectDiff(
+                              this.selectedNodePreviousState,
+                              node.state
+                           );
+                           if (changedState) {
+                              hasChanges = true;
+                              result.changedState = dehydrateHelper(
+                                 changedState,
+                                 this.currentInspectedPaths,
+                                 ['state']
+                              );
+                              this.selectedNodePreviousState = deepClone(
+                                 node.state
+                              );
+                           }
+                        }
+                        break;
+                     case 'options':
+                        if (node.changedOptions) {
+                           hasChanges = true;
+                           result.changedOptions = dehydrateHelper(
+                              node.changedOptions,
+                              this.currentInspectedPaths,
+                              ['options']
+                           );
+                           node.changedOptions = undefined;
+                        }
+                        break;
                   }
-                  return;
+               });
+               if (hasChanges) {
+                  window.__WASABY_DEV_HOOK__.pushMessage('inspectedElement', {
+                     id,
+                     type: 'partial',
+                     value: result
+                  });
+                  this.channel.dispatch('longMessage');
+               } else {
+                  this.channel.dispatch('inspectedElement', {
+                     id,
+                     type: 'no-change'
+                  });
                }
-               switch (tabName) {
-                  case 'attributes':
-                     if (node.changedAttributes) {
-                        hasChanges = true;
-                        result.changedAttributes = node.changedAttributes;
-                        node.changedAttributes = undefined;
-                     }
-                     break;
-                  case 'state':
-                     const changedState = getObjectDiff(
-                        this.selectedNodePreviousState,
-                        node.state
-                     );
-                     if (changedState) {
-                        hasChanges = true;
-                        result.changedState = changedState;
-                        this.selectedNodePreviousState = deepClone(node.state);
-                     }
-                     break;
-                  case 'options':
-                     if (node.changedOptions) {
-                        hasChanges = true;
-                        result.changedOptions = node.changedOptions;
-                        node.changedOptions = undefined;
-                     }
-                     break;
-               }
-            });
-            if (hasChanges) {
+            } else {
+               this.currentInspectedPaths.clear();
+               expandedTabs.forEach((tab) => {
+                  this.currentInspectedPaths.set(tab, new Map());
+               });
+               const result: IInspectedElement = {
+                  attributes: dehydrateHelper(
+                     node.attributes,
+                     this.currentInspectedPaths,
+                     ['attributes']
+                  ),
+                  state: dehydrateHelper(
+                     node.state,
+                     this.currentInspectedPaths,
+                     ['state']
+                  ),
+                  options: dehydrateHelper(
+                     node.options,
+                     this.currentInspectedPaths,
+                     ['options']
+                  ),
+                  events: dehydrateHelper(
+                     getEvents(this.elements, this.domToIds, id),
+                     this.currentInspectedPaths,
+                     ['events']
+                  ),
+                  isControl: !!node.instance
+               };
+               this.selectedNodePreviousState =
+                  result.isControl && expandedTabs.includes('state')
+                     ? deepClone(node.state)
+                     : undefined;
+
                window.__WASABY_DEV_HOOK__.pushMessage('inspectedElement', {
-                  type: 'partial',
-                  node: prepareForSerialization(result)
+                  id,
+                  type: 'full',
+                  value: result
                });
                this.channel.dispatch('longMessage');
             }
          }
 
          window.$wasaby = { ...node };
+      } else {
+         this.channel.dispatch('inspectedElement', {
+            id,
+            type: 'not-found'
+         });
+         delete window.$wasaby;
       }
+   }
+
+   private updateInspectedPaths(path: Array<string | number>): void {
+      let currentPathMap = this.currentInspectedPaths;
+      path.forEach((part) => {
+         let nextPathMap = currentPathMap.get(part);
+         if (!nextPathMap) {
+            nextPathMap = new Map();
+            currentPathMap.set(part, nextPathMap);
+         }
+         currentPathMap = nextPathMap;
+      });
    }
 
    private viewTemplate(id: IBackendControlNode['id']): void {
@@ -832,11 +924,7 @@ class Agent {
          const element = this.elements.get(id) as IBackendControlNode;
          value = element[currentProperty as keyof IBackendControlNode];
       }
-      while (path.length) {
-         currentProperty = path.pop();
-         value = value[currentProperty];
-      }
-      return value;
+      return getValueByPath(value as object | null, path);
    }
 
    private highlightElement(id?: IBackendControlNode['id']): void {

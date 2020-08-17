@@ -80,10 +80,6 @@ class Details extends Control<IOptions> {
       }, DEFAULT_EVAL_TIMEOUT);
    }
 
-   protected _hasData(data?: object): boolean {
-      return typeof data !== 'undefined' && Object.keys(data).length > 0;
-   }
-
    protected _forwardExpanded(
       e: Event,
       eventName: string,

@@ -1,28 +1,25 @@
 import { Control, TemplateFunction } from 'UI/Base';
-import template = require('wml!Elements/_Details/Pane/templates/NumberTemplate');
+import * as template from 'wml!Elements/_Details/Pane/templates/NumberTemplate';
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
-
-interface IOptions extends ITemplateOptions {
-   value: number;
-}
 
 /**
  * Template for numbers.
  * @author Зайцев А.С.
  */
-class NumberTemplate extends Control {
+class NumberTemplate extends Control<ITemplateOptions> {
    protected _template: TemplateFunction = template;
-   protected readonly _options: Readonly<IOptions>;
 
    static _theme: string[] = ['Elements/elements'];
 
-   static getOptionTypes(): Record<keyof IOptions, unknown> {
+   static getOptionTypes(): Record<keyof ITemplateOptions, unknown> {
       return {
-         value: descriptor(Number).required(),
+         caption: descriptor(String).required(),
          name: descriptor(String, Number).required(),
          key: descriptor(String).required(),
-         itemData: descriptor(Object)
+         itemData: descriptor(Object),
+         readOnly: descriptor(Boolean),
+         theme: descriptor(String)
       };
    }
 }

@@ -212,14 +212,13 @@ define([
          });
 
          describe('inspectElement', function() {
-            it("should not send anything because the element doesn't exist", function() {
+            it("should send event with the 'not-found' type because the element doesn't exist", function() {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
 
                postMessage('inspectElement', {
                   id: 0,
-                  expandedTabs: ['options'],
-                  reset: true
+                  expandedTabs: ['options']
                });
 
                return waitForMessageHandler(() => {
@@ -227,7 +226,14 @@ define([
                   sinon.assert.notCalled(
                      window.__WASABY_DEV_HOOK__.pushMessage
                   );
-                  sinon.assert.notCalled(instance.channel.dispatch);
+                  sinon.assert.calledWithExactly(
+                     instance.channel.dispatch,
+                     'inspectedElement',
+                     {
+                        id: 0,
+                        type: 'not-found'
+                     }
+                  );
                   assert.isUndefined(window.$wasaby);
 
                   // cleanup
@@ -275,8 +281,7 @@ define([
 
                postMessage('inspectElement', {
                   id: 0,
-                  expandedTabs: ['options'],
-                  reset: true
+                  expandedTabs: ['options', 'attributes', 'state', 'events']
                });
 
                return waitForMessageHandler(() => {
@@ -290,33 +295,43 @@ define([
                      window.__WASABY_DEV_HOOK__.pushMessage,
                      'inspectedElement',
                      {
+                        id: 0,
                         type: 'full',
-                        node: {
-                           id: 0,
+                        value: {
                            attributes: {
-                              'attr:class': 'controls-Application'
+                              cleaned: [],
+                              data: {
+                                 'attr:class': 'controls-Application'
+                              }
                            },
                            state: {
-                              pageWidth: 400,
-                              obj: {
-                                 field: 'str'
+                              cleaned: [['state', 'obj']],
+                              data: {
+                                 pageWidth: 400,
+                                 obj: {
+                                    caption: 'Object',
+                                    expandable: true,
+                                    type: 'object'
+                                 }
                               }
                            },
                            options: {
-                              value: '456'
+                              cleaned: [],
+                              data: {
+                                 value: '456'
+                              }
                            },
                            events: {
-                              click: [
-                                 {
-                                    arguments: ['1'],
-                                    function: {
-                                       control: {
-                                          onClick: 'function onClick'
-                                       },
-                                       value: 'onClick'
+                              cleaned: [['events', 'click', 0]],
+                              data: {
+                                 click: [
+                                    {
+                                       caption: 'Object',
+                                       expandable: true,
+                                       type: 'object'
                                     }
-                                 }
-                              ]
+                                 ]
+                              }
                            },
                            isControl: true
                         }
@@ -370,8 +385,7 @@ define([
 
                postMessage('inspectElement', {
                   id: 0,
-                  expandedTabs: ['options'],
-                  reset: true
+                  expandedTabs: ['options', 'attributes', 'state', 'events']
                });
 
                return waitForMessageHandler(() => {
@@ -380,17 +394,23 @@ define([
                      window.__WASABY_DEV_HOOK__.pushMessage,
                      'inspectedElement',
                      {
+                        id: 0,
                         type: 'full',
-                        node: {
-                           id: 0,
+                        value: {
                            attributes: {
-                              'attr:class': 'controls-Application'
+                              data: {
+                                 'attr:class': 'controls-Application'
+                              },
+                              cleaned: []
                            },
                            state: undefined,
                            options: {
-                              value: '456'
+                              data: {
+                                 value: '456'
+                              },
+                              cleaned: []
                            },
-                           events: {},
+                           events: undefined,
                            isControl: false
                         }
                      }
@@ -417,7 +437,7 @@ define([
                });
             });
 
-            it("should not send anything because there're no expanded tabs", function() {
+            it("should only send information about the tabs, without data, because there're no expanded tabs", function() {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
@@ -450,16 +470,51 @@ define([
 
                postMessage('inspectElement', {
                   id: 0,
-                  expandedTabs: [],
-                  reset: false
+                  expandedTabs: []
                });
 
                return waitForMessageHandler(() => {
                   assert.isUndefined(instance.selectedNodePreviousState);
-                  sinon.assert.notCalled(
-                     window.__WASABY_DEV_HOOK__.pushMessage
+                  sinon.assert.calledWithExactly(
+                     window.__WASABY_DEV_HOOK__.pushMessage,
+                     'inspectedElement',
+                     {
+                        id: 0,
+                        type: 'full',
+                        value: {
+                           attributes: {
+                              cleaned: [['attributes']],
+                              data: {
+                                 caption: 'Object',
+                                 expandable: true,
+                                 type: 'object'
+                              }
+                           },
+                           options: {
+                              cleaned: [['options']],
+                              data: {
+                                 caption: 'Object',
+                                 expandable: true,
+                                 type: 'object'
+                              }
+                           },
+                           state: {
+                              cleaned: [['state']],
+                              data: {
+                                 caption: 'Object',
+                                 expandable: true,
+                                 type: 'object'
+                              }
+                           },
+                           events: undefined,
+                           isControl: true
+                        }
+                     }
                   );
-                  sinon.assert.notCalled(instance.channel.dispatch);
+                  sinon.assert.calledWithExactly(
+                     instance.channel.dispatch,
+                     'longMessage'
+                  );
                   assert.deepEqual(window.$wasaby, {
                      id: 0,
                      name: 'Controls/Application',
@@ -492,7 +547,7 @@ define([
                });
             });
 
-            it('should send information only from the expanded tabs (options, state)', function() {
+            it('should send information about changes only from the expanded tabs (options, state) and remember the state', function() {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
@@ -503,6 +558,9 @@ define([
                      field: 'str'
                   }
                };
+               instance.currentInspectedElementId = 0;
+               instance.currentInspectedPaths.set('options', new Map());
+               instance.currentInspectedPaths.set('state', new Map());
                instance.elements.set(0, {
                   id: 0,
                   name: 'Controls/Application',
@@ -531,8 +589,7 @@ define([
 
                postMessage('inspectElement', {
                   id: 0,
-                  expandedTabs: ['options', 'state'],
-                  reset: false
+                  expandedTabs: ['options', 'state']
                });
 
                return waitForMessageHandler(() => {
@@ -546,16 +603,23 @@ define([
                      window.__WASABY_DEV_HOOK__.pushMessage,
                      'inspectedElement',
                      {
+                        id: 0,
                         type: 'partial',
-                        node: {
-                           id: 0,
+                        value: {
                            changedOptions: {
-                              newOption: 'qwerty',
-                              value: '123'
+                              cleaned: [],
+                              data: {
+                                 newOption: 'qwerty',
+                                 value: '123'
+                              }
                            },
                            changedState: {
-                              pageWidth: 400
-                           }
+                              cleaned: [],
+                              data: {
+                                 pageWidth: 400
+                              }
+                           },
+                           isControl: true
                         }
                      }
                   );
@@ -592,17 +656,13 @@ define([
                });
             });
 
-            it('should send information only from the expanded tabs (attributes)', function() {
+            it('should send information about changes only from the expanded tabs (attributes)', function() {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
                const controlInstance = {};
-               instance.selectedNodePreviousState = {
-                  pageWidth: 500,
-                  obj: {
-                     field: 'str'
-                  }
-               };
+               instance.currentInspectedElementId = 0;
+               instance.currentInspectedPaths.set('attributes', new Map());
                instance.elements.set(0, {
                   id: 0,
                   name: 'Controls/Application',
@@ -631,27 +691,25 @@ define([
 
                postMessage('inspectElement', {
                   id: 0,
-                  expandedTabs: ['attributes'],
-                  reset: false
+                  expandedTabs: ['attributes']
                });
 
                return waitForMessageHandler(() => {
-                  assert.deepEqual(instance.selectedNodePreviousState, {
-                     pageWidth: 500,
-                     obj: {
-                        field: 'str'
-                     }
-                  });
                   sinon.assert.calledWithExactly(
                      window.__WASABY_DEV_HOOK__.pushMessage,
                      'inspectedElement',
                      {
+                        id: 0,
                         type: 'partial',
-                        node: {
-                           id: 0,
+                        value: {
                            changedAttributes: {
-                              'attr:class': 'controls-Application ws-is-chrome'
-                           }
+                              cleaned: [],
+                              data: {
+                                 'attr:class':
+                                    'controls-Application ws-is-chrome'
+                              }
+                           },
+                           isControl: true
                         }
                      }
                   );
@@ -689,28 +747,17 @@ define([
                });
             });
 
-            it('should send information only from the expanded tabs (options, state) and send all information about the new tab (state)', function() {
+            it('should send information from dehydrated path', function() {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
                const controlInstance = {};
+               instance.currentInspectedElementId = 0;
+               instance.currentInspectedPaths.set('state', new Map());
                instance.elements.set(0, {
                   id: 0,
                   name: 'Controls/Application',
                   instance: controlInstance,
-                  options: {
-                     value: '456'
-                  },
-                  changedOptions: {
-                     newOption: 'qwerty',
-                     value: '123'
-                  },
-                  attributes: {
-                     'attr:class': 'controls-Application'
-                  },
-                  changedAttributes: {
-                     'attr:class': 'controls-Application ws-is-chrome'
-                  },
                   state: {
                      pageWidth: 400,
                      obj: {
@@ -722,103 +769,8 @@ define([
 
                postMessage('inspectElement', {
                   id: 0,
-                  expandedTabs: ['options', 'state'],
-                  reset: false,
-                  newTab: 'state'
-               });
-
-               return waitForMessageHandler(() => {
-                  assert.deepEqual(instance.selectedNodePreviousState, {
-                     pageWidth: 400,
-                     obj: {
-                        field: 'str'
-                     }
-                  });
-                  sinon.assert.calledWithExactly(
-                     window.__WASABY_DEV_HOOK__.pushMessage,
-                     'inspectedElement',
-                     {
-                        type: 'partial',
-                        node: {
-                           id: 0,
-                           changedOptions: {
-                              newOption: 'qwerty',
-                              value: '123'
-                           },
-                           state: {
-                              pageWidth: 400,
-                              obj: {
-                                 field: 'str'
-                              }
-                           }
-                        }
-                     }
-                  );
-                  sinon.assert.calledWithExactly(
-                     instance.channel.dispatch,
-                     'longMessage'
-                  );
-                  assert.deepEqual(window.$wasaby, {
-                     id: 0,
-                     name: 'Controls/Application',
-                     instance: controlInstance,
-                     options: {
-                        value: '456'
-                     },
-                     changedOptions: undefined,
-                     attributes: {
-                        'attr:class': 'controls-Application'
-                     },
-                     changedAttributes: {
-                        'attr:class': 'controls-Application ws-is-chrome'
-                     },
-                     state: {
-                        pageWidth: 400,
-                        obj: {
-                           field: 'str'
-                        }
-                     },
-                     container
-                  });
-
-                  // cleanup
-                  delete window.$wasaby;
-                  delete window.__WASABY_DEV_HOOK__;
-               });
-            });
-
-            it('should send information only from the expanded tabs (options, state) and send all information about the new tab (options)', function() {
-               stubWasabyDevHook();
-               sandbox.stub(instance.channel, 'dispatch');
-               const container = document.createElement('div');
-               const controlInstance = {};
-               instance.elements.set(0, {
-                  id: 0,
-                  name: 'Controls/Application',
-                  instance: controlInstance,
-                  options: {
-                     value: '456'
-                  },
-                  attributes: {
-                     'attr:class': 'controls-Application'
-                  },
-                  changedAttributes: {
-                     'attr:class': 'controls-Application ws-is-chrome'
-                  },
-                  state: {
-                     pageWidth: 400,
-                     obj: {
-                        field: 'str'
-                     }
-                  },
-                  container
-               });
-
-               postMessage('inspectElement', {
-                  id: 0,
-                  expandedTabs: ['options'],
-                  reset: false,
-                  newTab: 'options'
+                  expandedTabs: ['state'],
+                  path: ['state', 'obj']
                });
 
                return waitForMessageHandler(() => {
@@ -827,11 +779,13 @@ define([
                      window.__WASABY_DEV_HOOK__.pushMessage,
                      'inspectedElement',
                      {
-                        type: 'partial',
-                        node: {
-                           id: 0,
-                           options: {
-                              value: '456'
+                        id: 0,
+                        type: 'path',
+                        path: ['state', 'obj'],
+                        value: {
+                           cleaned: [],
+                           data: {
+                              field: 'str'
                            }
                         }
                      }
@@ -844,15 +798,6 @@ define([
                      id: 0,
                      name: 'Controls/Application',
                      instance: controlInstance,
-                     options: {
-                        value: '456'
-                     },
-                     attributes: {
-                        'attr:class': 'controls-Application'
-                     },
-                     changedAttributes: {
-                        'attr:class': 'controls-Application ws-is-chrome'
-                     },
                      state: {
                         pageWidth: 400,
                         obj: {
@@ -1006,7 +951,7 @@ define([
 
                postMessage('storeAsGlobal', {
                   id: 0,
-                  path: ['value', 'obj', 'options']
+                  path: ['obj', 'value', 'options']
                });
 
                return waitForMessageHandler(() => {
@@ -1159,11 +1104,11 @@ define([
                postMessage('viewFunctionSource', {
                   id: 0,
                   path: [
-                     'onClick',
-                     'control',
-                     'function',
-                     '0',
                      'click',
+                     '0',
+                     'function',
+                     'control',
+                     'onClick',
                      'events'
                   ]
                });

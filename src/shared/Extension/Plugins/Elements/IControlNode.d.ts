@@ -10,7 +10,7 @@ interface ITemplateNode {
       content?: object;
    };
    changedOptions?: ITemplateNode['options'];
-   attributes?: Record<string, string>;
+   attributes?: Record<string, string | boolean | number>;
    changedAttributes?: ITemplateNode['attributes'];
 }
 

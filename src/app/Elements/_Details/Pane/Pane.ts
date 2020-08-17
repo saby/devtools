@@ -1,31 +1,27 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-import template = require('wml!Elements/_Details/Pane/Pane');
+import * as template from 'wml!Elements/_Details/Pane/Pane';
 import { descriptor, Model } from 'Types/entity';
-import { RecordSet } from 'Types/collection';
-import { TEMPLATES } from './const';
 import { Source } from './Source';
-import columnTemplate = require('wml!Elements/_Details/Pane/columnTemplate');
+import * as columnTemplate from 'wml!Elements/_Details/Pane/columnTemplate';
 import { highlightUpdate } from '../../_utils/highlightUpdate';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import './templates/StringTemplate';
 import './templates/NumberTemplate';
 import './templates/ObjectTemplate';
 import './templates/BooleanTemplate';
-
-export interface IPaneValue {
-   value: object;
-   hasBreakpoint?: boolean;
-}
+import Store from '../../_store/Store';
 
 interface IOptions extends IControlOptions {
    caption: string;
-   data: Record<string, IPaneValue>;
+   data: Record<string, unknown>;
    expanded: boolean;
    controlId: IFrontendControlNode['id'];
    isControl: boolean;
+   store: Store;
    highlightUpdates?: boolean;
    changedData?: object;
    canStoreAsGlobal?: boolean;
+   elementsWithBreakpoints?: Set<IFrontendControlNode['id']>;
 }
 
 const enum ShowType {
@@ -54,38 +50,17 @@ interface IEditingConfig {
    toolbarVisibility: boolean;
 }
 
-interface IItem {
-   key: string;
-   value: unknown;
-   name: string;
-   parent: null;
-   hasBreakpoint?: boolean;
-}
-
-function getRawData(initialData: IOptions['data']): IItem[] {
-   return Object.entries(initialData).map(
-      ([key, value]: [string, IPaneValue]) => {
-         const result: IItem = {
-            key,
-            value: value.value,
-            name: key,
-            parent: null
-         };
-
-         if (value.hasBreakpoint) {
-            result.hasBreakpoint = value.hasBreakpoint;
-         }
-
-         return result;
-      }
-   );
-}
-
-function getSource(initialData: IOptions['data']): Source {
+function getSource(
+   initialData: IOptions['data'],
+   store: IOptions['store'],
+   controlId: IOptions['controlId'],
+   root: string
+): Source {
    return new Source({
-      data: getRawData(initialData),
-      idProperty: 'key',
-      parentProperty: 'parent'
+      store,
+      controlId,
+      root,
+      data: initialData
    });
 }
 
@@ -128,10 +103,14 @@ class Pane extends Control<IOptions> {
    protected _editingItem?: Model;
 
    protected _beforeMount(options: IOptions): void {
-      this._source = getSource(options.data);
+      this._source = getSource(
+         options.data,
+         options.store,
+         options.controlId,
+         options.caption
+      );
       this._columns = [
          {
-            getTemplate: this.__getTemplate,
             template: columnTemplate
          }
       ];
@@ -186,20 +165,27 @@ class Pane extends Control<IOptions> {
          newOptions.changedData &&
          this._options.changedData !== newOptions.changedData
       ) {
-         const rawData = getRawData(newOptions.changedData);
-         this._source.update(
-            new RecordSet({
-               rawData
-            })
-         );
+         this._source.update(newOptions.changedData);
          if (newOptions.expanded && this._children.list) {
             this._children.list.reload();
          }
       }
-      if (this._options.controlId !== newOptions.controlId) {
-         this._source = getSource(newOptions.data);
+      if (
+         this._options.controlId !== newOptions.controlId ||
+         this._options.caption !== newOptions.caption ||
+         this._options.data !== newOptions.data
+      ) {
+         this._source = getSource(
+            newOptions.data,
+            newOptions.store,
+            newOptions.controlId,
+            newOptions.caption
+         );
       }
-      if (this._options.isControl !== newOptions.isControl || this._options.caption !== newOptions.caption) {
+      if (
+         this._options.isControl !== newOptions.isControl ||
+         this._options.caption !== newOptions.caption
+      ) {
          this._editingConfig = getEditingConfig(
             newOptions.isControl,
             newOptions.caption
@@ -254,23 +240,15 @@ class Pane extends Control<IOptions> {
             return (
                this._options.caption === 'Events' &&
                item.get('parent') === null &&
-               !item.get('hasBreakpoint')
+               !this._options.elementsWithBreakpoints?.has(item.get('key'))
             );
          case 'removeBreakpoint':
             return (
                this._options.caption === 'Events' &&
                item.get('parent') === null &&
-               item.get('hasBreakpoint')
+               !!this._options.elementsWithBreakpoints?.has(item.get('key'))
             );
       }
-   }
-
-   private __getTemplate(value: unknown): string {
-      const type = typeof value;
-      if (TEMPLATES.hasOwnProperty(type)) {
-         return TEMPLATES[type];
-      }
-      return TEMPLATES.string;
    }
 
    private __toggleExpanded(): void {
@@ -336,9 +314,11 @@ class Pane extends Control<IOptions> {
          expanded: descriptor(Boolean).required(),
          controlId: descriptor(Number).required(),
          isControl: descriptor(Boolean).required(),
+         store: descriptor(Store).required(),
          changedData: descriptor(Object, null),
          highlightUpdates: descriptor(Boolean),
          canStoreAsGlobal: descriptor(Boolean),
+         elementsWithBreakpoints: descriptor(Set),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };
