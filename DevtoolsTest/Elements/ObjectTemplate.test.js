@@ -16,85 +16,6 @@ define([
          sandbox.restore();
       });
 
-      describe('constructor', function() {
-         it('should calculate correct caption for empty array', function() {
-            const instance = new ObjectTemplate({
-               value: []
-            });
-
-            assert.equal(instance._caption, 'Array[0]');
-         });
-
-         it('should calculate correct caption for array with items', function() {
-            const instance = new ObjectTemplate({
-               value: [1, 2, 3]
-            });
-
-            assert.equal(instance._caption, 'Array[3]');
-         });
-
-         it('should calculate correct caption for empty object', function() {
-            const instance = new ObjectTemplate({
-               value: {}
-            });
-
-            assert.equal(instance._caption, 'Empty object');
-         });
-
-         it('should calculate correct caption for object with keys', function() {
-            const instance = new ObjectTemplate({
-               value: {
-                  0: null
-               }
-            });
-
-            assert.equal(instance._caption, 'Object');
-         });
-
-         it('should calculate correct caption for null', function() {
-            const instance = new ObjectTemplate({
-               value: null
-            });
-
-            assert.equal(instance._caption, 'null');
-         });
-      });
-
-      describe('_beforeUpdate', function() {
-         it('should not change state because the value did not change', function() {
-            const value = [];
-            const instance = new ObjectTemplate({
-               value
-            });
-            instance.saveOptions({
-               value
-            });
-            Object.freeze(instance);
-
-            assert.doesNotThrow(() =>
-               instance.__beforeUpdate({
-                  value
-               })
-            );
-         });
-
-         it('should change caption because the value have changed', function() {
-            const oldValue = [];
-            const instance = new ObjectTemplate({
-               value: oldValue
-            });
-            instance.saveOptions({
-               value: oldValue
-            });
-
-            instance.__beforeUpdate({
-               value: [1, 2, 3]
-            });
-
-            assert.equal(instance._caption, 'Array[3]');
-         });
-      });
-
       describe('getOptionTypes', function() {
          it('should call entity:Descriptor with correct values', function() {
             const { mockOptionTypes, testOption } = optionTypesMocks;
@@ -103,14 +24,16 @@ define([
             const optionTypes = ObjectTemplate.getOptionTypes();
 
             assert.hasAllKeys(optionTypes, [
-               'value',
+               'caption',
                'name',
                'key',
-               'itemData'
+               'itemData',
+               'readOnly',
+               'theme'
             ]);
-            testOption(optionTypes, 'value', {
+            testOption(optionTypes, 'caption', {
                required: true,
-               args: [Object, null]
+               args: [String]
             });
             testOption(optionTypes, 'name', {
                required: true,
@@ -122,6 +45,12 @@ define([
             });
             testOption(optionTypes, 'itemData', {
                args: [Object]
+            });
+            testOption(optionTypes, 'readOnly', {
+               args: [Boolean]
+            });
+            testOption(optionTypes, 'theme', {
+               args: [String]
             });
          });
       });

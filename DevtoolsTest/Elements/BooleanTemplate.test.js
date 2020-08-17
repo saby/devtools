@@ -26,14 +26,16 @@ define([
             const optionTypes = BooleanTemplate.getOptionTypes();
 
             assert.hasAllKeys(optionTypes, [
-               'value',
+               'caption',
                'name',
                'key',
-               'itemData'
+               'itemData',
+               'readOnly',
+               'theme'
             ]);
-            testOption(optionTypes, 'value', {
+            testOption(optionTypes, 'caption', {
                required: true,
-               args: [Boolean]
+               args: [String]
             });
             testOption(optionTypes, 'name', {
                required: true,
@@ -45,6 +47,12 @@ define([
             });
             testOption(optionTypes, 'itemData', {
                args: [Object]
+            });
+            testOption(optionTypes, 'readOnly', {
+               args: [Boolean]
+            });
+            testOption(optionTypes, 'theme', {
+               args: [String]
             });
          });
       });
