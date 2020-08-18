@@ -22,6 +22,8 @@ interface IOptions extends IControlOptions {
    attributes?: object;
    changedAttributes?: object;
    logicParentName?: string;
+   eventWithBreakpoint?: string;
+   elementsWithBreakpoints?: Set<IFrontendControlNode['id']>;
 }
 
 const DEFAULT_EVAL_TIMEOUT = 100;
@@ -133,6 +135,8 @@ class Details extends Control<IOptions> {
          state: descriptor(Object),
          changedState: descriptor(Object),
          logicParentName: descriptor(String),
+         elementsWithBreakpoints: descriptor(Set),
+         eventWithBreakpoint: descriptor(String),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

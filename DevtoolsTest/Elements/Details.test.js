@@ -271,6 +271,8 @@ define([
                'state',
                'changedState',
                'logicParentName',
+               'elementsWithBreakpoints',
+               'eventWithBreakpoint',
                'readOnly',
                'theme'
             ]);
@@ -324,6 +326,12 @@ define([
                args: [Object]
             });
             testOption(optionTypes, 'logicParentName', {
+               args: [String]
+            });
+            testOption(optionTypes, 'elementsWithBreakpoints', {
+               args: [Set]
+            });
+            testOption(optionTypes, 'eventWithBreakpoint', {
                args: [String]
             });
             testOption(optionTypes, 'readOnly', {

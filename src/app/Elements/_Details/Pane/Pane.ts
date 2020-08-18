@@ -10,8 +10,9 @@ import './templates/NumberTemplate';
 import './templates/ObjectTemplate';
 import './templates/BooleanTemplate';
 import Store from '../../_store/Store';
+import { TEMPLATES } from './const';
 
-interface IOptions extends IControlOptions {
+type IOptions = IControlOptions & {
    caption: string;
    data: Record<string, unknown>;
    expanded: boolean;
@@ -21,8 +22,11 @@ interface IOptions extends IControlOptions {
    highlightUpdates?: boolean;
    changedData?: object;
    canStoreAsGlobal?: boolean;
-   elementsWithBreakpoints?: Set<IFrontendControlNode['id']>;
-}
+} & {
+   caption: 'Events';
+   eventWithBreakpoint: string;
+   elementsWithBreakpoints: Set<IFrontendControlNode['id']>;
+};
 
 const enum ShowType {
    MENU,
@@ -161,14 +165,14 @@ class Pane extends Control<IOptions> {
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
+      let needReload =
+         this._options.eventWithBreakpoint !== newOptions.eventWithBreakpoint;
       if (
          newOptions.changedData &&
          this._options.changedData !== newOptions.changedData
       ) {
          this._source.update(newOptions.changedData);
-         if (newOptions.expanded && this._children.list) {
-            this._children.list.reload();
-         }
+         needReload = true;
       }
       if (
          this._options.controlId !== newOptions.controlId ||
@@ -190,6 +194,10 @@ class Pane extends Control<IOptions> {
             newOptions.isControl,
             newOptions.caption
          );
+      }
+
+      if (needReload && newOptions.expanded && this._children.list) {
+         this._children.list.reload();
       }
    }
 
@@ -220,7 +228,6 @@ class Pane extends Control<IOptions> {
       action: IItemAction,
       item: Model
    ): boolean {
-      const value = item.get('value');
       if (item === this._editingItem) {
          return false;
       }
@@ -233,20 +240,25 @@ class Pane extends Control<IOptions> {
          case 'storeAsGlobal':
             return (
                !!this._options.canStoreAsGlobal &&
-               value &&
-               typeof value === 'object'
+               item.get('template') === TEMPLATES.object
             );
          case 'addBreakpoint':
             return (
                this._options.caption === 'Events' &&
                item.get('parent') === null &&
-               !this._options.elementsWithBreakpoints?.has(item.get('key'))
+               (item.get('key') !== this._options.eventWithBreakpoint ||
+                  !this._options.elementsWithBreakpoints.has(
+                     this._options.controlId
+                  ))
             );
          case 'removeBreakpoint':
             return (
                this._options.caption === 'Events' &&
                item.get('parent') === null &&
-               !!this._options.elementsWithBreakpoints?.has(item.get('key'))
+               item.get('key') === this._options.eventWithBreakpoint &&
+               this._options.elementsWithBreakpoints.has(
+                  this._options.controlId
+               )
             );
       }
    }
@@ -319,6 +331,7 @@ class Pane extends Control<IOptions> {
          highlightUpdates: descriptor(Boolean),
          canStoreAsGlobal: descriptor(Boolean),
          elementsWithBreakpoints: descriptor(Set),
+         eventWithBreakpoint: descriptor(String),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

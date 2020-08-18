@@ -2066,7 +2066,7 @@ define([
       });
 
       describe('_setBreakpoint', function() {
-         it('should remove all breakpoints, then add them again. Should not change inspected item', async function() {
+         it('should remove all breakpoints, then add them again.', async function() {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2101,122 +2101,22 @@ define([
 
             await instance._setBreakpoint({}, 'mousedown');
 
-            assert.isTrue(
-               options.store.dispatch.calledOnceWithExactly('setBreakpoint', {
-                  id: 0,
-                  eventName: 'mousedown'
-               })
-            );
-            assert.isTrue(chrome.devtools.inspectedWindow.eval.notCalled);
+            sinon.assert.calledWithExactly(options.store.dispatch, 'setBreakpoint', {
+               id: 0,
+               eventName: 'mousedown'
+            });
+            sinon.assert.notCalled(chrome.devtools.inspectedWindow.eval);
 
             clock.tick(100);
 
-            assert.isTrue(
-               chrome.devtools.inspectedWindow.eval.calledOnceWith(
-                  `${BREAKPOINTS} ? ${BREAKPOINTS}.map(([handler, condition, id]) => {\n                  debug(handler, condition);\n                  return id;\n               }) : []`
-               )
-            );
+            sinon.assert.calledWith(chrome.devtools.inspectedWindow.eval, `${BREAKPOINTS} ? ${BREAKPOINTS}.map(([handler, condition, id]) => {\n                  debug(handler, condition);\n                  return id;\n               }) : []`);
+
             assert.equal(instance._eventWithBreakpoint, 'mousedown');
             assert.notEqual(
                instance._elementsWithBreakpoints,
                oldElementsWithBreakpoints
             );
             assert.deepEqual(instance._elementsWithBreakpoints, new Set([0]));
-            assert.deepEqual(instance._inspectedItem, {
-               id: 1,
-               events: {
-                  mousedown: {
-                     value: {
-                        function: 'handleMousedown()',
-                        arguments: []
-                     }
-                  }
-               }
-            });
-
-            clock.restore();
-            delete window.elementsPanel;
-         });
-
-         it('should remove all breakpoints, then add them again. Should update events on the inspected item', async function() {
-            const options = {
-               store: {
-                  addListener: sandbox.stub(),
-                  toggleDevtoolsOpened: sandbox.stub(),
-                  getFullTree: sandbox.stub().resolves([]),
-                  dispatch: sandbox.stub()
-               }
-            };
-            const instance = new Elements(options);
-            instance.saveOptions(options);
-            instance._inspectedItem = {
-               id: 1,
-               events: {
-                  mousedown: {
-                     value: {
-                        function: 'handleMousedown()',
-                        arguments: []
-                     }
-                  }
-               }
-            };
-            const oldElementsWithBreakpoints =
-               instance._elementsWithBreakpoints;
-            instance._selectedItemId = 1;
-            sandbox.stub(chrome, 'devtools').value({
-               inspectedWindow: {
-                  eval: sandbox.stub().callsArgWith(1, [0])
-               }
-            });
-            sandbox.stub(instance, '_removeAllBreakpoints').resolves();
-            const clock = sinon.useFakeTimers();
-
-            await instance._setBreakpoint({}, 'mousedown');
-
-            assert.isTrue(
-               options.store.dispatch.calledOnceWithExactly('setBreakpoint', {
-                  id: 1,
-                  eventName: 'mousedown'
-               })
-            );
-            assert.isTrue(chrome.devtools.inspectedWindow.eval.notCalled);
-
-            clock.tick(100);
-
-            assert.isTrue(
-               chrome.devtools.inspectedWindow.eval.calledOnceWith(
-                  `${BREAKPOINTS} ? ${BREAKPOINTS}.map(([handler, condition, id]) => {\n                  debug(handler, condition);\n                  return id;\n               }) : []`
-               )
-            );
-            assert.equal(instance._eventWithBreakpoint, 'mousedown');
-            assert.notEqual(
-               instance._elementsWithBreakpoints,
-               oldElementsWithBreakpoints
-            );
-            assert.deepEqual(
-               instance._elementsWithBreakpoints,
-               new Set([0, 1])
-            );
-            assert.deepEqual(instance._inspectedItem, {
-               id: 1,
-               events: {
-                  mousedown: {
-                     value: {
-                        function: 'handleMousedown()',
-                        arguments: []
-                     }
-                  }
-               },
-               changedEvents: {
-                  mousedown: {
-                     value: {
-                        function: 'handleMousedown()',
-                        arguments: []
-                     },
-                     hasBreakpoint: true
-                  }
-               }
-            });
 
             clock.restore();
             delete window.elementsPanel;
@@ -2244,85 +2144,13 @@ define([
 
             await instance._removeAllBreakpoints();
 
-            assert.isTrue(
-               chrome.devtools.inspectedWindow.eval.calledOnceWith(
-                  `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`
-               )
-            );
+            sinon.assert.calledWith(chrome.devtools.inspectedWindow.eval, `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`);
             assert.equal(instance._eventWithBreakpoint, '');
             assert.notEqual(
                instance._elementsWithBreakpoints,
                oldElementsWithBreakpoints
             );
             assert.deepEqual(instance._elementsWithBreakpoints, new Set());
-
-            delete window.elementsPanel;
-         });
-
-         it('should remove all breakpoints and update inspectedItem', async function() {
-            const options = {
-               store: {
-                  addListener: sandbox.stub(),
-                  toggleDevtoolsOpened: sandbox.stub(),
-                  getFullTree: sandbox.stub().resolves([])
-               }
-            };
-            const instance = new Elements(options);
-            instance.saveOptions(options);
-            const oldElementsWithBreakpoints =
-               instance._elementsWithBreakpoints;
-            sandbox.stub(chrome, 'devtools').value({
-               inspectedWindow: {
-                  eval: sandbox.stub().callsArg(1)
-               }
-            });
-            instance._eventWithBreakpoint = 'mousedown';
-            instance._selectedItemId = 1;
-            instance._inspectedItem = {
-               id: 1,
-               events: {
-                  mousedown: {
-                     value: {
-                        function: 'handleMousedown()',
-                        arguments: []
-                     }
-                  }
-               }
-            };
-
-            await instance._removeAllBreakpoints();
-
-            assert.isTrue(
-               chrome.devtools.inspectedWindow.eval.calledOnceWith(
-                  `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`
-               )
-            );
-            assert.equal(instance._eventWithBreakpoint, '');
-            assert.notEqual(
-               instance._elementsWithBreakpoints,
-               oldElementsWithBreakpoints
-            );
-            assert.deepEqual(instance._elementsWithBreakpoints, new Set());
-            assert.deepEqual(instance._inspectedItem, {
-               id: 1,
-               events: {
-                  mousedown: {
-                     value: {
-                        function: 'handleMousedown()',
-                        arguments: []
-                     }
-                  }
-               },
-               changedEvents: {
-                  mousedown: {
-                     value: {
-                        function: 'handleMousedown()',
-                        arguments: []
-                     },
-                     hasBreakpoint: false
-                  }
-               }
-            });
 
             delete window.elementsPanel;
          });
