@@ -55,6 +55,7 @@
                                   isControl="{{ _options.isControl }}"
                                   store="{{ _options.store }}"
                                   elementsWithBreakpoints="{{ _options.elementsWithBreakpoints }}"
+                                  eventWithBreakpoint="{{ _options.eventWithBreakpoint }}"
                                   on:viewFunctionSource="_viewFunctionSource()"
                                   on:expandedChanged="_forwardExpanded('_eventsExpanded')"
                                   on:setBreakpoint="_notifyHandler('setBreakpoint')"

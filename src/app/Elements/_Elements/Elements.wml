@@ -64,6 +64,7 @@
                                              inspectedItem="{{ _inspectedItem }}"
                                              logicParentName="{{ _logicParentName }}"
                                              elementsWithBreakpoints="{{ _elementsWithBreakpoints }}"
+                                             eventWithBreakpoint="{{ _eventWithBreakpoint }}"
                                              on:logicParentHoverChanged="_logicParentHoverChanged()"
                                              on:logicParentClick="_onLogicParentClick()"
                                              on:expandedChanged="_onDetailsTabExpanded()"

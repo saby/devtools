@@ -608,8 +608,12 @@ define([
                };
                const item = new entityLib.Model({
                   rawData: {
-                     key: 'item---value',
-                     value: 123
+                     key: 'text',
+                     caption: 'Empty object',
+                     name: 'text',
+                     parent: null,
+                     hasChildren: null,
+                     template: 'Elements/elements:ObjectTemplate'
                   },
                   keyProperty: 'key'
                });
@@ -622,14 +626,18 @@ define([
                );
             });
 
-            it("should return false because item's value is not an object", function() {
+            it("should return false because the item is not an object", function() {
                const action = {
                   id: 'storeAsGlobal'
                };
                const item = new entityLib.Model({
                   rawData: {
-                     key: 'item---value',
-                     value: 123
+                     key: 'text',
+                     caption: 'test',
+                     name: 'text',
+                     parent: null,
+                     hasChildren: null,
+                     template: 'Elements/elements:StringTemplate'
                   },
                   keyProperty: 'key'
                });
@@ -648,8 +656,12 @@ define([
                };
                const item = new entityLib.Model({
                   rawData: {
-                     key: 'item---value',
-                     value: {}
+                     key: 'text',
+                     caption: 'Object',
+                     name: 'text',
+                     parent: null,
+                     hasChildren: true,
+                     template: 'Elements/elements:ObjectTemplate'
                   },
                   keyProperty: 'key'
                });
@@ -670,8 +682,12 @@ define([
                };
                const item = new entityLib.Model({
                   rawData: {
-                     key: 'item---value',
-                     value: {}
+                     key: 'text',
+                     caption: 'test',
+                     name: 'text',
+                     parent: null,
+                     hasChildren: null,
+                     template: 'Elements/elements:StringTemplate'
                   },
                   keyProperty: 'key'
                });
@@ -690,9 +706,12 @@ define([
                };
                const item = new entityLib.Model({
                   rawData: {
-                     key: 'click-0',
-                     value: {},
-                     parent: 'click'
+                     key: 'func---click',
+                     caption: 'function click()',
+                     name: 'func',
+                     parent: 'click',
+                     hasChildren: null,
+                     template: 'Elements/elements:StringTemplate'
                   },
                   keyProperty: 'key'
                });
@@ -712,14 +731,19 @@ define([
                const item = new entityLib.Model({
                   rawData: {
                      key: 'click',
-                     value: {},
-                     parent: null
+                     caption: 'Object',
+                     name: 'click',
+                     parent: null,
+                     hasChildren: true,
+                     template: 'Elements/elements:ObjectTemplate'
                   },
                   keyProperty: 'key'
                });
                instance.saveOptions({
                   caption: 'Events',
-                  elementsWithBreakpoints: new Set(['click'])
+                  controlId: 0,
+                  eventWithBreakpoint: 'click',
+                  elementsWithBreakpoints: new Set([0])
                });
 
                assert.isFalse(
@@ -734,13 +758,17 @@ define([
                const item = new entityLib.Model({
                   rawData: {
                      key: 'click',
-                     value: {},
-                     parent: null
+                     caption: 'Object',
+                     name: 'click',
+                     parent: null,
+                     hasChildren: true,
+                     template: 'Elements/elements:ObjectTemplate'
                   },
                   keyProperty: 'key'
                });
                instance.saveOptions({
-                  caption: 'Events'
+                  caption: 'Events',
+                  elementsWithBreakpoints: new Set()
                });
 
                assert.isTrue(
@@ -756,8 +784,12 @@ define([
                };
                const item = new entityLib.Model({
                   rawData: {
-                     key: 'item---value',
-                     value: {}
+                     key: 'text',
+                     caption: 'test',
+                     name: 'text',
+                     parent: null,
+                     hasChildren: null,
+                     template: 'Elements/elements:StringTemplate'
                   },
                   keyProperty: 'key'
                });
@@ -776,9 +808,12 @@ define([
                };
                const item = new entityLib.Model({
                   rawData: {
-                     key: 'click-0',
-                     value: {},
-                     parent: 'click'
+                     key: 'func---click',
+                     caption: 'function click()',
+                     name: 'func',
+                     parent: 'click',
+                     hasChildren: null,
+                     template: 'Elements/elements:StringTemplate'
                   },
                   keyProperty: 'key'
                });
@@ -798,13 +833,17 @@ define([
                const item = new entityLib.Model({
                   rawData: {
                      key: 'click',
-                     value: {},
-                     parent: null
+                     caption: 'Object',
+                     name: 'click',
+                     parent: null,
+                     hasChildren: true,
+                     template: 'Elements/elements:ObjectTemplate'
                   },
                   keyProperty: 'key'
                });
                instance.saveOptions({
-                  caption: 'Events'
+                  caption: 'Events',
+                  elementsWithBreakpoints: new Set()
                });
 
                assert.isFalse(
@@ -819,14 +858,19 @@ define([
                const item = new entityLib.Model({
                   rawData: {
                      key: 'click',
-                     value: {},
-                     parent: null
+                     caption: 'Object',
+                     name: 'click',
+                     parent: null,
+                     hasChildren: true,
+                     template: 'Elements/elements:ObjectTemplate'
                   },
                   keyProperty: 'key'
                });
                instance.saveOptions({
                   caption: 'Events',
-                  elementsWithBreakpoints: new Set(['click'])
+                  controlId: 0,
+                  eventWithBreakpoint: 'click',
+                  elementsWithBreakpoints: new Set([0])
                });
 
                assert.isTrue(
@@ -1062,6 +1106,7 @@ define([
                'changedData',
                'canStoreAsGlobal',
                'elementsWithBreakpoints',
+               'eventWithBreakpoint',
                'readOnly',
                'theme',
                'highlightUpdates'
@@ -1098,6 +1143,9 @@ define([
             });
             testOption(optionTypes, 'elementsWithBreakpoints', {
                args: [Set]
+            });
+            testOption(optionTypes, 'eventWithBreakpoint', {
+               args: [String]
             });
             testOption(optionTypes, 'readOnly', {
                args: [Boolean]

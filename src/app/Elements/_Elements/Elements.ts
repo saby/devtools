@@ -315,12 +315,7 @@ class Elements extends Control {
                }) : []`,
                (result: Array<IFrontendControlNode['id']>) => {
                   result.push(selectedItemId);
-                  if (
-                     this._inspectedItem &&
-                     result.includes(this._inspectedItem.id)
-                  ) {
-                     this.__updateEvents(eventName, true);
-                  }
+
                   this._elementsWithBreakpoints = new Set(result);
                   this._eventWithBreakpoint = eventName;
                   this._task1178532066++;
@@ -339,7 +334,6 @@ class Elements extends Control {
          chrome.devtools.inspectedWindow.eval(
             `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`,
             () => {
-               this.__updateEvents(this._eventWithBreakpoint, false);
                this._elementsWithBreakpoints = new Set();
                this._eventWithBreakpoint = '';
                this._task1178532066++;
@@ -358,7 +352,6 @@ class Elements extends Control {
     */
    private __removeBreakpoint(id: IFrontendControlNode['id']): Promise<void> {
       if (this._elementsWithBreakpoints.has(id)) {
-         this.__updateEvents(this._eventWithBreakpoint, false);
          this._elementsWithBreakpoints.delete(id);
          this._elementsWithBreakpoints = new Set(this._elementsWithBreakpoints);
          this._task1178532066++;
@@ -598,28 +591,6 @@ class Elements extends Control {
          result.push('events');
       }
       return result;
-   }
-
-   /**
-    * This function is used only to add hasBreakpoint field to an event and trigger the update of the tab
-    * @param eventName
-    * @param hasBreakpoint
-    * @private
-    */
-   private __updateEvents(eventName: string, hasBreakpoint: boolean): void {
-      if (
-         this._inspectedItem &&
-         this._inspectedItem.events &&
-         this._inspectedItem.events[eventName]
-      ) {
-         this._inspectedItem.changedEvents = {
-            [eventName]: {
-               ...this._inspectedItem.events[eventName],
-               hasBreakpoint
-            }
-         };
-         this._inspectedItem = { ...this._inspectedItem };
-      }
    }
 
    /**
