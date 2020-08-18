@@ -1,5 +1,5 @@
 <div class="devtools-Warning devtools-Warning_theme_{{ _options.theme }}">
-    <div>
+    <div class="devtools-Warning__header">
         <span class="devtools-Warning__caption_theme_{{ _options.theme }}">Warning: </span>{{ _options.caption }}
         <Controls.buttons:Button icon="{{ _expanded ? 'icon-MarkCollapseBold' : 'icon-MarkExpandBold' }}"
                                  iconSize="s"
