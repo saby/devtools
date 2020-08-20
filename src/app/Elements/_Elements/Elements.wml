@@ -6,7 +6,7 @@
                                      iconStyle="{{ _selectingFromPage ? 'primary' : 'secondary' }}"
                                      tooltip="Select an element from the page"
                                      viewMode="link"
-                                     on:click="__toggleSelectElementFromPage()"
+                                     on:click="_onSelectElementFromPageClick()"
                                      attr:class="devtools-Elements__headElement" />
             <Controls.search:Input bind:value="_searchValue"
                                    on:valueChanged="__onSearchValueChanged()"

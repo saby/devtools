@@ -123,13 +123,14 @@ define([
       });
 
       describe('_beforeUpdate', function() {
-         it('should update everything on the tab', function() {
+         it("should update everything on the tab and call __inspectElement because the store doesn't have a selectedId", function() {
             const items = [1, 2, 3];
             const store = {
                addListener: sandbox.stub(),
                toggleDevtoolsOpened: sandbox.stub(),
                getFullTree: sandbox.stub().resolves(items),
-               getElements: sandbox.stub().returns(items)
+               getElements: sandbox.stub().returns(items),
+               getSelectedId: sandbox.stub()
             };
             const options = {
                store,
@@ -138,24 +139,140 @@ define([
             const instance = new Elements(options);
             instance._itemsChanged = false;
             instance.saveOptions(options);
-            const setItemsStub = sandbox.stub(instance._model, 'setItems');
-            const inspectElementStub = sandbox.stub(
-               instance,
-               '__inspectElement'
-            );
-            const throttledUpdateSearchStub = sandbox.stub(
-               instance,
-               '_throttledUpdateSearch'
-            );
+            sandbox.stub(instance._model, 'setItems');
+            sandbox.stub(instance, '__inspectElement');
+            sandbox.stub(instance, '_throttledUpdateSearch');
 
             instance._beforeUpdate({
                ...options,
                selected: true
             });
 
-            assert.isTrue(setItemsStub.calledOnceWithExactly(items));
-            assert.isTrue(inspectElementStub.calledOnceWithExactly(store));
-            assert.isTrue(throttledUpdateSearchStub.calledOnceWithExactly());
+            sinon.assert.calledWithExactly(instance._model.setItems, items);
+            sinon.assert.calledWithExactly(instance.__inspectElement, store);
+            sinon.assert.calledWithExactly(instance._throttledUpdateSearch);
+            assert.isFalse(instance._itemsChanged);
+
+            delete window.elementsPanel;
+         });
+
+         it('should update everything on the tab and call __inspectElement because the id from the store and id in the state are the same', function() {
+            const items = [1, 2, 3];
+            const store = {
+               addListener: sandbox.stub(),
+               toggleDevtoolsOpened: sandbox.stub(),
+               getFullTree: sandbox.stub().resolves(items),
+               getElements: sandbox.stub().returns(items),
+               getSelectedId: sandbox.stub().returns(0)
+            };
+            const options = {
+               store,
+               selected: false
+            };
+            const instance = new Elements(options);
+            instance._selectedItemId = 0;
+            instance._itemsChanged = false;
+            instance.saveOptions(options);
+            sandbox.stub(instance._model, 'setItems');
+            sandbox.stub(instance, '__inspectElement');
+            sandbox.stub(instance, '_throttledUpdateSearch');
+
+            instance._beforeUpdate({
+               ...options,
+               selected: true
+            });
+
+            sinon.assert.calledWithExactly(instance._model.setItems, items);
+            sinon.assert.calledWithExactly(instance.__inspectElement, store);
+            sinon.assert.calledWithExactly(instance._throttledUpdateSearch);
+            assert.isFalse(instance._itemsChanged);
+
+            delete window.elementsPanel;
+         });
+
+         it("should update everything on the tab and call __inspectElement because the item with the id from the store doesn't exist", function() {
+            const items = [
+               {
+                  id: 1
+               },
+               {
+                  id: 2
+               },
+               {
+                  id: 3
+               }
+            ];
+            const store = {
+               addListener: sandbox.stub(),
+               toggleDevtoolsOpened: sandbox.stub(),
+               getFullTree: sandbox.stub().resolves(items),
+               getElements: sandbox.stub().returns(items),
+               getSelectedId: sandbox.stub().returns(0)
+            };
+            const options = {
+               store,
+               selected: false
+            };
+            const instance = new Elements(options);
+            instance._itemsChanged = false;
+            instance.saveOptions(options);
+            sandbox.stub(instance._model, 'setItems');
+            sandbox.stub(instance, '__inspectElement');
+            sandbox.stub(instance, '_throttledUpdateSearch');
+
+            instance._beforeUpdate({
+               ...options,
+               selected: true
+            });
+
+            sinon.assert.calledWithExactly(instance._model.setItems, items);
+            sinon.assert.calledWithExactly(instance.__inspectElement, store);
+            sinon.assert.calledWithExactly(instance._throttledUpdateSearch);
+            assert.isFalse(instance._itemsChanged);
+
+            delete window.elementsPanel;
+         });
+
+         it('should update everything on the tab and select the item with the id from the store', function() {
+            const items = [
+               {
+                  id: 1
+               },
+               {
+                  id: 2
+               },
+               {
+                  id: 3
+               }
+            ];
+            const store = {
+               addListener: sandbox.stub(),
+               toggleDevtoolsOpened: sandbox.stub(),
+               getFullTree: sandbox.stub().resolves(items),
+               getElements: sandbox.stub().returns(items),
+               getSelectedId: sandbox.stub().returns(1)
+            };
+            const options = {
+               store,
+               selected: false
+            };
+            const instance = new Elements(options);
+            instance._itemsChanged = false;
+            instance.saveOptions(options);
+            sandbox.stub(instance._model, 'setItems');
+            sandbox.stub(instance, '__inspectElement');
+            sandbox.stub(instance, '_throttledUpdateSearch');
+            sandbox.stub(instance, '__selectElement');
+
+            instance._beforeUpdate({
+               ...options,
+               selected: true
+            });
+
+            sinon.assert.calledWithExactly(instance._model.setItems, items);
+            sinon.assert.calledWithExactly(instance.__selectElement, 1, store);
+            sinon.assert.notCalled(instance.__inspectElement);
+            sinon.assert.calledWithExactly(instance._throttledUpdateSearch);
             assert.isFalse(instance._itemsChanged);
 
             delete window.elementsPanel;
@@ -1258,7 +1375,8 @@ define([
                   addListener: sandbox.stub(),
                   toggleDevtoolsOpened: sandbox.stub(),
                   getFullTree: sandbox.stub().resolves(tree),
-                  getElements: sandbox.stub().returns(tree)
+                  getElements: sandbox.stub().returns(tree),
+                  setSelectedId: sandbox.stub()
                }
             };
             const instance = new Elements(options);
@@ -1268,31 +1386,25 @@ define([
             instance._selectedItemId = undefined;
             instance._scrollToId = undefined;
             sandbox.stub(instance._model, 'getPath').returns(path);
-            const toggleSelectElementFromPageStub = sandbox.stub(
-               instance,
-               '__toggleSelectElementFromPage'
-            );
-            const inspectElementStub = sandbox.stub(
-               instance,
-               '__inspectElement'
-            );
-            const expandParentsStub = sandbox.stub(
-               instance._model,
-               'expandParents'
-            );
+            sandbox.stub(instance, '__toggleSelectElementFromPage');
+            sandbox.stub(instance, '__inspectElement');
+            sandbox.stub(instance._model, 'expandParents');
 
             instance.__selectElement(0);
 
-            assert.isTrue(
-               toggleSelectElementFromPageStub.calledOnceWithExactly()
+            sinon.assert.calledWithExactly(
+               instance.__toggleSelectElementFromPage,
+               options.store
             );
-            assert.isTrue(expandParentsStub.calledOnceWithExactly(0));
+            sinon.assert.calledWithExactly(instance._model.expandParents, 0);
             assert.equal(instance._path, path);
             assert.equal(instance._selectedItemId, 0);
             assert.equal(instance._scrollToId, 0);
-            assert.isTrue(
-               inspectElementStub.calledOnceWithExactly(options.store)
+            sinon.assert.calledWithExactly(
+               instance.__inspectElement,
+               options.store
             );
+            sinon.assert.calledWithExactly(options.store.setSelectedId, 0);
 
             delete window.elementsPanel;
          });
@@ -1316,7 +1428,8 @@ define([
                   addListener: sandbox.stub(),
                   toggleDevtoolsOpened: sandbox.stub(),
                   getFullTree: sandbox.stub().resolves(tree),
-                  getElements: sandbox.stub().returns(tree)
+                  getElements: sandbox.stub().returns(tree),
+                  setSelectedId: sandbox.stub()
                }
             };
             const instance = new Elements(options);
@@ -1349,6 +1462,7 @@ define([
             assert.isTrue(
                inspectElementStub.calledOnceWithExactly(options.store)
             );
+            sinon.assert.calledWithExactly(options.store.setSelectedId, 0);
 
             delete window.elementsPanel;
          });
@@ -2101,15 +2215,22 @@ define([
 
             await instance._setBreakpoint({}, 'mousedown');
 
-            sinon.assert.calledWithExactly(options.store.dispatch, 'setBreakpoint', {
-               id: 0,
-               eventName: 'mousedown'
-            });
+            sinon.assert.calledWithExactly(
+               options.store.dispatch,
+               'setBreakpoint',
+               {
+                  id: 0,
+                  eventName: 'mousedown'
+               }
+            );
             sinon.assert.notCalled(chrome.devtools.inspectedWindow.eval);
 
             clock.tick(100);
 
-            sinon.assert.calledWith(chrome.devtools.inspectedWindow.eval, `${BREAKPOINTS} ? ${BREAKPOINTS}.map(([handler, condition, id]) => {\n                  debug(handler, condition);\n                  return id;\n               }) : []`);
+            sinon.assert.calledWith(
+               chrome.devtools.inspectedWindow.eval,
+               `${BREAKPOINTS} ? ${BREAKPOINTS}.map(([handler, condition, id]) => {\n                  debug(handler, condition);\n                  return id;\n               }) : []`
+            );
 
             assert.equal(instance._eventWithBreakpoint, 'mousedown');
             assert.notEqual(
@@ -2144,7 +2265,10 @@ define([
 
             await instance._removeAllBreakpoints();
 
-            sinon.assert.calledWith(chrome.devtools.inspectedWindow.eval, `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`);
+            sinon.assert.calledWith(
+               chrome.devtools.inspectedWindow.eval,
+               `${BREAKPOINTS} && ${BREAKPOINTS}.forEach(([handler]) => undebug(handler)); ${BREAKPOINTS} = undefined;`
+            );
             assert.equal(instance._eventWithBreakpoint, '');
             assert.notEqual(
                instance._elementsWithBreakpoints,
@@ -2298,6 +2422,29 @@ define([
             sinon.assert.calledWithExactly(chrome.storage.sync.set, {
                elementsDetailsWidth: 200
             });
+
+            delete window.elementsPanel;
+         });
+      });
+
+      describe('_onSelectElementFromPageClick', function() {
+         it('should call __toggleSelectElementFromPage without arguments', function() {
+            const items = [];
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves(items)
+               }
+            };
+            const instance = new Elements(options);
+            sandbox.stub(instance, '__toggleSelectElementFromPage');
+
+            instance._onSelectElementFromPageClick();
+
+            sinon.assert.calledWithExactly(
+               instance.__toggleSelectElementFromPage
+            );
 
             delete window.elementsPanel;
          });

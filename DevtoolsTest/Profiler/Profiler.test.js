@@ -86,6 +86,114 @@ define([
          });
       });
 
+      describe('_beforeUpdate', function() {
+         it('should not call __setSelectedCommitId because the tab isn\'t selected', function() {
+            const store = {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {}
+            };
+            const options = {
+               store,
+               selected: false
+            };
+            const instance = new Profiler(options);
+            sandbox.stub(instance, '__setSelectedCommitId');
+
+            instance._beforeUpdate(options);
+
+            sinon.assert.notCalled(instance.__setSelectedCommitId);
+         });
+
+         it('should not call __setSelectedCommitId because the store doesn\'t have a selectedId', function() {
+            const store = {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {},
+               getSelectedId() {}
+            };
+            const options = {
+               store,
+               selected: true
+            };
+            const instance = new Profiler(options);
+            sandbox.stub(instance, '__setSelectedCommitId');
+
+            instance._beforeUpdate(options);
+
+            sinon.assert.notCalled(instance.__setSelectedCommitId);
+         });
+
+         it('should not call __setSelectedCommitId because there\'s no snapshot', function() {
+            const store = {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {},
+               getSelectedId() {
+                  return 1;
+               }
+            };
+            const options = {
+               store,
+               selected: true
+            };
+            const instance = new Profiler(options);
+            sandbox.stub(instance, '__setSelectedCommitId');
+
+            instance._beforeUpdate(options);
+
+            sinon.assert.notCalled(instance.__setSelectedCommitId);
+         });
+
+         it('should not call __setSelectedCommitId because the snapshot doesn\'t have an item with the id from the store', function() {
+            const store = {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {},
+               getSelectedId() {
+                  return 1;
+               }
+            };
+            const options = {
+               store,
+               selected: true
+            };
+            const instance = new Profiler(options);
+            instance._snapshot = [{
+               id: 0
+            }];
+            sandbox.stub(instance, '__setSelectedCommitId');
+
+            instance._beforeUpdate(options);
+
+            sinon.assert.notCalled(instance.__setSelectedCommitId);
+         });
+
+         it('should call __setSelectedCommitId', function() {
+            const store = {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {},
+               getSelectedId() {
+                  return 1;
+               }
+            };
+            const options = {
+               store,
+               selected: true
+            };
+            const instance = new Profiler(options);
+            instance._snapshot = [{
+               id: 1
+            }];
+            sandbox.stub(instance, '__setSelectedCommitId');
+
+            instance._beforeUpdate(options);
+
+            sinon.assert.calledWithExactly(instance.__setSelectedCommitId, 1);
+         });
+      });
+
       it('_masterFilter', function() {
          const instance = new Profiler({
             store: {
@@ -159,7 +267,7 @@ define([
                initialIdToDuration,
                syncList
             };
-            const stub = sandbox.stub(instance, '__setSynchronization');
+            sandbox.stub(instance, '__setSynchronization');
             instance._didProfile = false;
 
             instance.__setProfilingData(backendProfilingData);
@@ -175,8 +283,10 @@ define([
                   selfDuration: 15
                }
             ]);
-            assert.equal(instance._selectedSynchronizationId, 'test');
-            assert.isTrue(stub.calledOnceWithExactly('test'));
+            sinon.assert.calledWithExactly(
+               instance.__setSynchronization,
+               'test'
+            );
          });
 
          it('should correctly transform empty profiling data to a list of synchronizations', function() {
@@ -762,7 +872,7 @@ define([
             });
          });
          it('should set _selectedSynchronizationId and call __setSynchronization with that id', function() {
-            const stub = sandbox.stub(instance, '__setSynchronization');
+            sandbox.stub(instance, '__setSynchronization');
             instance._selectedSynchronizationId = undefined;
             instance._synchronizations = [
                {
@@ -776,8 +886,7 @@ define([
 
             instance._masterMarkedKeyChanged({}, id);
 
-            assert.equal(instance._selectedSynchronizationId, id);
-            assert.isTrue(stub.calledOnceWithExactly(id));
+            sinon.assert.calledWithExactly(instance.__setSynchronization, id);
          });
 
          it('should not call __setSynchronization because synchronization with this id does not exist', function() {
@@ -802,27 +911,37 @@ define([
 
       describe('_detailMarkedKeyChanged', function() {
          let instance;
+         let store;
          beforeEach(function() {
+            store = {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {},
+               setSelectedId() {}
+            };
             instance = new Profiler({
-               store: {
-                  addListener() {},
-                  toggleDevtoolsOpened() {},
-                  dispatch() {}
-               }
+               store
+            });
+            instance.saveOptions({
+               store
             });
          });
-         it('should set _selectedCommitId and calls __updateSelectedCommitChanges', function() {
-            const stub = sandbox.stub(
-               instance,
-               '__updateSelectedCommitChanges'
-            );
+         it('should call __setSelectedCommitId and calls __updateSelectedCommitChanges', function() {
+            sandbox.stub(instance, '__updateSelectedCommitChanges');
+            sandbox.stub(instance._options.store, 'setSelectedId');
             instance._selectedCommitId = undefined;
             const id = 1;
 
             instance._detailMarkedKeyChanged({}, id);
 
             assert.equal(instance._selectedCommitId, id);
-            assert.isTrue(stub.calledOnceWithExactly());
+            sinon.assert.calledWithExactly(
+               instance.__updateSelectedCommitChanges
+            );
+            sinon.assert.calledWithExactly(
+               instance._options.store.setSelectedId,
+               id
+            );
          });
       });
 
@@ -1184,50 +1303,13 @@ define([
             instance = new Profiler(options);
          });
          it('should set isProfiling to true and clear everything', function() {
-            const elements = [
-               {
-                  id: 0,
-                  name: '0',
-                  depth: 0,
-                  class: ''
-               }
-            ];
-            instance.saveOptions({
-               store: {
-                  ...options.store,
-                  getElements() {
-                     return elements;
-                  }
-               }
-            });
+            sandbox.stub(instance, 'resetState');
             instance._isProfiling = false;
-            // заполняем состояние любыми данными, чтобы можно было точно убедиться, что оно очистилось
-            instance._changesBySynchronization.set('1', {});
-            instance._elementsBySynchronization.set('1', {});
-            instance._snapshotBySynchronization.set('1', {});
-            const operations = [];
-            instance._currentOperations = operations;
-            instance._synchronizations = {};
-            instance._snapshot = {};
-            instance._selectedCommitChanges = {};
-            instance._selectedCommitId = {};
-            instance._selectedSynchronizationId = {};
-            instance._elementsSnapshot = [];
 
             instance.__onProfilingStatusChanged(true);
 
             assert.isTrue(instance._isProfiling);
-            assert.equal(instance._changesBySynchronization.size, 0);
-            assert.equal(instance._elementsBySynchronization.size, 0);
-            assert.equal(instance._snapshotBySynchronization.size, 0);
-            assert.notEqual(instance._currentOperations, operations);
-            assert.equal(instance._currentOperations.length, 0);
-            assert.isUndefined(instance._synchronizations);
-            assert.isUndefined(instance._snapshot);
-            assert.isUndefined(instance._selectedCommitChanges);
-            assert.isUndefined(instance._selectedCommitId);
-            assert.equal(instance._selectedSynchronizationId, '');
-            assert.deepEqual(instance._elementsSnapshot, elements);
+            sinon.assert.calledWithExactly(instance.resetState);
          });
 
          it('should fire getSynchronizationsList and getProfilingData events', function() {
@@ -1304,13 +1386,19 @@ define([
 
       describe('__updateSearch', function() {
          let instance;
+         let store;
          beforeEach(function() {
+            store = {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {},
+               setSelectedId() {}
+            };
             instance = new Profiler({
-               store: {
-                  addListener() {},
-                  toggleDevtoolsOpened() {},
-                  dispatch() {}
-               }
+               store
+            });
+            instance.saveOptions({
+               store
             });
          });
 
@@ -1322,14 +1410,11 @@ define([
                index: 0,
                total: 0
             });
-            const updateSelectedCommitChangesStub = sandbox.stub(
-               instance,
-               '__updateSelectedCommitChanges'
-            );
+            sandbox.stub(instance, '__updateSelectedCommitChanges');
 
             instance.__updateSearch(123);
 
-            assert.isTrue(updateSelectedCommitChangesStub.notCalled);
+            sinon.assert.notCalled(instance.__updateSelectedCommitChanges);
             assert.equal(instance._selectedCommitId, 1);
             assert.equal(instance._lastFoundItemIndex, 0);
             assert.equal(instance._searchTotal, 0);
@@ -1342,15 +1427,17 @@ define([
                index: 1,
                total: 2
             });
-            const updateSelectedCommitChangesStub = sandbox.stub(
-               instance,
-               '__updateSelectedCommitChanges'
-            );
+            sandbox.stub(instance, '__updateSelectedCommitChanges');
+            sandbox.stub(instance._options.store, 'setSelectedId');
 
             instance.__updateSearch(123);
 
-            assert.isTrue(
-               updateSelectedCommitChangesStub.calledOnceWithExactly()
+            sinon.assert.calledWithExactly(
+               instance.__updateSelectedCommitChanges
+            );
+            sinon.assert.calledWithExactly(
+               instance._options.store.setSelectedId,
+               2
             );
             assert.equal(instance._selectedCommitId, 2);
             assert.equal(instance._lastFoundItemIndex, 1);
@@ -1360,13 +1447,19 @@ define([
 
       describe('_onSearchKeydown', function() {
          let instance;
+         let store;
          beforeEach(function() {
+            store = {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {},
+               setSelectedId() {}
+            };
             instance = new Profiler({
-               store: {
-                  addListener() {},
-                  toggleDevtoolsOpened() {},
-                  dispatch() {}
-               }
+               store
+            });
+            instance.saveOptions({
+               store
             });
          });
 
@@ -1415,17 +1508,15 @@ define([
          });
 
          it('should update everything related to search and selected commit changes', function() {
-            const getNextItemIdStub = sandbox
+            sandbox
                .stub(instance._searchController, 'getNextItemId')
+               .withArgs('123', false)
                .returns({
                   id: 2,
                   index: 1,
                   total: 2
                });
-            const updateSelectedCommitChangesStub = sandbox.stub(
-               instance,
-               '__updateSelectedCommitChanges'
-            );
+            sandbox.stub(instance, '__updateSelectedCommitChanges');
             instance._searchValue = '123';
             instance._selectedCommitId = 1;
             instance._lastFoundItemIndex = 1;
@@ -1438,12 +1529,9 @@ define([
                }
             });
 
-            assert.isTrue(
-               getNextItemIdStub.calledOnceWithExactly('123', false)
-            );
             assert.equal(instance._selectedCommitId, 2);
-            assert.isTrue(
-               updateSelectedCommitChangesStub.calledOnceWithExactly()
+            sinon.assert.calledWithExactly(
+               instance.__updateSelectedCommitChanges
             );
             assert.equal(instance._lastFoundItemIndex, 1);
             assert.equal(instance._searchTotal, 2);
@@ -2175,6 +2263,121 @@ define([
                   hasChangesInSubtree: true
                }
             ]);
+         });
+      });
+
+      describe('__resetState', function() {
+         let instance;
+         const options = {
+            store: {
+               addListener() {},
+               toggleDevtoolsOpened() {},
+               dispatch() {},
+               getSelectedId() {},
+               setSelectedId() {}
+            }
+         };
+         beforeEach(function() {
+            instance = new Profiler(options);
+         });
+         it('should clear everything without resetting selectedId on the store because the id is not the same', function() {
+            const elements = [
+               {
+                  id: 0,
+                  name: '0',
+                  depth: 0,
+                  class: ''
+               }
+            ];
+            instance.saveOptions({
+               store: {
+                  ...options.store,
+                  getElements() {
+                     return elements;
+                  }
+               }
+            });
+            sandbox.stub(instance._options.store, 'getSelectedId').returns(2);
+            sandbox.stub(instance._options.store, 'setSelectedId');
+
+            // заполняем состояние любыми данными, чтобы можно было точно убедиться, что оно очистилось
+            instance._changesBySynchronization.set('1', {});
+            instance._elementsBySynchronization.set('1', {});
+            instance._snapshotBySynchronization.set('1', {});
+            const operations = [];
+            instance._currentOperations = operations;
+            instance._synchronizations = {};
+            instance._snapshot = {};
+            instance._selectedCommitChanges = {};
+            instance._selectedCommitId = 1;
+            instance._selectedSynchronizationId = {};
+            instance._elementsSnapshot = [];
+
+            instance.__onProfilingStatusChanged(true);
+
+            assert.equal(instance._changesBySynchronization.size, 0);
+            assert.equal(instance._elementsBySynchronization.size, 0);
+            assert.equal(instance._snapshotBySynchronization.size, 0);
+            assert.notEqual(instance._currentOperations, operations);
+            assert.equal(instance._currentOperations.length, 0);
+            assert.isUndefined(instance._synchronizations);
+            assert.isUndefined(instance._snapshot);
+            assert.isUndefined(instance._selectedCommitChanges);
+            assert.isUndefined(instance._selectedCommitId);
+            assert.equal(instance._selectedSynchronizationId, '');
+            assert.deepEqual(instance._elementsSnapshot, elements);
+            sinon.assert.notCalled(instance._options.store.setSelectedId);
+         });
+
+         it('should clear everything and reset selectedId on the store because the id is the same', function() {
+            const elements = [
+               {
+                  id: 0,
+                  name: '0',
+                  depth: 0,
+                  class: ''
+               }
+            ];
+            instance.saveOptions({
+               store: {
+                  ...options.store,
+                  getElements() {
+                     return elements;
+                  }
+               }
+            });
+            sandbox.stub(instance._options.store, 'getSelectedId').returns(1);
+            sandbox.stub(instance._options.store, 'setSelectedId');
+
+            // заполняем состояние любыми данными, чтобы можно было точно убедиться, что оно очистилось
+            instance._changesBySynchronization.set('1', {});
+            instance._elementsBySynchronization.set('1', {});
+            instance._snapshotBySynchronization.set('1', {});
+            const operations = [];
+            instance._currentOperations = operations;
+            instance._synchronizations = {};
+            instance._snapshot = {};
+            instance._selectedCommitChanges = {};
+            instance._selectedCommitId = 1;
+            instance._selectedSynchronizationId = {};
+            instance._elementsSnapshot = [];
+
+            instance.__onProfilingStatusChanged(true);
+
+            assert.equal(instance._changesBySynchronization.size, 0);
+            assert.equal(instance._elementsBySynchronization.size, 0);
+            assert.equal(instance._snapshotBySynchronization.size, 0);
+            assert.notEqual(instance._currentOperations, operations);
+            assert.equal(instance._currentOperations.length, 0);
+            assert.isUndefined(instance._synchronizations);
+            assert.isUndefined(instance._snapshot);
+            assert.isUndefined(instance._selectedCommitChanges);
+            assert.isUndefined(instance._selectedCommitId);
+            assert.equal(instance._selectedSynchronizationId, '');
+            assert.deepEqual(instance._elementsSnapshot, elements);
+            sinon.assert.calledWithExactly(
+               instance._options.store.setSelectedId
+            );
          });
       });
    });

@@ -30,6 +30,7 @@ import { Confirmation } from 'Controls/popup';
 
 interface IOptions extends IControlOptions {
    store: Store;
+   selected: boolean;
 }
 
 function masterFilter(item: { selfDuration: number }): boolean {
@@ -153,6 +154,19 @@ class Profiler extends Control<IOptions> {
       options.store.dispatch('getProfilingStatus');
    }
 
+   protected _beforeUpdate(newOptions: IOptions): void {
+      if (newOptions.selected && !this._options.selected) {
+         const selectedIdFromStore = newOptions.store.getSelectedId();
+         if (
+            this._selectedCommitId !== selectedIdFromStore &&
+            this._snapshot &&
+            this._snapshot.find(({ id }) => id === selectedIdFromStore)
+         ) {
+            this.__setSelectedCommitId(selectedIdFromStore);
+         }
+      }
+   }
+
    private __setProfilingData(profilingData: IBackendProfilingData): void {
       this._didProfile = true;
 
@@ -167,13 +181,12 @@ class Profiler extends Control<IOptions> {
       );
 
       if (profilingData.syncList[0]) {
-         this._selectedSynchronizationId = profilingData.syncList[0][0];
-
-         this.__setSynchronization(this._selectedSynchronizationId);
+         this.__setSynchronization(profilingData.syncList[0][0]);
       }
    }
 
    private __setSynchronization(synchronizationKey: string): void {
+      this._selectedSynchronizationId = synchronizationKey;
       const snapshot = this.getSnapshot(synchronizationKey);
 
       this._synchronizationOverview = getSynchronizationOverview(
@@ -261,8 +274,7 @@ class Profiler extends Control<IOptions> {
             (item) => item.id === id
          )
       ) {
-         this._selectedSynchronizationId = id;
-         this.__setSynchronization(this._selectedSynchronizationId);
+         this.__setSynchronization(id);
       }
    }
 
@@ -270,7 +282,12 @@ class Profiler extends Control<IOptions> {
       e: Event,
       id?: IFrontendControlNode['id']
    ): void {
+      this.__setSelectedCommitId(id);
+   }
+
+   private __setSelectedCommitId(id?: IFrontendControlNode['id']): void {
       this._selectedCommitId = id;
+      this._options.store.setSelectedId(id);
       this.__updateSelectedCommitChanges();
    }
 
@@ -365,8 +382,7 @@ class Profiler extends Control<IOptions> {
       );
 
       if (typeof searchResult.id !== 'undefined') {
-         this._selectedCommitId = searchResult.id;
-         this.__updateSelectedCommitChanges();
+         this.__setSelectedCommitId(searchResult.id);
       }
       this._lastFoundItemIndex = searchResult.index;
       this._searchTotal = searchResult.total;
@@ -380,8 +396,7 @@ class Profiler extends Control<IOptions> {
          );
 
          if (typeof searchResult.id !== 'undefined') {
-            this._selectedCommitId = searchResult.id;
-            this.__updateSelectedCommitChanges();
+            this.__setSelectedCommitId(searchResult.id);
          }
          this._lastFoundItemIndex = searchResult.index;
          this._searchTotal = searchResult.total;
@@ -537,6 +552,11 @@ class Profiler extends Control<IOptions> {
       this._synchronizations = undefined;
       this._snapshot = undefined;
       this._selectedCommitChanges = undefined;
+      // We should reset id in the store only if it's the same.
+      // Otherwise, we can lose the state in the Elements tab.
+      if (this._options.store.getSelectedId() === this._selectedCommitId) {
+         this._options.store.setSelectedId();
+      }
       this._selectedCommitId = undefined;
       this._selectedSynchronizationId = '';
       this._elementsSnapshot = this._options.store.getElements().slice();

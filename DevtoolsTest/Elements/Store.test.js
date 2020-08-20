@@ -519,15 +519,19 @@ define([
             const instance = new Store();
             instance._devtoolsOpened = false;
             let listener;
-            sandbox.stub(instance._channel, 'addListener').callsFake((eventName, handler) => {
-               assert.equal(eventName, 'operation');
-               listener = handler;
-            });
-            sandbox.stub(instance._channel, 'removeListener').callsFake((eventName, handler) => {
-               assert.equal(eventName, 'operation');
-               assert.equal(handler, listener);
-               listener = undefined;
-            });
+            sandbox
+               .stub(instance._channel, 'addListener')
+               .callsFake((eventName, handler) => {
+                  assert.equal(eventName, 'operation');
+                  listener = handler;
+               });
+            sandbox
+               .stub(instance._channel, 'removeListener')
+               .callsFake((eventName, handler) => {
+                  assert.equal(eventName, 'operation');
+                  assert.equal(handler, listener);
+                  listener = undefined;
+               });
             sandbox.stub(instance._channel, 'dispatch');
 
             instance.toggleDevtoolsOpened(true);
@@ -544,10 +548,40 @@ define([
 
             clock.tick(1000);
             sinon.assert.calledThrice(instance._channel.dispatch);
-            sinon.assert.alwaysCalledWithExactly(instance._channel.dispatch, 'devtoolsInitialized');
+            sinon.assert.alwaysCalledWithExactly(
+               instance._channel.dispatch,
+               'devtoolsInitialized'
+            );
 
             // cleanup
             clock.restore();
+         });
+      });
+
+      describe('setSelectedId', function() {
+         it('should store the passed id on the instance', function() {
+            const instance = new Store();
+
+            instance.setSelectedId(0);
+
+            assert.equal(instance._selectedId, 0);
+
+            instance.setSelectedId();
+
+            assert.isUndefined(instance._selectedId);
+
+            instance.setSelectedId(123);
+
+            assert.equal(instance._selectedId, 123);
+         });
+      });
+
+      describe('getSelectedId', function() {
+         it('should return instance._selectedId', function() {
+            const instance = new Store();
+            instance._selectedId = 123;
+
+            assert.equal(instance.getSelectedId(), 123);
          });
       });
    });

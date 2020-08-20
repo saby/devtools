@@ -50,6 +50,7 @@ class Store {
    protected _devtoolsOpened: boolean = false;
    protected _hasFullTree: boolean = false;
    protected _getElementsPromise?: Promise<Store['_elements']>;
+   protected _selectedId?: IFrontendControlNode['id'];
 
    constructor() {
       this._channel.addListener(
@@ -125,6 +126,14 @@ class Store {
             this._channel.dispatch('devtoolsInitialized');
          }, POLLING_INTERVAL);
       }
+   }
+
+   setSelectedId(id?: IFrontendControlNode['id']): void {
+      this._selectedId = id;
+   }
+
+   getSelectedId(): IFrontendControlNode['id'] | undefined {
+      return this._selectedId;
    }
 }
 
