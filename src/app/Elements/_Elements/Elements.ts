@@ -127,8 +127,18 @@ class Elements extends Control {
 
    protected _beforeUpdate(newOptions: IOptions): void {
       if (newOptions.selected && !this._options.selected) {
-         this._model.setItems(newOptions.store.getElements());
-         this.__inspectElement(newOptions.store);
+         const newElements = newOptions.store.getElements();
+         this._model.setItems(newElements);
+         const selectedIdFromStore = newOptions.store.getSelectedId();
+         if (
+            typeof selectedIdFromStore !== 'undefined' &&
+            selectedIdFromStore !== this._selectedItemId &&
+            newElements.find(({ id }) => id === selectedIdFromStore)
+         ) {
+            this.__selectElement(selectedIdFromStore, newOptions.store);
+         } else {
+            this.__inspectElement(newOptions.store);
+         }
          this._throttledUpdateSearch();
          this._itemsChanged = false;
       }
@@ -293,6 +303,10 @@ class Elements extends Control {
       }
    }
 
+   protected _onSelectElementFromPageClick(): void {
+      this.__toggleSelectElementFromPage();
+   }
+
    /**
     * Removes every breakpoint and adds new ones.
     * Because every breakpoint is set through eval, it is difficult to check which breakpoints should be left and which should be removed, so it's safer to remove them all and add them again.
@@ -404,14 +418,18 @@ class Elements extends Control {
       this._options.store.dispatch('highlightElement', id);
    }
 
-   private __selectElement(id: IFrontendControlNode['id']): void {
+   private __selectElement(
+      id: IFrontendControlNode['id'],
+      store: IOptions['store'] = this._options.store
+   ): void {
       if (this._selectingFromPage) {
-         this.__toggleSelectElementFromPage();
+         this.__toggleSelectElementFromPage(store);
       }
       this._model.expandParents(id);
       this._path = this._model.getPath(id);
       this._selectedItemId = id;
-      const elements = this._options.store.getElements();
+      this._options.store.setSelectedId(id);
+      const elements = store.getElements();
       const item = elements.find(
          (elem) => elem.id === id
       ) as IFrontendControlNode;
@@ -428,7 +446,7 @@ class Elements extends Control {
          this._logicParentName = '';
       }
       this._scrollToId = id;
-      this.__inspectElement(this._options.store);
+      this.__inspectElement(store);
    }
 
    private __highlightNode(id: IFrontendControlNode['id']): void {
@@ -460,11 +478,10 @@ class Elements extends Control {
       }
    }
 
-   private __toggleSelectElementFromPage(): void {
-      this._options.store.dispatch(
-         'toggleSelectFromPage',
-         !this._selectingFromPage
-      );
+   private __toggleSelectElementFromPage(
+      store: IOptions['store'] = this._options.store
+   ): void {
+      store.dispatch('toggleSelectFromPage', !this._selectingFromPage);
       this._selectingFromPage = !this._selectingFromPage;
    }
 
