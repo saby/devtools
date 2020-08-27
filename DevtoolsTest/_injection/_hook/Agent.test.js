@@ -2,6 +2,7 @@ define([
    'injection/_hook/Agent',
    'Extension/Plugins/Elements/const',
    'injection/_hook/Utils',
+   'injection/_hook/_utils/ContainerHandling',
    'injection/_hook/_utils/UserTimingAPI',
    'injection/_hook/getNodeId',
    'Extension/Utils/guid',
@@ -11,6 +12,7 @@ define([
    Agent,
    elementsConst,
    hookUtils,
+   ContainerHandling,
    UserTimingAPIUtils,
    getNodeId,
    guid,
@@ -265,7 +267,7 @@ define([
                         field: 'str'
                      }
                   },
-                  container
+                  containers: [container]
                });
                container.eventProperties = {
                   'on:click': [
@@ -357,7 +359,7 @@ define([
                            field: 'str'
                         }
                      },
-                     container
+                     containers: [container]
                   });
 
                   // cleanup
@@ -904,7 +906,7 @@ define([
                stubWasabyDevHook();
                const container = document.createElement('div');
                instance.elements.set(0, {
-                  container
+                  containers: [container]
                });
 
                postMessage('viewContainer', 0);
@@ -1087,7 +1089,7 @@ define([
                instance.elements.set(0, {
                   id: 0,
                   instance: controlInstance,
-                  container
+                  containers: [container]
                });
                container.eventProperties = {
                   'on:click': [
@@ -1171,13 +1173,13 @@ define([
                instance.elements.set(0, {
                   id: 0,
                   name: 'Controls/Application',
-                  container
+                  containers: [container]
                });
 
                return waitForMessageHandler(() => {
                   sinon.assert.calledWithExactly(
                      instance.highlighter.highlightElement,
-                     container,
+                     [container],
                      'Controls/Application'
                   );
                });
@@ -1385,14 +1387,14 @@ define([
                stubWasabyDevHook();
                const firstContainer = document.createElement('div');
                const firstInstance = {
-                  onClick: function onClick() {},
-                  _container: firstContainer
+                  onClick: function onClick() {}
                };
                instance.elements.set(0, {
                   id: 0,
                   instance: firstInstance,
-                  container: firstContainer
+                  containers: [firstContainer]
                });
+               instance.instanceToId.set(firstInstance, 0);
                instance.domToIds.set(firstContainer, [0]);
                const firstFunction = {
                   control: firstInstance,
@@ -1410,10 +1412,7 @@ define([
                const secondContainer = document.createElement('div');
                instance.elements.set(1, {
                   parentId: 0,
-                  instance: {
-                     _container: secondContainer
-                  },
-                  container: secondContainer
+                  containers: [secondContainer]
                });
                firstContainer.appendChild(secondContainer);
                instance.domToIds.set(secondContainer, [1]);
@@ -1422,7 +1421,7 @@ define([
                instance.elements.set(2, {
                   id: 2,
                   parentId: 1,
-                  container: thirdContainer
+                  containers: [thirdContainer]
                });
                const secondFunction = {
                   control: firstInstance,
@@ -1592,7 +1591,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
-                                 container: undefined
+                                 containers: undefined
                               },
                               operation: OperationType.CREATE
                            }
@@ -1606,7 +1605,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
-                                 container: undefined
+                                 containers: undefined
                               },
                               operation: OperationType.CREATE
                            }
@@ -1658,7 +1657,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
-                                 container: undefined
+                                 containers: undefined
                               },
                               operation: OperationType.CREATE
                            }
@@ -1806,7 +1805,7 @@ define([
             assert.deepEqual(instance.componentsStack, [0]);
          });
 
-         it('should take body as a container', function() {
+         it('should not set a container for an instance without it', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = 3;
@@ -1818,10 +1817,6 @@ define([
                OperationType.CREATE,
                'Controls/Application'
             );
-
-            instance.changedRoots.get(0).get(0).node.instance = {
-               _container: undefined
-            };
 
             assert.deepEqual(
                instance.changedRoots,
@@ -1838,10 +1833,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
-                                 container: document.body,
-                                 instance: {
-                                    _container: undefined
-                                 }
+                                 containers: undefined
                               },
                               operation: OperationType.CREATE
                            }
@@ -1859,7 +1851,8 @@ define([
             assert.deepEqual(instance.componentsStack, [0]);
          });
 
-         it('should take container from instance.idToContainer  (control has an instance)', function() {
+         // TODO: какой-то левый тест
+         it('should take container from instance.idToContainers (control has an instance)', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = 3;
@@ -1873,12 +1866,7 @@ define([
             );
 
             const actualContainer = document.createElement('div');
-            instance.idToContainer.set(0, actualContainer);
-            // this is a different container only to make sure that getter hits idToContainer in the test
-            const wrongContainer = document.createElement('span');
-            instance.changedRoots.get(0).get(0).node.instance = {
-               _container: wrongContainer
-            };
+            instance.idToContainers.set(0, [actualContainer]);
 
             assert.deepEqual(
                instance.changedRoots,
@@ -1895,10 +1883,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
-                                 container: actualContainer,
-                                 instance: {
-                                    _container: wrongContainer
-                                 }
+                                 containers: [actualContainer]
                               },
                               operation: OperationType.CREATE
                            }
@@ -1916,7 +1901,7 @@ define([
             assert.deepEqual(instance.componentsStack, [0]);
          });
 
-         it('should take container from instance.idToContainer (control doesnt have an instance)', function() {
+         it('should take container from instance.idToContainers (control doesnt have an instance)', function() {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = 3;
@@ -1930,7 +1915,7 @@ define([
             );
 
             const actualContainer = document.createElement('div');
-            instance.idToContainer.set(0, actualContainer);
+            instance.idToContainers.set(0, [actualContainer]);
 
             assert.deepEqual(
                instance.changedRoots,
@@ -1947,7 +1932,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
-                                 container: actualContainer
+                                 containers: [actualContainer]
                               },
                               operation: OperationType.CREATE
                            }
@@ -2485,7 +2470,7 @@ define([
             const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
-            sandbox.stub(hookUtils, 'getRef').returns(generatedRef);
+            sandbox.stub(ContainerHandling, 'getRef').returns(generatedRef);
 
             instance.onEndCommit(node, {
                options: {
@@ -2521,8 +2506,8 @@ define([
             assert.deepEqual(instance.componentsStack, []);
             assert.equal(node.children[0].ref, generatedRef);
             sinon.assert.calledWithExactly(
-               hookUtils.getRef,
-               instance.idToContainer,
+               ContainerHandling.getRef,
+               instance.idToContainers,
                instance.idToParentId,
                instance.domToIds,
                0,
@@ -2557,7 +2542,7 @@ define([
             instance.changedRoots.get(0).set(0, changedNode);
             instance.componentsStack.push(0);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
-            sandbox.stub(hookUtils, 'getRef');
+            sandbox.stub(ContainerHandling, 'getRef');
 
             instance.onEndCommit(node, {
                options: {
@@ -2566,7 +2551,7 @@ define([
             });
 
             assert.equal(node.children[0].ref, childRef);
-            sinon.assert.notCalled(hookUtils.getRef);
+            sinon.assert.notCalled(ContainerHandling.getRef);
          });
 
          it('should not add ref to the node (child is a control node)', function() {
@@ -2596,7 +2581,7 @@ define([
             instance.changedRoots.get(0).set(0, changedNode);
             instance.componentsStack.push(0);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
-            sandbox.stub(hookUtils, 'getRef');
+            sandbox.stub(ContainerHandling, 'getRef');
 
             instance.onEndCommit(node, {
                options: {
@@ -2605,7 +2590,7 @@ define([
             });
 
             assert.equal(node.children[0].ref, childRef);
-            sinon.assert.notCalled(hookUtils.getRef);
+            sinon.assert.notCalled(ContainerHandling.getRef);
          });
 
          it('should not update container of the control', function() {
@@ -2628,7 +2613,7 @@ define([
             instance.changedRoots.get(0).set(0, changedNode);
             instance.componentsStack.push(0);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
-            sandbox.stub(hookUtils, 'updateContainer');
+            sandbox.stub(ContainerHandling, 'updateContainer');
 
             instance.onEndCommit(node, {
                options: {
@@ -2636,7 +2621,7 @@ define([
                }
             });
 
-            sinon.assert.notCalled(hookUtils.updateContainer);
+            sinon.assert.notCalled(ContainerHandling.updateContainer);
          });
 
          it('should update container of the control because it has element', function() {
@@ -2661,7 +2646,7 @@ define([
             instance.changedRoots.get(0).set(0, changedNode);
             instance.componentsStack.push(0);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
-            sandbox.stub(hookUtils, 'updateContainer');
+            sandbox.stub(ContainerHandling, 'updateContainer');
 
             instance.onEndCommit(node, {
                options: {
@@ -2670,12 +2655,56 @@ define([
             });
 
             sinon.assert.calledWithExactly(
-               hookUtils.updateContainer,
-               instance.idToContainer,
+               ContainerHandling.updateContainer,
+               instance.idToContainers,
                instance.idToParentId,
                instance.domToIds,
                0,
+               element,
+               undefined
+            );
+         });
+
+         it('should update container of the control because it has element. Also should pass the old container to the updateContainer function', function() {
+            const element = document.createElement('div');
+            const node = {
+               controlClass: () => {},
+               key: '_',
                element
+            };
+            const oldElement = document.createElement('div');
+            instance.idToContainers.set(0, [oldElement]);
+            instance.rootStack.push(0);
+            instance.changedRoots.set(0, new Map());
+            const changedNode = {
+               node: {
+                  id: 0,
+                  name: 'Controls/Application',
+                  selfStartTime: 10,
+                  selfDuration: 0,
+                  treeDuration: 0
+               },
+               operation: OperationType.CREATE
+            };
+            instance.changedRoots.get(0).set(0, changedNode);
+            instance.componentsStack.push(0);
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
+            sandbox.stub(ContainerHandling, 'updateContainer');
+
+            instance.onEndCommit(node, {
+               options: {
+                  value: '123'
+               }
+            });
+
+            sinon.assert.calledWithExactly(
+               ContainerHandling.updateContainer,
+               instance.idToContainers,
+               instance.idToParentId,
+               instance.domToIds,
+               0,
+               element,
+               oldElement
             );
          });
 
@@ -2700,7 +2729,7 @@ define([
             instance.changedRoots.get(0).set(0, changedNode);
             instance.componentsStack.push(0);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
-            sandbox.stub(hookUtils, 'updateContainer');
+            sandbox.stub(ContainerHandling, 'updateContainer');
 
             instance.onEndCommit(node, {
                options: {
@@ -2708,23 +2737,134 @@ define([
                }
             });
 
-            sinon.assert.notCalled(hookUtils.updateContainer);
+            sinon.assert.notCalled(ContainerHandling.updateContainer);
 
             const element = document.createElement('div');
             node.element = element;
 
             assert.equal(node.element, element);
             sinon.assert.calledWithExactly(
-               hookUtils.updateContainer,
-               instance.idToContainer,
+               ContainerHandling.updateContainer,
+               instance.idToContainers,
                instance.idToParentId,
                instance.domToIds,
                0,
-               element
+               element,
+               undefined
             );
          });
 
-         it("should update container of the template because it doesn't have any children", function() {
+         it("should proxy element property of the control node because it has markup. Then shouldn't call updateContainer the second time, because it would be with the same container", function() {
+            const node = {
+               controlClass: () => {},
+               key: '_',
+               markup: {}
+            };
+            instance.rootStack.push(0);
+            instance.changedRoots.set(0, new Map());
+            const changedNode = {
+               node: {
+                  id: 0,
+                  name: 'Controls/Application',
+                  selfStartTime: 10,
+                  selfDuration: 0,
+                  treeDuration: 0
+               },
+               operation: OperationType.CREATE
+            };
+            instance.changedRoots.get(0).set(0, changedNode);
+            instance.componentsStack.push(0);
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
+            sandbox.stub(ContainerHandling, 'updateContainer');
+
+            instance.onEndCommit(node, {
+               options: {
+                  value: '123'
+               }
+            });
+
+            sinon.assert.notCalled(ContainerHandling.updateContainer);
+
+            const element = document.createElement('div');
+            node.element = element;
+
+            assert.equal(node.element, element);
+            sinon.assert.calledWithExactly(
+               ContainerHandling.updateContainer,
+               instance.idToContainers,
+               instance.idToParentId,
+               instance.domToIds,
+               0,
+               element,
+               undefined
+            );
+
+            node.element = element;
+            assert.equal(node.element, element);
+            sinon.assert.calledOnce(ContainerHandling.updateContainer);
+         });
+
+         it('should proxy element property of the control node because it has markup. Then should call updateContainer the second time, because it would be with a new container', function() {
+            const node = {
+               controlClass: () => {},
+               key: '_',
+               markup: {}
+            };
+            instance.rootStack.push(0);
+            instance.changedRoots.set(0, new Map());
+            const changedNode = {
+               node: {
+                  id: 0,
+                  name: 'Controls/Application',
+                  selfStartTime: 10,
+                  selfDuration: 0,
+                  treeDuration: 0
+               },
+               operation: OperationType.CREATE
+            };
+            instance.changedRoots.get(0).set(0, changedNode);
+            instance.componentsStack.push(0);
+            sandbox.stub(UserTimingAPIUtils, 'endMark');
+            sandbox.stub(ContainerHandling, 'updateContainer');
+
+            instance.onEndCommit(node, {
+               options: {
+                  value: '123'
+               }
+            });
+
+            sinon.assert.notCalled(ContainerHandling.updateContainer);
+
+            const element = document.createElement('div');
+            node.element = element;
+
+            assert.equal(node.element, element);
+            sinon.assert.calledWithExactly(
+               ContainerHandling.updateContainer,
+               instance.idToContainers,
+               instance.idToParentId,
+               instance.domToIds,
+               0,
+               element,
+               undefined
+            );
+
+            const secondElement = document.createElement('div');
+            node.element = secondElement;
+            assert.equal(node.element, secondElement);
+            sinon.assert.calledWithExactly(
+               ContainerHandling.updateContainer,
+               instance.idToContainers,
+               instance.idToParentId,
+               instance.domToIds,
+               0,
+               secondElement,
+               element
+            );
+            sinon.assert.calledTwice(ContainerHandling.updateContainer);
+         });
+
+         it("should not update container of the template because it doesn't have any children", function() {
             const node = {
                type: 'TemplateNode',
                key: '_'
@@ -2744,7 +2884,7 @@ define([
             instance.changedRoots.get(0).set(0, changedNode);
             instance.componentsStack.push(0);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
-            sandbox.stub(hookUtils, 'updateContainer');
+            sandbox.stub(ContainerHandling, 'updateContainer');
 
             instance.onEndCommit(node, {
                options: {
@@ -2752,14 +2892,7 @@ define([
                }
             });
 
-            sinon.assert.calledWithExactly(
-               hookUtils.updateContainer,
-               instance.idToContainer,
-               instance.idToParentId,
-               instance.domToIds,
-               0,
-               document.body
-            );
+            sinon.assert.notCalled(ContainerHandling.updateContainer);
          });
       });
 
@@ -3187,7 +3320,7 @@ define([
                firstInstance = {};
                instance.elements.set(0, {
                   id: 0,
-                  container: removedContainer,
+                  containers: [removedContainer],
                   selfDuration: 5,
                   treeDuration: 0,
                   instance: firstInstance
@@ -3197,7 +3330,7 @@ define([
                changes.set(0, {
                   node: {
                      id: 0,
-                     container: removedContainer,
+                     containers: [removedContainer],
                      selfDuration: 2,
                      treeDuration: 0,
                      instance: firstInstance
@@ -3216,7 +3349,7 @@ define([
                      },
                      selfDuration: 15,
                      treeDuration: 5,
-                     container: addedContainer,
+                     containers: [addedContainer],
                      instance: secondInstance
                   },
                   operation: OperationType.CREATE
@@ -3238,7 +3371,7 @@ define([
                      },
                      selfDuration: 5,
                      treeDuration: 0,
-                     container: document.body
+                     containers: [document.body]
                   },
                   operation: OperationType.UPDATE
                });
@@ -3254,7 +3387,7 @@ define([
                   },
                   selfDuration: 10,
                   treeDuration: 5,
-                  container: addedContainer,
+                  containers: [addedContainer],
                   instance: secondInstance
                });
                instance.instanceToId.set(secondInstance, 1);
@@ -3265,7 +3398,7 @@ define([
                   },
                   selfDuration: 5,
                   treeDuration: 0,
-                  container: document.body
+                  containers: [document.body]
                });
             });
 
@@ -3374,7 +3507,7 @@ define([
             const removedContainer = document.createElement('div');
             instance.elements.set(0, {
                id: 0,
-               container: removedContainer,
+               containers: [removedContainer],
                selfDuration: 5,
                treeDuration: 0
             });
@@ -3382,7 +3515,7 @@ define([
             changes.set(0, {
                node: {
                   id: 0,
-                  container: removedContainer,
+                  containers: [removedContainer],
                   selfDuration: 2,
                   treeDuration: 0
                },
@@ -3395,7 +3528,7 @@ define([
                   name: 'Controls/Application',
                   selfDuration: 15,
                   treeDuration: 5,
-                  container: addedContainer
+                  containers: [addedContainer]
                },
                operation: OperationType.CREATE
             });
@@ -3410,7 +3543,7 @@ define([
                   id: 2,
                   selfDuration: 5,
                   treeDuration: 0,
-                  container: document.body
+                  containers: [document.body]
                },
                operation: OperationType.UPDATE
             });
@@ -3426,7 +3559,7 @@ define([
                name: 'Controls/Application',
                selfDuration: 10,
                treeDuration: 5,
-               container: addedContainer,
+               containers: [addedContainer],
                domChanged: true,
                isVisible: false
             });
@@ -3436,7 +3569,7 @@ define([
                treeDuration: 0,
                domChanged: true,
                isVisible: true,
-               container: document.body
+               containers: [document.body]
             });
             assert.deepEqual(instance.elements, expectedElements);
             assert.deepEqual(instance.dirtyContainers, new Set());
@@ -3469,7 +3602,7 @@ define([
                   name: 'Controls/Application',
                   selfDuration: 20,
                   treeDuration: 15,
-                  container: document.body
+                  containers: [document.body]
                },
                operation: OperationType.UPDATE
             });
@@ -3483,7 +3616,7 @@ define([
                   name: 'Controls/SwitchableArea:View',
                   selfDuration: 15,
                   treeDuration: 5,
-                  container: addedContainer
+                  containers: [addedContainer]
                },
                operation: OperationType.CREATE
             });
@@ -3499,7 +3632,7 @@ define([
                name: 'Controls/Application',
                selfDuration: 5,
                treeDuration: 15,
-               container: document.body
+               containers: [document.body]
             });
             expectedElements.set(1, {
                id: 1,
@@ -3508,7 +3641,209 @@ define([
                name: 'Controls/SwitchableArea:View',
                selfDuration: 10,
                treeDuration: 5,
-               container: addedContainer
+               containers: [addedContainer]
+            });
+            assert.deepEqual(instance.elements, expectedElements);
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.firstCall,
+               'operation',
+               [OperationType.UPDATE, 0]
+            );
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.secondCall,
+               'operation',
+               [
+                  OperationType.CREATE,
+                  1,
+                  'Controls/SwitchableArea:View',
+                  ControlType.TEMPLATE,
+                  0,
+                  0
+               ]
+            );
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.thirdCall,
+               'endSynchronization',
+               '90ba6e97-ed16-4853-a635-ea4c6a929162'
+            );
+            assert.isTrue(
+               instance.channel.dispatch.lastCall.calledAfter(
+                  window.__WASABY_DEV_HOOK__.pushMessage.thirdCall
+               )
+            );
+            sinon.assert.calledWithExactly(
+               instance.channel.dispatch,
+               'longMessage'
+            );
+
+            // cleanup
+            delete window.__WASABY_DEV_HOOK__;
+         });
+
+         it("should convert children's vNodes to children's ids and cleanup the idToChildrenVNodes", function() {
+            stubWasabyDevHook();
+            sandbox
+               .stub(guid, 'guid')
+               .returns('90ba6e97-ed16-4853-a635-ea4c6a929162');
+            instance.rootStack.push(0);
+            sandbox.stub(instance.channel, 'dispatch');
+            instance.isDevtoolsOpened = true;
+            const changes = new Map();
+
+            changes.set(0, {
+               node: {
+                  id: 0,
+                  name: 'Controls/Application',
+                  selfDuration: 20,
+                  treeDuration: 15,
+                  containers: [document.body]
+               },
+               operation: OperationType.CREATE
+            });
+
+            const addedContainer = document.createElement('div');
+            changes.set(1, {
+               node: {
+                  id: 1,
+                  parentId: 0,
+                  logicParentId: 0,
+                  name: 'Controls/SwitchableArea:View',
+                  selfDuration: 15,
+                  treeDuration: 5,
+                  containers: [addedContainer]
+               },
+               operation: OperationType.CREATE
+            });
+            const childVNode = {};
+            instance.vNodeToId.set(childVNode, 1);
+
+            instance.idToChildrenVNodes.set(0, new Set([childVNode]));
+
+            instance.changedRoots.set(0, changes);
+            // setup end
+
+            instance.onEndSync(0);
+
+            const expectedElements = new Map();
+            expectedElements.set(0, {
+               id: 0,
+               name: 'Controls/Application',
+               selfDuration: 5,
+               treeDuration: 15,
+               containers: [document.body]
+            });
+            expectedElements.set(1, {
+               id: 1,
+               parentId: 0,
+               logicParentId: 0,
+               name: 'Controls/SwitchableArea:View',
+               selfDuration: 10,
+               treeDuration: 5,
+               containers: [addedContainer]
+            });
+            assert.deepEqual(instance.elements, expectedElements);
+            assert.deepEqual(instance.idToChildrenVNodes, new Map());
+            assert.deepEqual(
+               instance.idToChildrenIds,
+               new Map([[0, new Set([1])]])
+            );
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.firstCall,
+               'operation',
+               [OperationType.CREATE, 0, 'Controls/Application', 0]
+            );
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.secondCall,
+               'operation',
+               [
+                  OperationType.CREATE,
+                  1,
+                  'Controls/SwitchableArea:View',
+                  ControlType.TEMPLATE,
+                  0,
+                  0
+               ]
+            );
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.thirdCall,
+               'endSynchronization',
+               '90ba6e97-ed16-4853-a635-ea4c6a929162'
+            );
+            assert.isTrue(
+               instance.channel.dispatch.lastCall.calledAfter(
+                  window.__WASABY_DEV_HOOK__.pushMessage.thirdCall
+               )
+            );
+            sinon.assert.calledWithExactly(
+               instance.channel.dispatch,
+               'longMessage'
+            );
+
+            // cleanup
+            delete window.__WASABY_DEV_HOOK__;
+         });
+
+         it('TBD', function() {
+            stubWasabyDevHook();
+            sandbox
+               .stub(guid, 'guid')
+               .returns('90ba6e97-ed16-4853-a635-ea4c6a929162');
+            instance.rootStack.push(0);
+            sandbox.stub(instance.channel, 'dispatch');
+            instance.isDevtoolsOpened = true;
+            const changes = new Map();
+
+            instance.elements.set(0, {
+               id: 0,
+               selfDuration: 5,
+               treeDuration: 0
+            });
+            changes.set(0, {
+               node: {
+                  id: 0,
+                  name: 'Controls/Application',
+                  selfDuration: 20,
+                  treeDuration: 15,
+                  containers: [document.body]
+               },
+               operation: OperationType.UPDATE
+            });
+
+            const addedContainer = document.createElement('div');
+            changes.set(1, {
+               node: {
+                  id: 1,
+                  parentId: 0,
+                  logicParentId: 0,
+                  name: 'Controls/SwitchableArea:View',
+                  selfDuration: 15,
+                  treeDuration: 5,
+                  containers: [addedContainer]
+               },
+               operation: OperationType.CREATE
+            });
+
+            instance.changedRoots.set(0, changes);
+            // setup end
+
+            instance.onEndSync(0);
+
+            const expectedElements = new Map();
+            expectedElements.set(0, {
+               id: 0,
+               name: 'Controls/Application',
+               selfDuration: 5,
+               treeDuration: 15,
+               containers: [document.body]
+            });
+            expectedElements.set(1, {
+               id: 1,
+               parentId: 0,
+               logicParentId: 0,
+               name: 'Controls/SwitchableArea:View',
+               selfDuration: 10,
+               treeDuration: 5,
+               containers: [addedContainer]
             });
             assert.deepEqual(instance.elements, expectedElements);
             sinon.assert.calledWithExactly(
@@ -3563,7 +3898,7 @@ define([
                   name: 'Controls/Application',
                   selfDuration: 15,
                   treeDuration: 0,
-                  container: document.body
+                  containers: [document.body]
                },
                operation: OperationType.UPDATE
             });
@@ -3579,7 +3914,7 @@ define([
                name: 'Controls/Application',
                selfDuration: 15,
                treeDuration: 0,
-               container: document.body
+               containers: [document.body]
             });
             assert.deepEqual(instance.elements, expectedElements);
             sinon.assert.calledWithExactly(
@@ -3655,6 +3990,8 @@ define([
                selfDuration: 6,
                treeDuration: 0
             });
+            instance.idToChildrenIds.set(0, new Set([1, 3]));
+            instance.idToChildrenIds.set(1, new Set([2]));
 
             instance.changedRoots.set(0, changes);
             // setup end
@@ -3663,15 +4000,16 @@ define([
 
             assert.deepEqual(instance.elements, new Map());
             assert.deepEqual(instance.idToParentId, new Map());
+            assert.deepEqual(instance.idToChildrenIds, new Map());
             sinon.assert.calledWithExactly(
                window.__WASABY_DEV_HOOK__.pushMessage.firstCall,
                'operation',
-               [OperationType.DELETE, 1]
+               [OperationType.DELETE, 2]
             );
             sinon.assert.calledWithExactly(
                window.__WASABY_DEV_HOOK__.pushMessage.secondCall,
                'operation',
-               [OperationType.DELETE, 2]
+               [OperationType.DELETE, 1]
             );
             sinon.assert.calledWithExactly(
                window.__WASABY_DEV_HOOK__.pushMessage.thirdCall,
@@ -3702,13 +4040,19 @@ define([
             delete window.__WASABY_DEV_HOOK__;
          });
 
-         it('should remove dead controls (and their children) even if remove was not called for them', function() {
+         it('should remove the node and its children if it got deleted without message', function() {
+            instance.idToParentId.set(1, 0);
+            instance.idToParentId.set(2, 1);
+            instance.idToParentId.set(3, 0);
             stubWasabyDevHook();
             sandbox
                .stub(guid, 'guid')
                .returns('90ba6e97-ed16-4853-a635-ea4c6a929162');
             instance.rootStack.push(0);
             sandbox.stub(instance.channel, 'dispatch');
+            instance.isDevtoolsOpened = true;
+            instance.deletedChildrenIds.add(0);
+            const changes = new Map();
 
             instance.elements.set(0, {
                id: 0,
@@ -3719,37 +4063,65 @@ define([
                id: 1,
                parentId: 0,
                selfDuration: 4,
-               treeDuration: 2,
-               container: document.createElement('div')
+               treeDuration: 2
             });
             instance.elements.set(2, {
                id: 2,
+               parentId: 1,
                selfDuration: 2,
-               treeDuration: 0,
-               container: document.body
+               treeDuration: 0
             });
+            instance.elements.set(3, {
+               id: 3,
+               parentId: 0,
+               selfDuration: 6,
+               treeDuration: 0
+            });
+            instance.idToChildrenIds.set(0, new Set([1, 3]));
+            instance.idToChildrenIds.set(1, new Set([2]));
 
-            instance.changedRoots.set(0, new Map());
+            instance.changedRoots.set(0, changes);
             // setup end
 
             instance.onEndSync(0);
 
-            assert.deepEqual(
-               instance.elements,
-               new Map([
-                  [
-                     2,
-                     {
-                        id: 2,
-                        selfDuration: 2,
-                        treeDuration: 0,
-                        container: document.body
-                     }
-                  ]
-               ])
+            assert.deepEqual(instance.elements, new Map());
+            assert.deepEqual(instance.idToParentId, new Map());
+            assert.deepEqual(instance.idToChildrenIds, new Map());
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.firstCall,
+               'operation',
+               [OperationType.DELETE, 2]
             );
-            sinon.assert.notCalled(window.__WASABY_DEV_HOOK__.pushMessage);
-            sinon.assert.notCalled(instance.channel.dispatch);
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.secondCall,
+               'operation',
+               [OperationType.DELETE, 1]
+            );
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.thirdCall,
+               'operation',
+               [OperationType.DELETE, 3]
+            );
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.getCall(3),
+               'operation',
+               [OperationType.DELETE, 0]
+            );
+            sinon.assert.calledWithExactly(
+               window.__WASABY_DEV_HOOK__.pushMessage.getCall(4),
+               'endSynchronization',
+               '90ba6e97-ed16-4853-a635-ea4c6a929162'
+            );
+            assert.isTrue(
+               instance.channel.dispatch.lastCall.calledAfter(
+                  window.__WASABY_DEV_HOOK__.pushMessage.getCall(4)
+               )
+            );
+            sinon.assert.calledWithExactly(
+               instance.channel.dispatch,
+               'longMessage'
+            );
 
             // cleanup
             delete window.__WASABY_DEV_HOOK__;

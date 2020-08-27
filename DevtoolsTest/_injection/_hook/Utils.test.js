@@ -159,222 +159,6 @@ define([
          });
       });
 
-      describe('getRef', function() {
-         let idToContainer;
-         let idToParentId;
-         let domToIds;
-
-         beforeEach(function() {
-            idToContainer = new Map();
-            idToParentId = new Map();
-            domToIds = new WeakMap();
-         });
-
-         it('should create a new ref which will link container to the id when called', function() {
-            const ref = Utils.getRef(idToContainer, idToParentId, domToIds, 0);
-
-            assert.deepEqual(idToContainer, new Map());
-            assert.isUndefined(domToIds.get(document.body));
-
-            ref(document.body);
-
-            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
-            assert.deepEqual(domToIds.get(document.body), [0]);
-         });
-
-         it('should create a new ref which will link container to the id when called and also call childRef', function() {
-            const childRef = sandbox.stub();
-            const ref = Utils.getRef(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               0,
-               childRef
-            );
-
-            assert.deepEqual(idToContainer, new Map());
-            assert.isUndefined(domToIds.get(document.body));
-            sinon.assert.notCalled(childRef);
-
-            ref(document.body);
-
-            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
-            assert.deepEqual(domToIds.get(document.body), [0]);
-            sinon.assert.calledWithExactly(childRef, document.body);
-         });
-
-         it('should return childRef if it was created by devtools', function() {
-            const childRef = Utils.getRef(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               0
-            );
-
-            const ref = Utils.getRef(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               0,
-               childRef
-            );
-
-            assert.equal(ref, childRef);
-         });
-      });
-
-      describe('updateContainer', function() {
-         let idToContainer;
-         let idToParentId;
-         let domToIds;
-
-         beforeEach(function() {
-            idToContainer = new Map();
-            idToParentId = new Map();
-            domToIds = new WeakMap();
-         });
-
-         it('should not change anything because container is the same', function() {
-            idToContainer.set(0, document.body);
-            domToIds.set(document.body, [0]);
-            sandbox.stub(idToContainer, 'set');
-            sandbox.stub(domToIds, 'set');
-
-            Utils.updateContainer(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               0,
-               document.body
-            );
-
-            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
-            assert.deepEqual(domToIds.get(document.body), [0]);
-            sinon.assert.notCalled(idToContainer.set);
-            sinon.assert.notCalled(domToIds.set);
-         });
-
-         it('should link container with the id', function() {
-            Utils.updateContainer(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               0,
-               document.body
-            );
-
-            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
-            assert.deepEqual(domToIds.get(document.body), [0]);
-         });
-
-         it('should unlink container from the id', function() {
-            idToContainer.set(0, document.body);
-            domToIds.set(document.body, [0]);
-
-            Utils.updateContainer(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               0,
-               null
-            );
-
-            assert.deepEqual(idToContainer, new Map());
-            assert.isUndefined(domToIds.get(document.body));
-         });
-
-         it('should unlink container from the id but leave the parent', function() {
-            idToContainer.set(0, document.body);
-            idToContainer.set(1, document.body);
-            domToIds.set(document.body, [0, 1]);
-
-            Utils.updateContainer(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               1,
-               null
-            );
-
-            assert.deepEqual(idToContainer, new Map([[0, document.body]]));
-            assert.deepEqual(domToIds.get(document.body), [0]);
-         });
-
-         it('should link container with the id and do the same with parents', function() {
-            idToParentId.set(1, 0);
-            idToParentId.set(2, 1);
-
-            Utils.updateContainer(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               2,
-               document.body
-            );
-
-            assert.deepEqual(
-               idToContainer,
-               new Map([
-                  [0, document.body],
-                  [1, document.body],
-                  [2, document.body]
-               ])
-            );
-            assert.deepEqual(domToIds.get(document.body), [0, 1, 2]);
-         });
-
-         it('should link container with the id and parentId (parent did have a container)', function() {
-            idToParentId.set(1, 0);
-            idToContainer.set(0, document.body);
-            idToContainer.set(1, document.body);
-            const container = document.createElement('div');
-
-            Utils.updateContainer(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               1,
-               container
-            );
-
-            assert.deepEqual(
-               idToContainer,
-               new Map([
-                  [0, container],
-                  [1, container]
-               ])
-            );
-            assert.deepEqual(domToIds.get(container), [0, 1]);
-         });
-
-         it('should link container with the id but not touch the parent', function() {
-            const parentContainer = document.createElement('div');
-            idToParentId.set(1, 0);
-            idToContainer.set(0, parentContainer);
-            idToContainer.set(1, document.body);
-            domToIds.set(parentContainer, [0]);
-            const container = document.createElement('div');
-
-            Utils.updateContainer(
-               idToContainer,
-               idToParentId,
-               domToIds,
-               1,
-               container
-            );
-
-            assert.deepEqual(
-               idToContainer,
-               new Map([
-                  [0, parentContainer],
-                  [1, container]
-               ])
-            );
-            assert.deepEqual(domToIds.get(parentContainer), [0]);
-            assert.deepEqual(domToIds.get(container), [1]);
-         });
-      });
-
       describe('isVisible', function() {
          it('should return true because the element is the document root', function() {
             assert.isTrue(Utils.isVisible(document.documentElement));
@@ -447,7 +231,6 @@ define([
       describe('getEvents', function() {
          it('should filter out events handled by another controls', function() {
             const elements = new Map();
-            const domToIds = new WeakMap();
             const container = document.createElement('div');
             const onValueChanged = sandbox.stub();
             const control = {
@@ -480,12 +263,11 @@ define([
                ]
             };
             elements.set(0, {
-               container,
+               containers: [container],
                instance: control
             });
-            domToIds.set(container, [0]);
 
-            assert.deepEqual(Utils.getEvents(elements, domToIds, 0), {
+            assert.deepEqual(Utils.getEvents(elements, new WeakMap(), 0), {
                valueChanged: [
                   {
                      function: onValueChanged,
@@ -503,12 +285,11 @@ define([
 
          it('should filter out events handled by another controls and return control nodes', function() {
             const elements = new Map();
-            const domToIds = new WeakMap();
+            const instanceToId = new WeakMap();
             const container = document.createElement('div');
             const onValueChanged = sandbox.stub();
             const control = {
-               onValueChanged,
-               _container: container
+               onValueChanged
             };
             const secondHandler = {
                control
@@ -537,13 +318,13 @@ define([
                ]
             };
             const controlNode = {
-               container,
+               containers: [container],
                instance: control
             };
             elements.set(0, controlNode);
-            domToIds.set(container, [0, 1]);
+            instanceToId.set(control, 0);
 
-            assert.deepEqual(Utils.getEvents(elements, domToIds, 0, true), {
+            assert.deepEqual(Utils.getEvents(elements, instanceToId, 0, true), {
                valueChanged: [
                   {
                      function: onValueChanged,
@@ -561,12 +342,11 @@ define([
 
          it('should find the right control node (handler.control === node.instance)', function() {
             const elements = new Map();
-            const domToIds = new WeakMap();
+            const instanceToId = new WeakMap();
             const container = document.createElement('div');
             const onValueChanged = sandbox.stub();
             const control = {
-               onValueChanged,
-               _container: container
+               onValueChanged
             };
             container.eventProperties = {
                'on:valueChanged': [
@@ -580,27 +360,22 @@ define([
                ]
             };
             const firstControlNode = {
-               container
+               containers: [container]
             };
             const secondControlNode = {
-               container,
+               containers: [container],
                instance: {}
             };
             const thirdControlNode = {
-               container,
-               instance: control
-            };
-            const fourthControlNode = {
-               container,
+               containers: [container],
                instance: control
             };
             elements.set(0, firstControlNode);
             elements.set(1, secondControlNode);
             elements.set(2, thirdControlNode);
-            elements.set(3, fourthControlNode);
-            domToIds.set(container, [0, 1, 2, 3]);
+            instanceToId.set(control, 2);
 
-            assert.deepEqual(Utils.getEvents(elements, domToIds, 2, true), {
+            assert.deepEqual(Utils.getEvents(elements, instanceToId, 2, true), {
                valueChanged: [
                   {
                      function: onValueChanged,
