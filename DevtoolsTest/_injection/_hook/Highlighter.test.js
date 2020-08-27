@@ -172,12 +172,12 @@ define([
                onSelect
             });
             instance.overlay = new Overlay();
-            sandbox.stub(instance.overlay, 'inspect');
+            sandbox.stub(instance.overlay, 'inspectMultiple');
 
-            instance.highlightElement(document.body, 'Controls/Application');
+            instance.highlightElement([document.body], 'Controls/Application');
 
-            sinon.assert.calledOnce(instance.overlay.inspect);
-            sinon.assert.calledWithExactly(instance.overlay.inspect, document.body, 'Controls/Application');
+            sinon.assert.calledOnce(instance.overlay.inspectMultiple);
+            sinon.assert.calledWithExactly(instance.overlay.inspectMultiple, [document.body], 'Controls/Application');
          });
 
          it('should remove overlay', function() {
