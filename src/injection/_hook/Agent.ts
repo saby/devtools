@@ -15,7 +15,6 @@ import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { DevtoolChannel } from '../_devtool/Channel';
 import { guid } from 'Extension/Utils/guid';
 import {
-   getRef,
    findControlByDomNode,
    getCondition,
    getControlType,
@@ -23,9 +22,9 @@ import {
    getObjectDiff,
    isControlNode,
    isTemplateNode,
-   isVisible,
-   updateContainer
+   isVisible
 } from './Utils';
+import { getRef, updateContainer } from './_utils/ContainerHandling';
 import Highlighter from './Highlighter';
 import { IBackendProfilingData } from 'Extension/Plugins/Elements/IProfilingData';
 import deepClone from './deepClone';
@@ -71,14 +70,13 @@ class Agent {
       Array<IBackendControlNode['id']>
    > = new WeakMap();
    /**
-    * This map stores container for each node. There're two reasons for this:
-    * 1) Nodes are recreated on each update, so we have to store containers somewhere.
-    * 2) It will make adding support for multiple containers easier in the future.
+    * This map stores container for each node.
     */
-   private idToContainer: Map<
+   private idToContainers: Map<
       IBackendControlNode['id'],
-      IWasabyElement | null
+      IWasabyElement[]
    > = new Map();
+
    /**
     * This map is the source of truth for devtools.
     * This map updates after every synchronization and makes following assumptions:
@@ -165,6 +163,35 @@ class Agent {
       IBackendControlNode['id'],
       IBackendControlNode['id']
    > = new Map();
+
+   /**
+    * The next three fields are used to find the dead nodes. It works like this:
+    * every time a control updates we save its children into idToChildrenVNodes.
+    * Then at the end of synchronization we diff the children and put the deleted ones into deletedChildrenIds.
+    * New children are put into idToChildrenIds, which is also used to speed up deletion.
+    * Then at the end of every synchronization we traverse deletedChildrenIds and delete the nodes.
+    *
+    * The reason we're doing this at all is that we don't actually get a message about the deletion for some nodes.
+    * For example:
+    * Control
+    *    Template
+    *    Template
+    *    Template
+    *
+    * If templates inside the control gets replaced by something else we wouldn't get a message.
+    * It is even worse when these templates have templates inside of them, we wouldn't get messages for them either.
+    */
+   private idToChildrenVNodes: Map<
+      IBackendControlNode['id'],
+      Set<IControlNode | ITemplateNode>
+   > = new Map();
+
+   private idToChildrenIds: Map<
+      IBackendControlNode['id'],
+      Set<IBackendControlNode['id']>
+   > = new Map();
+
+   private deletedChildrenIds: Set<IBackendControlNode['id']> = new Set();
 
    /**
     * Mutation observer is used for tracking DOM changes during profiling.
@@ -332,23 +359,16 @@ class Agent {
          changedNode.node.selfStartTime = performance.now();
          startMark(name, id, changedNode.operation);
       } else {
-         const idToContainer = this.idToContainer;
+         const idToContainers = this.idToContainers;
          currentRoot.set(id, {
-            /**
-             * TODO: придумать как тут не игнорить ts
-             */
             node: {
                id,
                name,
                selfStartTime: performance.now(),
                selfDuration: 0,
                treeDuration: 0,
-               get container(this: IBackendControlNode): IWasabyElement {
-                  // This is control with invisible-node as it's container.
-                  if (this.instance && !this.instance._container) {
-                     return document.body as IWasabyElement;
-                  }
-                  return idToContainer.get(id) as IWasabyElement;
+               get containers(): IWasabyElement[] | undefined {
+                  return idToContainers.get(id);
                }
             },
             operation
@@ -386,31 +406,35 @@ class Agent {
          }
       }
 
-      // TODO: подумать на тему 1 контрол - несколько контейнеров. Актуально для шаблонов с несколькими корнями
       if (
          changedNode.operation === OperationType.CREATE ||
          changedNode.operation === OperationType.UPDATE
       ) {
          if (node.element) {
             // This is a control which was already mounted. We can just use the existing container.
+            const oldContainers = this.idToContainers.get(id);
             updateContainer(
-               this.idToContainer,
+               this.idToContainers,
                this.idToParentId,
                this.domToIds,
                id,
-               node.element
+               node.element,
+               // Controls can't have multiple containers at the moment, so we just take the first one
+               oldContainers ? oldContainers[0] : undefined
             );
          } else if (node.markup) {
             // This is a control that was not mounted, so we're proxying it's element property to catch its container.
             const updateIdToContainer = (
-               newContainer: IWasabyElement | null
+               newContainer: IWasabyElement | null,
+               oldContainer: IWasabyElement | null
             ) => {
                updateContainer(
-                  this.idToContainer,
+                  this.idToContainers,
                   this.idToParentId,
                   this.domToIds,
                   id,
-                  newContainer
+                  newContainer,
+                  oldContainer
                );
             };
             let container: IWasabyElement | null;
@@ -419,7 +443,7 @@ class Agent {
                   if (container === newContainer) {
                      return;
                   }
-                  updateIdToContainer(newContainer);
+                  updateIdToContainer(newContainer, container);
                   container = newContainer;
                },
                get(): IWasabyElement | null {
@@ -429,30 +453,19 @@ class Agent {
                enumerable: true
             });
          } else if (isTemplateNode(node)) {
-            if (node.children && node.children[0]) {
+            if (node.children && node.children.length) {
                // We only care about dom nodes inside template nodes. We'll catch it's element and propagate it.
-               if (
-                  !isControlNode(node.children[0]) &&
-                  !isTemplateNode(node.children[0])
-               ) {
-                  node.children[0].ref = getRef(
-                     this.idToContainer,
-                     this.idToParentId,
-                     this.domToIds,
-                     changedNode.node.id,
-                     node.children[0].ref
-                  );
-               }
-            } else {
-               // This is a template nodes which doesn\'t contain any children.
-               // Since every node has to have a container, we're setting document.body as the default.
-               updateContainer(
-                  this.idToContainer,
-                  this.idToParentId,
-                  this.domToIds,
-                  id,
-                  document.body as IWasabyElement
-               );
+               node.children.forEach((child) => {
+                  if (!isControlNode(child) && !isTemplateNode(child)) {
+                     child.ref = getRef(
+                        this.idToContainers,
+                        this.idToParentId,
+                        this.domToIds,
+                        changedNode.node.id,
+                        child.ref
+                     );
+                  }
+               });
             }
          }
       }
@@ -497,17 +510,38 @@ class Agent {
    }
 
    saveChildren(
-      children: ITemplateNode['children'] | IControlNode['markup']
+      children?: ITemplateNode['children'] | IControlNode['markup']
+   ): void {
+      if (!children) {
+         return;
+      }
+      const parentId = this.getCurrentNode().node.id;
+      const controlsAndTemplates: Set<ITemplateNode | IControlNode> = new Set();
+      this.getControlsAndTemplates(controlsAndTemplates, children);
+
+      controlsAndTemplates.forEach((child) => {
+         this.vNodeToParentId.set(child, parentId);
+      });
+
+      this.idToChildrenVNodes.set(parentId, controlsAndTemplates);
+   }
+
+   getControlsAndTemplates(
+      controlsAndTemplates: Set<ITemplateNode | IControlNode>,
+      children?: ITemplateNode['children'] | IControlNode['markup']
    ): void {
       if (children) {
          if (isControlNode(children) || isTemplateNode(children)) {
-            this.vNodeToParentId.set(children, this.getCurrentNode().node.id);
+            controlsAndTemplates.add(children);
          } else if (Array.isArray(children)) {
             children.forEach((child) => {
-               this.saveChildren(child);
+               this.getControlsAndTemplates(controlsAndTemplates, child);
             });
          } else if (children.children) {
-            this.saveChildren(children.children);
+            this.getControlsAndTemplates(
+               controlsAndTemplates,
+               children.children
+            );
          }
       }
    }
@@ -594,8 +628,12 @@ class Agent {
          }
          this.addProfilingData(node, operation);
       });
-      this.getDeadControls().forEach((node) => {
-         this.removeNode(node);
+      this.deletedChildrenIds.forEach((childId) => {
+         const node = this.elements.get(childId);
+         if (node) {
+            this.handleRemove(node);
+            this.deletedChildrenIds.delete(childId);
+         }
       });
       const id = guid();
       if (this.isProfiling) {
@@ -610,26 +648,18 @@ class Agent {
       this.rootStack.splice(this.rootStack.indexOf(rootId), 1);
    }
 
-   private getDeadControls(): IBackendControlNode[] {
-      const result: ReturnType<Agent['getDeadControls']> = [];
-      const deadParents: Set<IBackendControlNode['id']> = new Set();
-
-      this.elements.forEach((node, key) => {
-         if (
-            !node.container ||
-            (typeof node.parentId !== 'undefined' &&
-               deadParents.has(node.parentId))
-         ) {
-            result.push(node);
-            deadParents.add(key);
-         }
-      });
-
-      return result;
-   }
-
    private handleAdd(node: IBackendControlNode): void {
       this.elements.set(node.id, node);
+
+      const children = this.idToChildrenVNodes.get(node.id);
+
+      if (children) {
+         this.idToChildrenIds.set(
+            node.id,
+            this.transformVNodesSetToIdSet(children)
+         );
+         this.idToChildrenVNodes.delete(node.id);
+      }
 
       if (this.isDevtoolsOpened) {
          const message: IOperationEvent['args'] = [
@@ -655,6 +685,22 @@ class Agent {
       }
       this.elements.set(node.id, node);
 
+      const newChildren = this.idToChildrenVNodes.get(node.id);
+
+      if (newChildren) {
+         const newChildrenIds = this.transformVNodesSetToIdSet(newChildren);
+         const oldChildrenIds = this.idToChildrenIds.get(node.id);
+         if (oldChildrenIds) {
+            oldChildrenIds.forEach((childId) => {
+               if (!newChildrenIds.has(childId)) {
+                  this.deletedChildrenIds.add(childId);
+               }
+            });
+         }
+         this.idToChildrenIds.set(node.id, newChildrenIds);
+         this.idToChildrenVNodes.delete(node.id);
+      }
+
       if (this.isDevtoolsOpened) {
          const message: IOperationEvent['args'] = [
             OperationType.UPDATE,
@@ -670,28 +716,49 @@ class Agent {
    }
 
    private removeChildren(id: IBackendControlNode['id']): void {
-      const parents: Set<IBackendControlNode['parentId']> = new Set();
-      this.elements.forEach((element, key) => {
-         if (element.parentId === id || parents.has(element.parentId)) {
-            parents.add(key);
-            this.removeNode(element);
-         }
-      });
+      const childrenIds = this.idToChildrenIds.get(id);
+      if (childrenIds) {
+         childrenIds.forEach((childId) => {
+            const child = this.elements.get(childId);
+            if (child) {
+               this.deletedChildrenIds.delete(childId);
+               this.removeChildren(childId);
+               this.removeNode(child);
+            }
+         });
+      }
    }
 
    private removeNode({ id, parentId, instance }: IBackendControlNode): void {
       if (typeof parentId !== 'undefined') {
          this.idToParentId.delete(id);
+         const siblings = this.idToChildrenIds.get(parentId) as Set<
+            IBackendControlNode['id']
+         >;
+         siblings.delete(id);
+         this.deletedChildrenIds.delete(id);
       }
       if (instance) {
          this.instanceToId.delete(instance);
       }
+      this.idToChildrenVNodes.delete(id);
+      this.idToChildrenIds.delete(id);
       this.elements.delete(id);
 
       if (this.isDevtoolsOpened) {
          const message: IOperationEvent['args'] = [OperationType.DELETE, id];
          window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
       }
+   }
+
+   private transformVNodesSetToIdSet(
+      nodes: Set<IControlNode | ITemplateNode>
+   ): Set<IBackendControlNode['id']> {
+      const result: Set<IBackendControlNode['id']> = new Set();
+      nodes.forEach((node) => {
+         result.add(this.getNodeId(node));
+      });
+      return result;
    }
 
    private inspectElement(options: {
@@ -710,7 +777,7 @@ class Agent {
             if (options.path[0] === 'events') {
                value = dehydrateHelper(
                   getValueByPath(
-                     getEvents(this.elements, this.domToIds, id),
+                     getEvents(this.elements, this.instanceToId, id),
                      options.path.slice(1)
                   ) as object,
                   this.currentInspectedPaths,
@@ -824,7 +891,7 @@ class Agent {
                      ['options']
                   ),
                   events: dehydrateHelper(
-                     getEvents(this.elements, this.domToIds, id),
+                     getEvents(this.elements, this.instanceToId, id),
                      this.currentInspectedPaths,
                      ['events']
                   ),
@@ -882,8 +949,8 @@ class Agent {
 
    private viewContainer(id: IBackendControlNode['id']): void {
       const node = this.elements.get(id);
-      if (node) {
-         window.__WASABY_DEV_HOOK__.__container = node.container;
+      if (node && node.containers) {
+         window.__WASABY_DEV_HOOK__.__container = node.containers[0];
       }
    }
 
@@ -916,10 +983,10 @@ class Agent {
       id: IBackendControlNode['id'],
       path: Array<string | number>
    ): unknown {
-      let currentProperty = path.pop();
+      const currentProperty = path.pop();
       let value;
       if (currentProperty === 'events') {
-         value = getEvents(this.elements, this.domToIds, id);
+         value = getEvents(this.elements, this.instanceToId, id);
       } else {
          const element = this.elements.get(id) as IBackendControlNode;
          value = element[currentProperty as keyof IBackendControlNode];
@@ -930,8 +997,8 @@ class Agent {
    private highlightElement(id?: IBackendControlNode['id']): void {
       if (typeof id !== 'undefined') {
          const node = this.elements.get(id);
-         if (node && node.container) {
-            this.highlighter.highlightElement(node.container, node.name);
+         if (node && node.containers) {
+            this.highlighter.highlightElement(node.containers, node.name);
             return;
          }
       }
@@ -1087,11 +1154,15 @@ class Agent {
          switch (operation) {
             case OperationType.CREATE:
                node.domChanged = true;
-               node.isVisible = isVisible(node.container);
+               node.isVisible = node.containers
+                  ? node.containers.some((elem) => isVisible(elem))
+                  : true;
                break;
             case OperationType.UPDATE:
                node.domChanged = this.dirtyControls.has(node.id);
-               node.isVisible = isVisible(node.container);
+               node.isVisible = node.containers
+                  ? node.containers.some((elem) => isVisible(elem))
+                  : true;
                break;
          }
       }
@@ -1130,7 +1201,7 @@ class Agent {
          const currentId = node.id;
          const eventHandlers = getEvents(
             this.elements,
-            this.domToIds,
+            this.instanceToId,
             currentId,
             true
          )[eventName];

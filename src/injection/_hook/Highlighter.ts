@@ -42,16 +42,17 @@ class Highlighter {
       });
    }
 
-   highlightElement(container?: Element, name?: string): void {
+   highlightElement(containers?: IWasabyElement[], name?: string): void {
       if (!this.overlay) {
          this.overlay = new Overlay();
       }
 
-      if (!container) {
+      if (!containers) {
          this.overlay.remove();
          return;
       }
-      this.overlay.inspect(container, name);
+      // TODO: overloads should help to avoid type assertion but I can't get it to work properly(
+      this.overlay.inspectMultiple(containers, name as string);
    }
 
    private __clickHandler(e: MouseEvent): void {
@@ -62,7 +63,7 @@ class Highlighter {
    }
 
    private __mouseOverHandler(e: MouseEvent): void {
-      (this.overlay as Overlay).inspect(e.target as Element);
+      (this.overlay as Overlay).inspect(e.target as IWasabyElement);
       e.stopPropagation();
       e.preventDefault();
    }

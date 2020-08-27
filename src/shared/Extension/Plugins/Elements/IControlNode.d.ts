@@ -1,7 +1,7 @@
 interface ITemplateNode {
    name: string;
    template: Function;
-   container: IWasabyElement;
+   containers?: IWasabyElement[];
    children: Array<ITemplateNode | IControlNode>;
    type: string | null;
    ref?: Function;

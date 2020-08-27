@@ -2,13 +2,12 @@
  * Contains utility functions used by agent.
  * @author Зайцев А.С.
  */
-import { ControlType, OperationType } from 'Extension/Plugins/Elements/const';
+import { ControlType } from 'Extension/Plugins/Elements/const';
 import Agent from './Agent';
 import {
    IBackendControlNode,
    IControlNode,
-   ITemplateNode,
-   IWasabyElement
+   ITemplateNode
 } from 'Extension/Plugins/Elements/IControlNode';
 import isDeepEqual from './isDeepEqual';
 
@@ -61,114 +60,6 @@ export function isTemplateNode(node: object): node is ITemplateNode {
    return node.type === 'TemplateNode';
 }
 
-const refSymbol = Symbol('ref');
-
-/**
- * Creates a function which will be used to catch node's container.
- * @param idToContainer
- * @param idToParentId
- * @param domToIds
- * @param id
- * @param childRef
- */
-export function getRef(
-   idToContainer: Agent['idToContainer'],
-   idToParentId: Agent['idToParentId'],
-   domToIds: Agent['domToIds'],
-   id: IBackendControlNode['id'],
-   childRef?: Function
-): Function {
-   if (childRef && childRef[refSymbol]) {
-      return childRef;
-   }
-   const newRef = (element: IWasabyElement | null) => {
-      if (childRef) {
-         childRef(element);
-      }
-      updateContainer(
-         idToContainer,
-         idToParentId,
-         domToIds,
-         id,
-         element,
-         idToParentId.get(id)
-      );
-   };
-   newRef[refSymbol] = true;
-   return newRef;
-}
-
-function updateDomToIds(
-   domToIds: Agent['domToIds'],
-   operation: OperationType,
-   dom: Element,
-   id: IBackendControlNode['id']
-): void {
-   const ids = domToIds.get(dom);
-   switch (operation) {
-      case OperationType.DELETE:
-         if (ids) {
-            if (ids.length === 1) {
-               domToIds.delete(dom);
-            } else {
-               const index = ids.indexOf(id);
-               ids.splice(index, 1);
-            }
-         }
-         break;
-      case OperationType.CREATE:
-         if (ids) {
-            ids.push(id);
-         } else {
-            domToIds.set(dom, [id]);
-         }
-         break;
-   }
-}
-
-/**
- * Links container to id. Also updates parent if it had the same container.
- * @param idToContainer
- * @param idToParentId
- * @param domToIds
- * @param id
- * @param newContainer
- */
-export function updateContainer(
-   idToContainer: Agent['idToContainer'],
-   idToParentId: Agent['idToParentId'],
-   domToIds: Agent['domToIds'],
-   id: IBackendControlNode['id'],
-   newContainer: IWasabyElement | null
-): void {
-   const oldContainer = idToContainer.get(id);
-   if (oldContainer === newContainer) {
-      return;
-   }
-   const parentId = idToParentId.get(id);
-   if (typeof parentId !== 'undefined') {
-      const parentContainer = idToContainer.get(parentId);
-      if (!parentContainer || oldContainer === parentContainer) {
-         updateContainer(
-            idToContainer,
-            idToParentId,
-            domToIds,
-            parentId,
-            newContainer
-         );
-      }
-   }
-   if (oldContainer) {
-      updateDomToIds(domToIds, OperationType.DELETE, oldContainer, id);
-   }
-   if (newContainer) {
-      updateDomToIds(domToIds, OperationType.CREATE, newContainer, id);
-      idToContainer.set(id, newContainer);
-   } else {
-      idToContainer.delete(id);
-   }
-}
-
 function isParentVisible(element: HTMLElement): boolean {
    const parent = element.parentElement;
    if (parent) {
@@ -215,21 +106,14 @@ export function findControlByDomNode(
    return;
 }
 
-// TODO: это можно переписать, раз уж теперь есть instanceToId
 function findControlNodeByInstance(
    instance: IControlNode['instance'],
-   domToIds: Agent['domToIds'],
+   instanceToId: Agent['instanceToId'],
    elements: Agent['elements']
 ): IBackendControlNode | void {
-   const container = instance._container[0]
-      ? instance._container[0]
-      : instance._container;
-   const nodes = domToIds.get(container) as Array<IBackendControlNode['id']>;
-   for (let i = 0; i < nodes.length; i++) {
-      const currentNode = elements.get(nodes[i]);
-      if (currentNode && currentNode.instance === instance) {
-         return currentNode;
-      }
+   const id = instanceToId.get(instance);
+   if (typeof id !== 'undefined') {
+      return elements.get(id);
    }
 }
 
@@ -241,18 +125,18 @@ const EVENT_NAME_OFFSET = 3;
  * Devtools take information about events from the DOM elements, and there's no fast way to collect this information and keep it updated.
  * @param elements
  * @param id
- * @param domToIds
+ * @param instanceToId
  * @param needControlNode
  */
 export function getEvents(
    elements: Agent['elements'],
-   domToIds: Agent['domToIds'],
+   instanceToId: Agent['instanceToId'],
    id: IBackendControlNode['id'],
    needControlNode?: false
 ): Record<string, Array<{ function: Function; arguments: unknown[] }>>;
 export function getEvents(
    elements: Agent['elements'],
-   domToIds: Agent['domToIds'],
+   instanceToId: Agent['instanceToId'],
    id: IBackendControlNode['id'],
    needControlNode?: true
 ): Record<
@@ -265,14 +149,14 @@ export function getEvents(
 >;
 export function getEvents(
    elements: Agent['elements'],
-   domToIds: Agent['domToIds'],
+   instanceToId: Agent['instanceToId'],
    id: IBackendControlNode['id'],
    needControlNode: boolean = false
 ): ReturnType<typeof getEvents> {
    const node = elements.get(id);
    const events: ReturnType<typeof getEvents> = {};
-   if (node && node.container.eventProperties) {
-      const eventProperties = node.container.eventProperties;
+   if (node && node.containers && node.containers[0].eventProperties) {
+      const eventProperties = node.containers[0].eventProperties;
       Object.keys(eventProperties).forEach((key) => {
          let properties = eventProperties[key];
          if (node.instance) {
@@ -288,7 +172,7 @@ export function getEvents(
                controlNode: needControlNode
                   ? findControlNodeByInstance(
                        handler.fn.control,
-                       domToIds,
+                       instanceToId,
                        elements
                     )
                   : undefined
