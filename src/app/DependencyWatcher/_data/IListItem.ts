@@ -6,5 +6,4 @@ export interface IListItem extends IRPCModuleInfo {
    isDynamic: boolean;
    hasChildren: true | null;
    itemId: number;
-   computedSize: string;
 }

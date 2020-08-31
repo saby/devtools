@@ -53,25 +53,19 @@ define([
             .withArgs('resource')
             .returns([
                {
-                  name: '/cdn/resourceFromCdn.js',
-                  transferSize: 0,
-                  decodedBodySize: 773
+                  name: '/cdn/resourceFromCdn.js'
                },
                {
-                  name: '/resources/normalResource.css',
-                  transferSize: 937,
-                  decodedBodySize: 344
+                  name: '/resources/normalResource.css'
                },
                {
-                  name: 'notAResource.js',
-                  transferSize: 882,
-                  decodedBodySize: 292
+                  name: 'notAResource.js'
                }
             ]);
 
          assert.deepEqual(getResourcesFromPerformance.default(), [
-            ['/cdn/resourceFromCdn.js', 773],
-            ['/resources/normalResource.css', 1017]
+            '/cdn/resourceFromCdn.js',
+            '/resources/normalResource.css'
          ]);
 
          sinon.assert.calledOnce(window.performance.clearResourceTimings);

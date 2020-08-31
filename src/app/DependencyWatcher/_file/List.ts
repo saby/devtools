@@ -28,8 +28,7 @@ export class List extends Control<IOptions> {
    static getDefaultOptions(): Partial<IOptions> {
       return {
          headers,
-         columns,
-         sorting: [{ size: 'ASC' }]
+         columns
       };
    }
 }
