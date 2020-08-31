@@ -170,13 +170,11 @@ define([
                .resolves([
                   {
                      id: 1,
-                     name: 'testPath.js',
-                     size: 100
+                     name: 'testPath.js'
                   },
                   {
                      id: 2,
-                     name: 'anotherPath.js',
-                     size: 2000
+                     name: 'anotherPath.js'
                   }
                ]);
 
@@ -197,16 +195,12 @@ define([
                   {
                      id: 1,
                      name: 'testPath.js',
-                     title: 'testPath.js',
-                     size: 100,
-                     computedSize: '100 B'
+                     title: 'testPath.js'
                   },
                   {
                      id: 2,
                      name: 'anotherPath.js',
-                     title: 'anotherPath.js',
-                     size: 2000,
-                     computedSize: '1.95 KB'
+                     title: 'anotherPath.js'
                   }
                ],
                meta: {
@@ -281,13 +275,11 @@ define([
                .resolves([
                   {
                      id: 1,
-                     name: 'testPath.js',
-                     size: 100
+                     name: 'testPath.js'
                   },
                   {
                      id: 2,
-                     name: 'anotherPath.js',
-                     size: 2000
+                     name: 'anotherPath.js'
                   }
                ]);
 
@@ -308,16 +300,12 @@ define([
                   {
                      id: 1,
                      name: 'testPath.js',
-                     title: 'testPath.js',
-                     size: 100,
-                     computedSize: '100 B'
+                     title: 'testPath.js'
                   },
                   {
                      id: 2,
                      name: 'anotherPath.js',
-                     title: 'anotherPath.js',
-                     size: 2000,
-                     computedSize: '1.95 KB'
+                     title: 'anotherPath.js'
                   }
                ],
                meta: {

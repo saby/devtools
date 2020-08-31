@@ -810,7 +810,6 @@ define([
                fileName: 'testPath.js',
                fileId: 1,
                path: 'https://example.com/testPath.js',
-               size: 100,
                isDeprecated: true
             };
             instance._getChildren = sandbox
@@ -828,14 +827,12 @@ define([
                fileName: 'testPath.js',
                fileId: 1,
                path: 'https://example.com/testPath.js',
-               size: 100,
                isDeprecated: true,
                parent: null,
                isDynamic: false,
                itemId: 1,
                id: '1;',
-               hasChildren: true,
-               computedSize: '100 B'
+               hasChildren: true
             });
          });
 
@@ -848,7 +845,6 @@ define([
                fileName: 'testPath.js',
                fileId: 1,
                path: 'https://example.com/testPath.js',
-               size: 100,
                isDeprecated: true
             };
             instance._getChildren = sandbox
@@ -866,14 +862,12 @@ define([
                fileName: 'testPath.js',
                fileId: 1,
                path: 'https://example.com/testPath.js',
-               size: 100,
                isDeprecated: true,
                parent: '0;',
                isDynamic: true,
                itemId: 1,
                id: '1;0;',
-               hasChildren: true,
-               computedSize: '100 B'
+               hasChildren: true
             });
          });
       });
@@ -918,7 +912,6 @@ define([
                      static: [],
                      dynamic: []
                   },
-                  size: 100,
                   path: 'https://example.com/testPath.js',
                   fileName: 'testPath.js',
                   isDeprecated: false
@@ -937,7 +930,6 @@ define([
                      static: [],
                      dynamic: []
                   },
-                  size: 123,
                   path: 'https://example.com/anotherPath.js',
                   fileName: 'anotherPath.js',
                   isDeprecated: false
@@ -954,15 +946,13 @@ define([
                fileName: 'testPath.js',
                fileId: 1,
                path: 'https://example.com/testPath.js',
-               size: 100,
                initialized: true,
                isDynamic: false,
                isDeprecated: false,
                parent: null,
                itemId: 1,
                id: '1;',
-               hasChildren: true,
-               computedSize: '100 B'
+               hasChildren: true
             };
             createItemStub.withArgs(getItemsResult[0]).returns(firstItem);
             const secondItem = {
@@ -971,15 +961,13 @@ define([
                fileName: 'anotherPath.js',
                fileId: 1,
                path: 'https://example.com/anotherPath.js',
-               size: 100,
                initialized: true,
                isDynamic: false,
                isDeprecated: false,
                parent: '1;',
                itemId: 1,
                id: '2;1;',
-               hasChildren: false,
-               computedSize: '123 B'
+               hasChildren: false
             };
             createItemStub.withArgs(getItemsResult[1]).returns(secondItem);
 

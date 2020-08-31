@@ -9,7 +9,7 @@ function isResource(path: string): boolean {
    });
 }
 
-let resourceCache: Map<string, number>;
+let resourceCache: Set<string>;
 
 function updateResourceCache(): void {
    const resourceTimingList = performance.getEntriesByType(
@@ -20,17 +20,15 @@ function updateResourceCache(): void {
          return isResource(name);
       })
       .forEach((entry: PerformanceResourceTiming) => {
-         resourceCache.set(
-            entry.name,
-            // tslint:disable-next-line:no-bitwise
-            entry.transferSize | entry.decodedBodySize
+         resourceCache.add(
+            entry.name
          );
       });
    window.performance.clearResourceTimings();
 }
 
 export function init(): void {
-   resourceCache = new Map();
+   resourceCache = new Set();
    window.performance.addEventListener(
       'resourcetimingbufferfull',
       updateResourceCache
@@ -38,12 +36,12 @@ export function init(): void {
 }
 
 /**
- * Collects information about resources using Resource Timing API and returns only the necessary information (URL and size).
+ * Collects information about resources using Resource Timing API and returns only the necessary information (URL).
  * @author Зайцев А.С.
  */
-function getResourcesFromPerformance(): Array<[string, number]> {
+function getResourcesFromPerformance(): string[] {
    updateResourceCache();
-   const resourcesFromCache = Array.from(resourceCache.entries());
+   const resourcesFromCache = Array.from(resourceCache.values());
    resourceCache.clear();
    return resourcesFromCache;
 }

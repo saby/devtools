@@ -18,7 +18,7 @@ define([
 
       describe('_beforeMount', function() {
          it('should save sorting on instance for binding', function() {
-            const sorting = [{ size: 'DESC' }];
+            const sorting = [{ name: 'DESC' }];
 
             instance._beforeMount({
                sorting
@@ -31,8 +31,7 @@ define([
       it('getDefaultOptions', function() {
          assert.deepEqual(List.getDefaultOptions(), {
             headers: headers.headers,
-            columns: columns.columns,
-            sorting: [{ size: 'ASC' }]
+            columns: columns.columns
          });
       });
    });

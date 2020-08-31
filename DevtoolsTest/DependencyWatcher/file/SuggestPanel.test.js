@@ -18,7 +18,6 @@ define([
                   mode: 'totalCount'
                }
             });
-            assert.deepEqual(instance._sorting, [{ size: 'ASC' }]);
          });
       });
    });

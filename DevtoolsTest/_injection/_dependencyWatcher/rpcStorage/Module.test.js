@@ -236,7 +236,6 @@ define([
                .returns(['Third.js']);
             const newFile = {
                id: 5,
-               size: 10,
                path: 'resources/Third.js',
                name: 'Third.js',
                modules: new Set()
@@ -336,7 +335,6 @@ define([
                      static: [],
                      dynamic: []
                   },
-                  size: 0,
                   path: '',
                   fileName: '',
                   isDeprecated: false
@@ -355,7 +353,6 @@ define([
                      static: [],
                      dynamic: []
                   },
-                  size: 0,
                   path: '',
                   fileName: '',
                   isDeprecated: false
@@ -374,7 +371,6 @@ define([
                      static: [],
                      dynamic: []
                   },
-                  size: 10,
                   path: 'resources/Third.js',
                   fileName: 'Third.js',
                   isDeprecated: false
@@ -393,7 +389,6 @@ define([
                      static: [],
                      dynamic: []
                   },
-                  size: 0,
                   path: '',
                   fileName: '',
                   isDeprecated: true
