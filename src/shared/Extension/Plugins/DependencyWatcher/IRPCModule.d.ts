@@ -9,7 +9,6 @@ import { IFileFilter } from 'Extension/Plugins/DependencyWatcher/IFile';
 interface IFileInfo {
    fileName: string;
    path: string;
-   size: number;
 }
 
 export interface IRPCModuleInfo extends IFileInfo, IModuleInfo {

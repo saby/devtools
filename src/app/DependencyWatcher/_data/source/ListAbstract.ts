@@ -27,7 +27,6 @@ import { IListConfig } from './IList';
 import { ILogger } from 'Extension/Logger/ILogger';
 import { Lang, revert } from 'Extension/Utils/kbLayout';
 import * as hierarchyId from '../util/hierarchyId';
-import getComputedSize from 'Extension/Utils/getComputedSize';
 
 function filterGlobal(item: ITransferRPCModule): boolean {
    return item.name !== GLOBAL_MODULE_NAME;
@@ -214,7 +213,6 @@ export abstract class ListAbstract extends Compatibility {
          fileName,
          fileId,
          path,
-         size,
          isDeprecated
       }: ITransferRPCModule = item;
       return {
@@ -223,15 +221,13 @@ export abstract class ListAbstract extends Compatibility {
          fileName,
          fileId,
          path,
-         size,
          initialized,
          isDynamic,
          isDeprecated,
          parent: parent || null,
          itemId: id,
          id: hierarchyId.create(id, parent),
-         hasChildren: hasChildren(this._getChildren(item)),
-         computedSize: getComputedSize(size)
+         hasChildren: hasChildren(this._getChildren(item))
       };
    }
 

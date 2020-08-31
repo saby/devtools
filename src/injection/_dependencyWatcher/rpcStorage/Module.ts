@@ -26,7 +26,7 @@ function setToIdArray(set: Set<IModule>): number[] {
 }
 
 /**
- * Wrapper around the storages of the files and modules used to construct the list of modules with the data about files where they're stored (path, size).
+ * Wrapper around the storages of the files and modules used to construct the list of modules with the data about files where they're stored (path).
  * @author Зайцев А.С.
  */
 export class Module extends Query<IRPCModule, IRPCModuleFilter> {
@@ -87,11 +87,9 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter> {
             isDeprecated
          }: IModule) => {
             const file = this._files.getItem(fileId);
-            let size = 0;
             let path = '';
             let fileName = '';
             if (file) {
-               size = file.size;
                path = file.path;
                fileName = file.name;
             }
@@ -103,7 +101,6 @@ export class Module extends Query<IRPCModule, IRPCModuleFilter> {
                fileId,
                dependent,
                dependencies,
-               size,
                path,
                fileName,
                isDeprecated

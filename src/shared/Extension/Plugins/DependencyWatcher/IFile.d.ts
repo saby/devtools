@@ -9,7 +9,6 @@ interface ITransportModules {
 }
 
 export interface IFileInfo {
-   size: number;
    name: string;
    path: string;
 }
@@ -17,7 +16,7 @@ export interface IFileInfo {
 export interface IFile extends IFileInfo, IFileModules, IId {}
 
 export interface ITransportFile extends IFileInfo, ITransportModules, IId {
-   computedSize: string;
+
 }
 
 export interface IFileFilter {

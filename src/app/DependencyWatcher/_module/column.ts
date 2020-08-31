@@ -27,16 +27,10 @@ const used: Partial<IListItemColumn> = {
    align: 'center',
    template: usedTemplate
 };
-const size: Partial<IListItemColumn> = {
-   displayProperty: 'computedSize',
-   width: '100px',
-   align: 'right'
-};
 
 export const columns: Array<Partial<IListItemColumn>> = [
    name,
    fileName,
    isDynamic,
-   used,
-   size
+   used
 ];

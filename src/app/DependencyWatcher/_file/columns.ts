@@ -20,10 +20,4 @@ const modules: Partial<IFileColumn> = {
    template: ModulesTemplate
 };
 
-const size: Partial<IFileColumn> = {
-   displayProperty: 'computedSize',
-   width: '100px',
-   align: 'right'
-};
-
-export const columns: Array<Partial<IFileColumn>> = [name, modules, size];
+export const columns: Array<Partial<IFileColumn>> = [name, modules];

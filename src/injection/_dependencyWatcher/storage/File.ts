@@ -24,8 +24,8 @@ export class FileStorage extends Query<IFile, IFileFilter> {
       initPerformanceObserving();
    }
    private __getNewFiles(): IFile[] {
-      return getResourcesFromPerformance().map(([path, size]) => {
-         return this.create(path, size);
+      return getResourcesFromPerformance().map((path) => {
+         return this.create(path);
       });
    }
    getItems(keys?: number[]): IFile[] {
@@ -40,10 +40,9 @@ export class FileStorage extends Query<IFile, IFileFilter> {
          findInPath(partOfName, this.__getNewFiles())
       );
    }
-   create(path: string, size: number): IFile {
+   create(path: string): IFile {
       const file: IFile = {
          path,
-         size,
          name: getNormalizedFileName(path),
          id: getId(),
          modules: new Set<number>()

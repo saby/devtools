@@ -99,13 +99,12 @@ define([
             sandbox
                .stub(getResourcesFromPerformance, 'default')
                .returns([
-                  ['resources/Types/entity.min.js', 123],
-                  ['resources/Controls/Application.min.js', 456]
+                  'resources/Types/entity.min.js',
+                  'resources/Controls/Application.min.js'
                ]);
             sandbox.stub(getId, 'getId').returns(1);
             const expectedResult = {
                path: 'resources/Controls/Application.min.js',
-               size: 456,
                name: 'Application.min.js',
                id: 1,
                modules: new Set()
@@ -129,15 +128,13 @@ define([
             sandbox.stub(getId, 'getId').returns(1);
             const expectedResult = {
                path: 'resources/Controls/Application.min.js',
-               size: 456,
                name: 'Application.min.js',
                id: 1,
                modules: new Set()
             };
 
             const result = instance.create(
-               'resources/Controls/Application.min.js',
-               456
+               'resources/Controls/Application.min.js'
             );
 
             assert.deepEqual(result, expectedResult);
@@ -154,7 +151,6 @@ define([
             const instance = new FileStorage();
             const item = {
                path: 'resources/Controls/Application.min.js',
-               size: 456,
                name: 'Application.min.js',
                id: 1,
                modules: new Set()
@@ -192,7 +188,6 @@ define([
             const instance = new FileStorage();
             const item = {
                path: 'resources/Controls/Application.min.js',
-               size: 456,
                name: 'Application.min.js',
                id: 1,
                modules: new Set()

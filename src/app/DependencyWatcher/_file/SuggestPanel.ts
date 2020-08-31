@@ -17,8 +17,5 @@ export class SuggestPanel extends Control {
          mode: 'totalCount'
       }
    };
-   protected _sorting: Array<Partial<
-      Record<keyof ITransportFile, 'ASC' | 'DESC'>
-   >> = [{ size: 'ASC' }];
 }
 export default SuggestPanel;

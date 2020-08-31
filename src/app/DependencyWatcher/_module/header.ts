@@ -23,16 +23,10 @@ const used: IHeader<IListItem> = {
    align: 'center',
    sortingProperty: 'used'
 };
-const size: IHeader<IListItem> = {
-   title: rk('size'),
-   align: 'right',
-   sortingProperty: 'size'
-};
 
 export const headers: IHeaders<IListItem> = [
    name,
    fileName,
    isDynamic,
-   used,
-   size
+   used
 ];

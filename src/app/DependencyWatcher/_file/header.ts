@@ -15,14 +15,8 @@ const modules: IHeader<ITransportFile> = {
    align: 'center',
    sortingProperty: 'modules'
 };
-const size: IHeader<ITransportFile> = {
-   title: rk('size'),
-   align: 'right',
-   sortingProperty: 'size'
-};
 
 export const headers: IHeaders<ITransportFile> = [
    name,
-   modules,
-   size
+   modules
 ];

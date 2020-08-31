@@ -11,7 +11,6 @@
             keyProperty="id"
             bind:filter="_filter"
             navigation="{{ _navigation }}"
-            sorting="{{ _sorting }}"
         >
             <ws:search>
                 <Controls.search:Input/>
