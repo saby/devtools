@@ -16,15 +16,6 @@ import { GlobalMessages } from 'Extension/const';
 import { getGlobalChannel } from '../_devtool/globalChannel';
 
 /**
- * Rethrows error asynchronously to avoid breaking the calling code.
- */
-function rethrowError(e: Error): void {
-   setTimeout(() => {
-      throw e;
-   }, 0);
-}
-
-/**
  * Manages communication between an agent and a framework.
  * Also contains some fields which frontend uses to get access to things living in a page context (functions, objects, etc.).
  * @author Зайцев А.С.
@@ -47,11 +38,7 @@ export class Hook implements IWasabyDevHook {
       oldNode?: IControlNode | ITemplateNode
    ): void {
       if (this._agent) {
-         try {
-            this._agent.onStartCommit(typeOfOperation, name, oldNode);
-         } catch (e) {
-            rethrowError(e);
-         }
+         this._agent.onStartCommit(typeOfOperation, name, oldNode);
       }
    }
 
@@ -60,61 +47,37 @@ export class Hook implements IWasabyDevHook {
       data?: ITemplateChanges | IControlChanges
    ): void {
       if (this._agent) {
-         try {
-            this._agent.onEndCommit(node, data);
-         } catch (e) {
-            rethrowError(e);
-         }
+         this._agent.onEndCommit(node, data);
       }
    }
 
    saveChildren(children: ITemplateNode['children'] | IControlNode['markup']): void {
       if (this._agent) {
-         try {
-            this._agent.saveChildren(children);
-         } catch (e) {
-            rethrowError(e);
-         }
+         this._agent.saveChildren(children);
       }
    }
 
    onStartLifecycle(node: IControlNode): void {
       if (this._agent) {
-         try {
-            this._agent.onStartLifecycle(node);
-         } catch (e) {
-            rethrowError(e);
-         }
+         this._agent.onStartLifecycle(node);
       }
    }
 
    onEndLifecycle(node: IControlNode): void {
       if (this._agent) {
-         try {
-            this._agent.onEndLifecycle(node);
-         } catch (e) {
-            rethrowError(e);
-         }
+         this._agent.onEndLifecycle(node);
       }
    }
 
    onStartSync(rootId: number): void {
       if (this._agent) {
-         try {
-            this._agent.onStartSync(rootId);
-         } catch (e) {
-            rethrowError(e);
-         }
+         this._agent.onStartSync(rootId);
       }
    }
 
    onEndSync(rootId: number): void {
       if (this._agent) {
-         try {
-            this._agent.onEndSync(rootId);
-         } catch (e) {
-            rethrowError(e);
-         }
+         this._agent.onEndSync(rootId);
       }
    }
 

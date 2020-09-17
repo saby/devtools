@@ -54,34 +54,6 @@ define([
                oldNode
             );
          });
-
-         it('should catch error from the agent and rethrow it after timeout', function() {
-            const oldNode = {
-               value: 123
-            };
-            instance._agent = {
-               onStartCommit: sandbox.stub().throws('test error')
-            };
-            const clock = sinon.useFakeTimers();
-
-            assert.doesNotThrow(() => {
-               instance.onStartCommit(0, 'Controls/Application', oldNode);
-            });
-
-            sinon.assert.calledWithExactly(
-               instance._agent.onStartCommit,
-               0,
-               'Controls/Application',
-               oldNode
-            );
-            try {
-               clock.tick(0);
-            } catch (error) {
-               assert.equal(error, 'test error');
-            }
-
-            clock.restore();
-         });
       });
 
       describe('onEndCommit', function() {
@@ -117,36 +89,6 @@ define([
                data
             );
          });
-
-         it('should catch error from the agent and rethrow it after timeout', function() {
-            const node = {
-               value: 123
-            };
-            const data = {
-               value: 456
-            };
-            instance._agent = {
-               onEndCommit: sandbox.stub().throws('test error')
-            };
-            const clock = sinon.useFakeTimers();
-
-            assert.doesNotThrow(() => {
-               instance.onEndCommit(node, data);
-            });
-
-            sinon.assert.calledWithExactly(
-               instance._agent.onEndCommit,
-               node,
-               data
-            );
-            try {
-               clock.tick(0);
-            } catch (error) {
-               assert.equal(error, 'test error');
-            }
-
-            clock.restore();
-         });
       });
 
       describe('saveChildren', function() {
@@ -179,34 +121,6 @@ define([
                children
             );
          });
-
-         it('should catch error from the agent and rethrow it after timeout', function() {
-            const children = [
-               {
-                  value: 123
-               }
-            ];
-            instance._agent = {
-               saveChildren: sandbox.stub().throws('test error')
-            };
-            const clock = sinon.useFakeTimers();
-
-            assert.doesNotThrow(() => {
-               instance.saveChildren(children);
-            });
-
-            sinon.assert.calledWithExactly(
-               instance._agent.saveChildren,
-               children
-            );
-            try {
-               clock.tick(0);
-            } catch (error) {
-               assert.equal(error, 'test error');
-            }
-
-            clock.restore();
-         });
       });
 
       describe('onStartLifecycle', function() {
@@ -234,32 +148,6 @@ define([
                instance._agent.onStartLifecycle,
                node
             );
-         });
-
-         it('should catch error from the agent and rethrow it after timeout', function() {
-            const node = {
-               value: 123
-            };
-            instance._agent = {
-               onStartLifecycle: sandbox.stub().throws('test error')
-            };
-            const clock = sinon.useFakeTimers();
-
-            assert.doesNotThrow(() => {
-               instance.onStartLifecycle(node);
-            });
-
-            sinon.assert.calledWithExactly(
-               instance._agent.onStartLifecycle,
-               node
-            );
-            try {
-               clock.tick(0);
-            } catch (error) {
-               assert.equal(error, 'test error');
-            }
-
-            clock.restore();
          });
       });
 
@@ -289,32 +177,6 @@ define([
                node
             );
          });
-
-         it('should catch error from the agent and rethrow it after timeout', function() {
-            const node = {
-               value: 123
-            };
-            instance._agent = {
-               onEndLifecycle: sandbox.stub().throws('test error')
-            };
-            const clock = sinon.useFakeTimers();
-
-            assert.doesNotThrow(() => {
-               instance.onEndLifecycle(node);
-            });
-
-            sinon.assert.calledWithExactly(
-               instance._agent.onEndLifecycle,
-               node
-            );
-            try {
-               clock.tick(0);
-            } catch (error) {
-               assert.equal(error, 'test error');
-            }
-
-            clock.restore();
-         });
       });
 
       describe('onStartSync', function() {
@@ -333,26 +195,6 @@ define([
 
             sinon.assert.calledWithExactly(instance._agent.onStartSync, 1);
          });
-
-         it('should catch error from the agent and rethrow it after timeout', function() {
-            instance._agent = {
-               onStartSync: sandbox.stub().throws('test error')
-            };
-            const clock = sinon.useFakeTimers();
-
-            assert.doesNotThrow(() => {
-               instance.onStartSync(1);
-            });
-
-            sinon.assert.calledWithExactly(instance._agent.onStartSync, 1);
-            try {
-               clock.tick(0);
-            } catch (error) {
-               assert.equal(error, 'test error');
-            }
-
-            clock.restore();
-         });
       });
 
       describe('onEndSync', function() {
@@ -370,26 +212,6 @@ define([
             instance.onEndSync(1);
 
             sinon.assert.calledWithExactly(instance._agent.onEndSync, 1);
-         });
-
-         it('should catch error from the agent and rethrow it after timeout', function() {
-            instance._agent = {
-               onEndSync: sandbox.stub().throws('test error')
-            };
-            const clock = sinon.useFakeTimers();
-
-            assert.doesNotThrow(() => {
-               instance.onEndSync(1);
-            });
-
-            sinon.assert.calledWithExactly(instance._agent.onEndSync, 1);
-            try {
-               clock.tick(0);
-            } catch (error) {
-               assert.equal(error, 'test error');
-            }
-
-            clock.restore();
          });
       });
 

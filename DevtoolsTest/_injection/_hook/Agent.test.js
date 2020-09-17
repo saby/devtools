@@ -8,7 +8,7 @@ define([
    'Extension/Utils/guid',
    'injection/_devtool/globalChannel',
    'DevtoolsTest/getJSDOM'
-], function(
+], function (
    Agent,
    elementsConst,
    hookUtils,
@@ -50,8 +50,8 @@ define([
 
    function waitForMessageHandler(callback) {
       return new Promise((resolve) => {
-         setTimeout(function() {
-            setTimeout(function() {
+         setTimeout(function () {
+            setTimeout(function () {
                callback();
                resolve();
             });
@@ -59,8 +59,8 @@ define([
       });
    }
 
-   describe('injection/_hook/Agent', function() {
-      before(async function() {
+   describe('injection/_hook/Agent', function () {
+      before(async function () {
          if (needJSDOM) {
             const { JSDOM } = await getJSDOM();
             const dom = new JSDOM('');
@@ -73,7 +73,7 @@ define([
          }
       });
 
-      after(function() {
+      after(function () {
          if (needJSDOM) {
             delete global.document;
             delete global.window;
@@ -84,16 +84,16 @@ define([
          }
       });
 
-      beforeEach(function() {
+      beforeEach(function () {
          sandbox = sinon.createSandbox();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          sandbox.restore();
       });
 
       let instance;
-      beforeEach(function() {
+      beforeEach(function () {
          instance = new Agent({
             logger: {
                error: sandbox.stub()
@@ -101,16 +101,16 @@ define([
          });
       });
 
-      afterEach(function() {
+      afterEach(function () {
          instance.mutationObserver.disconnect();
          instance.channel.destructor();
          globalChannel.getGlobalChannel().removeAllListeners();
          instance = undefined;
       });
 
-      describe('event handlers', function() {
-         describe('devtoolsClosed', function() {
-            it('should disable highlighter and set isDevtoolsOpened to false', function() {
+      describe('event handlers', function () {
+         describe('devtoolsClosed', function () {
+            it('should disable highlighter and set isDevtoolsOpened to false', function () {
                sandbox.stub(instance.highlighter, 'stopSelectingFromPage');
                instance.isDevtoolsOpened = true;
 
@@ -125,8 +125,8 @@ define([
             });
          });
 
-         describe('devtoolsInitialized', function() {
-            it('should send all elements to devtools through the hook', function() {
+         describe('devtoolsInitialized', function () {
+            it('should send all elements to devtools through the hook', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                instance.elements.set(0, {
@@ -185,7 +185,7 @@ define([
                });
             });
 
-            it('should not send elements to devtools', function() {
+            it('should not send elements to devtools', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                instance.elements.set(0, {
@@ -213,8 +213,8 @@ define([
             });
          });
 
-         describe('inspectElement', function() {
-            it("should send event with the 'not-found' type because the element doesn't exist", function() {
+         describe('inspectElement', function () {
+            it("should send event with the 'not-found' type because the element doesn't exist", function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
 
@@ -244,7 +244,7 @@ define([
                });
             });
 
-            it('should send all information about the element through the hook and remember the state', function() {
+            it('should send all information about the element through the hook and remember the state', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
@@ -368,7 +368,7 @@ define([
                });
             });
 
-            it('should send all information about the element through the hook', function() {
+            it('should send all information about the element through the hook', function () {
                const container = document.createElement('div');
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
@@ -439,7 +439,7 @@ define([
                });
             });
 
-            it("should only send information about the tabs, without data, because there're no expanded tabs", function() {
+            it("should only send information about the tabs, without data, because there're no expanded tabs", function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
@@ -549,7 +549,7 @@ define([
                });
             });
 
-            it('should send information about changes only from the expanded tabs (options, state) and remember the state', function() {
+            it('should send information about changes only from the expanded tabs (options, state) and remember the state', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
@@ -658,7 +658,7 @@ define([
                });
             });
 
-            it('should send information about changes only from the expanded tabs (attributes)', function() {
+            it('should send information about changes only from the expanded tabs (attributes)', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
@@ -749,7 +749,7 @@ define([
                });
             });
 
-            it('should send information from dehydrated path', function() {
+            it('should send information from dehydrated path', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const container = document.createElement('div');
@@ -816,8 +816,8 @@ define([
             });
          });
 
-         describe('viewTemplate', function() {
-            it('should store template of the node in window.__WASABY_DEV_HOOK__.__template', function() {
+         describe('viewTemplate', function () {
+            it('should store template of the node in window.__WASABY_DEV_HOOK__.__template', function () {
                stubWasabyDevHook();
                const template = () => {};
                instance.elements.set(0, {
@@ -834,7 +834,7 @@ define([
                });
             });
 
-            it("should not throw when the node doesn't exist", function() {
+            it("should not throw when the node doesn't exist", function () {
                stubWasabyDevHook();
 
                postMessage('viewTemplate', 0);
@@ -848,8 +848,8 @@ define([
             });
          });
 
-         describe('viewConstructor', function() {
-            it('should store constructor of the node in window.__WASABY_DEV_HOOK__.__constructor', function() {
+         describe('viewConstructor', function () {
+            it('should store constructor of the node in window.__WASABY_DEV_HOOK__.__constructor', function () {
                stubWasabyDevHook();
                const constructor = () => {};
                instance.elements.set(0, {
@@ -871,7 +871,7 @@ define([
                });
             });
 
-            it("should not throw when the node doesn't have an instance", function() {
+            it("should not throw when the node doesn't have an instance", function () {
                stubWasabyDevHook();
                instance.elements.set(0, {
                   options: {}
@@ -887,7 +887,7 @@ define([
                });
             });
 
-            it("should not throw when the node doesn't exist", function() {
+            it("should not throw when the node doesn't exist", function () {
                stubWasabyDevHook();
 
                postMessage('viewConstructor', 0);
@@ -901,8 +901,8 @@ define([
             });
          });
 
-         describe('viewContainer', function() {
-            it('should store container of the node in window.__WASABY_DEV_HOOK__.__container', function() {
+         describe('viewContainer', function () {
+            it('should store container of the node in window.__WASABY_DEV_HOOK__.__container', function () {
                stubWasabyDevHook();
                const container = document.createElement('div');
                instance.elements.set(0, {
@@ -922,7 +922,7 @@ define([
                });
             });
 
-            it("should not throw when the node doesn't exist", function() {
+            it("should not throw when the node doesn't exist", function () {
                stubWasabyDevHook();
 
                postMessage('viewContainer', 0);
@@ -936,8 +936,8 @@ define([
             });
          });
 
-         describe('storeAsGlobal', function() {
-            it('should store value in window.$tmp and console.log about it', function() {
+         describe('storeAsGlobal', function () {
+            it('should store value in window.$tmp and console.log about it', function () {
                stubWasabyDevHook();
                sandbox.stub(console, 'log');
                const value = {
@@ -967,8 +967,8 @@ define([
             });
          });
 
-         describe('getSelectedItem', function() {
-            it('should take the first node in the elements Map and fire setSelectedItem event', function() {
+         describe('getSelectedItem', function () {
+            it('should take the first node in the elements Map and fire setSelectedItem event', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                instance.elements.set(0, {
@@ -990,7 +990,7 @@ define([
                });
             });
 
-            it('should find control node by the element', function() {
+            it('should find control node by the element', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                const element = document.createElement('div');
@@ -1016,7 +1016,7 @@ define([
                });
             });
 
-            it('should not do anything if getSelectedItem was called two times in a row with one id', function() {
+            it('should not do anything if getSelectedItem was called two times in a row with one id', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                instance.idClosestToPreviousSelectedElement = 0;
@@ -1035,7 +1035,7 @@ define([
                });
             });
 
-            it("should not do anything if there're no nodes", function() {
+            it("should not do anything if there're no nodes", function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
 
@@ -1053,8 +1053,8 @@ define([
             });
          });
 
-         describe('viewFunctionSource', function() {
-            it('should store the function in window.__WASABY_DEV_HOOK__.__function', function() {
+         describe('viewFunctionSource', function () {
+            it('should store the function in window.__WASABY_DEV_HOOK__.__function', function () {
                stubWasabyDevHook();
                const dataLoadCallback = () => {};
                instance.elements.set(0, {
@@ -1079,7 +1079,7 @@ define([
                });
             });
 
-            it('should store the event handler in window.__WASABY_DEV_HOOK__.__function', function() {
+            it('should store the event handler in window.__WASABY_DEV_HOOK__.__function', function () {
                stubWasabyDevHook();
                const container = document.createElement('div');
                const onClick = () => {};
@@ -1124,8 +1124,8 @@ define([
             });
          });
 
-         describe('highlightElement', function() {
-            it('should reset the highlight because the event was fired without id', function() {
+         describe('highlightElement', function () {
+            it('should reset the highlight because the event was fired without id', function () {
                sandbox.stub(instance.highlighter, 'highlightElement');
 
                postMessage('highlightElement');
@@ -1137,7 +1137,7 @@ define([
                });
             });
 
-            it("should reset the highlight because the node doesn't exist", function() {
+            it("should reset the highlight because the node doesn't exist", function () {
                sandbox.stub(instance.highlighter, 'highlightElement');
 
                postMessage('highlightElement', 0);
@@ -1149,7 +1149,7 @@ define([
                });
             });
 
-            it("should reset the highlight because the node doesn't have a container", function() {
+            it("should reset the highlight because the node doesn't have a container", function () {
                sandbox.stub(instance.highlighter, 'highlightElement');
 
                postMessage('highlightElement', 0);
@@ -1165,7 +1165,7 @@ define([
                });
             });
 
-            it('should highlight the node', function() {
+            it('should highlight the node', function () {
                sandbox.stub(instance.highlighter, 'highlightElement');
 
                postMessage('highlightElement', 0);
@@ -1186,8 +1186,8 @@ define([
             });
          });
 
-         describe('toggleSelectFromPage', function() {
-            it('should start selecting from the page', function() {
+         describe('toggleSelectFromPage', function () {
+            it('should start selecting from the page', function () {
                sandbox.stub(instance.highlighter, 'startSelectingFromPage');
 
                postMessage('toggleSelectFromPage', true);
@@ -1199,7 +1199,7 @@ define([
                });
             });
 
-            it('should stop selecting from the page', function() {
+            it('should stop selecting from the page', function () {
                sandbox.stub(instance.highlighter, 'stopSelectingFromPage');
 
                postMessage('toggleSelectFromPage', false);
@@ -1212,8 +1212,8 @@ define([
             });
          });
 
-         describe('toggleProfiling', function() {
-            it('should cleanup mutation observer and fire new profiling status', function() {
+         describe('toggleProfiling', function () {
+            it('should cleanup mutation observer and fire new profiling status', function () {
                sandbox.stub(instance.channel, 'dispatch');
                sandbox.stub(instance.dirtyContainers, 'clear');
                sandbox.stub(instance.dirtyControls, 'clear');
@@ -1234,7 +1234,7 @@ define([
                });
             });
 
-            it('should clear internal fields used for profiling, save base durations, cleanup mutation observer and fire new profiling status', function() {
+            it('should clear internal fields used for profiling, save base durations, cleanup mutation observer and fire new profiling status', function () {
                sandbox.stub(instance.channel, 'dispatch');
                sandbox.stub(instance.changedNodesBySynchronization, 'clear');
                sandbox.stub(instance.initialIdToDuration, 'clear');
@@ -1282,8 +1282,8 @@ define([
             });
          });
 
-         describe('getProfilingData', function() {
-            it('should transform the profiling data to a serializable representation, then clean it up and fire profilingData event with it', function() {
+         describe('getProfilingData', function () {
+            it('should transform the profiling data to a serializable representation, then clean it up and fire profilingData event with it', function () {
                sandbox.stub(instance.channel, 'dispatch');
                sandbox.stub(instance.initialIdToDuration, 'clear');
                sandbox.stub(instance.changedNodesBySynchronization, 'clear');
@@ -1350,8 +1350,8 @@ define([
             });
          });
 
-         describe('getProfilingStatus', function() {
-            it('should fire profilingStatus event with false', function() {
+         describe('getProfilingStatus', function () {
+            it('should fire profilingStatus event with false', function () {
                sandbox.stub(instance.channel, 'dispatch');
                instance.isProfiling = false;
 
@@ -1366,7 +1366,7 @@ define([
                });
             });
 
-            it('should fire profilingStatus event with true', function() {
+            it('should fire profilingStatus event with true', function () {
                sandbox.stub(instance.channel, 'dispatch');
                instance.isProfiling = true;
 
@@ -1382,8 +1382,8 @@ define([
             });
          });
 
-         describe('setBreakpoint', function() {
-            it('should collect event handlers and store necessary data in window.__WASABY_DEV_HOOK__._breakpoints', function() {
+         describe('setBreakpoint', function () {
+            it('should collect event handlers and store necessary data in window.__WASABY_DEV_HOOK__._breakpoints', function () {
                stubWasabyDevHook();
                const firstContainer = document.createElement('div');
                const firstInstance = {
@@ -1479,8 +1479,8 @@ define([
          });
       });
 
-      describe('onStartSync', function() {
-         it('should initialize state for the root (add it to the stack and changedRoots)', function() {
+      describe('onStartSync', function () {
+         it('should initialize state for the root (add it to the stack and changedRoots)', function () {
             sandbox.stub(UserTimingAPIUtils, 'startSyncMark');
             sandbox.stub(instance.mutationObserver, 'observe');
 
@@ -1492,7 +1492,7 @@ define([
             sinon.assert.calledWithExactly(UserTimingAPIUtils.startSyncMark, 0);
          });
 
-         it('should initialize state for the root and start observing', function() {
+         it('should initialize state for the root and start observing', function () {
             sandbox.stub(UserTimingAPIUtils, 'startSyncMark');
             sandbox.stub(instance.mutationObserver, 'observe');
             instance.isProfiling = true;
@@ -1514,7 +1514,7 @@ define([
             sinon.assert.calledWithExactly(UserTimingAPIUtils.startSyncMark, 0);
          });
 
-         it('should put the root on top of the rootStack if onStartSync was called multiple times with multiple roots without calling endSync', function() {
+         it('should put the root on top of the rootStack if onStartSync was called multiple times with multiple roots without calling endSync', function () {
             instance.onStartSync(0);
 
             assert.deepEqual(instance.rootStack, [0]);
@@ -1544,17 +1544,20 @@ define([
          });
       });
 
-      describe('onStartCommit', function() {
-         it("should throw because there're no roots in progress", function() {
-            assert.throws(() => {
-               instance.onStartCommit(
-                  OperationType.CREATE,
-                  'Controls/Application'
-               );
-            }, 'Trying to change nonexistent root');
+      describe('onStartCommit', function () {
+         it("should throw because there're no roots in progress", function () {
+            instance.onStartCommit(
+               OperationType.CREATE,
+               'Controls/Application'
+            );
+
+            assert.equal(
+               instance.logger.error.firstCall.args[0].message,
+               'Trying to change nonexistent root'
+            );
          });
 
-         it('should log error because startCommit for the node was called several times in a row without calling endCommit', function() {
+         it('should log error because startCommit for the node was called several times in a row without calling endCommit', function () {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = 3;
@@ -1595,20 +1598,6 @@ define([
                               },
                               operation: OperationType.CREATE
                            }
-                        ],
-                        [
-                           -1,
-                           {
-                              node: {
-                                 id: -1,
-                                 name: 'Controls/Application',
-                                 selfStartTime: currentTime,
-                                 selfDuration: 0,
-                                 treeDuration: 0,
-                                 containers: undefined
-                              },
-                              operation: OperationType.CREATE
-                           }
                         ]
                      ])
                   ]
@@ -1620,16 +1609,11 @@ define([
                0,
                OperationType.CREATE
             );
-            sinon.assert.calledWithExactly(
-               UserTimingAPIUtils.startMark,
-               'Controls/Application',
-               -1,
-               OperationType.CREATE
-            );
-            assert.deepEqual(instance.componentsStack, [0, -1]);
+            sinon.assert.calledOnce(UserTimingAPIUtils.startMark);
+            assert.deepEqual(instance.componentsStack, [0]);
          });
 
-         it('should generate id for the node and save information about it on the current root', function() {
+         it('should generate id for the node and save information about it on the current root', function () {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = 3;
@@ -1675,7 +1659,7 @@ define([
             assert.deepEqual(instance.componentsStack, [0]);
          });
 
-         it('should update the time for the node if onStartCommit was called for it several times during one synchronization', function() {
+         it('should update the time for the node if onStartCommit was called for it several times during one synchronization', function () {
             const oldVNode = {};
             instance.vNodeToId.set(oldVNode, 0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
@@ -1739,7 +1723,7 @@ define([
             assert.deepEqual(instance.componentsStack, [0]);
          });
 
-         it('should update the selfStartTime for the node if onStartCommit was called for it several times during one synchronization', function() {
+         it('should update the selfStartTime for the node if onStartCommit was called for it several times during one synchronization', function () {
             const oldVNode = {
                vnode: {}
             };
@@ -1805,7 +1789,7 @@ define([
             assert.deepEqual(instance.componentsStack, [0]);
          });
 
-         it('should not set a container for an instance without it', function() {
+         it('should not set a container for an instance without it', function () {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = 3;
@@ -1852,7 +1836,7 @@ define([
          });
 
          // TODO: какой-то левый тест
-         it('should take container from instance.idToContainers (control has an instance)', function() {
+         it('should take container from instance.idToContainers (control has an instance)', function () {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = 3;
@@ -1901,7 +1885,7 @@ define([
             assert.deepEqual(instance.componentsStack, [0]);
          });
 
-         it('should take container from instance.idToContainers (control doesnt have an instance)', function() {
+         it('should take container from instance.idToContainers (control doesnt have an instance)', function () {
             sandbox.stub(getNodeId, 'default').returns(0);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
             const currentTime = 3;
@@ -1951,46 +1935,51 @@ define([
          });
       });
 
-      describe('onEndCommit', function() {
-         it("should throw because there're no roots in progress", function() {
-            const node = {
+      describe('onEndCommit', function () {
+         it("should throw because there're no roots in progress", function () {
+            instance.onEndCommit({
                type: 'div',
                key: '_'
-            };
+            });
 
-            assert.throws(() => {
-               instance.onEndCommit(node);
-            }, 'Trying to change nonexistent root');
+            assert.equal(
+               instance.logger.error.firstCall.args[0].message,
+               'Trying to change nonexistent root'
+            );
          });
 
-         it("should throw because there're no nodes on the stack", function() {
-            const node = {
-               type: 'div',
-               key: '_'
-            };
+         it("should throw because there're no nodes on the stack", function () {
             instance.rootStack.push(0);
             instance.changedRoots.set(0, new Map());
 
-            assert.throws(() => {
-               instance.onEndCommit(node);
-            }, "There're no nodes in progress");
-         });
-
-         it("should throw because the last node on the stack doesn't exist in the current root", function() {
-            const node = {
+            instance.onEndCommit({
                type: 'div',
                key: '_'
-            };
+            });
+
+            assert.equal(
+               instance.logger.error.firstCall.args[0].message,
+               "Trying to commit a node, but there's no uncommitted nodes."
+            );
+         });
+
+         it("should throw because the last node on the stack doesn't exist in the current root", function () {
             instance.rootStack.push(0);
             instance.changedRoots.set(0, new Map());
             instance.componentsStack.push(0);
 
-            assert.throws(() => {
-               instance.onEndCommit(node);
-            }, 'Trying to change nonexistent node');
+            instance.onEndCommit({
+               type: 'div',
+               key: '_'
+            });
+
+            assert.equal(
+               instance.logger.error.firstCall.args[0].message,
+               "Trying to commit a node with the id: 0, but the node with this id doesn't exist in the current root."
+            );
          });
 
-         it('should save information about the node, update selfDuration, add parentId', function() {
+         it('should save information about the node, update selfDuration, add parentId', function () {
             const node = {
                type: 'div',
                key: '_'
@@ -2046,7 +2035,7 @@ define([
             assert.deepEqual(instance.componentsStack, []);
          });
 
-         it("should update treeDuration of the node's parent", function() {
+         it("should update treeDuration of the node's parent", function () {
             const node = {
                type: 'div',
                key: '_'
@@ -2124,7 +2113,7 @@ define([
             assert.deepEqual(instance.idToParentId, new Map([[1, 0]]));
          });
 
-         it("should update treeDuration and selfDuration of the node's parent", function() {
+         it("should update treeDuration and selfDuration of the node's parent", function () {
             const node = {
                type: 'div',
                key: '_'
@@ -2197,7 +2186,7 @@ define([
             assert.deepEqual(instance.idToParentId, new Map([[1, 0]]));
          });
 
-         it('should set unusedReceivedState and asyncControl to true', function() {
+         it('should set unusedReceivedState and asyncControl to true', function () {
             const node = {
                key: '_'
             };
@@ -2262,7 +2251,7 @@ define([
             assert.isFalse(instance.controlsWithReceivedStates.has('_'));
          });
 
-         it("should not set unusedReceivedState because the control doesn't have an instance", function() {
+         it("should not set unusedReceivedState because the control doesn't have an instance", function () {
             const node = {
                key: '_'
             };
@@ -2317,7 +2306,7 @@ define([
             assert.deepEqual(instance.changedRoots, expectedChangedRoots);
          });
 
-         it('should not set unusedReceivedState because this is not a create operation', function() {
+         it('should not set unusedReceivedState because this is not a create operation', function () {
             const node = {
                key: '_'
             };
@@ -2379,7 +2368,7 @@ define([
             assert.isTrue(instance.controlsWithReceivedStates.has('_'));
          });
 
-         it("should not set unusedReceivedState because this control doesn't have receivedState (but still should set asyncControl to true)", function() {
+         it("should not set unusedReceivedState because this control doesn't have receivedState (but still should set asyncControl to true)", function () {
             const node = {
                key: '_'
             };
@@ -2441,7 +2430,7 @@ define([
             assert.deepEqual(instance.changedRoots, expectedChangedRoots);
          });
 
-         it('should add ref to the node', function() {
+         it('should add ref to the node', function () {
             const generatedRef = () => {};
             const childRef = () => {};
             const node = {
@@ -2515,7 +2504,7 @@ define([
             );
          });
 
-         it('should not add ref to the node (child is a template node)', function() {
+         it('should not add ref to the node (child is a template node)', function () {
             const childRef = () => {};
             const node = {
                type: 'TemplateNode',
@@ -2554,7 +2543,7 @@ define([
             sinon.assert.notCalled(ContainerHandling.getRef);
          });
 
-         it('should not add ref to the node (child is a control node)', function() {
+         it('should not add ref to the node (child is a control node)', function () {
             const childRef = () => {};
             const node = {
                type: 'TemplateNode',
@@ -2593,7 +2582,7 @@ define([
             sinon.assert.notCalled(ContainerHandling.getRef);
          });
 
-         it('should not update container of the control', function() {
+         it('should not update container of the control', function () {
             const node = {
                controlClass: () => {},
                key: '_'
@@ -2624,7 +2613,7 @@ define([
             sinon.assert.notCalled(ContainerHandling.updateContainer);
          });
 
-         it('should update container of the control because it has element', function() {
+         it('should update container of the control because it has element', function () {
             const element = document.createElement('div');
             const node = {
                controlClass: () => {},
@@ -2665,7 +2654,7 @@ define([
             );
          });
 
-         it('should update container of the control because it has element. Also should pass the old container to the updateContainer function', function() {
+         it('should update container of the control because it has element. Also should pass the old container to the updateContainer function', function () {
             const element = document.createElement('div');
             const node = {
                controlClass: () => {},
@@ -2708,7 +2697,7 @@ define([
             );
          });
 
-         it('should proxy element property of the control node because it has markup', function() {
+         it('should proxy element property of the control node because it has markup', function () {
             const node = {
                controlClass: () => {},
                key: '_',
@@ -2754,7 +2743,7 @@ define([
             );
          });
 
-         it("should proxy element property of the control node because it has markup. Then shouldn't call updateContainer the second time, because it would be with the same container", function() {
+         it("should proxy element property of the control node because it has markup. Then shouldn't call updateContainer the second time, because it would be with the same container", function () {
             const node = {
                controlClass: () => {},
                key: '_',
@@ -2804,7 +2793,7 @@ define([
             sinon.assert.calledOnce(ContainerHandling.updateContainer);
          });
 
-         it('should proxy element property of the control node because it has markup. Then should call updateContainer the second time, because it would be with a new container', function() {
+         it('should proxy element property of the control node because it has markup. Then should call updateContainer the second time, because it would be with a new container', function () {
             const node = {
                controlClass: () => {},
                key: '_',
@@ -2864,7 +2853,7 @@ define([
             sinon.assert.calledTwice(ContainerHandling.updateContainer);
          });
 
-         it("should not update container of the template because it doesn't have any children", function() {
+         it("should not update container of the template because it doesn't have any children", function () {
             const node = {
                type: 'TemplateNode',
                key: '_'
@@ -2896,21 +2885,21 @@ define([
          });
       });
 
-      describe('saveChildren', function() {
+      describe('saveChildren', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Agent({
                logger: {
                   error: sandbox.stub()
                }
             });
          });
-         afterEach(function() {
+         afterEach(function () {
             instance.channel.destructor();
             instance = undefined;
          });
 
-         it('should not change vNodeToParentId because saveChildren was called with undefined', function() {
+         it('should not change vNodeToParentId because saveChildren was called with undefined', function () {
             sandbox.stub(instance.vNodeToParentId, 'set');
 
             instance.saveChildren(undefined);
@@ -2918,7 +2907,7 @@ define([
             sinon.assert.notCalled(instance.vNodeToParentId.set);
          });
 
-         it('should save the node in vNodeToParentId (the node is a control node)', function() {
+         it('should save the node in vNodeToParentId (the node is a control node)', function () {
             instance.rootStack.push(0);
             instance.componentsStack.push(0);
             instance.changedRoots.set(
@@ -2943,7 +2932,7 @@ define([
             assert.equal(instance.vNodeToParentId.get(child), 0);
          });
 
-         it('should save the node in vNodeToParentId (the node is a template node)', function() {
+         it('should save the node in vNodeToParentId (the node is a template node)', function () {
             instance.rootStack.push(0);
             instance.componentsStack.push(0);
             instance.changedRoots.set(
@@ -2968,7 +2957,7 @@ define([
             assert.equal(instance.vNodeToParentId.get(child), 0);
          });
 
-         it('should save the node in vNodeToParentId (the node is inside children property)', function() {
+         it('should save the node in vNodeToParentId (the node is inside children property)', function () {
             instance.rootStack.push(0);
             instance.componentsStack.push(0);
             instance.changedRoots.set(
@@ -2995,7 +2984,7 @@ define([
             assert.equal(instance.vNodeToParentId.get(child), 0);
          });
 
-         it('should save every node in vNodeToParentId', function() {
+         it('should save every node in vNodeToParentId', function () {
             instance.rootStack.push(0);
             instance.componentsStack.push(0);
             instance.changedRoots.set(
@@ -3029,8 +3018,8 @@ define([
          });
       });
 
-      describe('onStartLifecycle', function() {
-         it("should log error because the node with this id doesn't exist", function() {
+      describe('onStartLifecycle', function () {
+         it("should log error because the node with this id doesn't exist", function () {
             const node = {};
             instance.vNodeToId.set(node, 1);
 
@@ -3038,11 +3027,11 @@ define([
 
             assert.equal(
                instance.logger.error.firstCall.args[0].message,
-               "Can't find the node with this id"
+               'Trying to mark the start of a lifecycle method of a node that was not changed during this synchronization. Node id: 1.'
             );
          });
 
-         it('should put the node on the stack and update its selfStartTime', function() {
+         it('should put the node on the stack and update its selfStartTime', function () {
             const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'startMark');
@@ -3137,8 +3126,8 @@ define([
          });
       });
 
-      describe('onEndLifecycle', function() {
-         it("should log error because the node with this id doesn't exist", function() {
+      describe('onEndLifecycle', function () {
+         it("should log error because the node with this id doesn't exist", function () {
             const node = {};
             instance.vNodeToId.set(node, 1);
 
@@ -3146,11 +3135,11 @@ define([
 
             assert.equal(
                instance.logger.error.firstCall.args[0].message,
-               "Can't find the node with this id"
+               'Trying to mark the end of a lifecycle method of a node that was not changed during this synchronization. Node id: 1.'
             );
          });
 
-         it('should remove the node from the stack and update selfDuration', function() {
+         it('should remove the node from the stack and update selfDuration', function () {
             const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
@@ -3228,7 +3217,7 @@ define([
             assert.deepEqual(instance.componentsStack, []);
          });
 
-         it('should remove the node from the stack, update selfDuration and update treeDuration and selfDuration of its parent', function() {
+         it('should remove the node from the stack, update selfDuration and update treeDuration and selfDuration of its parent', function () {
             const currentTime = 3;
             sandbox.stub(performance, 'now').returns(currentTime);
             sandbox.stub(UserTimingAPIUtils, 'endMark');
@@ -3304,8 +3293,8 @@ define([
          });
       });
 
-      describe('onEndSync', function() {
-         describe('should apply every basic operation (create, update, delete) and correctly update state', function() {
+      describe('onEndSync', function () {
+         describe('should apply every basic operation (create, update, delete) and correctly update state', function () {
             let removedContainer;
             let addedContainer;
             let expectedElements;
@@ -3402,7 +3391,7 @@ define([
                });
             });
 
-            it('without notifying devtools', function() {
+            it('without notifying devtools', function () {
                instance.onEndSync(0);
 
                assert.deepEqual(instance.elements, expectedElements);
@@ -3416,7 +3405,7 @@ define([
                assert.equal(instance.instanceToId.get(secondInstance), 1);
             });
 
-            it('should notify devtools', function() {
+            it('should notify devtools', function () {
                stubWasabyDevHook();
                sandbox
                   .stub(guid, 'guid')
@@ -3476,16 +3465,16 @@ define([
             });
          });
 
-         it("should log error because the root doesn't exist", function() {
+         it("should log error because the root doesn't exist", function () {
             instance.onEndSync(0);
 
             assert.equal(
                instance.logger.error.firstCall.args[0].message,
-               'Trying to change nonexistent root'
+               'The synchronization for the root with the id: 0 was never started.'
             );
          });
 
-         it('should add the profiling data', function() {
+         it('should add the profiling data', function () {
             sandbox.stub(instance.mutationObserver, 'disconnect');
             sandbox
                .stub(guid, 'guid')
@@ -3581,7 +3570,7 @@ define([
             sinon.assert.calledOnce(instance.mutationObserver.disconnect);
          });
 
-         it('should pass parentId to the frontend when a node gets added and devtools are opened', function() {
+         it('should pass parentId to the frontend when a node gets added and devtools are opened', function () {
             stubWasabyDevHook();
             sandbox
                .stub(guid, 'guid')
@@ -3680,7 +3669,7 @@ define([
             delete window.__WASABY_DEV_HOOK__;
          });
 
-         it("should convert children's vNodes to children's ids and cleanup the idToChildrenVNodes", function() {
+         it("should convert children's vNodes to children's ids and cleanup the idToChildrenVNodes", function () {
             stubWasabyDevHook();
             sandbox
                .stub(guid, 'guid')
@@ -3783,7 +3772,7 @@ define([
             delete window.__WASABY_DEV_HOOK__;
          });
 
-         it('TBD', function() {
+         it('TBD', function () {
             stubWasabyDevHook();
             sandbox
                .stub(guid, 'guid')
@@ -3882,7 +3871,7 @@ define([
             delete window.__WASABY_DEV_HOOK__;
          });
 
-         it('should add the node if a new node was added with the wrong operation', function() {
+         it('should add the node if a new node was added with the wrong operation', function () {
             stubWasabyDevHook();
             sandbox
                .stub(guid, 'guid')
@@ -3946,7 +3935,7 @@ define([
             delete window.__WASABY_DEV_HOOK__;
          });
 
-         it('should remove children of the node when it gets deleted', function() {
+         it('should remove children of the node when it gets deleted', function () {
             instance.idToParentId.set(1, 0);
             instance.idToParentId.set(2, 1);
             instance.idToParentId.set(3, 0);
@@ -4040,7 +4029,7 @@ define([
             delete window.__WASABY_DEV_HOOK__;
          });
 
-         it('should remove the node and its children if it got deleted without message', function() {
+         it('should remove the node and its children if it got deleted without message', function () {
             instance.idToParentId.set(1, 0);
             instance.idToParentId.set(2, 1);
             instance.idToParentId.set(3, 0);
@@ -4128,8 +4117,8 @@ define([
          });
       });
 
-      describe('selectByDomNode', function() {
-         it('should fire stopSelectFromPage event', function() {
+      describe('selectByDomNode', function () {
+         it('should fire stopSelectFromPage event', function () {
             sandbox.stub(hookUtils, 'findControlByDomNode').returns(undefined);
             sandbox.stub(instance.channel, 'dispatch');
 
@@ -4141,7 +4130,7 @@ define([
             );
          });
 
-         it('should fire setSelectedItem event with the id of the control', function() {
+         it('should fire setSelectedItem event with the id of the control', function () {
             sandbox.stub(hookUtils, 'findControlByDomNode').returns({
                id: 123
             });
@@ -4157,8 +4146,8 @@ define([
          });
       });
 
-      describe('mutationObserverCallback', function() {
-         it('should mark container and every control on it as dirty', function() {
+      describe('mutationObserverCallback', function () {
+         it('should mark container and every control on it as dirty', function () {
             const mutations = [
                {
                   target: document.body
@@ -4175,7 +4164,7 @@ define([
             assert.deepEqual(instance.dirtyControls, new Set([0, 1]));
          });
 
-         it('should not process the container multiple times if it gets changed multiple times during one synchronization', function() {
+         it('should not process the container multiple times if it gets changed multiple times during one synchronization', function () {
             sandbox.spy(instance.dirtyContainers, 'add');
             const mutations = [
                {
@@ -4195,7 +4184,7 @@ define([
             sinon.assert.calledOnce(instance.dirtyContainers.add);
          });
 
-         it('should climb the DOM-tree up until it finds the closest control', function() {
+         it('should climb the DOM-tree up until it finds the closest control', function () {
             const parent = document.createElement('div');
             const child = document.createElement('div');
             parent.appendChild(child);
@@ -4220,8 +4209,8 @@ define([
          });
       });
 
-      describe('start with profiling', function() {
-         it('should read received states', function() {
+      describe('start with profiling', function () {
+         it('should read received states', function () {
             window.__WASABY_START_PROFILING = true;
             window.receivedStates = '{"_":{"value":123},"_0_":true}';
 

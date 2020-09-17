@@ -3,6 +3,7 @@ import {
    IControlChanges,
    IControlNode,
    ITemplateChanges,
+   ITemplateNode,
    IWasabyElement
 } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
@@ -17,9 +18,9 @@ type Breakpoint = [
 
 export interface IWasabyDevHook {
    onStartCommit: (
-      typeOfOperation: OperationType,
+      operation: OperationType,
       name: string,
-      oldNode?: object
+      oldNode?: IControlNode | ITemplateNode
    ) => void;
    onStartLifecycle: (node: IControlNode) => void;
    onEndCommit: (
