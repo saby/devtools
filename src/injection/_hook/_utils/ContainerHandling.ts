@@ -94,7 +94,6 @@ export function updateContainer(
 
    const parentId = idToParentId.get(id);
    if (typeof parentId !== 'undefined') {
-      // TODO: тут часто можно останавливать всплытие, если у одного родителя не изменился контейнер, то у всех остальных тоже не изменится
       updateContainer(
          idToContainers,
          idToParentId,

@@ -42,6 +42,7 @@ import {
 import { dehydrateHelper } from './dehydrate';
 import { getValueByPath } from 'Extension/Utils/getValueByPath';
 import { IInspectedElement, InspectedPathsMap } from 'Types/ElementInspection';
+import ErrorWrapper from './_utils/ErrorWrapper';
 
 export interface IChangedNode {
    node: IBackendControlNode;
@@ -222,12 +223,16 @@ class Agent {
       IBackendControlNode['id']
    > = new WeakMap();
 
+   private errorWrapper: ErrorWrapper;
+
    constructor(config: { logger: INamedLogger }) {
+      this.logger = config.logger;
+      this.errorWrapper = new ErrorWrapper(this.logger);
+      this.wrapPublicMethods();
       getGlobalChannel().addListener(
          GlobalMessages.devtoolsClosed,
          this.onDevtoolsClosed.bind(this)
       );
-      this.logger = config.logger;
       this.channel.addListener(
          'devtoolsInitialized',
          this.onDevtoolsOpened.bind(this)
@@ -286,6 +291,18 @@ class Agent {
             this.logger.error(new Error("Can't read received states"));
          }
       }
+   }
+
+   private wrapPublicMethods(): void {
+      this.onStartCommit = this.errorWrapper.wrapFunction(this.onStartCommit);
+      this.onEndCommit = this.errorWrapper.wrapFunction(this.onEndCommit);
+      this.saveChildren = this.errorWrapper.wrapFunction(this.saveChildren);
+      this.onStartLifecycle = this.errorWrapper.wrapFunction(
+         this.onStartLifecycle
+      );
+      this.onEndLifecycle = this.errorWrapper.wrapFunction(this.onEndLifecycle);
+      this.onStartSync = this.errorWrapper.wrapFunction(this.onStartSync);
+      this.onEndSync = this.errorWrapper.wrapFunction(this.onEndSync);
    }
 
    private onDevtoolsOpened(): void {
@@ -497,14 +514,18 @@ class Agent {
    }
 
    private getCurrentNode(): IChangedNode {
-      const currentRoot = this.getCurrentRoot();
       if (this.componentsStack.length === 0) {
-         throw new Error("There're no nodes in progress");
+         throw new Error(
+            "Trying to commit a node, but there's no uncommitted nodes."
+         );
       }
+      const currentRoot = this.getCurrentRoot();
       const id = this.componentsStack[this.componentsStack.length - 1];
       const changedNode = currentRoot.get(id);
       if (!changedNode) {
-         throw new Error('Trying to change nonexistent node');
+         throw new Error(
+            `Trying to commit a node with the id: ${id}, but the node with this id doesn't exist in the current root.`
+         );
       }
       return changedNode;
    }
@@ -570,7 +591,9 @@ class Agent {
          startMark(changedNode.node.name, changedNode.node.id);
          this.componentsStack.push(changedNode.node.id);
       } else {
-         this.logger.error(new Error("Can't find the node with this id"));
+         throw new Error(
+            `Trying to mark the start of a lifecycle method of a node that was not changed during this synchronization. Node id: ${id}.`
+         );
       }
    }
 
@@ -595,15 +618,18 @@ class Agent {
 
          this.componentsStack.pop();
       } else {
-         this.logger.error(new Error("Can't find the node with this id"));
+         throw new Error(
+            `Trying to mark the end of a lifecycle method of a node that was not changed during this synchronization. Node id: ${id}.`
+         );
       }
    }
 
    onEndSync(rootId: number): void {
       const changes = this.changedRoots.get(rootId);
       if (!changes) {
-         this.logger.error(new Error('Trying to change nonexistent root'));
-         return;
+         throw new Error(
+            `The synchronization for the root with the id: ${rootId} was never started.`
+         );
       }
       endSyncMark(rootId);
       if (this.isProfiling) {
@@ -646,6 +672,7 @@ class Agent {
       }
       this.changedRoots.delete(rootId);
       this.rootStack.splice(this.rootStack.indexOf(rootId), 1);
+      this.errorWrapper.resetErrors();
    }
 
    private handleAdd(node: IBackendControlNode): void {
@@ -1110,12 +1137,9 @@ class Agent {
          } else if (this.vNodeToId.has(node.vnode)) {
             return this.vNodeToId.get(node.vnode) as number;
          } else {
-            this.logger.error(
-               new Error(
-                  'startCommit for this node was called several times in a row without calling endCommit.'
-               )
+            throw new Error(
+               'startCommit for this node was called several times in a row without calling endCommit.'
             );
-            return -1;
          }
       }
       return getNodeId();
