@@ -1,4 +1,4 @@
-<Layout.Browser
+<Layout.browsers:Browser
     filterButtonSource="{{ _filterButtonSource }}"
     filter="{{ _filter }}"
     on:filterChanged="_onFilterChanged()"
@@ -51,4 +51,4 @@
             </Controls.explorer:View>
         </Controls.scroll:Container>
     </ws:content>
-</Layout.Browser>
+</Layout.browsers:Browser>

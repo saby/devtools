@@ -16,7 +16,7 @@
                                         fontSize="l"
                                         fontColorStyle="secondary"
                                         attr:class="devtools-Debugging__header" />
-                <Layout.Browser source="{{ _unselectedSource }}"
+                <Layout.browsers:Browser source="{{ _unselectedSource }}"
                                 keyProperty="id"
                                 searchParam="title"
                                 markerVisibility="hidden"
@@ -39,14 +39,14 @@
                             </Controls.list:View>
                         </Controls.scroll:Container>
                     </ws:content>
-                </Layout.Browser>
+                </Layout.browsers:Browser>
             </div>
             <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }}">
                 <Controls.heading:Title caption="Unminified modules"
                                         fontSize="l"
                                         fontColorStyle="secondary"
                                         attr:class="devtools-Debugging__header" />
-                <Layout.Browser source="{{ _selectedSource }}"
+                <Layout.browsers:Browser source="{{ _selectedSource }}"
                                 keyProperty="id"
                                 searchParam="title"
                                 markerVisibility="hidden"
@@ -70,7 +70,7 @@
                             </Controls.list:View>
                         </Controls.scroll:Container>
                     </ws:content>
-                </Layout.Browser>
+                </Layout.browsers:Browser>
             </div>
         </div>
     </ws:content>
