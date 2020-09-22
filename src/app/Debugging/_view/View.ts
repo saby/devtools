@@ -1,6 +1,6 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import { Memory } from 'Types/source';
-import { adapter, Record } from 'Types/entity';
+import { adapter, Record as EntityRecord } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
 import { Confirmation } from 'Controls/popup';
 import { View as ListView } from 'Controls/list';
@@ -13,8 +13,10 @@ import {
    INavigationPageSourceConfig
 } from 'Controls/interface';
 import * as template from 'wml!Debugging/_view/View';
+import { getArrayDifference } from 'Controls/Utils/ArraySimpleValuesUtil';
 import Cookie = chrome.cookies.Cookie;
 import Tab = chrome.tabs.Tab;
+import CookieChangeInfo = chrome.cookies.CookieChangeInfo;
 
 const AVAILABLE_COOKIE_SPACE = 4096;
 const WS_CORE_MODULES = [
@@ -42,12 +44,15 @@ interface IItem {
  */
 class View extends Control<IControlOptions, void[]> {
    protected _template: TemplateFunction = template;
+   protected _hasUnsavedChanges: boolean = false;
    protected _unselectedSource: Memory;
    protected _selectedSource: Memory;
    protected _unselectedSearchValue: string = '';
    protected _selectedSearchValue: string = '';
    protected _sorting: object = [{ isPinned: 'DESC' }, { title: 'ASC' }];
-   protected _selectedItems: RecordSet;
+   private unselectedItems: RecordSet;
+   protected _unselectedItemsReadyCallback: (items: RecordSet) => void;
+   private selectedItems: RecordSet;
    protected _selectedItemsReadyCallback: (items: RecordSet) => void;
    protected _unselectedActions: IItemAction[] = [
       {
@@ -122,7 +127,10 @@ class View extends Control<IControlOptions, void[]> {
 
    protected async _beforeMount(): Promise<void> {
       this._selectedItemsReadyCallback = (items) => {
-         this._selectedItems = items;
+         this.selectedItems = items;
+      };
+      this._unselectedItemsReadyCallback = (items) => {
+         this.unselectedItems = items;
       };
       const [modules, url, pinnedModules]: [
          string[],
@@ -175,49 +183,18 @@ class View extends Control<IControlOptions, void[]> {
          data: selectedModules,
          filter: View.sourceFilter
       });
+
+      this.onCookieChange = this.onCookieChange.bind(this);
+      chrome.cookies.onChanged.addListener(this.onCookieChange);
    }
 
-   protected async _applyChanges(): Promise<void> {
-      const url = await this.getUrl();
-      const selectedKeys = this._selectedItems
-         .getRawData()
-         .map((elem: { id: string }) => elem.id);
-      if (selectedKeys.length) {
-         const availableSpace = await this.getAvailableCookieSpace(url);
-         if (availableSpace === 0) {
-            return View.openPopup();
-         }
+   protected _beforeUnmount(): void {
+      chrome.cookies.onChanged.removeListener(this.onCookieChange);
+   }
 
-         let currentSize = 0;
-
-         for (let i = 0; i < selectedKeys.length; i++) {
-            const value = selectedKeys[i];
-            const length = i === 0 ? value.length : value.length + 1;
-
-            if (currentSize + length <= availableSpace) {
-               currentSize += length;
-            } else {
-               return View.openPopup();
-            }
-         }
-
-         chrome.cookies.set(
-            {
-               name: 's3debug',
-               url,
-               value: selectedKeys.join(',')
-            },
-            chrome.devtools.inspectedWindow.reload
-         );
-      } else {
-         chrome.cookies.remove(
-            {
-               name: 's3debug',
-               url
-            },
-            chrome.devtools.inspectedWindow.reload
-         );
-      }
+   protected _reloadPage(): void {
+      this._hasUnsavedChanges = false;
+      chrome.devtools.inspectedWindow.reload({});
    }
 
    protected async _resetCookie(): Promise<void> {
@@ -227,13 +204,13 @@ class View extends Control<IControlOptions, void[]> {
             name: 's3debug',
             url
          },
-         chrome.devtools.inspectedWindow.reload
+         this._reloadPage
       );
    }
 
    protected _itemActionVisibilityCallback(
       action: IItemAction,
-      item: Record
+      item: EntityRecord
    ): boolean {
       switch (action.id) {
          case 'pin':
@@ -245,11 +222,10 @@ class View extends Control<IControlOptions, void[]> {
       }
    }
 
-   protected async _moveItems(
+   protected async _changeCookie(
       e: Event,
-      sourceSource: Memory,
-      targetSource: Memory,
-      item: Record
+      action: 'add' | 'delete',
+      item: EntityRecord
    ): Promise<void> {
       const itemKey = item.get('id');
       let items;
@@ -260,22 +236,151 @@ class View extends Control<IControlOptions, void[]> {
       } else {
          items = [itemKey];
       }
-      await sourceSource.destroy(items);
-      await Promise.all(
-         items.map((elem) =>
-            targetSource.update(
-               new Record({
-                  rawData: {
-                     id: elem,
-                     title: elem,
-                     isPinned: this.pinnedModules.has(elem)
-                  }
-               })
-            )
+
+      const url = await this.getUrl();
+      const cookieValue = await this.getCookieValue(url);
+      const newModules = new Set(
+         cookieValue.split(',').filter((value) => value.length !== 0)
+      );
+      items.forEach((id) => newModules[action](id));
+
+      if (newModules.size !== 0) {
+         const availableSpace = await this.getAvailableCookieSpace(url);
+         if (availableSpace === 0) {
+            return View.openPopup();
+         }
+         const newValue = Array.from(newModules);
+
+         let currentSize = 0;
+
+         for (let i = 0; i < newValue.length; i++) {
+            const value = newValue[i];
+            const length = i === 0 ? value.length : value.length + 1; // + 1 is used to account for ,
+
+            if (currentSize + length <= availableSpace) {
+               currentSize += length;
+            } else {
+               return View.openPopup();
+            }
+         }
+
+         chrome.cookies.set({
+            name: 's3debug',
+            url,
+            value: newValue.join(',')
+         });
+      } else {
+         chrome.cookies.remove({
+            name: 's3debug',
+            url
+         });
+      }
+   }
+
+   private async onCookieChange(changeInfo: CookieChangeInfo): Promise<void> {
+      if (changeInfo.cookie.name !== 's3debug') {
+         return;
+      }
+      this._hasUnsavedChanges = true;
+      if (changeInfo.removed) {
+         if (
+            this.selectedItems.getCount() === 0 ||
+            changeInfo.cause === 'overwrite'
+         ) {
+            return;
+         }
+         const unselectedItemsNames: string[] =
+            changeInfo.cookie.value === 'true'
+               ? this.selectedItems.getRawData().map(({ id }: IItem) => id)
+               : changeInfo.cookie.value.split(',');
+
+         await this.moveItems(
+            this._selectedSource,
+            this._unselectedSource,
+            unselectedItemsNames
+         );
+
+         await Promise.all([
+            this._children.unselectedList.reload(),
+            this._children.selectedList.reload()
+         ]);
+      } else {
+         const newValue = changeInfo.cookie.value;
+
+         if (newValue === 'true') {
+            this._unselectedSource = new Memory({
+               keyProperty: 'id',
+               data: [],
+               filter: View.sourceFilter
+            });
+
+            this._selectedSource = new Memory({
+               keyProperty: 'id',
+               data: this.unselectedItems
+                  .getRawData()
+                  .concat(this.selectedItems.getRawData()),
+               filter: View.sourceFilter
+            });
+         } else {
+            const newSelectedModules = newValue
+               .split(',')
+               .filter((value) => value.length !== 0);
+
+            const currentSelectedModules: Array<
+               IItem['id']
+            > = this.selectedItems.getRawData().map(({ id }: IItem) => id);
+
+            const diff = getArrayDifference(
+               currentSelectedModules,
+               newSelectedModules
+            );
+
+            const operations = [];
+
+            operations.push(
+               this.moveItems(
+                  this._unselectedSource,
+                  this._selectedSource,
+                  diff.added
+               )
+            );
+
+            operations.push(
+               this.moveItems(
+                  this._selectedSource,
+                  this._unselectedSource,
+                  diff.removed
+               )
+            );
+
+            await Promise.all(operations);
+
+            await Promise.all([
+               this._children.unselectedList.reload(),
+               this._children.selectedList.reload()
+            ]);
+         }
+      }
+   }
+
+   private async moveItems(
+      sourceSource: Memory,
+      targetSource: Memory,
+      items: Array<IItem['id']>
+   ): Promise<void> {
+      const operations = items.map((elem) =>
+         targetSource.update(
+            new EntityRecord({
+               rawData: {
+                  id: elem,
+                  title: elem,
+                  isPinned: this.pinnedModules.has(elem)
+               }
+            })
          )
       );
-      this._children.unselectedList.reload();
-      this._children.selectedList.reload();
+      operations.push(sourceSource.destroy(items));
+      await Promise.all(operations);
    }
 
    private getUrl(): Promise<string> {
@@ -345,7 +450,7 @@ class View extends Control<IControlOptions, void[]> {
    }
 
    private togglePin(
-      item: Record,
+      item: EntityRecord,
       state: boolean,
       source: Memory,
       list: ListView
