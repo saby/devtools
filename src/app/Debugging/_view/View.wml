@@ -1,22 +1,25 @@
 <Devtool.Layout.Browser>
     <ws:headTemplate>
-        <Controls.buttons:Button tooltip="Apply changes and reload the page"
-                                 caption="Apply"
-                                 buttonStyle="primary"
-                                 attr:class="devtools-Debugging__headElement"
-                                 on:click="_applyChanges()" />
         <Controls.buttons:Button tooltip="Remove s3debug cookie and reload the page"
                                  caption="Reset"
+                                 attr:class="devtools-Debugging__headElement"
                                  on:click="_resetCookie()" />
+        <ws:if data="{{ _hasUnsavedChanges }}">
+            <Controls.buttons:Button caption="You have unsaved changes. Click here to reload the page and apply them."
+                                     buttonStyle="secondary"
+                                     viewMode="link"
+                                     on:click="_reloadPage()" />
+        </ws:if>
     </ws:headTemplate>
     <ws:content>
         <div class="devtools-Debugging">
-            <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }}">
+            <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }} ws-flexbox ws-flex-column">
                 <Controls.heading:Title caption="Minified modules"
                                         fontSize="l"
                                         fontColorStyle="secondary"
                                         attr:class="devtools-Debugging__header" />
-                <Layout.browsers:Browser source="{{ _unselectedSource }}"
+                <Layout.browsers:Browser
+                                source="{{ _unselectedSource }}"
                                 keyProperty="id"
                                 searchParam="title"
                                 markerVisibility="hidden"
@@ -31,8 +34,9 @@
                             <Controls.list:View name="unselectedList"
                                                 itemActions="{{ _unselectedActions }}"
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
+                                                itemsReadyCallback="{{ _unselectedItemsReadyCallback }}"
                                                 navigation="{{ _navigation }}"
-                                                on:itemClick="_moveItems(_unselectedSource, _selectedSource)">
+                                                on:itemClick="_changeCookie('add')">
                                 <ws:virtualScrollConfig pageSize="{{ 50 }}" />
                                 <ws:itemTemplate>
                                     <ws:partial template="Controls/list:ItemTemplate"
@@ -43,12 +47,13 @@
                     </ws:content>
                 </Layout.browsers:Browser>
             </div>
-            <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }}">
+            <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }} ws-flexbox ws-flex-column">
                 <Controls.heading:Title caption="Unminified modules"
                                         fontSize="l"
                                         fontColorStyle="secondary"
                                         attr:class="devtools-Debugging__header" />
-                <Layout.browsers:Browser source="{{ _selectedSource }}"
+                <Layout.browsers:Browser
+                                source="{{ _selectedSource }}"
                                 keyProperty="id"
                                 searchParam="title"
                                 markerVisibility="hidden"
@@ -65,7 +70,7 @@
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
                                                 itemsReadyCallback="{{ _selectedItemsReadyCallback }}"
                                                 navigation="{{ _navigation }}"
-                                                on:itemClick="_moveItems(_selectedSource, _unselectedSource)">
+                                                on:itemClick="_changeCookie('delete')">
                                 <ws:virtualScrollConfig pageSize="{{ 50 }}"/>
                                 <ws:itemTemplate>
                                     <ws:partial template="Controls/list:ItemTemplate"

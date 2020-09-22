@@ -3,8 +3,9 @@ define([
    'Debugging/_view/View',
    'Types/entity',
    'Types/collection',
+   'Types/source',
    'Controls/popup'
-], function(mockChrome, View, entityLib, collectionLib, popupLib) {
+], function (mockChrome, View, entityLib, collectionLib, sourceLib, popupLib) {
    let sandbox;
    let instance;
    View = View.default;
@@ -12,43 +13,74 @@ define([
    const RecordSet = collectionLib.RecordSet;
    const Model = entityLib.Model;
    const Record = entityLib.Record;
+   const Memory = sourceLib.Memory;
 
-   describe('Debugging/_view/View', function() {
-      beforeEach(function() {
+   describe('Debugging/_view/View', function () {
+      function stubTabURL(url) {
+         sandbox
+            .stub(chrome.tabs, 'get')
+            .withArgs(chrome.devtools.inspectedWindow.tabId)
+            .callsArgWith(1, {
+               url
+            });
+      }
+
+      function stubContentsModules(modules) {
+         sandbox
+            .stub(chrome.devtools.inspectedWindow, 'eval')
+            .withArgs('contents ? Object.keys(contents.modules) : []')
+            .callsArgWith(1, modules);
+      }
+
+      function stubCookieValue(value, url) {
+         sandbox
+            .stub(chrome.cookies, 'get')
+            .withArgs({
+               name: 's3debug',
+               url
+            })
+            .callsArgWith(
+               1,
+               value
+                  ? {
+                       value
+                    }
+                  : value
+            );
+      }
+
+      function stubCookiesGetAll(cookies, url) {
+         sandbox
+            .stub(chrome.cookies, 'getAll')
+            .withArgs({
+               url
+            })
+            .callsArgWith(1, cookies);
+      }
+
+      function stubPinnedModules(value) {
+         sandbox
+            .stub(chrome.storage.sync, 'get')
+            .withArgs('debuggingPinnedModules')
+            .callsArgWith(1, value);
+      }
+
+      beforeEach(function () {
          sandbox = sinon.createSandbox();
          instance = new View();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          sandbox.restore();
       });
 
-      describe('_beforeMount', function() {
-         it('should select all modules if s3debug=true', async function() {
+      describe('_beforeMount', function () {
+         it('should select all modules if s3debug=true', async function () {
             const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.devtools.inspectedWindow, 'eval')
-               .withArgs('contents ? Object.keys(contents.modules) : []')
-               .callsArgWith(1, ['Controls', 'UI', 'Core']);
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'get')
-               .withArgs({
-                  name: 's3debug',
-                  url
-               })
-               .callsArgWith(1, {
-                  value: 'true'
-               });
-            sandbox
-               .stub(chrome.storage.sync, 'get')
-               .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, {});
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('true', url);
+            stubPinnedModules({});
 
             await instance._beforeMount();
 
@@ -72,31 +104,12 @@ define([
             ]);
          });
 
-         it('should select all modules from s3debug', async function() {
+         it('should select all modules from s3debug', async function () {
             const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.devtools.inspectedWindow, 'eval')
-               .withArgs('contents ? Object.keys(contents.modules) : []')
-               .callsArgWith(1, ['Controls', 'UI', 'Core']);
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'get')
-               .withArgs({
-                  name: 's3debug',
-                  url
-               })
-               .callsArgWith(1, {
-                  value: 'Controls,UI,Core'
-               });
-            sandbox
-               .stub(chrome.storage.sync, 'get')
-               .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, {});
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('Controls,UI,Core', url);
+            stubPinnedModules({});
 
             await instance._beforeMount();
 
@@ -120,31 +133,12 @@ define([
             ]);
          });
 
-         it('should not add an empty module to selected keys', async function() {
+         it('should not add an empty module to selected keys', async function () {
             const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.devtools.inspectedWindow, 'eval')
-               .withArgs('contents ? Object.keys(contents.modules) : []')
-               .callsArgWith(1, ['Controls', 'UI', 'Core']);
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'get')
-               .withArgs({
-                  name: 's3debug',
-                  url
-               })
-               .callsArgWith(1, {
-                  value: ''
-               });
-            sandbox
-               .stub(chrome.storage.sync, 'get')
-               .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, {});
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('', url);
+            stubPinnedModules({});
 
             await instance._beforeMount();
 
@@ -168,29 +162,12 @@ define([
             assert.deepEqual(instance._selectedSource.data, []);
          });
 
-         it('should not fail if the cookie is not set', async function() {
+         it('should not fail if the cookie is not set', async function () {
             const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.devtools.inspectedWindow, 'eval')
-               .withArgs('contents ? Object.keys(contents.modules) : []')
-               .callsArgWith(1, ['Controls', 'UI', 'Core']);
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'get')
-               .withArgs({
-                  name: 's3debug',
-                  url
-               })
-               .callsArgWith(1, null);
-            sandbox
-               .stub(chrome.storage.sync, 'get')
-               .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, {});
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue(null, url);
+            stubPinnedModules({});
 
             await instance._beforeMount();
 
@@ -214,33 +191,14 @@ define([
             assert.deepEqual(instance._selectedSource.data, []);
          });
 
-         it('should correctly set isPinned for modules from s3debug', async function() {
+         it('should correctly set isPinned for modules from s3debug', async function () {
             const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.devtools.inspectedWindow, 'eval')
-               .withArgs('contents ? Object.keys(contents.modules) : []')
-               .callsArgWith(1, ['Controls', 'UI', 'Core']);
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'get')
-               .withArgs({
-                  name: 's3debug',
-                  url
-               })
-               .callsArgWith(1, {
-                  value: 'Controls,UI,Core'
-               });
-            sandbox
-               .stub(chrome.storage.sync, 'get')
-               .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, {
-                  debuggingPinnedModules: ['UI']
-               });
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('Controls,UI,Core', url);
+            stubPinnedModules({
+               debuggingPinnedModules: ['UI']
+            });
 
             await instance._beforeMount();
 
@@ -264,33 +222,14 @@ define([
             ]);
          });
 
-         it('should correctly set isPinned if s3debug=true', async function() {
+         it('should correctly set isPinned if s3debug=true', async function () {
             const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.devtools.inspectedWindow, 'eval')
-               .withArgs('contents ? Object.keys(contents.modules) : []')
-               .callsArgWith(1, ['Controls', 'UI', 'Core']);
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'get')
-               .withArgs({
-                  name: 's3debug',
-                  url
-               })
-               .callsArgWith(1, {
-                  value: 'true'
-               });
-            sandbox
-               .stub(chrome.storage.sync, 'get')
-               .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, {
-                  debuggingPinnedModules: ['UI']
-               });
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('true', url);
+            stubPinnedModules({
+               debuggingPinnedModules: ['UI']
+            });
 
             await instance._beforeMount();
 
@@ -312,31 +251,41 @@ define([
                   isPinned: false
                }
             ]);
+         });
+
+         it('should add listener for cookies.onChanged', async function () {
+            const url = 'https://online.sbis.ru';
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('true', url);
+            stubPinnedModules({});
+            const boundCallback = sandbox.stub();
+            sandbox
+               .stub(instance.onCookieChange, 'bind')
+               .withArgs(instance)
+               .returns(boundCallback);
+            sandbox.stub(chrome.cookies.onChanged, 'addListener');
+
+            await instance._beforeMount();
+
+            sinon.assert.calledWithExactly(
+               chrome.cookies.onChanged.addListener,
+               boundCallback
+            );
          });
       });
 
-      describe('_moveItems', function() {
-         it('should remove the item from the unselected source and add it to the selected source', async function() {
-            instance._children = {
-               unselectedList: {
-                  reload: sandbox.stub()
-               },
-               selectedList: {
-                  reload: sandbox.stub()
-               }
-            };
-            instance._unselectedSource = {
-               destroy: sandbox.stub()
-            };
-            instance._selectedSource = {
-               update: sandbox.stub()
-            };
-            instance.pinnedModules = new Set();
+      describe('_changeCookie', function () {
+         it('should add a new module to the cookie', async function () {
+            const url = 'https://online.sbis.ru';
+            stubTabURL(url);
+            stubCookieValue(null, url);
+            stubCookiesGetAll([], url);
+            sandbox.stub(chrome.cookies, 'set');
 
-            await instance._moveItems(
+            await instance._changeCookie(
                {},
-               instance._unselectedSource,
-               instance._selectedSource,
+               'add',
                new Record({
                   rawData: {
                      id: 'UI',
@@ -346,42 +295,32 @@ define([
                })
             );
 
-            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
-               'UI'
-            ]);
-            assert.deepEqual(
-               instance._selectedSource.update.firstCall.args[0].getRawData(),
-               {
-                  id: 'UI',
-                  title: 'UI',
-                  isPinned: false
-               }
-            );
-            sinon.assert.calledOnce(instance._children.unselectedList.reload);
-            sinon.assert.calledOnce(instance._children.selectedList.reload);
+            sinon.assert.calledWithExactly(chrome.cookies.set, {
+               name: 's3debug',
+               value: 'UI',
+               url
+            });
          });
 
-         it('should remove the item from the selected source and add it to the unselected source', async function() {
-            instance._children = {
-               unselectedList: {
-                  reload: sandbox.stub()
-               },
-               selectedList: {
-                  reload: sandbox.stub()
-               }
-            };
-            instance._unselectedSource = {
-               update: sandbox.stub()
-            };
-            instance._selectedSource = {
-               destroy: sandbox.stub()
-            };
-            instance.pinnedModules = new Set();
+         it('should remove a module from the cookie', async function () {
+            const url = 'https://online.sbis.ru';
+            stubTabURL(url);
+            stubCookieValue('UI,Controls', url);
+            stubCookiesGetAll(
+               [
+                  {
+                     name: 's3debug',
+                     value: 'UI,Controls',
+                     url
+                  }
+               ],
+               url
+            );
+            sandbox.stub(chrome.cookies, 'set');
 
-            await instance._moveItems(
+            await instance._changeCookie(
                {},
-               instance._selectedSource,
-               instance._unselectedSource,
+               'delete',
                new Record({
                   rawData: {
                      id: 'UI',
@@ -391,47 +330,62 @@ define([
                })
             );
 
-            assert.deepEqual(
-               instance._unselectedSource.update.firstCall.args[0].getRawData(),
-               {
-                  id: 'UI',
-                  title: 'UI',
-                  isPinned: false
-               }
-            );
-            sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
-               'UI'
-            ]);
-            sinon.assert.calledOnce(instance._children.unselectedList.reload);
-            sinon.assert.calledOnce(instance._children.selectedList.reload);
+            sinon.assert.calledWithExactly(chrome.cookies.set, {
+               name: 's3debug',
+               value: 'Controls',
+               url
+            });
          });
 
-         it('should remove existing WS.Core modules from the unselected source and add it to the selected source', async function() {
-            instance._children = {
-               unselectedList: {
-                  reload: sandbox.stub()
-               },
-               selectedList: {
-                  reload: sandbox.stub()
-               }
-            };
-            instance._unselectedSource = {
-               destroy: sandbox.stub()
-            };
-            instance._selectedSource = {
-               update: sandbox.stub()
-            };
+         it("should remove the cookie, because there're no selected modules left", async function () {
+            const url = 'https://online.sbis.ru';
+            stubTabURL(url);
+            stubCookieValue('UI', url);
+            stubCookiesGetAll(
+               [
+                  {
+                     name: 's3debug',
+                     value: 'UI',
+                     url
+                  }
+               ],
+               url
+            );
+            sandbox.stub(chrome.cookies, 'remove');
+
+            await instance._changeCookie(
+               {},
+               'delete',
+               new Record({
+                  rawData: {
+                     id: 'UI',
+                     title: 'UI',
+                     isPinned: false
+                  }
+               })
+            );
+
+            sinon.assert.calledWithExactly(chrome.cookies.remove, {
+               name: 's3debug',
+               url
+            });
+         });
+
+         it('should add existing WS.Core modules to the cookie', async function () {
+            const url = 'https://online.sbis.ru';
+            stubTabURL(url);
+            stubCookieValue(null, url);
+            stubCookiesGetAll([], url);
             instance.existingModules = new Set([
                'WS.Core',
                'WS.Deprecated',
                'Core'
             ]);
-            instance.pinnedModules = new Set();
+            sandbox.stub(chrome.cookies, 'set');
 
-            await instance._moveItems(
+            await instance._changeCookie(
                {},
-               instance._unselectedSource,
-               instance._selectedSource,
+               'add',
                new Record({
                   rawData: {
                      id: 'WS.Core',
@@ -441,40 +395,230 @@ define([
                })
             );
 
-            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
+            sinon.assert.calledWithExactly(chrome.cookies.set, {
+               name: 's3debug',
+               value: 'WS.Core,WS.Deprecated,Core',
+               url
+            });
+         });
+
+         it('should remove existing WS.Core modules from the cookie', async function () {
+            const url = 'https://online.sbis.ru';
+            stubTabURL(url);
+            stubCookieValue('UI,Controls,WS.Core,WS.Deprecated,Core', url);
+            stubCookiesGetAll(
+               [
+                  {
+                     name: 's3debug',
+                     value: 'UI,Controls,WS.Core,WS.Deprecated,Core',
+                     url
+                  }
+               ],
+               url
+            );
+            instance.existingModules = new Set([
                'WS.Core',
                'WS.Deprecated',
                'Core'
             ]);
-            assert.deepEqual(
-               instance._selectedSource.update.firstCall.args[0].getRawData(),
-               {
-                  id: 'WS.Core',
-                  title: 'WS.Core',
-                  isPinned: false
-               }
+            sandbox.stub(chrome.cookies, 'set');
+
+            await instance._changeCookie(
+               {},
+               'delete',
+               new Record({
+                  rawData: {
+                     id: 'WS.Core',
+                     title: 'WS.Core',
+                     isPinned: false
+                  }
+               })
             );
-            assert.deepEqual(
-               instance._selectedSource.update.secondCall.args[0].getRawData(),
-               {
-                  id: 'WS.Deprecated',
-                  title: 'WS.Deprecated',
-                  isPinned: false
-               }
-            );
-            assert.deepEqual(
-               instance._selectedSource.update.thirdCall.args[0].getRawData(),
-               {
-                  id: 'Core',
-                  title: 'Core',
-                  isPinned: false
-               }
-            );
-            sinon.assert.calledOnce(instance._children.unselectedList.reload);
-            sinon.assert.calledOnce(instance._children.selectedList.reload);
+
+            sinon.assert.calledWithExactly(chrome.cookies.set, {
+               name: 's3debug',
+               value: 'UI,Controls',
+               url
+            });
          });
 
-         it('should not lose isPinned during the move', async function() {
+         it("should show popup because the cookie doesn't fit in the available space", async function () {
+            const url = 'https://online.sbis.ru';
+            stubTabURL(url);
+            stubCookieValue('1'.repeat(4094), url);
+            stubCookiesGetAll(
+               [
+                  {
+                     name: 's3debug',
+                     value: '1'.repeat(4094),
+                     url
+                  }
+               ],
+               url
+            );
+            const popupConfig = {
+               type: 'ok',
+               style: 'danger',
+               details:
+                  'The resulting cookie will be too large and very likely will crash the page.\n' +
+                  'Consider selecting fewer modules or removing some cookies to make space.'
+            };
+            sandbox
+               .stub(Confirmation, 'openPopup')
+               .withArgs(popupConfig)
+               .resolves();
+            sandbox.stub(chrome.cookies, 'set');
+
+            await instance._changeCookie(
+               {},
+               'add',
+               new Record({
+                  rawData: {
+                     id: 'UI',
+                     title: 'UI',
+                     isPinned: false
+                  }
+               })
+            );
+
+            sinon.assert.notCalled(chrome.cookies.set);
+            sinon.assert.calledWithExactly(Confirmation.openPopup, popupConfig);
+         });
+
+         it("should show popup because there's no available space", async function () {
+            const url = 'https://online.sbis.ru';
+            stubTabURL(url);
+            stubCookieValue(null, url);
+            stubCookiesGetAll(
+               [
+                  {
+                     name: 'testCookie',
+                     value: '1'.repeat(4096),
+                     url
+                  }
+               ],
+               url
+            );
+            const popupConfig = {
+               type: 'ok',
+               style: 'danger',
+               details:
+                  'The resulting cookie will be too large and very likely will crash the page.\n' +
+                  'Consider selecting fewer modules or removing some cookies to make space.'
+            };
+            sandbox
+               .stub(Confirmation, 'openPopup')
+               .withArgs(popupConfig)
+               .resolves();
+            sandbox.stub(chrome.cookies, 'set');
+
+            await instance._changeCookie(
+               {},
+               'add',
+               new Record({
+                  rawData: {
+                     id: 'UI',
+                     title: 'UI',
+                     isPinned: false
+                  }
+               })
+            );
+
+            sinon.assert.notCalled(chrome.cookies.set);
+            sinon.assert.calledWithExactly(Confirmation.openPopup, popupConfig);
+         });
+      });
+
+      describe('onCookieChange', function () {
+         it('should not move items because another cookie was changed', async function () {
+            instance._hasUnsavedChanges = false;
+            sandbox.stub(instance, 'moveItems');
+
+            await instance.onCookieChange({
+               cookie: {
+                  name: 'testCookie'
+               }
+            });
+
+            assert.isFalse(instance._hasUnsavedChanges);
+            sinon.assert.notCalled(instance.moveItems);
+         });
+
+         it("should not move items after removal of the cookie because there's no selected items", async function () {
+            instance._hasUnsavedChanges = false;
+            sandbox.stub(instance, 'moveItems');
+            instance.selectedItems = new RecordSet({
+               rawData: []
+            });
+
+            await instance.onCookieChange({
+               cookie: {
+                  name: 's3debug'
+               },
+               removed: true,
+               cause: 'explicit'
+            });
+
+            assert.isTrue(instance._hasUnsavedChanges);
+            sinon.assert.notCalled(instance.moveItems);
+         });
+
+         it('should not move items after removal of the cookie because the cookie was overwritten by devtools', async function () {
+            instance._hasUnsavedChanges = false;
+            sandbox.stub(instance, 'moveItems');
+            instance.selectedItems = new RecordSet({
+               rawData: [
+                  {
+                     id: 'test',
+                     title: 'test',
+                     isPinned: false
+                  }
+               ]
+            });
+
+            await instance.onCookieChange({
+               cookie: {
+                  name: 's3debug'
+               },
+               removed: true,
+               cause: 'overwrite'
+            });
+
+            assert.isTrue(instance._hasUnsavedChanges);
+            sinon.assert.notCalled(instance.moveItems);
+         });
+
+         it('should move all selected items to unselected (s3debug=true)', async function () {
+            instance._hasUnsavedChanges = false;
+            const rawData = [
+               {
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               },
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
+                  isPinned: true
+               }
+            ];
+            instance.pinnedModules = new Set(['anotherTest']);
+            instance.unselectedItems = new RecordSet({
+               rawData: []
+            });
+            instance.selectedItems = new RecordSet({
+               rawData
+            });
+            instance._unselectedSource = new Memory({
+               data: [],
+               keyProperty: 'id'
+            });
+            instance._selectedSource = new Memory({
+               data: rawData,
+               keyProperty: 'id'
+            });
+            sandbox.stub(instance._unselectedSource, 'update');
+            sandbox.stub(instance._selectedSource, 'destroy');
             instance._children = {
                unselectedList: {
                   reload: sandbox.stub()
@@ -483,269 +627,262 @@ define([
                   reload: sandbox.stub()
                }
             };
-            instance._unselectedSource = {
-               destroy: sandbox.stub()
-            };
-            instance._selectedSource = {
-               update: sandbox.stub()
-            };
-            instance.pinnedModules = new Set(['UI']);
 
-            await instance._moveItems(
-               {},
-               instance._unselectedSource,
-               instance._selectedSource,
-               new Record({
-                  rawData: {
-                     id: 'UI',
-                     title: 'UI',
-                     isPinned: true
-                  }
-               })
-            );
+            await instance.onCookieChange({
+               cookie: {
+                  name: 's3debug',
+                  value: 'true'
+               },
+               removed: true,
+               cause: 'explicit'
+            });
 
-            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
-               'UI'
-            ]);
+            assert.isTrue(instance._hasUnsavedChanges);
             assert.deepEqual(
-               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               instance._unselectedSource.update.firstCall.args[0].getRawData(),
                {
-                  id: 'UI',
-                  title: 'UI',
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               }
+            );
+            assert.deepEqual(
+               instance._unselectedSource.update.secondCall.args[0].getRawData(),
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
                   isPinned: true
                }
             );
+            sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
+               'test',
+               'anotherTest'
+            ]);
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
+         });
+
+         it('should move all selected items to unselected (s3debug=string[])', async function () {
+            instance._hasUnsavedChanges = false;
+            const rawData = [
+               {
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               },
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
+                  isPinned: true
+               }
+            ];
+            instance.pinnedModules = new Set(['anotherTest']);
+            instance.unselectedItems = new RecordSet({
+               rawData: []
+            });
+            instance.selectedItems = new RecordSet({
+               rawData
+            });
+            instance._unselectedSource = new Memory({
+               data: [],
+               keyProperty: 'id'
+            });
+            instance._selectedSource = new Memory({
+               data: rawData,
+               keyProperty: 'id'
+            });
+            sandbox.stub(instance._unselectedSource, 'update');
+            sandbox.stub(instance._selectedSource, 'destroy');
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               },
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+
+            await instance.onCookieChange({
+               cookie: {
+                  name: 's3debug',
+                  value: 'test,anotherTest'
+               },
+               removed: true,
+               cause: 'explicit'
+            });
+
+            assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(
+               instance._unselectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               }
+            );
+            assert.deepEqual(
+               instance._unselectedSource.update.secondCall.args[0].getRawData(),
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
+                  isPinned: true
+               }
+            );
+            sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
+               'test',
+               'anotherTest'
+            ]);
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
+         });
+
+         it('should move all unselected items to selected (s3debug=true)', async function () {
+            instance._hasUnsavedChanges = false;
+            const rawData = [
+               {
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               },
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
+                  isPinned: true
+               }
+            ];
+            instance.pinnedModules = new Set(['anotherTest']);
+            instance.unselectedItems = new RecordSet({
+               rawData: [rawData[0]]
+            });
+            instance.selectedItems = new RecordSet({
+               rawData: [rawData[1]]
+            });
+            instance._unselectedSource = new Memory({
+               data: [],
+               keyProperty: 'id'
+            });
+            instance._selectedSource = new Memory({
+               data: rawData,
+               keyProperty: 'id'
+            });
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               },
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            const oldUnselectedSource = instance._unselectedSource;
+            const oldSelectedSource = instance._selectedSource;
+
+            await instance.onCookieChange({
+               cookie: {
+                  name: 's3debug',
+                  value: 'true'
+               },
+               removed: false,
+               cause: 'explicit'
+            });
+
+            assert.isTrue(instance._hasUnsavedChanges);
+            assert.notEqual(instance._unselectedSource, oldUnselectedSource);
+            assert.notEqual(instance._selectedSource, oldSelectedSource);
+            assert.deepEqual(instance._unselectedSource.data, []);
+            assert.deepEqual(instance._selectedSource.data, rawData);
+            sinon.assert.notCalled(instance._children.unselectedList.reload);
+            sinon.assert.notCalled(instance._children.selectedList.reload);
+         });
+
+         it('should swap items between lists', async function () {
+            instance._hasUnsavedChanges = false;
+            const rawData = [
+               {
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               },
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
+                  isPinned: true
+               }
+            ];
+            instance.pinnedModules = new Set(['anotherTest']);
+            instance.unselectedItems = new RecordSet({
+               rawData: [rawData[0]]
+            });
+            instance.selectedItems = new RecordSet({
+               rawData: [rawData[1]]
+            });
+            instance._unselectedSource = new Memory({
+               data: [],
+               keyProperty: 'id'
+            });
+            instance._selectedSource = new Memory({
+               data: rawData,
+               keyProperty: 'id'
+            });
+            sandbox.stub(instance._unselectedSource, 'update');
+            sandbox.stub(instance._unselectedSource, 'destroy');
+            sandbox.stub(instance._selectedSource, 'update');
+            sandbox.stub(instance._selectedSource, 'destroy');
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               },
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance._children = {
+               unselectedList: {
+                  reload: sandbox.stub()
+               },
+               selectedList: {
+                  reload: sandbox.stub()
+               }
+            };
+
+            await instance.onCookieChange({
+               cookie: {
+                  name: 's3debug',
+                  value: 'test'
+               },
+               removed: false,
+               cause: 'explicit'
+            });
+
+            assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(
+               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               }
+            );
+            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
+               'test'
+            ]);
+            assert.deepEqual(
+               instance._unselectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
+                  isPinned: true
+               }
+            );
+            sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
+               'anotherTest'
+            ]);
             sinon.assert.calledOnce(instance._children.unselectedList.reload);
             sinon.assert.calledOnce(instance._children.selectedList.reload);
          });
       });
 
-      describe('_applyChanges', function() {
-         it('should remove s3debug cookie', async function() {
-            instance._selectedItems = new RecordSet({
-               rawData: []
-            });
-            const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            const removeStub = sandbox.stub(chrome.cookies, 'remove');
-
-            await instance._applyChanges();
-
-            assert.isTrue(
-               removeStub.calledOnceWithExactly(
-                  {
-                     name: 's3debug',
-                     url
-                  },
-                  chrome.devtools.inspectedWindow.reload
-               )
-            );
-         });
-
-         it('should set keys as s3debug cookie value', async function() {
-            instance._selectedItems = new RecordSet({
-               rawData: [
-                  {
-                     id: 'Controls',
-                     title: 'Controls'
-                  },
-                  {
-                     id: 'UI',
-                     title: 'UI'
-                  }
-               ]
-            });
-            const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'getAll')
-               .withArgs({
-                  url
-               })
-               .callsArgWith(1, [
-                  {
-                     name: 'testCookie',
-                     value: '1234',
-                     url
-                  }
-               ]);
-            const setStub = sandbox.stub(chrome.cookies, 'set');
-
-            await instance._applyChanges();
-
-            assert.isTrue(
-               setStub.calledOnceWithExactly(
-                  {
-                     name: 's3debug',
-                     url,
-                     value: 'Controls,UI'
-                  },
-                  chrome.devtools.inspectedWindow.reload
-               )
-            );
-         });
-
-         it('should overwrite s3debug cookie value', async function() {
-            instance._selectedItems = new RecordSet({
-               rawData: [
-                  {
-                     id: 'Controls',
-                     title: 'Controls'
-                  },
-                  {
-                     id: 'UI',
-                     title: 'UI'
-                  }
-               ]
-            });
-            const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'getAll')
-               .withArgs({
-                  url
-               })
-               .callsArgWith(1, [
-                  {
-                     name: 's3debug',
-                     value: '1'.repeat(4074),
-                     url
-                  }
-               ]);
-            const setStub = sandbox.stub(chrome.cookies, 'set');
-
-            await instance._applyChanges();
-
-            assert.isTrue(
-               setStub.calledOnceWithExactly(
-                  {
-                     name: 's3debug',
-                     url,
-                     value: 'Controls,UI'
-                  },
-                  chrome.devtools.inspectedWindow.reload
-               )
-            );
-         });
-
-         it("should show popup because cookies don't fit in the available space", async function() {
-            instance._selectedItems = new RecordSet({
-               rawData: [
-                  {
-                     id: 'Controls',
-                     title: 'Controls'
-                  },
-                  {
-                     id: 'UI',
-                     title: 'UI'
-                  },
-                  {
-                     id: 'Core',
-                     title: 'Core'
-                  }
-               ]
-            });
-            const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'getAll')
-               .withArgs({
-                  url
-               })
-               .callsArgWith(1, [
-                  {
-                     name: 'testCookie',
-                     value: '1'.repeat(4074),
-                     url
-                  }
-               ]);
-            sandbox
-               .stub(Confirmation, 'openPopup')
-               .withArgs({
-                  type: 'ok',
-                  style: 'danger',
-                  details:
-                     'The resulting cookie will be too large and very likely will crash the page.' +
-                     'Consider selecting fewer modules or removing some cookies to make space.'
-               })
-               .resolves();
-
-            await instance._applyChanges();
-         });
-
-         it("should show popup because there's no available space", async function() {
-            instance._selectedItems = new RecordSet({
-               rawData: [
-                  {
-                     id: 'Controls',
-                     title: 'Controls'
-                  },
-                  {
-                     id: 'UI',
-                     title: 'UI'
-                  },
-                  {
-                     id: 'Core',
-                     title: 'Core'
-                  }
-               ]
-            });
-            const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'getAll')
-               .withArgs({
-                  url
-               })
-               .callsArgWith(1, [
-                  {
-                     name: 'testCookie',
-                     value: '1'.repeat(4096),
-                     url
-                  }
-               ]);
-            sandbox
-               .stub(Confirmation, 'openPopup')
-               .withArgs({
-                  type: 'ok',
-                  style: 'danger',
-                  details:
-                     'The resulting cookie will be too large and very likely will crash the page.\n' +
-                     'Consider selecting fewer modules or removing some cookies to make space.'
-               })
-               .resolves();
-
-            await instance._applyChanges();
-         });
-      });
-
-      describe('sourceFilter', function() {
-         it('should return true because the filter is empty', function() {
+      describe('sourceFilter', function () {
+         it('should return true because the filter is empty', function () {
             const item = new Model({
                rawData: {
                   title: 'Controls'
@@ -756,7 +893,7 @@ define([
             assert.isTrue(View.sourceFilter(item, filter));
          });
 
-         it('should return false because the item does not match the filter', function() {
+         it('should return false because the item does not match the filter', function () {
             const item = new Model({
                rawData: {
                   title: 'Controls'
@@ -769,7 +906,7 @@ define([
             assert.isFalse(View.sourceFilter(item, filter));
          });
 
-         it('should return true because the item matches the filter', function() {
+         it('should return true because the item matches the filter', function () {
             const item = new Model({
                rawData: {
                   title: 'Controls'
@@ -783,45 +920,44 @@ define([
          });
       });
 
-      describe('_selectedItemsReadyCallback', function() {
-         it('should save items on instance', async function() {
+      describe('_selectedItemsReadyCallback', function () {
+         it('should save items on instance', async function () {
             const items = new RecordSet({
                rawData: []
             });
             const url = 'https://online.sbis.ru';
-            sandbox
-               .stub(chrome.devtools.inspectedWindow, 'eval')
-               .withArgs('contents ? Object.keys(contents.modules) : []')
-               .callsArgWith(1, ['Controls', 'UI', 'Core']);
-            sandbox
-               .stub(chrome.tabs, 'get')
-               .withArgs(chrome.devtools.inspectedWindow.tabId)
-               .callsArgWith(1, {
-                  url
-               });
-            sandbox
-               .stub(chrome.cookies, 'get')
-               .withArgs({
-                  name: 's3debug',
-                  url
-               })
-               .callsArgWith(1, {
-                  value: 'true'
-               });
-            sandbox
-               .stub(chrome.storage.sync, 'get')
-               .withArgs('debuggingPinnedModules')
-               .callsArgWith(1, {});
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('true', url);
+            stubPinnedModules({});
             await instance._beforeMount();
 
             instance._selectedItemsReadyCallback(items);
 
-            assert.equal(instance._selectedItems, items);
+            assert.equal(instance.selectedItems, items);
          });
       });
 
-      describe('togglePin', function() {
-         it('should pin the item, update it in the source and reload the unselectedList', async function() {
+      describe('_unselectedItemsReadyCallback', function () {
+         it('should save items on instance', async function () {
+            const items = new RecordSet({
+               rawData: []
+            });
+            const url = 'https://online.sbis.ru';
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('true', url);
+            stubPinnedModules({});
+            await instance._beforeMount();
+
+            instance._unselectedItemsReadyCallback(items);
+
+            assert.equal(instance.unselectedItems, items);
+         });
+      });
+
+      describe('togglePin', function () {
+         it('should pin the item, update it in the source and reload the unselectedList', async function () {
             instance._children = {
                unselectedList: {
                   reload: sandbox.stub()
@@ -861,7 +997,7 @@ define([
             });
          });
 
-         it('should unpin the item, update it in the source and reload the unselectedList', async function() {
+         it('should unpin the item, update it in the source and reload the unselectedList', async function () {
             instance._children = {
                unselectedList: {
                   reload: sandbox.stub()
@@ -901,7 +1037,7 @@ define([
             });
          });
 
-         it('should pin the item, update it in the source and reload the selectedList', async function() {
+         it('should pin the item, update it in the source and reload the selectedList', async function () {
             instance._children = {
                selectedList: {
                   reload: sandbox.stub()
@@ -941,7 +1077,7 @@ define([
             });
          });
 
-         it('should unpin the item, update it in the source and reload the selectedList', async function() {
+         it('should unpin the item, update it in the source and reload the selectedList', async function () {
             instance._children = {
                selectedList: {
                   reload: sandbox.stub()
@@ -982,7 +1118,54 @@ define([
          });
       });
 
-      it('_itemActionVisibilityCallback', function() {
+      describe('_beforeUnmount', function () {
+         it('should remove listener from chrome.cookies.onChanged', function () {
+            sandbox.stub(chrome.cookies.onChanged, 'removeListener');
+
+            instance._beforeUnmount();
+
+            sinon.assert.calledWithExactly(
+               chrome.cookies.onChanged.removeListener,
+               instance.onCookieChange
+            );
+         });
+      });
+
+      describe('_reloadPage', function () {
+         it('should set _hasUnsavedChanges to false and reload the page', function () {
+            sandbox.stub(chrome.devtools.inspectedWindow, 'reload');
+            instance._hasUnsavedChanges = true;
+
+            instance._reloadPage();
+
+            assert.isFalse(instance._hasUnsavedChanges);
+            sinon.assert.calledWithExactly(
+               chrome.devtools.inspectedWindow.reload,
+               {}
+            );
+         });
+      });
+
+      describe('_resetCookie', function () {
+         it('should remove cookie and pass _reloadPage as the callback', async function () {
+            const url = 'https://online.sbis.ru';
+            stubTabURL(url);
+            sandbox.stub(chrome.cookies, 'remove');
+
+            await instance._resetCookie();
+
+            sinon.assert.calledWithExactly(
+               chrome.cookies.remove,
+               {
+                  name: 's3debug',
+                  url
+               },
+               instance._reloadPage
+            );
+         });
+      });
+
+      it('_itemActionVisibilityCallback', function () {
          const pinnedItem = new Record({
             rawData: {
                id: 'UI',
