@@ -12,25 +12,25 @@ class Extension extends Control {
    protected _template: TemplateFunction = template;
    protected _activeTab: string = 'Elements';
    protected _tabsSource: Memory = new Memory({
-      keyProperty: 'id',
+      keyProperty: 'key',
       data: [
          {
-            id: 'Elements',
+            key: 'Elements',
             title: 'Elements',
             align: 'left'
          },
          {
-            id: 'Profiler',
+            key: 'Profiler',
             title: 'Profiler',
             align: 'left'
          },
          {
-            id: 'Dependencies',
+            key: 'Dependencies',
             title: 'Dependencies',
             align: 'left'
          },
          {
-            id: 'Debugging',
+            key: 'Debugging',
             title: 'Debugging',
             align: 'left'
          }

@@ -1,22 +1,11 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { _scrollContext } from 'Controls/scroll';
 import { SyntheticEvent } from 'Vdom/Vdom';
-import template = require('wml!Devtool/Page/Application');
-
-interface IEventDetect<TOptions> extends Control<TOptions> {
-   start(ev: Event): void;
-}
-
-interface IChildren<TOptions extends IControlOptions = {}>
-   extends Record<string, Control<TOptions> | HTMLElement> {
-   scrollDetect: IEventDetect<TOptions>;
-   resizeDetect: IEventDetect<TOptions>;
-   mousemoveDetect: IEventDetect<TOptions>;
-   touchmoveDetect: IEventDetect<TOptions>;
-   touchendDetect: IEventDetect<TOptions>;
-   mousedownDetect: IEventDetect<TOptions>;
-   mouseupDetect: IEventDetect<TOptions>;
-}
+import * as template from 'wml!Devtool/Page/Application';
+import { RegisterClass } from 'Controls/event';
+import { ControllerClass } from 'Controls/dragnDrop';
+import { GlobalController, ManagerClass } from 'Controls/popup';
+import * as TouchDetector from 'Controls/Application/TouchDetectorController';
 
 interface IApplicationOptions extends IControlOptions {
    pagingVisible: unknown;
@@ -31,19 +20,40 @@ interface IApplicationOptions extends IControlOptions {
 export default class Application extends Control<IApplicationOptions> {
    protected _template: TemplateFunction = template;
    protected _scrollContext: _scrollContext;
-   _children: IChildren<IApplicationOptions>;
+   private registers: Record<string, RegisterClass> = {};
+   private dragnDropController: ControllerClass;
+   private globalPopup: GlobalController;
+   private popupManager: ManagerClass;
+   private touchDetector: TouchDetector;
+   private touchObjectContext: object;
+
    protected _beforeMount(cfg: IApplicationOptions): void {
+      this.createDragnDropController();
+      this.createGlobalPopup();
+      this.createPopupManager(cfg);
+      this.createTouchDetector();
+      this.createRegisters();
       this._scrollContext = new _scrollContext({
          pagingVisible: false
       });
    }
-   protected _afterMount(): void {
+
+   protected _afterMount(cfg: IApplicationOptions): void {
       document.body.onresize = (event: Event) => {
          this._resizePage(new SyntheticEvent(event));
       };
+      this.globalPopup.registerGlobalPopup();
+      this.popupManager.init(cfg, this._getChildContext());
    }
+
    protected _beforeUnmount(): void {
       document.body.onresize = null;
+      Object.values(this.registers).forEach((register) => {
+         register.destroy();
+      });
+      this.globalPopup.registerGlobalPopupEmpty();
+      this.popupManager.destroy();
+      this.dragnDropController.destroy();
    }
 
    protected _beforeUpdate(cfg: IApplicationOptions): void {
@@ -53,43 +63,143 @@ export default class Application extends Control<IApplicationOptions> {
       }
    }
 
+   protected _afterUpdate(cfg: IApplicationOptions): void {
+      this.popupManager.updateOptions(this._options, this._getChildContext());
+   }
+
    protected _getChildContext(): object {
       return {
-         ScrollData: this._scrollContext
+         ScrollData: this._scrollContext,
+         isTouch: this.touchObjectContext
       };
    }
 
    protected _scrollPage(ev: SyntheticEvent<Event>): void {
-      this._children.scrollDetect.start(ev);
+      this.registers.scroll.start(ev);
    }
 
    protected _resizePage(ev: SyntheticEvent<Event>): void {
-      this._children.resizeDetect.start(ev);
+      this.registers.controlResize.start(ev);
    }
 
    protected _mousemovePage(ev: SyntheticEvent<Event>): void {
-      this._children.mousemoveDetect.start(ev);
+      this.registers.mousemove.start(ev);
+      this.touchDetector.moveHandler();
+   }
+
+   protected _touchStartPage(ev: SyntheticEvent<Event>): void {
+      this.touchDetector.touchHandler();
    }
 
    protected _touchmovePage(ev: SyntheticEvent<Event>): void {
-      this._children.touchmoveDetect.start(ev);
+      this.registers.touchmove.start(ev);
    }
 
    protected _touchendPage(ev: SyntheticEvent<Event>): void {
-      this._children.touchendDetect.start(ev);
+      this.registers.touchend.start(ev);
    }
 
    protected _mousedownPage(ev: SyntheticEvent<Event>): void {
-      this._children.mousedownDetect.start(ev);
+      this.registers.mousedown.start(ev);
+      this.popupManager.mouseDownHandler(ev);
    }
 
    protected _mouseupPage(ev: SyntheticEvent<Event>): void {
-      this._children.mouseupDetect.start(ev);
+      this.registers.mouseup.start(ev);
    }
 
-    // tslint:disable-next-line:no-empty
+   // tslint:disable-next-line:no-empty
    protected _keyPressHandler(event: SyntheticEvent<Event>): void {}
 
-    // tslint:disable-next-line:no-empty
+   // tslint:disable-next-line:no-empty
    protected _suggestStateChangedHandler(event: Event): void {}
+
+   protected _registerHandler(
+      event: Event,
+      registerType: string,
+      component: Control,
+      callback: Function,
+      config: object
+   ): void {
+      if (this.registers[registerType]) {
+         this.registers[registerType].register(
+            event,
+            registerType,
+            component,
+            callback,
+            config
+         );
+         return;
+      }
+      this.dragnDropController.registerHandler(
+         event,
+         registerType,
+         component,
+         callback,
+         config
+      );
+   }
+
+   protected _unregisterHandler(
+      event: Event,
+      registerType: string,
+      component: Control,
+      config: object
+   ): void {
+      if (this.registers[registerType]) {
+         this.registers[registerType].unregister(
+            event,
+            registerType,
+            component,
+            config
+         );
+         return;
+      }
+      this.dragnDropController.unregisterHandler(
+         event,
+         registerType,
+         component,
+         config
+      );
+   }
+
+   protected _popupEventHandler(
+      event: Event,
+      action: string,
+      ...args: unknown[]
+   ): void {
+      this.popupManager.eventHandler.apply(this.popupManager, [action, args]);
+   }
+
+   private createRegisters(): void {
+      const registers = [
+         'scroll',
+         'controlResize',
+         'mousemove',
+         'mouseup',
+         'touchmove',
+         'touchend',
+         'mousedown'
+      ];
+      registers.forEach((register) => {
+         this.registers[register] = new RegisterClass({ register });
+      });
+   }
+
+   private createDragnDropController(): void {
+      this.dragnDropController = new ControllerClass();
+   }
+
+   private createGlobalPopup(): void {
+      this.globalPopup = new GlobalController();
+   }
+
+   private createPopupManager(cfg: object): void {
+      this.popupManager = new ManagerClass(cfg);
+   }
+
+   private createTouchDetector(): void {
+      this.touchDetector = new TouchDetector();
+      this.touchObjectContext = this.touchDetector.createContext();
+   }
 }

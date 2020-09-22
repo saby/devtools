@@ -56,6 +56,10 @@ const WASABY_MODULES = [
     "path": "rmi/src/client/SbisEnvUI"
   },
   {
+    "name": "SbisEnvUI-default-theme",
+    "path": "rmi/src/client/SbisEnvUI-default-theme"
+  },
+  {
     "name": "File",
     "path": "rmi/src/client/File"
   },
@@ -74,6 +78,10 @@ const WASABY_MODULES = [
   {
     "name": "UI",
     "path": "saby-ui/UI"
+  },
+  {
+    "name": "RequireJsLoader",
+    "path": "wasaby-requirejs-loader/RequireJsLoader"
   }
 ].map(({ path, ...config}) => {
   return {

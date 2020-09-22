@@ -9,24 +9,26 @@
         ispl.features.compatibleLayer = false;
 
         require([
-            'Core/app-start',
             'Controls/Application/HeadData',
             'Application/Env',
-            'Core/app-init',
-            'View/Executor/TClosure'
-        ], function(AppStart, HeadData, AppEnv, appInit) {
-            appInit();
+            'Application/Initializer'
+        ], function(HeadData, AppEnv, AppInit) {
+            require(['UI/Base'], function(UI) {
+                window.startContextData = { AppData: new UI.AppData({}) };
+                var sr = new UI.StateReceiver();
+                AppInit.default(window.wsConfig, void 0, sr);
 
-            var headData = new HeadData([], true);
-            headData.isNewEnvironment = true;
-            AppEnv.setStore('HeadData', headData);
+                var headData = new HeadData([], true);
+                headData.isNewEnvironment = true;
+                AppEnv.setStore('HeadData', headData);
 
-            require(['Devtool/PageWrapper'], (Extension) => {
-                Extension.default.createControl(
-                    Extension.default,
-                    {},
-                    document.querySelector('#root')
-                );
+                require(['Devtool/PageWrapper'], (Extension) => {
+                    Extension.default.createControl(
+                       Extension.default,
+                       {},
+                       document.querySelector('#root')
+                    );
+                });
             });
         });
     });
