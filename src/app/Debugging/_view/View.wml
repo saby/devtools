@@ -31,7 +31,9 @@
                             <Controls.list:View name="unselectedList"
                                                 itemActions="{{ _unselectedActions }}"
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
+                                                navigation="{{ _navigation }}"
                                                 on:itemClick="_moveItems(_unselectedSource, _selectedSource)">
+                                <ws:virtualScrollConfig pageSize="{{ 50 }}" />
                                 <ws:itemTemplate>
                                     <ws:partial template="Controls/list:ItemTemplate"
                                                 attr:class="{{ itemTemplate.itemData.item.isPinned ? 'devtools-Debugging__listItem' }}" />
@@ -62,7 +64,9 @@
                                                 itemActions="{{ _selectedActions }}"
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
                                                 itemsReadyCallback="{{ _selectedItemsReadyCallback }}"
+                                                navigation="{{ _navigation }}"
                                                 on:itemClick="_moveItems(_selectedSource, _unselectedSource)">
+                                <ws:virtualScrollConfig pageSize="{{ 50 }}"/>
                                 <ws:itemTemplate>
                                     <ws:partial template="Controls/list:ItemTemplate"
                                                 attr:class="{{ itemTemplate.itemData.item.isPinned ? 'devtools-Debugging__listItem' }}" />

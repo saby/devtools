@@ -21,9 +21,9 @@
             on:itemsChanged="_onItemsChanged()"
         />
     </ws:filterButton>
-    <ws:topTemplate>
+    <ws:beforeFilterTemplate>
         <ws:partial template="{{ _options.headButton }}" />
-    </ws:topTemplate>
+    </ws:beforeFilterTemplate>
     <ws:content>
         <Controls.scroll:Container
             attr:class="devtools-DependencyWatcher_Page__scroll"
@@ -38,11 +38,10 @@
                 columnScroll="{{ true }}"
                 displayProperty="name"
                 itemActions="{{ _itemActions }}"
-                virtualScrolling="{{ true }}"
-                virtualPageSize="{{ 70 }}"
                 stickyHeader="{{ true }}"
                 stickyColumnsCount="{{ 4 }}"
             >
+                <ws:virtualScrollConfig pageSize="{{ 70 }}" />
                 <ws:emptyTemplate>
                     <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
                         <ws:contentTemplate>{[Не найдено]}</ws:contentTemplate>

@@ -6,10 +6,9 @@
     columns="{{ _options.columns }}"
     header="{{ _options.headers }}"
     navigation="{{ _options.navigation }}"
-    virtualScrolling="{{ true }}"
-    virtualPageSize="{{ 70 }}"
     scope="{{ _options }}"
 >
+    <ws:virtualScrollConfig pageSize="{{ 70 }}" />
     <ws:emptyTemplate>
         <ws:partial template="Controls/list:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
             <ws:contentTemplate>{[Не найдено]}</ws:contentTemplate>

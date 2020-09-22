@@ -12,12 +12,13 @@
 </head>
 <body class="ws-is-no-touch ws-is-hover">
 <div id="root"></div>
-<script type="text/javascript" src="../resources/WS.Core/ext/requirejs/bundles.js"></script>
+<!--TODO: doesn't exist in debug builds, should be removed there -->
+<script type="text/javascript" src="../resources/bundles.js"></script>
 <!-- Подключение require -->
-<script type="text/javascript" src="../resources/WS.Core/ext/requirejs/require.js"></script>
+<script type="text/javascript" src="../resources/RequireJsLoader/require.js"></script>
 <!-- Подключение конфига для require -->
 <script type="text/javascript" src="../resources/contents.js"></script>
-<script type="text/javascript" src="../resources/WS.Core/ext/requirejs/config.js"></script>
+<script type="text/javascript" src="../resources/RequireJsLoader/config.js"></script>
 
 <!-- Запуск приложения -->
 <script type="text/javascript" src="./app-start.js"></script>

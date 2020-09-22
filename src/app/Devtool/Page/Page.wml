@@ -6,7 +6,7 @@
     <ws:if data="{{ _hasWasabyOnPage }}">
         <Controls.tabs:Buttons
                 bind:selectedKey="_activeTab"
-                keyProperty="id"
+                keyProperty="key"
                 source="{{ _tabsSource }}"
                 attr:class="devtools-Devtool_Page__tabButtons devtools-Devtool_Page__tabButtons_theme_{{ _options.theme }}"
         >
@@ -23,7 +23,7 @@
         <Controls.switchableArea:View bind:selectedKey="_activeTab">
             <ws:items>
                 <ws:Array>
-                    <ws:Object id="Elements">
+                    <ws:Object key="Elements">
                         <ws:itemTemplate>
                             <Controls.Container.Async
                                 templateName="Elements/elements:Elements"
@@ -35,7 +35,7 @@
                             </Controls.Container.Async>
                         </ws:itemTemplate>
                     </ws:Object>
-                    <ws:Object id="Profiler">
+                    <ws:Object key="Profiler">
                         <ws:itemTemplate>
                             <Controls.Container.Async
                                 templateName="Profiler/profiler:Profiler"
@@ -47,12 +47,12 @@
                             </Controls.Container.Async>
                         </ws:itemTemplate>
                     </ws:Object>
-                    <ws:Object id="Dependencies">
+                    <ws:Object key="Dependencies">
                         <ws:itemTemplate>
                             <Controls.Container.Async templateName="DependencyWatcher/main:View" />
                         </ws:itemTemplate>
                     </ws:Object>
-                    <ws:Object id="Debugging">
+                    <ws:Object key="Debugging">
                         <ws:itemTemplate>
                             <Controls.Container.Async templateName="Debugging/debugging:View" />
                         </ws:itemTemplate>

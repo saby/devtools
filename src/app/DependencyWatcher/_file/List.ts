@@ -1,16 +1,20 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-import template = require('wml!DependencyWatcher/_file/List');
+import * as template from 'wml!DependencyWatcher/_file/List';
 import { columns } from './columns';
 import { headers } from './header';
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 import { IHeaders } from '../interface/IHeaders';
 import { IColumns } from '../interface/IColumn';
+import {
+   INavigationPageSourceConfig,
+   INavigationOptionValue
+} from 'Controls/_interface/INavigation';
 
 type Sorting = Array<Partial<Record<keyof ITransportFile, 'ASC' | 'DESC'>>>;
 interface IOptions extends IControlOptions {
    columns: IColumns<ITransportFile>;
    headers: IHeaders<ITransportFile>;
-   navigation: object;
+   navigation: INavigationOptionValue<INavigationPageSourceConfig>;
    sorting: Sorting;
 }
 

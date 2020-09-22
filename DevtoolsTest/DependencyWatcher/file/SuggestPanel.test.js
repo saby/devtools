@@ -14,8 +14,7 @@ define([
                view: 'infinity',
                sourceConfig: {
                   pageSize: 50,
-                  page: 0,
-                  mode: 'totalCount'
+                  page: 0
                }
             });
          });

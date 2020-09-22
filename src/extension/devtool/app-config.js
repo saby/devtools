@@ -1,5 +1,5 @@
 window.wsConfig = {
-    compatible: false
-    // wsRoot: 'ws/',
-    // resourceRoot: 'resources/'
+    compatible: false,
+    wsRoot: 'resources/WS.Core/',
+    resourceRoot: 'resources/'
 };

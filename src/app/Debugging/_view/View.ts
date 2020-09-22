@@ -8,7 +8,11 @@ import {
    IItemAction,
    TItemActionShowType as ShowType
 } from 'Controls/itemActions';
-import template = require('wml!Debugging/_view/View');
+import {
+   INavigationOptionValue,
+   INavigationPageSourceConfig
+} from 'Controls/interface';
+import * as template from 'wml!Debugging/_view/View';
 import Cookie = chrome.cookies.Cookie;
 import Tab = chrome.tabs.Tab;
 
@@ -100,6 +104,17 @@ class View extends Control<IControlOptions, void[]> {
    protected _children: {
       unselectedList: ListView;
       selectedList: ListView;
+   };
+   protected readonly _navigation: INavigationOptionValue<
+      INavigationPageSourceConfig
+   > = {
+      source: 'page',
+      view: 'infinity',
+      sourceConfig: {
+         pageSize: 50,
+         page: 0,
+         hasMore: false
+      }
    };
 
    private existingModules: Set<string>;

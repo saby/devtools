@@ -1,41 +1,26 @@
-<Controls.event:Register name="scrollDetect" register="scroll" attr:fixCompatible="1">
-<Controls.event:Register name="resizeDetect" register="controlResize" attr:fixCompatible="1">
-<Controls.event:Register name="mousemoveDetect" register="mousemove" attr:fixCompatible="1">
-<Controls.event:Register name="mouseupDetect" register="mouseup" attr:fixCompatible="1">
-<Controls.event:Register name="touchmoveDetect" register="touchmove" attr:fixCompatible="1">
-<Controls.event:Register name="touchendDetect" register="touchend" attr:fixCompatible="1">
-<Controls.event:Register name="mousedownDetect" register="mousedown" attr:fixCompatible="1">
-    <Controls.popup:Global>
-        <Controls.popup:Manager>
-            <Controls.Application.TouchDetector name="touchDetector">
-                <Controls.dragnDrop:Controller name="dragNDropContainer">
-                    <UI.HotKeys:Dispatcher>
-                        <div
-                            on:scroll="_scrollPage()"
-                            on:resize="_resizePage()"
-                            on:mousemove="_mousemovePage()"
-                            on:touchmove="_touchmovePage()"
-                            on:touchend="_touchendPage()"
-                            on:mousedown="_mousedownPage()"
-                            on:mouseup="_mouseupPage()"
-                            on:keyPress="_keyPressHandler()"
-                            on:suggestStateChanged="_suggestStateChangedHandler()"
-                        >
-                            <ws:partial
-                                template="{{ _options.content }}"
-                                scope="{{ _options }}"
-                            />
-                            <Controls.popup:Container attr:id="popup" eventHandler="{{content._managerEventHandler}}"/>
-                        </div>
-                    </UI.HotKeys:Dispatcher>
-                </Controls.dragnDrop:Controller>
-            </Controls.Application.TouchDetector>
-        </Controls.popup:Manager>
-    </Controls.popup:Global>
-</Controls.event:Register>
-</Controls.event:Register>
-</Controls.event:Register>
-</Controls.event:Register>
-</Controls.event:Register>
-</Controls.event:Register>
-</Controls.event:Register>
+<Controls.Application.TouchDetector name="touchDetector">
+    <UI.HotKeys:Dispatcher>
+        <div
+                on:scroll="_scrollPage()"
+                on:resize="_resizePage()"
+                on:mousemove="_mousemovePage()"
+                on:touchstart="_touchStartPage()"
+                on:touchmove="_touchmovePage()"
+                on:touchend="_touchendPage()"
+                on:mousedown="_mousedownPage()"
+                on:mouseup="_mouseupPage()"
+                on:keyPress="_keyPressHandler()"
+                on:suggestStateChanged="_suggestStateChangedHandler()"
+                on:register="_registerHandler()"
+                on:unregister="_unregisterHandler()"
+                on:workspaceResize="_popupEventHandler('workspaceResize')"
+                on:pageScrolled="_popupEventHandler('pageScrolled')"
+        >
+            <ws:partial
+                    template="{{ _options.content }}"
+                    scope="{{ _options }}"
+            />
+            <Controls.popup:Container attr:id="popup" eventHandler="{{content._managerEventHandler}}"/>
+        </div>
+    </UI.HotKeys:Dispatcher>
+</Controls.Application.TouchDetector>

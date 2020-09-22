@@ -1,5 +1,5 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-import template = require('wml!DependencyWatcher/_module/List');
+import * as template from 'wml!DependencyWatcher/_module/List';
 import { Model } from 'Types/entity';
 import { IListItem, source } from '../data';
 import { columns } from './column';
@@ -9,6 +9,10 @@ import { IFilterItem, getButtonSource } from './getButtonSource';
 import { getItemActions, IItemAction, ItemActionNames } from './getItemActions';
 import { IColumn } from '../interface/IColumn';
 import { IHeaders } from '../interface/IHeaders';
+import {
+   INavigationOptionValue,
+   IBasePageSourceConfig
+} from 'Controls/interface';
 
 interface IChildren {
    listView: {
@@ -21,16 +25,6 @@ interface IOptions extends IControlOptions {
    fileSource: source.File;
 }
 
-interface INavigation {
-   source: 'page' | 'position';
-   view: 'infinity' | 'pages' | 'demand';
-   sourceConfig: {
-      pageSize: number;
-      page: number;
-      mode: 'totalCount';
-   };
-}
-
 /**
  * Main list of the "Dependencies" tab.
  * @author Зайцев А.С.
@@ -40,13 +34,14 @@ export default class List extends Control<IOptions> {
    protected readonly _children: IChildren;
    protected readonly _column: Array<Partial<IColumn<IListItem>>> = columns;
    protected readonly _headers: IHeaders<IListItem> = headers;
-   protected readonly _navigation: INavigation = {
+   protected readonly _navigation: INavigationOptionValue<
+      IBasePageSourceConfig
+   > = {
       source: 'page',
       view: 'infinity',
       sourceConfig: {
-         pageSize: 50,
-         page: 0,
-         mode: 'totalCount'
+         pageSize: 70,
+         page: 0
       }
    };
    protected _filterButtonSource: IFilterItem[];
