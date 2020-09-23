@@ -35,8 +35,7 @@
                                         attr:class="ws-align-self-end devtools-Profiler__headElement"
                                         bind:selectedKey="_selectedTab" />
         </ws:if>
-        <!--TODO: включить поиск и в RankedView, после того как ключи станут нормальными-->
-        <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot && _selectedTab === 'Flamegraph' }}">
+        <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
             <Controls.search:Input bind:value="_searchValue"
                                    on:valueChanged="_onSearchValueChanged()"
                                    on:keydown="_onSearchKeydown()"
@@ -75,6 +74,8 @@
                             <Profiler._RankedView.RankedView snapshot="{{ _snapshot }}"
                                                              markedKey="{{ _selectedCommitId }}"
                                                              filter="{{ _detailFilter }}"
+                                                             searchValue="{{ _searchValue }}"
+                                                             itemsReadyCallback="{{ _rankedViewItemsReadyCallback }}"
                                                              on:markedKeyChanged="_detailMarkedKeyChanged()"
                                                              attr:class="ws-flex-grow-1"/>
                         </ws:else>

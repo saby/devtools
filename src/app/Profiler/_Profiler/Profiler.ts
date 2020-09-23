@@ -1,5 +1,6 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { Memory } from 'Types/source';
+import { RecordSet } from 'Types/collection';
 import { Store } from 'Elements/elements';
 import { IOperationEvent } from 'Extension/Plugins/Elements/IOperations';
 import { ICommitDetailsOptions } from 'Profiler/_CommitDetails/CommitDetails';
@@ -135,6 +136,8 @@ class Profiler extends Control<IOptions> {
 
    private fileGetter?: FileSystem;
 
+   private rankedViewItems?: RecordSet;
+
    constructor(options: IOptions) {
       super(options);
       options.store.addListener(
@@ -152,6 +155,9 @@ class Profiler extends Control<IOptions> {
       );
       options.store.toggleDevtoolsOpened(true);
       options.store.dispatch('getProfilingStatus');
+      this._rankedViewItemsReadyCallback = this._rankedViewItemsReadyCallback.bind(
+         this
+      );
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
@@ -165,6 +171,10 @@ class Profiler extends Control<IOptions> {
             this.__setSelectedCommitId(selectedIdFromStore);
          }
       }
+   }
+
+   protected _rankedViewItemsReadyCallback(items: RecordSet): void {
+      this.rankedViewItems = items;
    }
 
    private __setProfilingData(profilingData: IBackendProfilingData): void {
@@ -375,8 +385,14 @@ class Profiler extends Control<IOptions> {
    }
 
    private __updateSearch(value: string): void {
+      let items = [];
+      if (this._selectedTab === 'Flamegraph' && this._snapshot) {
+         items = this._snapshot;
+      } else if (this._selectedTab === 'Ranked' && this.rankedViewItems) {
+         items = this.rankedViewItems.getRawData();
+      }
       const searchResult = this._searchController.updateSearch(
-         this._snapshot || [],
+         items,
          value,
          this._selectedCommitId
       );
@@ -584,8 +600,12 @@ class Profiler extends Control<IOptions> {
             synchronizationKey
          );
 
-         const parentsOfElementsWithDOMChanges: Set<IFrontendControlNode['id']> = new Set();
-         const parentsOfSynchronizedElements: Set<IFrontendControlNode['id']> = new Set();
+         const parentsOfElementsWithDOMChanges: Set<
+            IFrontendControlNode['id']
+         > = new Set();
+         const parentsOfSynchronizedElements: Set<
+            IFrontendControlNode['id']
+         > = new Set();
          const parentsDuration: Map<
             IFrontendControlNode['id'],
             {
