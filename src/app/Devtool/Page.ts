@@ -83,9 +83,11 @@ class Extension extends Control {
 
    static _theme: string[] = [
       'Devtool/Page/Page',
-      'Controls/Application/Application',
+      'Controls/application',
       'Controls/Application/oldCss' // TODO: пока не подключили application берём шрифты отсюда
    ];
+
+   static _styles: string[] = ['Controls/dragnDrop'];
 }
 
 export default Extension;
