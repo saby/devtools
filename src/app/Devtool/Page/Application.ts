@@ -3,7 +3,7 @@ import { _scrollContext } from 'Controls/scroll';
 import { SyntheticEvent } from 'Vdom/Vdom';
 import * as template from 'wml!Devtool/Page/Application';
 import { RegisterClass } from 'Controls/event';
-import { ControllerClass } from 'Controls/dragnDrop';
+import { ControllerClass, IDragObject } from 'Controls/dragnDrop';
 import { GlobalController, ManagerClass } from 'Controls/popup';
 import * as TouchDetector from 'Controls/Application/TouchDetectorController';
 
@@ -169,6 +169,25 @@ export default class Application extends Control<IApplicationOptions> {
       ...args: unknown[]
    ): void {
       this.popupManager.eventHandler.apply(this.popupManager, [action, args]);
+   }
+
+   protected _updateDraggingTemplate(
+      event: Event,
+      draggingTemplateOptions: IDragObject,
+      draggingTemplate: TemplateFunction
+   ): void {
+      this.dragnDropController.updateDraggingTemplate(
+         draggingTemplateOptions,
+         draggingTemplate
+      );
+   }
+
+   protected _documentDragStart(event: Event, dragObject: IDragObject): void {
+      this.dragnDropController.documentDragStart(dragObject);
+   }
+
+   protected _documentDragEnd(event: Event, dragObject: IDragObject): void {
+      this.dragnDropController.documentDragEnd(dragObject);
    }
 
    private createRegisters(): void {
