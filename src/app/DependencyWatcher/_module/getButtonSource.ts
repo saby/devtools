@@ -3,7 +3,7 @@
  * @author Зайцев А.С.
  */
 import { source } from '../data';
-import rk = require('i18n!DependencyWatcher/_module/getButtonSource');
+import * as rk from 'i18n!DependencyWatcher';
 
 export interface IFilterItem<TValue = unknown> {
    name: string;

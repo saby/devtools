@@ -2,7 +2,7 @@
  * Item actions for the main list of the "Dependencies" tab.
  * @author Зайцев А.С.
  */
-import rk = require('i18n!DependencyWatcher/_module/getItemActions');
+import * as rk from 'i18n!DependencyWatcher';
 import { Model } from 'Types/entity';
 
 export enum ItemActionNames {

@@ -6,7 +6,7 @@ import { ViewMode } from './ViewMode';
 import { source } from '../data';
 import { Memory } from 'Types/source';
 import { IListConfig } from '../_data/source/IList';
-import rk = require('i18n!DependencyWatcher/_main/Tabs');
+import * as rk from 'i18n!DependencyWatcher';
 
 interface IDescription {
    caption: string;
