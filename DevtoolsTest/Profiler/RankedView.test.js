@@ -4,23 +4,23 @@ define([
    'Types/source',
    'Types/entity',
    'DevtoolsTest/optionTypesMocks'
-], function(mockChrome, RankedView, sourceLib, entityLib, optionTypesMocks) {
+], function (mockChrome, RankedView, sourceLib, entityLib, optionTypesMocks) {
    let sandbox;
    RankedView = RankedView.default;
    const Memory = sourceLib.Memory;
    const Model = entityLib.Model;
 
-   describe('Profiler/_RankedView/RankedView', function() {
-      beforeEach(function() {
+   describe('Profiler/_RankedView/RankedView', function () {
+      beforeEach(function () {
          sandbox = sinon.createSandbox();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          sandbox.restore();
       });
 
-      describe('constructor', function() {
-         it('should initialize source', function() {
+      describe('constructor', function () {
+         it('should initialize source', function () {
             const instance = new RankedView({
                snapshot: [
                   {
@@ -83,7 +83,7 @@ define([
          });
       });
 
-      describe('_beforeUpdate', function() {
+      describe('_beforeUpdate', function () {
          let instance;
          const snapshot = [
             {
@@ -125,7 +125,7 @@ define([
             instance = new RankedView(options);
             instance.saveOptions(options);
          });
-         it('should update source if the filter was changed', function() {
+         it('should update source if the filter was changed', function () {
             instance._beforeUpdate({
                filter: {
                   ...filter,
@@ -151,7 +151,7 @@ define([
                }
             ]);
          });
-         it('should update source if synchronizations were changed', function() {
+         it('should update source if synchronizations were changed', function () {
             instance._beforeUpdate({
                filter,
                snapshot: [
@@ -173,7 +173,7 @@ define([
                }
             ]);
          });
-         it('should not touch source if nothing changed', function() {
+         it('should not touch source if nothing changed', function () {
             Object.defineProperty(instance, '_source', {
                writable: false
             });
@@ -187,7 +187,69 @@ define([
          });
       });
 
-      describe('__markedKeyChanged', function() {
+      describe('_afterUpdate', function () {
+         let instance;
+         beforeEach(() => {
+            instance = new RankedView({
+               snapshot: [
+                  {
+                     id: '0',
+                     selfDuration: 100,
+                     updateReason: 'mounted'
+                  }
+               ],
+               filter: {
+                  minDuration: 10,
+                  name: '',
+                  displayReasons: [
+                     'mounted',
+                     'selfUpdated',
+                     'parentUpdated',
+                     'forceUpdated'
+                  ]
+               }
+            });
+         });
+
+         it("should not call scrollToItem on child because markedKey didn't change", function () {
+            instance._children = {
+               grid: {
+                  scrollToItem: sandbox.stub()
+               }
+            };
+            instance.saveOptions({
+               markedKey: '0'
+            });
+
+            instance._afterUpdate({
+               markedKey: '0'
+            });
+
+            sinon.assert.notCalled(instance._children.grid.scrollToItem);
+         });
+
+         it('should call scrollToItem on child because markedKey has changed', function () {
+            instance._children = {
+               grid: {
+                  scrollToItem: sandbox.stub()
+               }
+            };
+            instance.saveOptions({
+               markedKey: '1'
+            });
+
+            instance._afterUpdate({
+               markedKey: '0'
+            });
+
+            sinon.assert.calledWithExactly(
+               instance._children.grid.scrollToItem,
+               '1'
+            );
+         });
+      });
+
+      describe('_markedKeyChanged', function () {
          let instance;
          beforeEach(() => {
             instance = new RankedView({
@@ -225,10 +287,10 @@ define([
                }
             });
          });
-         it('should fire markedKeyChanged event', function() {
+         it('should fire markedKeyChanged event', function () {
             const stub = sandbox.stub(instance, '_notify');
 
-            instance.__markedKeyChanged({}, '1');
+            instance._markedKeyChanged({}, '1');
 
             assert.isTrue(
                stub.calledOnceWithExactly('markedKeyChanged', ['1'])
@@ -236,7 +298,7 @@ define([
          });
       });
 
-      it('_groupingCallback', function() {
+      it('_groupingCallback', function () {
          const instance = new RankedView({
             snapshot: [
                {
@@ -283,8 +345,8 @@ define([
          assert.equal(instance._groupingCallback(item), 'forceUpdated');
       });
 
-      describe('getOptionTypes', function() {
-         it('should call entity:Descriptor with correct values', function() {
+      describe('getOptionTypes', function () {
+         it('should call entity:Descriptor with correct values', function () {
             const { mockOptionTypes, testOption } = optionTypesMocks;
             mockOptionTypes(sandbox, entityLib);
 
@@ -294,6 +356,7 @@ define([
                'snapshot',
                'markedKey',
                'filter',
+               'itemsReadyCallback',
                'readOnly',
                'theme'
             ]);
@@ -308,6 +371,9 @@ define([
             testOption(optionTypes, 'filter', {
                required: true,
                args: [Object]
+            });
+            testOption(optionTypes, 'itemsReadyCallback', {
+               args: [Function]
             });
             testOption(optionTypes, 'readOnly', {
                args: [Boolean]

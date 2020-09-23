@@ -1,11 +1,11 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { Memory } from 'Types/source';
-import template = require('wml!Profiler/_RankedView/RankedView');
+import * as template from 'wml!Profiler/_RankedView/RankedView';
 import { descriptor, Model } from 'Types/entity';
-import commitTimeTemplate = require('wml!Profiler/_RankedView/commitTimeTemplate');
-import reasonTemplate = require('wml!Profiler/_RankedView/reasonTemplate');
-import groupTemplate = require('wml!Profiler/_RankedView/groupTemplate');
+import { RecordSet } from 'Types/collection';
+import * as groupTemplate from 'wml!Profiler/_RankedView/groupTemplate';
+import { View } from 'Controls/grid';
 import { getDataWithLengths } from '../_utils/Utils';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 
@@ -22,6 +22,7 @@ interface IOptions extends IControlOptions {
       minDuration: number;
       displayReasons: ControlUpdateReason[];
    };
+   itemsReadyCallback: (items: RecordSet) => void;
 }
 
 function applyFilter(
@@ -48,20 +49,6 @@ class RankedView extends Control<IOptions> {
 
    protected _source: Memory;
 
-   protected _columns: object[] = [
-      {
-         template: reasonTemplate,
-         width: '30px'
-      },
-      {
-         displayProperty: 'name',
-         textOverflow: 'ellipsis'
-      },
-      {
-         template: commitTimeTemplate
-      }
-   ];
-
    protected _sorting: object[] = [
       {
          selfDuration: 'desc'
@@ -73,6 +60,10 @@ class RankedView extends Control<IOptions> {
    ) => ControlUpdateReason = groupByReason;
 
    protected _groupTemplate: TemplateFunction = groupTemplate;
+
+   protected _children: {
+      grid: View;
+   };
 
    constructor(options: IOptions) {
       super(options);
@@ -96,7 +87,13 @@ class RankedView extends Control<IOptions> {
       }
    }
 
-   protected __markedKeyChanged(e: Event, id: string): void {
+   protected _afterUpdate(oldOptions: IOptions): void {
+      if (oldOptions.markedKey !== this._options.markedKey) {
+         this._children.grid.scrollToItem(this._options.markedKey);
+      }
+   }
+
+   protected _markedKeyChanged(e: Event, id: string): void {
       this._notify('markedKeyChanged', [id]);
    }
 
@@ -105,6 +102,7 @@ class RankedView extends Control<IOptions> {
          snapshot: descriptor(Array).required(),
          markedKey: descriptor(Number).required(),
          filter: descriptor(Object).required(),
+         itemsReadyCallback: descriptor(Function),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };
