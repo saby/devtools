@@ -25,6 +25,7 @@ const isDynamic: Partial<IListItemColumn> = {
 const used: Partial<IListItemColumn> = {
    width: '55px',
    align: 'center',
+   valign: 'center',
    template: usedTemplate
 };
 

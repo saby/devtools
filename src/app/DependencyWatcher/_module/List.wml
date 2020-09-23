@@ -38,6 +38,7 @@
                 columnScroll="{{ true }}"
                 displayProperty="name"
                 itemActions="{{ _itemActions }}"
+                itemActionsPosition="custom"
                 stickyHeader="{{ true }}"
                 stickyColumnsCount="{{ 4 }}"
             >
