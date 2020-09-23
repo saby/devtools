@@ -2,7 +2,7 @@
  * Headers for the main list of the "Dependencies" tab.
  * @author Зайцев А.С.
  */
-import rk = require('i18n!DependencyWatcher/_module/header');
+import * as rk from 'i18n!DependencyWatcher';
 import { IListItem } from '../data';
 import { IHeader, IHeaders } from '../interface/IHeaders';
 
