@@ -1,22 +1,27 @@
-<ws:if data="{{ !itemData.item.initialized }}">
-    <Controls.popup:InfoboxTarget attr:style="width: 100%;">
-        <ws:content>
-            <ws:if data="{{ !itemData.item.defined }}">
-                <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Alert controls-icon_style-info_theme-{{ _options.theme }}"></div>
-            </ws:if>
-            <ws:else>
-                <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Alert controls-icon_style-warning_theme-{{ _options.theme }}"></div>
-            </ws:else>
-        </ws:content>
-        <ws:template>
-            <ws:if data="{{ !itemData.item.defined }}">
-                <h1>{[Незагруженный модуль]}</h1>
-                <span>{[Модуль является зависимостью неиспользуемого модуля в бандле]}</span>
-            </ws:if>
-            <ws:else>
-                <h1>{[Неиспользуемый модуль]}</h1>
-                <span>{[Попробуйте отфильтровать данные по файлу, чтобы посмотреть кто его загрузил]}</span>
-            </ws:else>
-        </ws:template>
-    </Controls.popup:InfoboxTarget>
-</ws:if>
+<Controls.grid:ColumnTemplate itemData="{{ itemData }}">
+    <ws:contentTemplate>
+        <ws:if data="{{ !itemData.item.initialized }}">
+            <Controls.popup:InfoboxTarget attr:style="width: 100%;">
+                <ws:content>
+                    <ws:if data="{{ !itemData.item.defined }}">
+                        <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Alert controls-icon_style-info_theme-{{ _options.theme }}"></div>
+                    </ws:if>
+                    <ws:else>
+                        <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Alert controls-icon_style-warning_theme-{{ _options.theme }}"></div>
+                    </ws:else>
+                </ws:content>
+                <ws:template>
+                    <ws:if data="{{ !itemData.item.defined }}">
+                        <h1>{[Незагруженный модуль]}</h1>
+                        <span>{[Модуль является зависимостью неиспользуемого модуля в бандле]}</span>
+                    </ws:if>
+                    <ws:else>
+                        <h1>{[Неиспользуемый модуль]}</h1>
+                        <span>{[Попробуйте отфильтровать данные по файлу, чтобы посмотреть кто его загрузил]}</span>
+                    </ws:else>
+                </ws:template>
+            </Controls.popup:InfoboxTarget>
+        </ws:if>
+    </ws:contentTemplate>
+</Controls.grid:ColumnTemplate>
+
