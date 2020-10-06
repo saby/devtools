@@ -1,5 +1,24 @@
-import { IBackendControlNode, IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import {
+   IBackendControlNode,
+   IFrontendControlNode
+} from 'Extension/Plugins/Elements/IControlNode';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
+
+export interface IBackendChangedReactiveProp {
+   name: string;
+   stack: string;
+}
+
+export interface IFrontendChangedReactiveProp {
+   name: string;
+   stack?: IStackFrame[];
+}
+
+export interface IStackFrame {
+   name: string;
+   url: string;
+   lineNumber: number;
+}
 
 export interface IChangesDescription {
    selfDuration: number;
@@ -10,7 +29,7 @@ export interface IChangesDescription {
    asyncControl: boolean;
    changedOptions?: string[];
    changedAttributes?: string[];
-   changedReactiveProps?: string[];
+   changedReactiveProps?: string[] | IFrontendChangedReactiveProp[];
 }
 
 export interface IBackendSynchronizationDescription {
@@ -30,6 +49,8 @@ export interface IFrontendSynchronizationDescription {
 
 export interface IFrontendProfilingData {
    initialIdToDuration: Map<IFrontendControlNode['id'], number>;
-   synchronizationKeyToDescription: Map<string,
-      IFrontendSynchronizationDescription>;
+   synchronizationKeyToDescription: Map<
+      string,
+      IFrontendSynchronizationDescription
+   >;
 }

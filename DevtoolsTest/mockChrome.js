@@ -37,6 +37,9 @@ GLOBAL.chrome = {
          tabId: 1,
          eval() {},
          reload() {}
+      },
+      panels: {
+         openResource() {}
       }
    },
    cookies: {

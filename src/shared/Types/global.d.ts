@@ -12,6 +12,7 @@ declare global {
       $tmp?: unknown;
       wasabyDevtoolsOptions?: {
          useUserTimingAPI?: boolean;
+         saveReactivePropsStacks?: boolean;
       };
       elementsPanel: {
          panelShownCallback: () => void;

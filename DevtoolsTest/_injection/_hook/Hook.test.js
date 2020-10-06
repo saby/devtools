@@ -1,33 +1,54 @@
 define([
    'injection/_hook/Hook',
    'injection/_devtool/globalChannel',
-   'injection/_hook/Agent'
-], function(Hook, globalChannel, Agent) {
+   'injection/_hook/Agent',
+   'DevtoolsTest/getJSDOM'
+], function (Hook, globalChannel, Agent, getJSDOM) {
    let sandbox;
    let instance;
+   const needJSDOM = typeof window === 'undefined';
    Hook = Hook.Hook;
 
-   describe('injection/_hook/Hook', function() {
-      beforeEach(function() {
+   function stubWasabyDevtoolsOptions(value) {
+      window.wasabyDevtoolsOptions = value;
+   }
+
+   describe('injection/_hook/Hook', function () {
+      before(async function () {
+         if (needJSDOM) {
+            const { JSDOM } = await getJSDOM();
+            const dom = new JSDOM('');
+            global.window = dom.window;
+         }
+      });
+
+      after(function () {
+         if (needJSDOM) {
+            delete global.window;
+         }
+      });
+
+      beforeEach(function () {
          sandbox = sinon.createSandbox();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          sandbox.restore();
       });
 
-      beforeEach(function() {
+      beforeEach(function () {
          instance = new Hook({
             create: sandbox.stub()
          });
+         stubWasabyDevtoolsOptions();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          instance = undefined;
       });
 
-      describe('onStartCommit', function() {
-         it('should not throw if agent is not initialized', function() {
+      describe('onStartCommit', function () {
+         it('should not throw if agent is not initialized', function () {
             const oldNode = {
                value: 123
             };
@@ -37,7 +58,7 @@ define([
             });
          });
 
-         it('should pass the call to the agent', function() {
+         it('should pass the call to the agent', function () {
             const oldNode = {
                value: 123
             };
@@ -56,8 +77,8 @@ define([
          });
       });
 
-      describe('onEndCommit', function() {
-         it('should not throw if agent is not initialized', function() {
+      describe('onEndCommit', function () {
+         it('should not throw if agent is not initialized', function () {
             const node = {
                value: 123
             };
@@ -70,7 +91,7 @@ define([
             });
          });
 
-         it('should pass the call to the agent', function() {
+         it('should pass the call to the agent', function () {
             const node = {
                value: 123
             };
@@ -91,8 +112,8 @@ define([
          });
       });
 
-      describe('saveChildren', function() {
-         it('should not throw if agent is not initialized', function() {
+      describe('saveChildren', function () {
+         it('should not throw if agent is not initialized', function () {
             const children = [
                {
                   value: 123
@@ -104,7 +125,7 @@ define([
             });
          });
 
-         it('should pass the call to the agent', function() {
+         it('should pass the call to the agent', function () {
             const children = [
                {
                   value: 123
@@ -123,8 +144,8 @@ define([
          });
       });
 
-      describe('onStartLifecycle', function() {
-         it('should not throw if agent is not initialized', function() {
+      describe('onStartLifecycle', function () {
+         it('should not throw if agent is not initialized', function () {
             const node = {
                value: 123
             };
@@ -134,7 +155,7 @@ define([
             });
          });
 
-         it('should pass the call to the agent', function() {
+         it('should pass the call to the agent', function () {
             const node = {
                value: 123
             };
@@ -151,8 +172,8 @@ define([
          });
       });
 
-      describe('onEndLifecycle', function() {
-         it('should not throw if agent is not initialized', function() {
+      describe('onEndLifecycle', function () {
+         it('should not throw if agent is not initialized', function () {
             const node = {
                value: 123
             };
@@ -162,7 +183,7 @@ define([
             });
          });
 
-         it('should pass the call to the agent', function() {
+         it('should pass the call to the agent', function () {
             const node = {
                value: 123
             };
@@ -179,14 +200,14 @@ define([
          });
       });
 
-      describe('onStartSync', function() {
-         it('should not throw if agent is not initialized', function() {
+      describe('onStartSync', function () {
+         it('should not throw if agent is not initialized', function () {
             assert.doesNotThrow(() => {
                instance.onStartSync(1);
             });
          });
 
-         it('should pass the call to the agent', function() {
+         it('should pass the call to the agent', function () {
             instance._agent = {
                onStartSync: sandbox.stub()
             };
@@ -197,14 +218,14 @@ define([
          });
       });
 
-      describe('onEndSync', function() {
-         it('should not throw if agent is not initialized', function() {
+      describe('onEndSync', function () {
+         it('should not throw if agent is not initialized', function () {
             assert.doesNotThrow(() => {
                instance.onEndSync(1);
             });
          });
 
-         it('should pass the call to the agent', function() {
+         it('should pass the call to the agent', function () {
             instance._agent = {
                onEndSync: sandbox.stub()
             };
@@ -215,8 +236,8 @@ define([
          });
       });
 
-      describe('init', function() {
-         it('should not create the agent if a renderer is not passed', function() {
+      describe('init', function () {
+         it('should not create the agent if a renderer is not passed', function () {
             sandbox.stub(globalChannel, 'getGlobalChannel');
 
             instance.init();
@@ -226,7 +247,7 @@ define([
             sinon.assert.notCalled(globalChannel.getGlobalChannel);
          });
 
-         it('should create the agent', function() {
+         it('should create the agent', function () {
             const fakeGlobalChannel = {
                addListener: sandbox.stub()
             };
@@ -260,8 +281,8 @@ define([
          });
       });
 
-      describe('pushMessage', function() {
-         it('should add message to messageQueue', function() {
+      describe('pushMessage', function () {
+         it('should add message to messageQueue', function () {
             instance.pushMessage('testEvent', 123);
 
             assert.deepEqual(instance._messageQueue, [['testEvent', 123]]);
@@ -275,8 +296,8 @@ define([
          });
       });
 
-      describe('readMessageQueue', function() {
-         it('should read messages from message queue and empty it', function() {
+      describe('readMessageQueue', function () {
+         it('should read messages from message queue and empty it', function () {
             instance._messageQueue = [
                ['testEvent', 123],
                ['anotherEvent', 456]

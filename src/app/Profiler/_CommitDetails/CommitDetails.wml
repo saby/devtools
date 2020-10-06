@@ -49,7 +49,7 @@
                     <div>
                         Changed reactive properties:
                         <ws:for data="item in _options.changedReactiveProps">
-                            <div class="devtools-CommitDetails__changedValueName">{{ item }}</div>
+                            <Profiler._CommitDetails.ReactiveProp reactiveProp="{{ item }}" />
                         </ws:for>
                     </div>
                 </ws:if>
