@@ -1,16 +1,17 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-import template = require('wml!Profiler/_CommitDetails/CommitDetails');
+import * as template from 'wml!Profiler/_CommitDetails/CommitDetails';
 import { descriptor } from 'Types/entity';
-import tmplNotify = require('Controls/Utils/tmplNotify');
+import * as tmplNotify from 'Controls/Utils/tmplNotify';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { IWarning } from 'Profiler/_Warning/const';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
+import { IFrontendChangedReactiveProp } from 'Extension/Plugins/Elements/IProfilingData';
 
 export interface ICommitDetailsOptions {
    updateReason: ControlUpdateReason;
    changedOptions?: string[];
    changedAttributes?: string[];
-   changedReactiveProps?: string[];
+   changedReactiveProps?: string[] | IFrontendChangedReactiveProp[];
    warnings?: IWarning[];
    logicParentId?: IFrontendControlNode['logicParentId'];
    logicParentName?: IFrontendControlNode['name'];

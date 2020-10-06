@@ -21,6 +21,8 @@ import { getGlobalChannel } from '../_devtool/globalChannel';
  * @author Зайцев А.С.
  */
 export class Hook implements IWasabyDevHook {
+   saveReactivePropsStacks: boolean =
+      window.wasabyDevtoolsOptions?.saveReactivePropsStacks;
    private _breakpoints?: IWasabyDevHook['_breakpoints'];
    private _agent: Agent;
    private _messageQueue: Array<[string, ISerializable?]> = [];
@@ -51,7 +53,9 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   saveChildren(children: ITemplateNode['children'] | IControlNode['markup']): void {
+   saveChildren(
+      children: ITemplateNode['children'] | IControlNode['markup']
+   ): void {
       if (this._agent) {
          this._agent.saveChildren(children);
       }
