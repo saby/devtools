@@ -126,7 +126,7 @@ const EXTENSION_MODULES = [
     "path": resolve("DevtoolsTest")
   },
   {
-    "name": "Injection",
+    "name": "injection",
     "path": resolve(input.injectionDir)
   },
   {

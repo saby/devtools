@@ -1,3 +1,5 @@
+import { IBackendChangedReactiveProp } from 'Extension/Plugins/Elements/IProfilingData';
+
 interface ITemplateNode {
    name: string;
    template: Function;
@@ -43,7 +45,7 @@ interface IControlNode extends Exclude<ITemplateNode, 'children'> {
    state?: object;
    context?: object;
    changedContext?: IControlNode['context'];
-   changedReactiveProps?: string[];
+   changedReactiveProps?: string[] | IBackendChangedReactiveProp[];
 }
 
 export interface IBackendControlNode extends IControlNode {

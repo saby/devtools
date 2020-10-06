@@ -11,6 +11,7 @@ import {
    IBackendSynchronizationDescription,
    IChangesDescription
 } from 'Extension/Plugins/Elements/IProfilingData';
+import { parseStacksOfReactiveProps } from './parseStacksOfReactiveProps';
 
 function processChanges(value?: object): string[] | undefined {
    let result;
@@ -57,7 +58,9 @@ function getChangesDescription(
       ),
       changedOptions: processChanges(node.changedOptions),
       changedAttributes: processChanges(node.changedAttributes),
-      changedReactiveProps: node.changedReactiveProps,
+      changedReactiveProps: parseStacksOfReactiveProps(
+         node.changedReactiveProps
+      ),
       selfDuration: node.selfDuration,
       domChanged: !!node.domChanged,
       isVisible: !!node.isVisible,

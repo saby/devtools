@@ -1,13 +1,13 @@
 define([
    'injection/_hook/_utils/Profiling',
    'Extension/Plugins/Elements/const'
-], function(ProfilingUtils, elementsConst) {
+], function (ProfilingUtils, elementsConst) {
    const { getSyncList } = ProfilingUtils;
    const { OperationType } = elementsConst;
 
-   describe('injection/_hook/_utils/Profiling', function() {
-      describe('getSyncList', function() {
-         it('should transform backend representation of synchronizations to a serializable representation (no Maps, no Sets, no functions, etc.)', function() {
+   describe('injection/_hook/_utils/Profiling', function () {
+      describe('getSyncList', function () {
+         it('should transform backend representation of synchronizations to a serializable representation (no Maps, no Sets, no functions, etc.)', function () {
             const changedNodesBySynchronization = new Map();
             const firstChanges = new Map();
             firstChanges.set(0, {
@@ -97,7 +97,11 @@ define([
                               unusedReceivedState: false,
                               changedOptions: undefined,
                               changedAttributes: undefined,
-                              changedReactiveProps: ['value'],
+                              changedReactiveProps: [
+                                 {
+                                    name: 'value'
+                                 }
+                              ],
                               asyncControl: false
                            }
                         ],
@@ -111,7 +115,11 @@ define([
                               unusedReceivedState: false,
                               changedOptions: ['value', 'anotherValue'],
                               changedAttributes: ['class'],
-                              changedReactiveProps: ['selectedKeys'],
+                              changedReactiveProps: [
+                                 {
+                                    name: 'selectedKeys'
+                                 }
+                              ],
                               asyncControl: false
                            }
                         ],

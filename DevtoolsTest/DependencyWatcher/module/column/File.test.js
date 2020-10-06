@@ -32,11 +32,7 @@ define([
                },
                keyProperty: 'id'
             });
-            sandbox.stub(chrome, 'devtools').value({
-               panels: {
-                  openResource: sandbox.stub()
-               }
-            });
+            sandbox.stub(chrome.devtools.panels, 'openResource');
 
             instance.__openResource(event, item);
 

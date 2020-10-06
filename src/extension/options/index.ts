@@ -1,10 +1,12 @@
 interface IExtensionOptions {
    useUserTimingAPI: boolean;
+   saveReactivePropsStacks: boolean;
    theme: 'dark' | 'light' | 'devtools';
 }
 
 const defaultOptions: IExtensionOptions = {
    useUserTimingAPI: false,
+   saveReactivePropsStacks: false,
    theme: 'devtools'
 };
 
@@ -12,7 +14,8 @@ function loadOptions(): Promise<IExtensionOptions> {
    return new Promise((resolve) => {
       const keys: Array<keyof IExtensionOptions> = [
          'useUserTimingAPI',
-         'theme'
+         'theme',
+         'saveReactivePropsStacks'
       ];
       chrome.storage.sync.get(keys, (result) => {
          resolve({
@@ -43,6 +46,17 @@ loadOptions().then((options) => {
    themeChooser.addEventListener('change', () => {
       chrome.storage.sync.set({
          theme: themeChooser.value
+      });
+   });
+
+   const saveReactivePropsStacks = document.getElementsByName(
+      'saveReactivePropsStacks'
+   )[0] as HTMLInputElement;
+
+   saveReactivePropsStacks.checked = options.saveReactivePropsStacks;
+   saveReactivePropsStacks.addEventListener('change', (e) => {
+      chrome.storage.sync.set({
+         saveReactivePropsStacks: saveReactivePropsStacks.checked
       });
    });
 });
