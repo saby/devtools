@@ -1,7 +1,6 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import { Memory } from 'Types/source';
 import { adapter, Record as EntityRecord } from 'Types/entity';
-import { RecordSet } from 'Types/collection';
 import { Confirmation } from 'Controls/popup';
 import { View as ListView } from 'Controls/list';
 import {
@@ -50,10 +49,8 @@ class View extends Control<IControlOptions, void[]> {
    protected _unselectedSearchValue: string = '';
    protected _selectedSearchValue: string = '';
    protected _sorting: object = [{ isPinned: 'DESC' }, { title: 'ASC' }];
-   private unselectedItems: RecordSet;
-   protected _unselectedItemsReadyCallback: (items: RecordSet) => void;
-   private selectedItems: RecordSet;
-   protected _selectedItemsReadyCallback: (items: RecordSet) => void;
+   private unselectedModules: IItem[] = [];
+   private selectedModules: IItem[] = [];
    protected _unselectedActions: IItemAction[] = [
       {
          id: 'pin',
@@ -126,12 +123,6 @@ class View extends Control<IControlOptions, void[]> {
    private pinnedModules: Set<string>;
 
    protected async _beforeMount(): Promise<void> {
-      this._selectedItemsReadyCallback = (items) => {
-         this.selectedItems = items;
-      };
-      this._unselectedItemsReadyCallback = (items) => {
-         this.unselectedItems = items;
-      };
       const [modules, url, pinnedModules]: [
          string[],
          string,
@@ -142,12 +133,10 @@ class View extends Control<IControlOptions, void[]> {
          this.getPinnedModules()
       ]);
       const cookieValue = await this.getCookieValue(url);
-      const selectedModules: IItem[] = [];
-      const unselectedModules: IItem[] = [];
 
       if (cookieValue === 'true') {
          modules.forEach((value) => {
-            selectedModules.push({
+            this.selectedModules.push({
                id: value,
                title: value,
                isPinned: pinnedModules.has(value)
@@ -165,24 +154,16 @@ class View extends Control<IControlOptions, void[]> {
                isPinned: pinnedModules.has(value)
             };
             if (selectedModulesSet.has(value)) {
-               selectedModules.push(newItem);
+               this.selectedModules.push(newItem);
             } else {
-               unselectedModules.push(newItem);
+               this.unselectedModules.push(newItem);
             }
          });
       }
 
-      this._unselectedSource = new Memory({
-         keyProperty: 'id',
-         data: unselectedModules,
-         filter: View.sourceFilter
-      });
+      this._unselectedSource = this.getMemory(this.unselectedModules);
 
-      this._selectedSource = new Memory({
-         keyProperty: 'id',
-         data: selectedModules,
-         filter: View.sourceFilter
-      });
+      this._selectedSource = this.getMemory(this.selectedModules);
 
       this.onCookieChange = this.onCookieChange.bind(this);
       chrome.cookies.onChanged.addListener(this.onCookieChange);
@@ -197,15 +178,28 @@ class View extends Control<IControlOptions, void[]> {
       chrome.devtools.inspectedWindow.reload({});
    }
 
-   protected async _resetCookie(): Promise<void> {
-      const url = await this.getUrl();
-      chrome.cookies.remove(
-         {
-            name: 's3debug',
-            url
-         },
-         this._reloadPage
-      );
+   protected _moveFavoriteItems(e: Event, newState: boolean): void {
+      if (newState) {
+         const newItems = new Set(this.pinnedModules);
+         this.selectedModules.forEach((item) => {
+            newItems.add(item.id);
+         });
+         this.setCookie(Array.from(newItems));
+      } else {
+         this.setCookie(
+            this.selectedModules
+               .filter((item) => !item.isPinned)
+               .map(({ id }) => id)
+         );
+      }
+   }
+
+   protected _moveAllItems(e: Event, newState: boolean): void {
+      if (newState) {
+         this.setCookie(['true']);
+      } else {
+         this.setCookie([]);
+      }
    }
 
    protected _itemActionVisibilityCallback(
@@ -244,17 +238,22 @@ class View extends Control<IControlOptions, void[]> {
       );
       items.forEach((id) => newModules[action](id));
 
-      if (newModules.size !== 0) {
+      await this.setCookie(Array.from(newModules));
+   }
+
+   private async setCookie(modules: string[]): Promise<void> {
+      const url = await this.getUrl();
+
+      if (modules.length !== 0) {
          const availableSpace = await this.getAvailableCookieSpace(url);
          if (availableSpace === 0) {
             return View.openPopup();
          }
-         const newValue = Array.from(newModules);
 
          let currentSize = 0;
 
-         for (let i = 0; i < newValue.length; i++) {
-            const value = newValue[i];
+         for (let i = 0; i < modules.length; i++) {
+            const value = modules[i];
             const length = i === 0 ? value.length : value.length + 1; // + 1 is used to account for ,
 
             if (currentSize + length <= availableSpace) {
@@ -267,7 +266,7 @@ class View extends Control<IControlOptions, void[]> {
          chrome.cookies.set({
             name: 's3debug',
             url,
-            value: newValue.join(',')
+            value: modules.join(',')
          });
       } else {
          chrome.cookies.remove({
@@ -284,17 +283,22 @@ class View extends Control<IControlOptions, void[]> {
       this._hasUnsavedChanges = true;
       if (changeInfo.removed) {
          if (
-            this.selectedItems.getCount() === 0 ||
+            this.selectedModules.length === 0 ||
             changeInfo.cause === 'overwrite'
          ) {
             return;
          }
          const unselectedItemsNames: string[] =
             changeInfo.cookie.value === 'true'
-               ? this.selectedItems.getRawData().map(({ id }: IItem) => id)
+               ? this.selectedModules.map(({ id }) => id)
                : changeInfo.cookie.value.split(',');
 
-         await this.moveItems(
+         this.selectedModules.forEach((item) => {
+            this.unselectedModules.push(item);
+         });
+         this.selectedModules = [];
+
+         await this.moveItemsInSource(
             this._selectedSource,
             this._unselectedSource,
             unselectedItemsNames
@@ -308,19 +312,12 @@ class View extends Control<IControlOptions, void[]> {
          const newValue = changeInfo.cookie.value;
 
          if (newValue === 'true') {
-            this._unselectedSource = new Memory({
-               keyProperty: 'id',
-               data: [],
-               filter: View.sourceFilter
-            });
-
-            this._selectedSource = new Memory({
-               keyProperty: 'id',
-               data: this.unselectedItems
-                  .getRawData()
-                  .concat(this.selectedItems.getRawData()),
-               filter: View.sourceFilter
-            });
+            this.selectedModules = this.unselectedModules.concat(
+               this.selectedModules
+            );
+            this.unselectedModules = [];
+            this._unselectedSource = this.getMemory(this.unselectedModules);
+            this._selectedSource = this.getMemory(this.selectedModules);
          } else {
             const newSelectedModules = newValue
                .split(',')
@@ -328,17 +325,28 @@ class View extends Control<IControlOptions, void[]> {
 
             const currentSelectedModules: Array<
                IItem['id']
-            > = this.selectedItems.getRawData().map(({ id }: IItem) => id);
+            > = this.selectedModules.map(({ id }) => id);
 
             const diff = getArrayDifference(
                currentSelectedModules,
                newSelectedModules
             );
 
+            this.moveItemsInArrays(
+               this.unselectedModules,
+               this.selectedModules,
+               diff.added
+            );
+            this.moveItemsInArrays(
+               this.selectedModules,
+               this.unselectedModules,
+               diff.removed
+            );
+
             const operations = [];
 
             operations.push(
-               this.moveItems(
+               this.moveItemsInSource(
                   this._unselectedSource,
                   this._selectedSource,
                   diff.added
@@ -346,7 +354,7 @@ class View extends Control<IControlOptions, void[]> {
             );
 
             operations.push(
-               this.moveItems(
+               this.moveItemsInSource(
                   this._selectedSource,
                   this._unselectedSource,
                   diff.removed
@@ -363,12 +371,12 @@ class View extends Control<IControlOptions, void[]> {
       }
    }
 
-   private async moveItems(
+   private async moveItemsInSource(
       sourceSource: Memory,
       targetSource: Memory,
-      items: Array<IItem['id']>
+      ids: Array<IItem['id']>
    ): Promise<void> {
-      const operations = items.map((elem) =>
+      const operations = ids.map((elem) =>
          targetSource.update(
             new EntityRecord({
                rawData: {
@@ -379,8 +387,32 @@ class View extends Control<IControlOptions, void[]> {
             })
          )
       );
-      operations.push(sourceSource.destroy(items));
+      operations.push(sourceSource.destroy(ids));
       await Promise.all(operations);
+   }
+
+   private moveItemsInArrays(
+      source: IItem[],
+      target: IItem[],
+      ids: Array<IItem['id']>
+   ): void {
+      ids.forEach((id) => {
+         const itemIndex = source.findIndex(
+            (sourceItem) => sourceItem.id === id
+         );
+         if (itemIndex !== -1) {
+            target.push(source[itemIndex]);
+            source.splice(itemIndex, 1);
+         }
+      });
+   }
+
+   private getMemory(items: IItem[]): Memory {
+      return new Memory({
+         keyProperty: 'id',
+         data: items.slice(),
+         filter: View.sourceFilter
+      });
    }
 
    private getUrl(): Promise<string> {
