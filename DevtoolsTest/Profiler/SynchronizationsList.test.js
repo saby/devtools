@@ -4,7 +4,7 @@ define([
    'Types/source',
    'Types/entity',
    'DevtoolsTest/optionTypesMocks'
-], function(
+], function (
    mockChrome,
    SynchronizationsList,
    sourceLib,
@@ -15,17 +15,17 @@ define([
    SynchronizationsList = SynchronizationsList.default;
    const Memory = sourceLib.Memory;
 
-   describe('Profiler/_SynchronizationsList/SynchronizationsList', function() {
-      beforeEach(function() {
+   describe('Profiler/_SynchronizationsList/SynchronizationsList', function () {
+      beforeEach(function () {
          sandbox = sinon.createSandbox();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          sandbox.restore();
       });
 
-      describe('constructor', function() {
-         it('should initialize source', function() {
+      describe('constructor', function () {
+         it('should initialize source', function () {
             const instance = new SynchronizationsList({
                synchronizations: [
                   {
@@ -52,26 +52,44 @@ define([
             assert.deepEqual(instance._source.data, [
                {
                   id: '0',
-                  selfDuration: 100,
-                  barColor: 3,
-                  length: 33.33333333333333
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_3',
+                        length: 33.33333333333333,
+                        name: 'selfDuration',
+                        value: 100
+                     }
+                  ],
+                  selfDuration: 100
                },
                {
                   id: '1',
-                  selfDuration: 300,
-                  barColor: 8,
-                  length: 100
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_8',
+                        length: 100,
+                        name: 'selfDuration',
+                        value: 300
+                     }
+                  ],
+                  selfDuration: 300
                },
                {
                   id: '3',
-                  selfDuration: 200,
-                  barColor: 5,
-                  length: 66.66666666666666
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_5',
+                        length: 66.66666666666666,
+                        name: 'selfDuration',
+                        value: 200
+                     }
+                  ],
+                  selfDuration: 200
                }
             ]);
          });
       });
-      describe('_beforeUpdate', function() {
+      describe('_beforeUpdate', function () {
          let instance;
          const synchronizations = [
             {
@@ -100,7 +118,7 @@ define([
             instance = new SynchronizationsList(options);
             instance.saveOptions(options);
          });
-         it('should update source if the filter was changed', function() {
+         it('should update source if the filter was changed', function () {
             instance._beforeUpdate({
                filter: (synchronization) => synchronization.selfDuration > 100,
                synchronizations
@@ -109,19 +127,31 @@ define([
             assert.deepEqual(instance._source.data, [
                {
                   id: '1',
-                  selfDuration: 300,
-                  barColor: 8,
-                  length: 100
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_8',
+                        length: 100,
+                        name: 'selfDuration',
+                        value: 300
+                     }
+                  ],
+                  selfDuration: 300
                },
                {
                   id: '3',
-                  selfDuration: 200,
-                  barColor: 5,
-                  length: 66.66666666666666
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_5',
+                        length: 66.66666666666666,
+                        name: 'selfDuration',
+                        value: 200
+                     }
+                  ],
+                  selfDuration: 200
                }
             ]);
          });
-         it('should update source if synchronizations were changed', function() {
+         it('should update source if synchronizations were changed', function () {
             instance._beforeUpdate({
                filter,
                synchronizations: [
@@ -135,13 +165,19 @@ define([
             assert.deepEqual(instance._source.data, [
                {
                   id: '0',
-                  selfDuration: 100,
-                  barColor: 8,
-                  length: 100
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_8',
+                        length: 100,
+                        name: 'selfDuration',
+                        value: 100
+                     }
+                  ],
+                  selfDuration: 100
                }
             ]);
          });
-         it('should not touch source if nothing changed', function() {
+         it('should not touch source if nothing changed', function () {
             Object.defineProperty(instance, '_source', {
                writable: false
             });
@@ -155,7 +191,7 @@ define([
          });
       });
 
-      describe('__markedKeyChanged', function() {
+      describe('__markedKeyChanged', function () {
          let instance;
          beforeEach(() => {
             instance = new SynchronizationsList({
@@ -180,7 +216,7 @@ define([
                filter: (synchronization) => synchronization.selfDuration !== 0
             });
          });
-         it('should fire markedKeyChanged event', function() {
+         it('should fire markedKeyChanged event', function () {
             const stub = sandbox.stub(instance, '_notify');
 
             instance.__markedKeyChanged({}, '1');
@@ -191,8 +227,8 @@ define([
          });
       });
 
-      describe('getOptionTypes', function() {
-         it('should call entity:Descriptor with correct values', function() {
+      describe('getOptionTypes', function () {
+         it('should call entity:Descriptor with correct values', function () {
             const { mockOptionTypes, testOption } = optionTypesMocks;
             mockOptionTypes(sandbox, entityLib);
 

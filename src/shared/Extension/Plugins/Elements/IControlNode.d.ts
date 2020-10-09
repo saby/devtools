@@ -53,6 +53,7 @@ export interface IBackendControlNode extends IControlNode {
    selfDuration: number;
    treeDuration: number;
    selfStartTime: number;
+   lifecycleDuration: number;
    domChanged?: boolean;
    parentId?: IBackendControlNode['id'];
    logicParentId?: IBackendControlNode['id'];

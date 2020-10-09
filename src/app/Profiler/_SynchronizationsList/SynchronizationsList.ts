@@ -1,9 +1,9 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import { descriptor } from 'Types/entity';
 import { Memory } from 'Types/source';
-import synchronizationTemplate = require('wml!Profiler/_SynchronizationsList/synchronizationTemplate');
-import template = require('wml!Profiler/_SynchronizationsList/SynchronizationsList');
-import { getDataWithLengths } from '../_utils/Utils';
+import * as synchronizationTemplate from 'wml!Profiler/_SynchronizationsList/synchronizationTemplate';
+import * as template from 'wml!Profiler/_SynchronizationsList/SynchronizationsList';
+import { formatDurationsForStackedBars } from '../_utils/formatDurationsForStackedBars';
 
 interface ISynchronizationsList {
    id: string;
@@ -29,8 +29,10 @@ class SynchronizationsList extends Control<IOptions> {
       super(options);
       this._source = new Memory({
          keyProperty: 'id',
-         data: getDataWithLengths(
-            options.synchronizations.filter(options.filter)
+         data: formatDurationsForStackedBars(
+            options.synchronizations.filter(options.filter),
+            ['selfDuration'],
+            'timing'
          )
       });
    }
@@ -42,8 +44,10 @@ class SynchronizationsList extends Control<IOptions> {
       ) {
          this._source = new Memory({
             keyProperty: 'id',
-            data: getDataWithLengths(
-               newOptions.synchronizations.filter(newOptions.filter)
+            data: formatDurationsForStackedBars(
+               newOptions.synchronizations.filter(newOptions.filter),
+               ['selfDuration'],
+               'timing'
             )
          });
       }

@@ -26,21 +26,25 @@ define([
                   {
                      id: '0',
                      selfDuration: 100,
+                     lifecycleDuration: 10,
                      updateReason: 'mounted'
                   },
                   {
                      id: '1',
                      selfDuration: 300,
+                     lifecycleDuration: 50,
                      updateReason: 'mounted'
                   },
                   {
                      id: '2',
                      selfDuration: 0,
+                     lifecycleDuration: 0,
                      updateReason: 'selfUpdated'
                   },
                   {
                      id: '3',
                      selfDuration: 200,
+                     lifecycleDuration: 0,
                      updateReason: 'parentUpdated'
                   }
                ],
@@ -59,24 +63,66 @@ define([
             assert.instanceOf(instance._source, Memory);
             assert.deepEqual(instance._source.data, [
                {
-                  id: '0',
-                  selfDuration: 100,
-                  barColor: 3,
-                  length: 33.33333333333333,
+                  id: '1',
+                  selfDuration: 300,
+                  renderDuration: 250,
+                  lifecycleDuration: 50,
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_renderDuration',
+                        length: 83.33333333333334,
+                        name: 'renderDuration',
+                        value: 250
+                     },
+                     {
+                        color: 'devtools-Profiler__duration_lifecycleDuration',
+                        length: 16.666666666666664,
+                        name: 'lifecycleDuration',
+                        value: 50
+                     }
+                  ],
                   updateReason: 'mounted'
                },
                {
-                  id: '1',
-                  selfDuration: 300,
-                  barColor: 8,
-                  length: 100,
+                  id: '0',
+                  selfDuration: 100,
+                  renderDuration: 90,
+                  lifecycleDuration: 10,
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_renderDuration',
+                        length: 30,
+                        name: 'renderDuration',
+                        value: 90
+                     },
+                     {
+                        color: 'devtools-Profiler__duration_lifecycleDuration',
+                        length: 3.3333333333333335,
+                        name: 'lifecycleDuration',
+                        value: 10
+                     }
+                  ],
                   updateReason: 'mounted'
                },
                {
                   id: '3',
                   selfDuration: 200,
-                  barColor: 5,
-                  length: 66.66666666666666,
+                  renderDuration: 200,
+                  lifecycleDuration: 0,
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_renderDuration',
+                        length: 66.66666666666666,
+                        name: 'renderDuration',
+                        value: 200
+                     },
+                     {
+                        color: 'devtools-Profiler__duration_lifecycleDuration',
+                        length: 0,
+                        name: 'lifecycleDuration',
+                        value: 0
+                     }
+                  ],
                   updateReason: 'parentUpdated'
                }
             ]);
@@ -89,21 +135,25 @@ define([
             {
                id: '0',
                selfDuration: 100,
+               lifecycleDuration: 10,
                updateReason: 'mounted'
             },
             {
                id: '1',
                selfDuration: 300,
+               lifecycleDuration: 50,
                updateReason: 'mounted'
             },
             {
                id: '2',
                selfDuration: 0,
+               lifecycleDuration: 0,
                updateReason: 'selfUpdated'
             },
             {
                id: '3',
                selfDuration: 200,
+               lifecycleDuration: 0,
                updateReason: 'parentUpdated'
             }
          ];
@@ -138,15 +188,43 @@ define([
                {
                   id: '1',
                   selfDuration: 300,
-                  barColor: 8,
-                  length: 100,
+                  renderDuration: 250,
+                  lifecycleDuration: 50,
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_renderDuration',
+                        length: 83.33333333333334,
+                        name: 'renderDuration',
+                        value: 250
+                     },
+                     {
+                        color: 'devtools-Profiler__duration_lifecycleDuration',
+                        length: 16.666666666666664,
+                        name: 'lifecycleDuration',
+                        value: 50
+                     }
+                  ],
                   updateReason: 'mounted'
                },
                {
                   id: '3',
                   selfDuration: 200,
-                  barColor: 5,
-                  length: 66.66666666666666,
+                  renderDuration: 200,
+                  lifecycleDuration: 0,
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_renderDuration',
+                        length: 66.66666666666666,
+                        name: 'renderDuration',
+                        value: 200
+                     },
+                     {
+                        color: 'devtools-Profiler__duration_lifecycleDuration',
+                        length: 0,
+                        name: 'lifecycleDuration',
+                        value: 0
+                     }
+                  ],
                   updateReason: 'parentUpdated'
                }
             ]);
@@ -158,6 +236,7 @@ define([
                   {
                      id: '0',
                      selfDuration: 150,
+                     lifecycleDuration: 25,
                      updateReason: 'mounted'
                   }
                ]
@@ -167,8 +246,22 @@ define([
                {
                   id: '0',
                   selfDuration: 150,
-                  barColor: 8,
-                  length: 100,
+                  renderDuration: 125,
+                  lifecycleDuration: 25,
+                  bars: [
+                     {
+                        color: 'devtools-Profiler__duration_renderDuration',
+                        length: 83.33333333333334,
+                        name: 'renderDuration',
+                        value: 125
+                     },
+                     {
+                        color: 'devtools-Profiler__duration_lifecycleDuration',
+                        length: 16.666666666666664,
+                        name: 'lifecycleDuration',
+                        value: 25
+                     }
+                  ],
                   updateReason: 'mounted'
                }
             ]);
@@ -195,6 +288,7 @@ define([
                   {
                      id: '0',
                      selfDuration: 100,
+                     lifecycleDuration: 10,
                      updateReason: 'mounted'
                   }
                ],
@@ -257,21 +351,25 @@ define([
                   {
                      id: '0',
                      selfDuration: 100,
+                     lifecycleDuration: 10,
                      updateReason: 'mounted'
                   },
                   {
                      id: '1',
                      selfDuration: 300,
+                     lifecycleDuration: 50,
                      updateReason: 'mounted'
                   },
                   {
                      id: '2',
                      selfDuration: 0,
+                     lifecycleDuration: 0,
                      updateReason: 'selfUpdated'
                   },
                   {
                      id: '3',
                      selfDuration: 200,
+                     lifecycleDuration: 0,
                      updateReason: 'parentUpdated'
                   }
                ],
@@ -296,53 +394,6 @@ define([
                stub.calledOnceWithExactly('markedKeyChanged', ['1'])
             );
          });
-      });
-
-      it('_groupingCallback', function () {
-         const instance = new RankedView({
-            snapshot: [
-               {
-                  id: '0',
-                  selfDuration: 100,
-                  updateReason: 'mounted'
-               },
-               {
-                  id: '1',
-                  selfDuration: 300,
-                  updateReason: 'mounted'
-               },
-               {
-                  id: '2',
-                  selfDuration: 0,
-                  updateReason: 'selfUpdated'
-               },
-               {
-                  id: '3',
-                  selfDuration: 200,
-                  updateReason: 'parentUpdated'
-               }
-            ],
-            filter: {
-               minDuration: 10,
-               name: '',
-               displayReasons: [
-                  'mounted',
-                  'selfUpdated',
-                  'parentUpdated',
-                  'forceUpdated'
-               ]
-            }
-         });
-         const item = new Model();
-
-         item.set('updateReason', 'mounted');
-         assert.equal(instance._groupingCallback(item), 'mounted');
-         item.set('updateReason', 'selfUpdated');
-         assert.equal(instance._groupingCallback(item), 'selfUpdated');
-         item.set('updateReason', 'parentUpdated');
-         assert.equal(instance._groupingCallback(item), 'parentUpdated');
-         item.set('updateReason', 'forceUpdated');
-         assert.equal(instance._groupingCallback(item), 'forceUpdated');
       });
 
       describe('getOptionTypes', function () {

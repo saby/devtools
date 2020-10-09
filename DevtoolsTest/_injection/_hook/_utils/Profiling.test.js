@@ -13,6 +13,7 @@ define([
             firstChanges.set(0, {
                node: {
                   selfDuration: 10,
+                  lifecycleDuration: 5,
                   domChanged: true,
                   isVisible: true,
                   unusedReceivedState: false,
@@ -24,6 +25,7 @@ define([
                node: {
                   parentId: 0,
                   selfDuration: 5,
+                  lifecycleDuration: 3,
                   options: {
                      value: 12,
                      anotherValue: 34
@@ -49,6 +51,7 @@ define([
                node: {
                   parentId: 1,
                   selfDuration: 2,
+                  lifecycleDuration: 1,
                   domChanged: false,
                   isVisible: false,
                   unusedReceivedState: false
@@ -59,6 +62,7 @@ define([
                node: {
                   parentId: 1,
                   selfDuration: 4,
+                  lifecycleDuration: 2,
                   domChanged: true,
                   isVisible: false,
                   unusedReceivedState: false
@@ -70,6 +74,7 @@ define([
             secondChanges.set(4, {
                node: {
                   selfDuration: 9,
+                  lifecycleDuration: 5,
                   domChanged: true,
                   isVisible: true,
                   unusedReceivedState: true,
@@ -91,6 +96,7 @@ define([
                            0,
                            {
                               selfDuration: 10,
+                              lifecycleDuration: 5,
                               updateReason: 'forceUpdated',
                               domChanged: true,
                               isVisible: true,
@@ -109,6 +115,7 @@ define([
                            1,
                            {
                               selfDuration: 5,
+                              lifecycleDuration: 3,
                               updateReason: 'selfUpdated',
                               domChanged: true,
                               isVisible: true,
@@ -127,6 +134,7 @@ define([
                            2,
                            {
                               selfDuration: 2,
+                              lifecycleDuration: 1,
                               updateReason: 'parentUpdated',
                               domChanged: false,
                               isVisible: false,
@@ -141,6 +149,7 @@ define([
                            3,
                            {
                               selfDuration: 4,
+                              lifecycleDuration: 2,
                               updateReason: 'destroyed',
                               domChanged: true,
                               isVisible: false,
@@ -163,6 +172,7 @@ define([
                            4,
                            {
                               selfDuration: 9,
+                              lifecycleDuration: 5,
                               updateReason: 'mounted',
                               domChanged: true,
                               isVisible: true,

@@ -5,13 +5,12 @@
                         source="{{ _source }}"
                         markedKey="{{ _options.markedKey }}"
                         markerVisibility="visible"
-                        sorting="{{ _sorting }}"
-                        groupingKeyCallback="{{ _groupingCallback }}"
                         groupTemplate="{{ _groupTemplate }}"
-                        virtualScrolling="{{ true }}"
-                        virtualPageSize="{{ 50 }}"
+                        groupProperty="updateReason"
+                        navigation="{{ _navigation }}"
                         itemsReadyCallback="{{ _options.itemsReadyCallback }}"
                         on:markedKeyChanged="_markedKeyChanged()">
+        <ws:virtualScrollConfig pageSize="{{ 50 }}" />
         <ws:columns>
             <ws:Array>
                 <ws:Object width="30px">

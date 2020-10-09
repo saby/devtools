@@ -621,6 +621,9 @@ class Profiler extends Control<IOptions> {
                synchronizationKey,
                currentItem.id
             );
+            const lifecycleDuration = elementChanges
+               ? elementChanges.lifecycleDuration
+               : 0;
             const warnings: WARNING_NAMES[] = [];
             const updateReason: ControlUpdateReason = elementChanges
                ? elementChanges.updateReason
@@ -689,6 +692,7 @@ class Profiler extends Control<IOptions> {
                warnings: warnings.length ? warnings : undefined,
                actualBaseDuration,
                actualDuration,
+               lifecycleDuration,
                hasChangesInSubtree
             });
          }
