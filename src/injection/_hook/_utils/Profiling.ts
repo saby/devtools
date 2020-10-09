@@ -62,6 +62,7 @@ function getChangesDescription(
          node.changedReactiveProps
       ),
       selfDuration: node.selfDuration,
+      lifecycleDuration: node.lifecycleDuration,
       domChanged: !!node.domChanged,
       isVisible: !!node.isVisible,
       unusedReceivedState: !!node.unusedReceivedState,

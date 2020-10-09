@@ -6,11 +6,19 @@ import { descriptor, Model } from 'Types/entity';
 import { RecordSet } from 'Types/collection';
 import * as groupTemplate from 'wml!Profiler/_RankedView/groupTemplate';
 import { View } from 'Controls/grid';
-import { getDataWithLengths } from '../_utils/Utils';
+import {
+   DurationName,
+   formatDurationsForStackedBars
+} from '../_utils/formatDurationsForStackedBars';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
+import {
+   INavigationOptionValue,
+   INavigationPageSourceConfig
+} from 'Controls/_interface/INavigation';
 
 interface IRankedViewControlNode extends IFrontendControlNode {
    selfDuration: number;
+   lifecycleDuration: number;
    updateReason: ControlUpdateReason;
 }
 
@@ -36,10 +44,6 @@ function applyFilter(
    );
 }
 
-function groupByReason(item: Model): ControlUpdateReason {
-   return item.get('updateReason') as ControlUpdateReason;
-}
-
 /**
  * Renders a flat list of commits which happened during the last profiling session.
  * @author Зайцев А.С.
@@ -49,28 +53,32 @@ class RankedView extends Control<IOptions> {
 
    protected _source: Memory;
 
-   protected _sorting: object[] = [
-      {
-         selfDuration: 'desc'
-      }
-   ];
-
-   protected _groupingCallback: (
-      item: Model
-   ) => ControlUpdateReason = groupByReason;
-
    protected _groupTemplate: TemplateFunction = groupTemplate;
 
    protected _children: {
       grid: View;
    };
 
+   protected readonly _navigation: INavigationOptionValue<
+      INavigationPageSourceConfig
+   > = {
+      source: 'page',
+      view: 'infinity',
+      sourceConfig: {
+         pageSize: 50,
+         page: 0,
+         hasMore: false
+      }
+   };
+
+   private renderedDurations: DurationName[] = [
+      'renderDuration',
+      'lifecycleDuration'
+   ];
+
    constructor(options: IOptions) {
       super(options);
-      this._source = new Memory({
-         keyProperty: 'id',
-         data: getDataWithLengths(applyFilter(options.snapshot, options.filter))
-      });
+      this._source = this.getSource(options);
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
@@ -78,12 +86,7 @@ class RankedView extends Control<IOptions> {
          this._options.filter !== newOptions.filter ||
          this._options.snapshot !== newOptions.snapshot
       ) {
-         this._source = new Memory({
-            keyProperty: 'id',
-            data: getDataWithLengths(
-               applyFilter(newOptions.snapshot, newOptions.filter)
-            )
-         });
+         this._source = this.getSource(newOptions);
       }
    }
 
@@ -95,6 +98,47 @@ class RankedView extends Control<IOptions> {
 
    protected _markedKeyChanged(e: Event, id: string): void {
       this._notify('markedKeyChanged', [id]);
+   }
+
+   private getSource(options: IOptions): Memory {
+      /*
+      Virtual scroll and groups don't work well together.
+      If the items aren't sorted by group the list can render one group and then remove it because
+      previous group has gotten more items.
+      So we have to group and sort items here to prevent that.
+       */
+      const groups: Map<
+         ControlUpdateReason,
+         IRankedViewControlNode[]
+      > = new Map();
+      applyFilter(options.snapshot, options.filter).forEach((item) => {
+         const renderDuration = item.selfDuration - item.lifecycleDuration;
+         const newItem = {
+            ...item,
+            renderDuration
+         };
+         const group = groups.get(newItem.updateReason);
+         if (group) {
+            group.push(newItem);
+         } else {
+            groups.set(newItem.updateReason, [newItem]);
+         }
+      });
+
+      const groupedData = Array.from(groups.values()).reduce(
+         (acc, group) =>
+            acc.concat(group.sort((a, b) => b.selfDuration - a.selfDuration)),
+         []
+      );
+
+      return new Memory({
+         keyProperty: 'id',
+         data: formatDurationsForStackedBars(
+            groupedData,
+            this.renderedDurations,
+            'durationName'
+         )
+      });
    }
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {

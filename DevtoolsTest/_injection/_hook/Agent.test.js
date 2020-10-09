@@ -1297,6 +1297,7 @@ define([
                         {
                            node: {
                               selfDuration: 10,
+                              lifecycleDuration: 5,
                               domChanged: true,
                               isVisible: true,
                               unusedReceivedState: false,
@@ -1330,6 +1331,7 @@ define([
                                        0,
                                        {
                                           selfDuration: 10,
+                                          lifecycleDuration: 5,
                                           updateReason: 'mounted',
                                           domChanged: true,
                                           isVisible: true,
@@ -1593,6 +1595,7 @@ define([
                                  name: 'Controls/Application',
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
+                                 lifecycleDuration: 0,
                                  treeDuration: 0,
                                  containers: undefined
                               },
@@ -1641,6 +1644,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
+                                 lifecycleDuration: 0,
                                  containers: undefined
                               },
                               operation: OperationType.CREATE
@@ -1817,6 +1821,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
+                                 lifecycleDuration: 0,
                                  containers: undefined
                               },
                               operation: OperationType.CREATE
@@ -1867,6 +1872,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
+                                 lifecycleDuration: 0,
                                  containers: [actualContainer]
                               },
                               operation: OperationType.CREATE
@@ -1916,6 +1922,7 @@ define([
                                  selfStartTime: currentTime,
                                  selfDuration: 0,
                                  treeDuration: 0,
+                                 lifecycleDuration: 0,
                                  containers: [actualContainer]
                               },
                               operation: OperationType.CREATE
@@ -3154,7 +3161,8 @@ define([
                            name: 'Controls/Application',
                            selfStartTime: 10,
                            selfDuration: 10,
-                           treeDuration: 10
+                           treeDuration: 10,
+                           lifecycleDuration: 0
                         },
                         operation: OperationType.CREATE
                      }
@@ -3172,7 +3180,8 @@ define([
                            name: 'Controls/popup:Manager',
                            selfStartTime: 10,
                            selfDuration: 5,
-                           treeDuration: 5
+                           treeDuration: 5,
+                           lifecycleDuration: 0
                         },
                         operation: OperationType.CREATE
                      }
@@ -3194,7 +3203,8 @@ define([
                   name: 'Controls/Application',
                   selfStartTime: 10,
                   selfDuration: 10,
-                  treeDuration: 10
+                  treeDuration: 10,
+                  lifecycleDuration: 0
                },
                operation: OperationType.CREATE
             });
@@ -3204,7 +3214,8 @@ define([
                   name: 'Controls/popup:Manager',
                   selfStartTime: 10,
                   selfDuration: 5 + currentTime - 10,
-                  treeDuration: 5
+                  treeDuration: 5,
+                  lifecycleDuration: -7
                },
                operation: OperationType.CREATE
             });
@@ -3232,7 +3243,8 @@ define([
                            name: 'Controls/Application',
                            selfStartTime: 10,
                            selfDuration: 15,
-                           treeDuration: 15
+                           treeDuration: 15,
+                           lifecycleDuration: 0
                         },
                         operation: OperationType.UPDATE
                      }
@@ -3246,7 +3258,8 @@ define([
                            name: 'Controls/popup:Manager',
                            selfStartTime: 10,
                            selfDuration: 5,
-                           treeDuration: 5
+                           treeDuration: 5,
+                           lifecycleDuration: 0
                         },
                         operation: OperationType.UPDATE
                      }
@@ -3268,7 +3281,8 @@ define([
                   name: 'Controls/Application',
                   selfStartTime: 10,
                   selfDuration: 15 + lifecycleDuration,
-                  treeDuration: 15 + lifecycleDuration
+                  treeDuration: 15 + lifecycleDuration,
+                  lifecycleDuration: 0
                },
                operation: OperationType.UPDATE
             });
@@ -3279,7 +3293,8 @@ define([
                   name: 'Controls/popup:Manager',
                   selfStartTime: 10,
                   selfDuration: 5 + lifecycleDuration,
-                  treeDuration: 5
+                  treeDuration: 5,
+                  lifecycleDuration
                },
                operation: OperationType.UPDATE
             });

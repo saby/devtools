@@ -2,7 +2,6 @@
             scope="{{ _options }}">
    <ws:contentTemplate>
       <Profiler._TimeRender.TimeRender value="{{ itemData.item.selfDuration }}"
-                                      barColor="{{ itemData.item.barColor }}"
-                                      length="{{ itemData.item.length }}"/>
+                                       bars="{{ itemData.item.bars }}" />
    </ws:contentTemplate>
 </ws:partial>

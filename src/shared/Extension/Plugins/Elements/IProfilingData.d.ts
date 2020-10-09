@@ -22,6 +22,7 @@ export interface IStackFrame {
 
 export interface IChangesDescription {
    selfDuration: number;
+   lifecycleDuration: number;
    updateReason: ControlUpdateReason;
    domChanged: boolean;
    isVisible: boolean;

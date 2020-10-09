@@ -384,6 +384,7 @@ class Agent {
                selfStartTime: performance.now(),
                selfDuration: 0,
                treeDuration: 0,
+               lifecycleDuration: 0,
                get containers(): IWasabyElement[] | undefined {
                   return idToContainers.get(id);
                }
@@ -605,6 +606,7 @@ class Agent {
          const lifecycleDuration =
             performance.now() - changedNode.node.selfStartTime;
          changedNode.node.selfDuration += lifecycleDuration;
+         changedNode.node.lifecycleDuration = lifecycleDuration;
          endMark(changedNode.node.name, changedNode.node.id);
 
          const parentId = changedNode.node.parentId;

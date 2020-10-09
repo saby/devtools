@@ -78,8 +78,7 @@ define([
 
             assert.hasAllKeys(optionTypes, [
                'value',
-               'barColor',
-               'length',
+               'bars',
                'readOnly',
                'theme'
             ]);
@@ -87,12 +86,9 @@ define([
                required: true,
                args: [Number]
             });
-            testOption(optionTypes, 'barColor', {
+            testOption(optionTypes, 'bars', {
                required: true,
-               args: [Number]
-            });
-            testOption(optionTypes, 'length', {
-               args: [Number]
+               args: [Array]
             });
             testOption(optionTypes, 'readOnly', {
                args: [Boolean]
