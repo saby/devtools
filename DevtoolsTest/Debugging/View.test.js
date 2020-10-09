@@ -2,15 +2,13 @@ define([
    'DevtoolsTest/mockChrome',
    'Debugging/_view/View',
    'Types/entity',
-   'Types/collection',
    'Types/source',
    'Controls/popup'
-], function (mockChrome, View, entityLib, collectionLib, sourceLib, popupLib) {
+], function (mockChrome, View, entityLib, sourceLib, popupLib) {
    let sandbox;
    let instance;
    View = View.default;
    const Confirmation = popupLib.Confirmation;
-   const RecordSet = collectionLib.RecordSet;
    const Model = entityLib.Model;
    const Record = entityLib.Record;
    const Memory = sourceLib.Memory;
@@ -532,7 +530,7 @@ define([
       describe('onCookieChange', function () {
          it('should not move items because another cookie was changed', async function () {
             instance._hasUnsavedChanges = false;
-            sandbox.stub(instance, 'moveItems');
+            sandbox.stub(instance, 'moveItemsInSource');
 
             await instance.onCookieChange({
                cookie: {
@@ -541,15 +539,13 @@ define([
             });
 
             assert.isFalse(instance._hasUnsavedChanges);
-            sinon.assert.notCalled(instance.moveItems);
+            sinon.assert.notCalled(instance.moveItemsInSource);
          });
 
          it("should not move items after removal of the cookie because there's no selected items", async function () {
             instance._hasUnsavedChanges = false;
-            sandbox.stub(instance, 'moveItems');
-            instance.selectedItems = new RecordSet({
-               rawData: []
-            });
+            sandbox.stub(instance, 'moveItemsInSource');
+            instance.selectedModules = [];
 
             await instance.onCookieChange({
                cookie: {
@@ -560,21 +556,21 @@ define([
             });
 
             assert.isTrue(instance._hasUnsavedChanges);
-            sinon.assert.notCalled(instance.moveItems);
+            assert.isEmpty(instance.selectedModules);
+            sinon.assert.notCalled(instance.moveItemsInSource);
          });
 
          it('should not move items after removal of the cookie because the cookie was overwritten by devtools', async function () {
             instance._hasUnsavedChanges = false;
-            sandbox.stub(instance, 'moveItems');
-            instance.selectedItems = new RecordSet({
-               rawData: [
-                  {
-                     id: 'test',
-                     title: 'test',
-                     isPinned: false
-                  }
-               ]
-            });
+            sandbox.stub(instance, 'moveItemsInSource');
+            const rawData = [
+               {
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               }
+            ];
+            instance.selectedModules = rawData.slice();
 
             await instance.onCookieChange({
                cookie: {
@@ -585,7 +581,8 @@ define([
             });
 
             assert.isTrue(instance._hasUnsavedChanges);
-            sinon.assert.notCalled(instance.moveItems);
+            assert.deepEqual(instance.selectedModules, rawData);
+            sinon.assert.notCalled(instance.moveItemsInSource);
          });
 
          it('should move all selected items to unselected (s3debug=true)', async function () {
@@ -603,18 +600,14 @@ define([
                }
             ];
             instance.pinnedModules = new Set(['anotherTest']);
-            instance.unselectedItems = new RecordSet({
-               rawData: []
-            });
-            instance.selectedItems = new RecordSet({
-               rawData
-            });
+            instance.unselectedModules = [];
+            instance.selectedModules = rawData.slice();
             instance._unselectedSource = new Memory({
                data: [],
                keyProperty: 'id'
             });
             instance._selectedSource = new Memory({
-               data: rawData,
+               data: rawData.slice(),
                keyProperty: 'id'
             });
             sandbox.stub(instance._unselectedSource, 'update');
@@ -638,6 +631,8 @@ define([
             });
 
             assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(instance.unselectedModules, rawData);
+            assert.isEmpty(instance.selectedModules);
             assert.deepEqual(
                instance._unselectedSource.update.firstCall.args[0].getRawData(),
                {
@@ -677,18 +672,14 @@ define([
                }
             ];
             instance.pinnedModules = new Set(['anotherTest']);
-            instance.unselectedItems = new RecordSet({
-               rawData: []
-            });
-            instance.selectedItems = new RecordSet({
-               rawData
-            });
+            instance.unselectedModules = [];
+            instance.selectedModules = rawData.slice();
             instance._unselectedSource = new Memory({
                data: [],
                keyProperty: 'id'
             });
             instance._selectedSource = new Memory({
-               data: rawData,
+               data: rawData.slice(),
                keyProperty: 'id'
             });
             sandbox.stub(instance._unselectedSource, 'update');
@@ -712,6 +703,8 @@ define([
             });
 
             assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(instance.unselectedModules, rawData);
+            assert.isEmpty(instance.selectedModules);
             assert.deepEqual(
                instance._unselectedSource.update.firstCall.args[0].getRawData(),
                {
@@ -751,18 +744,14 @@ define([
                }
             ];
             instance.pinnedModules = new Set(['anotherTest']);
-            instance.unselectedItems = new RecordSet({
-               rawData: [rawData[0]]
-            });
-            instance.selectedItems = new RecordSet({
-               rawData: [rawData[1]]
-            });
+            instance.unselectedModules = [rawData[0]];
+            instance.selectedModules = [rawData[1]];
             instance._unselectedSource = new Memory({
                data: [],
                keyProperty: 'id'
             });
             instance._selectedSource = new Memory({
-               data: rawData,
+               data: rawData.slice(),
                keyProperty: 'id'
             });
             instance._children = {
@@ -786,6 +775,8 @@ define([
             });
 
             assert.isTrue(instance._hasUnsavedChanges);
+            assert.isEmpty(instance.unselectedModules);
+            assert.deepEqual(instance.selectedModules, rawData);
             assert.notEqual(instance._unselectedSource, oldUnselectedSource);
             assert.notEqual(instance._selectedSource, oldSelectedSource);
             assert.deepEqual(instance._unselectedSource.data, []);
@@ -809,18 +800,14 @@ define([
                }
             ];
             instance.pinnedModules = new Set(['anotherTest']);
-            instance.unselectedItems = new RecordSet({
-               rawData: [rawData[0]]
-            });
-            instance.selectedItems = new RecordSet({
-               rawData: [rawData[1]]
-            });
+            instance.unselectedModules = [rawData[0]];
+            instance.selectedModules = [rawData[1]];
             instance._unselectedSource = new Memory({
                data: [],
                keyProperty: 'id'
             });
             instance._selectedSource = new Memory({
-               data: rawData,
+               data: rawData.slice(),
                keyProperty: 'id'
             });
             sandbox.stub(instance._unselectedSource, 'update');
@@ -854,6 +841,8 @@ define([
             });
 
             assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(instance.unselectedModules, [rawData[1]]);
+            assert.deepEqual(instance.selectedModules, [rawData[0]]);
             assert.deepEqual(
                instance._selectedSource.update.firstCall.args[0].getRawData(),
                {
@@ -917,42 +906,6 @@ define([
             };
 
             assert.isTrue(View.sourceFilter(item, filter));
-         });
-      });
-
-      describe('_selectedItemsReadyCallback', function () {
-         it('should save items on instance', async function () {
-            const items = new RecordSet({
-               rawData: []
-            });
-            const url = 'https://online.sbis.ru';
-            stubContentsModules(['Controls', 'UI', 'Core']);
-            stubTabURL(url);
-            stubCookieValue('true', url);
-            stubPinnedModules({});
-            await instance._beforeMount();
-
-            instance._selectedItemsReadyCallback(items);
-
-            assert.equal(instance.selectedItems, items);
-         });
-      });
-
-      describe('_unselectedItemsReadyCallback', function () {
-         it('should save items on instance', async function () {
-            const items = new RecordSet({
-               rawData: []
-            });
-            const url = 'https://online.sbis.ru';
-            stubContentsModules(['Controls', 'UI', 'Core']);
-            stubTabURL(url);
-            stubCookieValue('true', url);
-            stubPinnedModules({});
-            await instance._beforeMount();
-
-            instance._unselectedItemsReadyCallback(items);
-
-            assert.equal(instance.unselectedItems, items);
          });
       });
 
@@ -1146,22 +1099,99 @@ define([
          });
       });
 
-      describe('_resetCookie', function () {
-         it('should remove cookie and pass _reloadPage as the callback', async function () {
-            const url = 'https://online.sbis.ru';
-            stubTabURL(url);
-            sandbox.stub(chrome.cookies, 'remove');
-
-            await instance._resetCookie();
-
-            sinon.assert.calledWithExactly(
-               chrome.cookies.remove,
+      describe('_moveFavoriteItems', function () {
+         it('should set cookie to all pinned modules + selected items', function () {
+            sandbox.stub(instance, 'setCookie');
+            instance.pinnedModules = new Set();
+            instance.pinnedModules.add('anotherTest');
+            instance.pinnedModules.add('andAnotherOne');
+            instance.unselectedModules = [
                {
-                  name: 's3debug',
-                  url
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
                },
-               instance._reloadPage
-            );
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
+                  isPinned: true
+               },
+               {
+                  id: 'andAnotherOne',
+                  title: 'andAnotherOne',
+                  isPinned: true
+               }
+            ];
+            instance.selectedModules = [
+               {
+                  id: 'andAnotherNotPinnedOne',
+                  title: 'andAnotherNotPinnedOne',
+                  isPinned: false
+               }
+            ];
+
+            instance._moveFavoriteItems({}, true);
+
+            sinon.assert.calledWithExactly(instance.setCookie, [
+               'anotherTest',
+               'andAnotherOne',
+               'andAnotherNotPinnedOne'
+            ]);
+         });
+
+         it('should unselect selected pinned modules', function () {
+            sandbox.stub(instance, 'setCookie');
+            instance.pinnedModules = new Set();
+            instance.pinnedModules.add('anotherTest');
+            instance.pinnedModules.add('andAnotherOne');
+            instance.unselectedModules = [
+               {
+                  id: 'test',
+                  title: 'test',
+                  isPinned: false
+               },
+               {
+                  id: 'andAnotherOne',
+                  title: 'andAnotherOne',
+                  isPinned: true
+               }
+            ];
+            instance.selectedModules = [
+               {
+                  id: 'anotherTest',
+                  title: 'anotherTest',
+                  isPinned: true
+               },
+               {
+                  id: 'andAnotherNotPinnedOne',
+                  title: 'andAnotherNotPinnedOne',
+                  isPinned: false
+               }
+            ];
+
+            instance._moveFavoriteItems({}, false);
+
+            sinon.assert.calledWithExactly(instance.setCookie, [
+               'andAnotherNotPinnedOne'
+            ]);
+         });
+      });
+
+      describe('_moveAllItems', function () {
+         it('should set cookie to true', function () {
+            sandbox.stub(instance, 'setCookie');
+
+            instance._moveAllItems({}, true);
+
+            sinon.assert.calledWithExactly(instance.setCookie, ['true']);
+         });
+
+         it('should call setCookie with empty array (this will remove the cookie)', function () {
+            sandbox.stub(instance, 'setCookie');
+
+            instance._moveAllItems({}, false);
+
+            sinon.assert.calledWithExactly(instance.setCookie, []);
          });
       });
 
