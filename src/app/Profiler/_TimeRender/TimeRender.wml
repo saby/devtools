@@ -1,10 +1,4 @@
 <div class="devtools-TimeRender ws-flexbox ws-align-items-center">
     <span class="devtools-TimeRender__value ws-flex-shrink-0">{{ _formattedValue }}</span>
-    <ws:if data="{{ _options.length }}">
-        <div class="ws-flex-grow-1">
-            <div title="{{ _formattedValue }}"
-                 class="devtools-TimeRender__bar devtools-TimeRender__bar_backgroundColor_{{ _options.barColor }}_theme_{{ _options.theme }}"
-                 attr:style="width: {{_options.length}}%;"></div>
-        </div>
-    </ws:if>
+    <Profiler._StackedBar.StackedBar bars="{{ _options.bars }}"/>
 </div>

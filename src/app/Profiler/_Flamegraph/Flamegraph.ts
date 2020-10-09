@@ -3,7 +3,7 @@ import { descriptor } from 'Types/entity';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { getWidth } from './Utils';
 import { formatTime, getBackgroundClassBasedOnReason } from '../_utils/Utils';
-import template = require('wml!Profiler/_Flamegraph/Flamegraph');
+import * as template from 'wml!Profiler/_Flamegraph/Flamegraph';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { WARNING_NAMES } from 'Profiler/_Warning/const';
 
@@ -11,6 +11,7 @@ export interface IFlamegraphControlNode extends IFrontendControlNode {
    selfDuration: number;
    actualDuration: number;
    actualBaseDuration: number;
+   lifecycleDuration: number;
    updateReason: ControlUpdateReason;
    hasChangesInSubtree: boolean;
    warnings?: WARNING_NAMES[];

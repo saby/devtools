@@ -1,12 +1,12 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-import template = require('wml!Profiler/_TimeRender/TimeRender');
+import * as template from 'wml!Profiler/_TimeRender/TimeRender';
 import { descriptor } from 'Types/entity';
 import { formatTime } from '../_utils/Utils';
+import { IStackedBar } from '../_StackedBar/StackedBar';
 
 interface IOptions extends IControlOptions {
    value: number;
-   barColor: number;
-   length?: number;
+   bars: IStackedBar[];
 }
 
 /**
@@ -32,8 +32,7 @@ class TimeRender extends Control<IOptions> {
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
          value: descriptor(Number).required(),
-         barColor: descriptor(Number).required(),
-         length: descriptor(Number),
+         bars: descriptor(Array).required(),
          readOnly: descriptor(Boolean),
          theme: descriptor(String)
       };

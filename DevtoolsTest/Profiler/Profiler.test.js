@@ -5,13 +5,13 @@ define([
    'File/ResourceGetter/fileSystem',
    'injection/const',
    'DevtoolsTest/getJSDOM'
-], function(mockChrome, Profiler, popupLib, fileSystem, iConstants, getJSDOM) {
+], function (mockChrome, Profiler, popupLib, fileSystem, iConstants, getJSDOM) {
    let sandbox;
    Profiler = Profiler.default;
    const needJSDOM = typeof window === 'undefined';
 
-   describe('Profiler/_Profiler/Profiler', function() {
-      before(async function() {
+   describe('Profiler/_Profiler/Profiler', function () {
+      before(async function () {
          if (needJSDOM) {
             const { JSDOM } = await getJSDOM();
             const dom = new JSDOM('');
@@ -22,7 +22,7 @@ define([
          }
       });
 
-      after(function() {
+      after(function () {
          if (needJSDOM) {
             delete global.window;
             delete global.document;
@@ -31,16 +31,16 @@ define([
          }
       });
 
-      beforeEach(function() {
+      beforeEach(function () {
          sandbox = sinon.createSandbox();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          sandbox.restore();
       });
 
-      describe('constructor', function() {
-         it('should subscribe to all necessary events', function() {
+      describe('constructor', function () {
+         it('should subscribe to all necessary events', function () {
             const listeners = new Map();
             const store = {
                addListener(key, value) {
@@ -58,7 +58,7 @@ define([
             assert.isTrue(listeners.has('endSynchronization'));
             assert.isTrue(listeners.has('profilingStatus'));
          });
-         it('should call toggleDevtoolsOpened', function() {
+         it('should call toggleDevtoolsOpened', function () {
             const store = {
                addListener() {},
                dispatch() {},
@@ -71,7 +71,7 @@ define([
 
             assert.isTrue(stub.calledOnceWithExactly(true));
          });
-         it('should dispatch getProfilingStatus event', function() {
+         it('should dispatch getProfilingStatus event', function () {
             const store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -86,8 +86,8 @@ define([
          });
       });
 
-      describe('_beforeUpdate', function() {
-         it('should not call __setSelectedCommitId because the tab isn\'t selected', function() {
+      describe('_beforeUpdate', function () {
+         it("should not call __setSelectedCommitId because the tab isn't selected", function () {
             const store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -105,7 +105,7 @@ define([
             sinon.assert.notCalled(instance.__setSelectedCommitId);
          });
 
-         it('should not call __setSelectedCommitId because the store doesn\'t have a selectedId', function() {
+         it("should not call __setSelectedCommitId because the store doesn't have a selectedId", function () {
             const store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -124,7 +124,7 @@ define([
             sinon.assert.notCalled(instance.__setSelectedCommitId);
          });
 
-         it('should not call __setSelectedCommitId because there\'s no snapshot', function() {
+         it("should not call __setSelectedCommitId because there's no snapshot", function () {
             const store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -145,7 +145,7 @@ define([
             sinon.assert.notCalled(instance.__setSelectedCommitId);
          });
 
-         it('should not call __setSelectedCommitId because the snapshot doesn\'t have an item with the id from the store', function() {
+         it("should not call __setSelectedCommitId because the snapshot doesn't have an item with the id from the store", function () {
             const store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -159,9 +159,11 @@ define([
                selected: true
             };
             const instance = new Profiler(options);
-            instance._snapshot = [{
-               id: 0
-            }];
+            instance._snapshot = [
+               {
+                  id: 0
+               }
+            ];
             sandbox.stub(instance, '__setSelectedCommitId');
 
             instance._beforeUpdate(options);
@@ -169,7 +171,7 @@ define([
             sinon.assert.notCalled(instance.__setSelectedCommitId);
          });
 
-         it('should call __setSelectedCommitId', function() {
+         it('should call __setSelectedCommitId', function () {
             const store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -183,9 +185,11 @@ define([
                selected: true
             };
             const instance = new Profiler(options);
-            instance._snapshot = [{
-               id: 1
-            }];
+            instance._snapshot = [
+               {
+                  id: 1
+               }
+            ];
             sandbox.stub(instance, '__setSelectedCommitId');
 
             instance._beforeUpdate(options);
@@ -194,7 +198,7 @@ define([
          });
       });
 
-      it('_masterFilter', function() {
+      it('_masterFilter', function () {
          const instance = new Profiler({
             store: {
                addListener() {},
@@ -215,9 +219,9 @@ define([
          );
       });
 
-      describe('__setProfilingData', function() {
+      describe('__setProfilingData', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -226,7 +230,7 @@ define([
                }
             });
          });
-         it('should correctly transform profiling data to a list of synchronizations', function() {
+         it('should correctly transform profiling data to a list of synchronizations', function () {
             const initialIdToDuration = [
                [1, 10],
                [2, 15]
@@ -289,7 +293,7 @@ define([
             );
          });
 
-         it('should correctly transform empty profiling data to a list of synchronizations', function() {
+         it('should correctly transform empty profiling data to a list of synchronizations', function () {
             const backendProfilingData = {
                initialIdToDuration: [],
                syncList: []
@@ -309,9 +313,9 @@ define([
          });
       });
 
-      describe('__setSynchronization', function() {
+      describe('__setSynchronization', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -320,7 +324,7 @@ define([
                }
             });
          });
-         it('should correctly calculate snapshot of the synchronization', function() {
+         it('should correctly calculate snapshot of the synchronization', function () {
             const profilingData = {
                initialIdToDuration: new Map([
                   [1, 10],
@@ -338,6 +342,7 @@ define([
                               1,
                               {
                                  selfDuration: 5,
+                                 lifecycleDuration: 3,
                                  updateReason: 'forceUpdated'
                               }
                            ],
@@ -345,6 +350,7 @@ define([
                               2,
                               {
                                  selfDuration: 7,
+                                 lifecycleDuration: 4,
                                  updateReason: 'parentUpdated'
                               }
                            ]
@@ -360,6 +366,7 @@ define([
                               1,
                               {
                                  selfDuration: 5,
+                                 lifecycleDuration: 1,
                                  updateReason: 'forceUpdated',
                                  domChanged: true,
                                  isVisible: true,
@@ -371,6 +378,7 @@ define([
                               2,
                               {
                                  selfDuration: 7,
+                                 lifecycleDuration: 1.1,
                                  updateReason: 'parentUpdated',
                                  domChanged: false,
                                  isVisible: true
@@ -463,11 +471,8 @@ define([
             instance._synchronizations = synchronizations;
             instance._elementsSnapshot = elementsSnapshot;
             instance._changesBySynchronization = changesBySynchronization;
-            const updateSelectedCommitChangesStub = sandbox.stub(
-               instance,
-               '__updateSelectedCommitChanges'
-            );
-            const updateSearchStub = sandbox.stub(instance, '__updateSearch');
+            sandbox.stub(instance, '__updateSelectedCommitChanges');
+            sandbox.stub(instance, '__updateSearch');
 
             instance.__setSynchronization('test2');
 
@@ -481,6 +486,7 @@ define([
                   selfDuration: 5,
                   actualBaseDuration: 42,
                   actualDuration: 37,
+                  lifecycleDuration: 1,
                   warnings: ['unusedReceivedState', 'asyncControl'],
                   hasChangesInSubtree: true
                },
@@ -495,6 +501,7 @@ define([
                   selfDuration: 7,
                   actualBaseDuration: 12,
                   actualDuration: 7,
+                  lifecycleDuration: 1.1,
                   warnings: ['domUnchanged'],
                   hasChangesInSubtree: true
                },
@@ -509,6 +516,7 @@ define([
                   selfDuration: 2,
                   actualBaseDuration: 2,
                   actualDuration: 0,
+                  lifecycleDuration: 0,
                   warnings: undefined,
                   hasChangesInSubtree: false
                },
@@ -523,6 +531,7 @@ define([
                   selfDuration: 3,
                   actualBaseDuration: 3,
                   actualDuration: 0,
+                  lifecycleDuration: 0,
                   warnings: undefined,
                   hasChangesInSubtree: false
                },
@@ -537,6 +546,7 @@ define([
                   selfDuration: 10,
                   actualBaseDuration: 10,
                   actualDuration: 10,
+                  lifecycleDuration: undefined,
                   warnings: ['invisible'],
                   hasChangesInSubtree: true
                },
@@ -551,6 +561,7 @@ define([
                   selfDuration: 15,
                   actualBaseDuration: 15,
                   actualDuration: 15,
+                  lifecycleDuration: undefined,
                   warnings: undefined,
                   hasChangesInSubtree: true
                }
@@ -568,13 +579,15 @@ define([
                forceUpdatedCount: 1,
                destroyedCount: 0
             });
-            assert.isTrue(
-               updateSelectedCommitChangesStub.calledOnceWithExactly()
+            sinon.assert.calledOnce(instance.__updateSelectedCommitChanges);
+            sinon.assert.calledWithExactly(
+               instance.__updateSelectedCommitChanges
             );
-            assert.isTrue(updateSearchStub.calledOnceWithExactly(''));
+            sinon.assert.calledOnce(instance.__updateSearch);
+            sinon.assert.calledWithExactly(instance.__updateSearch, '');
          });
 
-         it('should take snapshot of the synchronization from the cache and not call __getElementsBySynchronization', function() {
+         it('should take snapshot of the synchronization from the cache and not call __getElementsBySynchronization', function () {
             const expectedSnapshot = [
                {
                   id: 1,
@@ -632,9 +645,9 @@ define([
          });
       });
 
-      describe('__updateSelectedCommitChanges', function() {
+      describe('__updateSelectedCommitChanges', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -643,7 +656,7 @@ define([
                }
             });
          });
-         it('should set _selectedCommitChanges to undefined because there is no selected commit', function() {
+         it('should set _selectedCommitChanges to undefined because there is no selected commit', function () {
             instance._selectedCommitId = undefined;
             instance._selectedCommitChanges = {
                updateReason: 'unchanged'
@@ -658,7 +671,7 @@ define([
             assert.equal(instance._logicParentName, '');
          });
 
-         it('should find the correct changesDescription', function() {
+         it('should find the correct changesDescription', function () {
             const changesDescription = {
                updateReason: 'mounted',
                changedOptions: ['value', 'iconSize'],
@@ -719,7 +732,7 @@ define([
             assert.equal(instance._logicParentName, 'LogicParent');
          });
 
-         it('should find the correct changesDescription and correct warnings', function() {
+         it('should find the correct changesDescription and correct warnings', function () {
             const changesDescription = {
                updateReason: 'mounted',
                changedOptions: ['value', 'iconSize'],
@@ -773,7 +786,7 @@ define([
             assert.equal(instance._logicParentName, '');
          });
 
-         it("should set update reason as unchanged because there're no changes for the selected commit", function() {
+         it("should set update reason as unchanged because there're no changes for the selected commit", function () {
             instance._profilingData = {
                initialIdToDuration: new Map(),
                synchronizationKeyToDescription: new Map([
@@ -811,9 +824,9 @@ define([
          });
       });
 
-      describe('__getWarnings', function() {
+      describe('__getWarnings', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -823,11 +836,11 @@ define([
             });
          });
 
-         it('should return undefined because there is no item', function() {
+         it('should return undefined because there is no item', function () {
             assert.isUndefined(instance.__getWarnings());
          });
 
-         it('should return undefined because selected commit does not contain warnings', function() {
+         it('should return undefined because selected commit does not contain warnings', function () {
             assert.isUndefined(
                instance.__getWarnings({
                   id: 2,
@@ -840,7 +853,7 @@ define([
             );
          });
 
-         it('should return warnings', function() {
+         it('should return warnings', function () {
             assert.deepEqual(
                instance.__getWarnings({
                   id: 2,
@@ -860,9 +873,9 @@ define([
          });
       });
 
-      describe('_masterMarkedKeyChanged', function() {
+      describe('_masterMarkedKeyChanged', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -871,7 +884,7 @@ define([
                }
             });
          });
-         it('should set _selectedSynchronizationId and call __setSynchronization with that id', function() {
+         it('should set _selectedSynchronizationId and call __setSynchronization with that id', function () {
             sandbox.stub(instance, '__setSynchronization');
             instance._selectedSynchronizationId = undefined;
             instance._synchronizations = [
@@ -889,7 +902,7 @@ define([
             sinon.assert.calledWithExactly(instance.__setSynchronization, id);
          });
 
-         it('should not call __setSynchronization because synchronization with this id does not exist', function() {
+         it('should not call __setSynchronization because synchronization with this id does not exist', function () {
             sandbox.stub(instance, '__setSynchronization');
             instance._selectedSynchronizationId = undefined;
             instance._synchronizations = [
@@ -909,10 +922,10 @@ define([
          });
       });
 
-      describe('_detailMarkedKeyChanged', function() {
+      describe('_detailMarkedKeyChanged', function () {
          let instance;
          let store;
-         beforeEach(function() {
+         beforeEach(function () {
             store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -926,7 +939,7 @@ define([
                store
             });
          });
-         it('should call __setSelectedCommitId and calls __updateSelectedCommitChanges', function() {
+         it('should call __setSelectedCommitId and calls __updateSelectedCommitChanges', function () {
             sandbox.stub(instance, '__updateSelectedCommitChanges');
             sandbox.stub(instance._options.store, 'setSelectedId');
             instance._selectedCommitId = undefined;
@@ -945,9 +958,9 @@ define([
          });
       });
 
-      describe('_logicParentHoverChanged', function() {
+      describe('_logicParentHoverChanged', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -957,7 +970,7 @@ define([
             });
          });
 
-         it('should set instance._logicParentHovered to the passed state', function() {
+         it('should set instance._logicParentHovered to the passed state', function () {
             instance._logicParentHovered = false;
 
             instance._logicParentHoverChanged({}, false);
@@ -971,9 +984,9 @@ define([
          });
       });
 
-      describe('__getElementsBySynchronization', function() {
+      describe('__getElementsBySynchronization', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -982,13 +995,13 @@ define([
                }
             });
          });
-         it('should throw error', function() {
+         it('should throw error', function () {
             assert.throws(
                () => instance.__getElementsBySynchronization('1'),
                "Synchronization with id 1 didn't happen during this profiling session."
             );
          });
-         it('should take result from the cache', function() {
+         it('should take result from the cache', function () {
             const result = {};
             instance._elementsBySynchronization.set('test', result);
 
@@ -999,7 +1012,7 @@ define([
                result
             );
          });
-         it('should add item', function() {
+         it('should add item', function () {
             const elementsSnapshot = [
                {
                   id: 1,
@@ -1060,7 +1073,7 @@ define([
                0
             );
          });
-         it('should use cached elements from the previous synchronization', function() {
+         it('should use cached elements from the previous synchronization', function () {
             const changesBySynchronization = new Map([
                ['test2', [[1, 4, '4', 0, 3, 2]]]
             ]);
@@ -1131,7 +1144,7 @@ define([
                0
             );
          });
-         it('should correctly calculate the amount of deleted items', function() {
+         it('should correctly calculate the amount of deleted items', function () {
             const elementsSnapshot = [
                {
                   id: 1,
@@ -1184,9 +1197,9 @@ define([
          });
       });
 
-      describe('__onOperation', function() {
+      describe('__onOperation', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -1195,7 +1208,7 @@ define([
                }
             });
          });
-         it('should not change _currentOperations', function() {
+         it('should not change _currentOperations', function () {
             const operations = [];
             instance._isProfiling = false;
             instance._currentOperations = operations;
@@ -1205,7 +1218,7 @@ define([
             assert.equal(instance._currentOperations.length, 0);
             assert.equal(instance._currentOperations, operations);
          });
-         it('should add operation to currentOperations', function() {
+         it('should add operation to currentOperations', function () {
             const operation = [3, 2];
             instance._isProfiling = true;
             instance._currentOperations = [];
@@ -1217,9 +1230,9 @@ define([
          });
       });
 
-      describe('__onEndSynchronization', function() {
+      describe('__onEndSynchronization', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -1228,7 +1241,7 @@ define([
                }
             });
          });
-         it('should not change _currentOperations and _changesBySynchronization', function() {
+         it('should not change _currentOperations and _changesBySynchronization', function () {
             const operations = [];
             instance._isProfiling = false;
             instance._currentOperations = operations;
@@ -1242,7 +1255,7 @@ define([
             assert.equal(instance._currentOperations, operations);
             assert.isTrue(stub.notCalled);
          });
-         it('should add _currentOperations to _changesBySynchronization and reset them', function() {
+         it('should add _currentOperations to _changesBySynchronization and reset them', function () {
             const operations = [[3, 2]];
             instance._isProfiling = true;
             instance._currentOperations = operations;
@@ -1258,7 +1271,7 @@ define([
          });
       });
 
-      describe('_toggleProfiling', function() {
+      describe('_toggleProfiling', function () {
          let instance;
          const options = {
             store: {
@@ -1267,10 +1280,10 @@ define([
                dispatch() {}
             }
          };
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler(options);
          });
-         it('should fire toggleProfiling event with true as an argument', function() {
+         it('should fire toggleProfiling event with true as an argument', function () {
             instance.saveOptions(options);
             const stub = sandbox.stub(instance._options.store, 'dispatch');
             instance._isProfiling = false;
@@ -1279,7 +1292,7 @@ define([
 
             assert.isTrue(stub.calledOnceWithExactly('toggleProfiling', true));
          });
-         it('should fire toggleProfiling event with false as an argument', function() {
+         it('should fire toggleProfiling event with false as an argument', function () {
             instance.saveOptions(options);
             const stub = sandbox.stub(instance._options.store, 'dispatch');
             instance._isProfiling = true;
@@ -1290,7 +1303,7 @@ define([
          });
       });
 
-      describe('__onProfilingStatusChanged', function() {
+      describe('__onProfilingStatusChanged', function () {
          let instance;
          const options = {
             store: {
@@ -1299,10 +1312,10 @@ define([
                dispatch() {}
             }
          };
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler(options);
          });
-         it('should set isProfiling to true and clear everything', function() {
+         it('should set isProfiling to true and clear everything', function () {
             sandbox.stub(instance, 'resetState');
             instance._isProfiling = false;
 
@@ -1312,7 +1325,7 @@ define([
             sinon.assert.calledWithExactly(instance.resetState);
          });
 
-         it('should fire getSynchronizationsList and getProfilingData events', function() {
+         it('should fire getSynchronizationsList and getProfilingData events', function () {
             instance.saveOptions(options);
             instance._isProfiling = true;
             const stub = sandbox.stub(instance._options.store, 'dispatch');
@@ -1324,7 +1337,7 @@ define([
             assert.isTrue(stub.calledWith('getProfilingData'));
          });
 
-         it('should not change _isProfiling and state', function() {
+         it('should not change _isProfiling and state', function () {
             instance._isProfiling = true;
             Object.seal(instance);
 
@@ -1335,9 +1348,9 @@ define([
          });
       });
 
-      describe('_reloadAndProfile', function() {
+      describe('_reloadAndProfile', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -1347,7 +1360,7 @@ define([
             });
          });
 
-         it('reloads window and sets __WASABY_START_PROFILING to true', function() {
+         it('reloads window and sets __WASABY_START_PROFILING to true', function () {
             sandbox.stub(chrome, 'devtools').value({
                inspectedWindow: {
                   reload: sandbox.stub()
@@ -1363,9 +1376,9 @@ define([
          });
       });
 
-      describe('_onSearchValueChanged', function() {
+      describe('_onSearchValueChanged', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -1375,7 +1388,7 @@ define([
             });
          });
 
-         it('calls __updateSearch with the second argument', function() {
+         it('calls __updateSearch with the second argument', function () {
             const stub = sandbox.stub(instance, '__updateSearch');
 
             instance._onSearchValueChanged({}, 'test');
@@ -1384,10 +1397,10 @@ define([
          });
       });
 
-      describe('__updateSearch', function() {
+      describe('__updateSearch', function () {
          let instance;
          let store;
-         beforeEach(function() {
+         beforeEach(function () {
             store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -1402,7 +1415,7 @@ define([
             });
          });
 
-         it('should not change _selectedCommitId and __updateSelectedCommitChanges', function() {
+         it('should not change _selectedCommitId and __updateSelectedCommitChanges', function () {
             instance._selectedCommitId = 1;
             instance._lastFoundItemIndex = 1;
             instance._searchTotal = 1;
@@ -1420,7 +1433,7 @@ define([
             assert.equal(instance._searchTotal, 0);
          });
 
-         it('should update everything related to search and selected commit changes', function() {
+         it('should update everything related to search and selected commit changes', function () {
             instance._selectedCommitId = 1;
             sandbox.stub(instance._searchController, 'updateSearch').returns({
                id: 2,
@@ -1445,10 +1458,10 @@ define([
          });
       });
 
-      describe('_onSearchKeydown', function() {
+      describe('_onSearchKeydown', function () {
          let instance;
          let store;
-         beforeEach(function() {
+         beforeEach(function () {
             store = {
                addListener() {},
                toggleDevtoolsOpened() {},
@@ -1463,7 +1476,7 @@ define([
             });
          });
 
-         it('should not change state', function() {
+         it('should not change state', function () {
             Object.seal(instance);
 
             assert.doesNotThrow(() =>
@@ -1475,7 +1488,7 @@ define([
             );
          });
 
-         it('should not change _selectedCommitId', function() {
+         it('should not change _selectedCommitId', function () {
             const getNextItemIdStub = sandbox
                .stub(instance._searchController, 'getNextItemId')
                .returns({
@@ -1507,7 +1520,7 @@ define([
             assert.equal(instance._searchTotal, 0);
          });
 
-         it('should update everything related to search and selected commit changes', function() {
+         it('should update everything related to search and selected commit changes', function () {
             sandbox
                .stub(instance._searchController, 'getNextItemId')
                .withArgs('123', false)
@@ -1538,9 +1551,9 @@ define([
          });
       });
 
-      describe('_exportToJSON', function() {
+      describe('_exportToJSON', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -1550,7 +1563,7 @@ define([
             });
          });
 
-         it('should stringify url', function() {
+         it('should stringify url', function () {
             const fakeA = {
                click: sandbox.stub()
             };
@@ -1686,9 +1699,9 @@ define([
          });
       });
 
-      describe('_importFromJSON', function() {
+      describe('_importFromJSON', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -1698,7 +1711,7 @@ define([
             });
          });
 
-         it('should not reset state when no files were chosen', async function() {
+         it('should not reset state when no files were chosen', async function () {
             const fakeGetter = {
                getFiles: sandbox.stub().resolves()
             };
@@ -1716,7 +1729,7 @@ define([
             sinon.assert.notCalled(instance.resetState);
          });
 
-         it('should show error message and not reset state when wrong files were selected', async function() {
+         it('should show error message and not reset state when wrong files were selected', async function () {
             const fakeGetter = {
                getFiles: sandbox.stub().resolves([
                   {
@@ -1744,7 +1757,7 @@ define([
             sinon.assert.notCalled(instance.resetState);
          });
 
-         describe('should show error message and not reset state when an incorrect profile was passed', function() {
+         describe('should show error message and not reset state when an incorrect profile was passed', function () {
             const incorrectProfiles = [
                {
                   syncList: []
@@ -1770,7 +1783,7 @@ define([
             ];
 
             incorrectProfiles.forEach((profile, index) => {
-               it(`incorrect profile index: ${index}`, async function() {
+               it(`incorrect profile index: ${index}`, async function () {
                   const fakeGetter = {
                      getFiles: sandbox.stub().resolves([
                         {
@@ -1805,7 +1818,7 @@ define([
             });
          });
 
-         it('should show error message and not reset state when an error occurs during profile parsing', async function() {
+         it('should show error message and not reset state when an error occurs during profile parsing', async function () {
             const fakeGetter = {
                getFiles: sandbox.stub().resolves([
                   {
@@ -1833,7 +1846,7 @@ define([
             sinon.assert.notCalled(instance.resetState);
          });
 
-         it('should apply imported profile', async function() {
+         it('should apply imported profile', async function () {
             const fakeGetter = {
                getFiles: sandbox.stub().resolves([
                   {
@@ -2004,9 +2017,9 @@ define([
          });
       });
 
-      describe('_onFileDrop', function() {
+      describe('_onFileDrop', function () {
          let instance;
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler({
                store: {
                   addListener() {},
@@ -2016,7 +2029,7 @@ define([
             });
          });
 
-         it('should show error message and not reset state when wrong files were selected', async function() {
+         it('should show error message and not reset state when wrong files were selected', async function () {
             sandbox.stub(instance, 'resetState');
             sandbox.stub(popupLib.Confirmation, 'openPopup');
             // setup end
@@ -2035,7 +2048,7 @@ define([
             sinon.assert.notCalled(instance.resetState);
          });
 
-         describe('should show error message and not reset state when an incorrect profile was passed', function() {
+         describe('should show error message and not reset state when an incorrect profile was passed', function () {
             const incorrectProfiles = [
                {
                   syncList: []
@@ -2061,7 +2074,7 @@ define([
             ];
 
             incorrectProfiles.forEach((profile, index) => {
-               it(`incorrect profile index: ${index}`, async function() {
+               it(`incorrect profile index: ${index}`, async function () {
                   sandbox.stub(instance, 'resetState');
                   sandbox.stub(popupLib.Confirmation, 'openPopup');
                   // setup end
@@ -2085,7 +2098,7 @@ define([
             });
          });
 
-         it('should show error message and not reset state when an error occurs during profile parsing', async function() {
+         it('should show error message and not reset state when an error occurs during profile parsing', async function () {
             sandbox.stub(instance, 'resetState');
             sandbox.stub(popupLib.Confirmation, 'openPopup');
             // setup end
@@ -2104,7 +2117,7 @@ define([
             sinon.assert.notCalled(instance.resetState);
          });
 
-         it('should apply imported profile', async function() {
+         it('should apply imported profile', async function () {
             sandbox.stub(instance, 'resetState');
             sandbox.stub(popupLib.Confirmation, 'openPopup');
             // setup end
@@ -2266,7 +2279,7 @@ define([
          });
       });
 
-      describe('__resetState', function() {
+      describe('__resetState', function () {
          let instance;
          const options = {
             store: {
@@ -2277,10 +2290,10 @@ define([
                setSelectedId() {}
             }
          };
-         beforeEach(function() {
+         beforeEach(function () {
             instance = new Profiler(options);
          });
-         it('should clear everything without resetting selectedId on the store because the id is not the same', function() {
+         it('should clear everything without resetting selectedId on the store because the id is not the same', function () {
             const elements = [
                {
                   id: 0,
@@ -2329,7 +2342,7 @@ define([
             sinon.assert.notCalled(instance._options.store.setSelectedId);
          });
 
-         it('should clear everything and reset selectedId on the store because the id is the same', function() {
+         it('should clear everything and reset selectedId on the store because the id is the same', function () {
             const elements = [
                {
                   id: 0,

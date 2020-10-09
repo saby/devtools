@@ -46,3 +46,18 @@
 .devtools-reason_background_destroyed_theme_@{themeName} {
    background: @background-color_reason_destroyed;
 }
+
+.devtools-Profiler__duration_renderDuration_theme_@{themeName} {
+   background: @background-color_duration_renderDuration;
+}
+
+.devtools-Profiler__duration_lifecycleDuration_theme_@{themeName} {
+   background: @background-color_duration_lifecycleDuration;
+}
+
+.for(0, 8, {
+   .devtools-Profiler__duration_@{_i}_theme_@{themeName} {
+      @color: "background-color_duration_@{_i}";
+      background: @@color;
+   }
+});
