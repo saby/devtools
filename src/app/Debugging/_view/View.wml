@@ -1,13 +1,8 @@
 <Devtool.Layout.Browser>
     <ws:headTemplate>
-        <Controls.buttons:Button tooltip="Remove s3debug cookie and reload the page"
-                                 caption="Reset"
-                                 attr:class="devtools-Debugging__headElement"
-                                 on:click="_resetCookie()" />
         <ws:if data="{{ _hasUnsavedChanges }}">
-            <Controls.buttons:Button caption="You have unsaved changes. Click here to reload the page and apply them."
-                                     buttonStyle="secondary"
-                                     viewMode="link"
+            <Controls.buttons:Button caption="Apply"
+                                     tooltip="You have unsaved changes. Click here to reload the page and apply them."
                                      on:click="_reloadPage()" />
         </ws:if>
     </ws:headTemplate>
@@ -29,12 +24,21 @@
                     <ws:search>
                         <Controls.search:Input bind:value="_unselectedSearchValue" />
                     </ws:search>
+                    <ws:beforeFilterTemplate>
+                        <Controls.buttons:Button icon="icon-DayForwardNull"
+                                                 viewMode="linkButton"
+                                                 tooltip="Select favorite modules"
+                                                 on:click="_moveFavoriteItems(true)" />
+                        <Controls.buttons:Button icon="icon-DayForward"
+                                                 viewMode="linkButton"
+                                                 tooltip="Select all modules"
+                                                 on:click="_moveAllItems(true)" />
+                    </ws:beforeFilterTemplate>
                     <ws:content>
                         <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
                             <Controls.list:View name="unselectedList"
                                                 itemActions="{{ _unselectedActions }}"
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
-                                                itemsReadyCallback="{{ _unselectedItemsReadyCallback }}"
                                                 navigation="{{ _navigation }}"
                                                 on:itemClick="_changeCookie('add')">
                                 <ws:virtualScrollConfig pageSize="{{ 50 }}" />
@@ -63,12 +67,21 @@
                     <ws:search>
                         <Controls.search:Input bind:value="_selectedSearchValue" />
                     </ws:search>
+                    <ws:beforeFilterTemplate>
+                        <Controls.buttons:Button icon="icon-DayBackwardNull"
+                                                 viewMode="linkButton"
+                                                 tooltip="Unselect favorite modules"
+                                                 on:click="_moveFavoriteItems(false)" />
+                        <Controls.buttons:Button icon="icon-DayBackward"
+                                                 viewMode="linkButton"
+                                                 tooltip="Unselect all modules"
+                                                 on:click="_moveAllItems(false)" />
+                    </ws:beforeFilterTemplate>
                     <ws:content>
                         <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
                             <Controls.list:View name="selectedList"
                                                 itemActions="{{ _selectedActions }}"
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
-                                                itemsReadyCallback="{{ _selectedItemsReadyCallback }}"
                                                 navigation="{{ _navigation }}"
                                                 on:itemClick="_changeCookie('delete')">
                                 <ws:virtualScrollConfig pageSize="{{ 50 }}"/>
