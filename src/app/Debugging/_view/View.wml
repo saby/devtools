@@ -44,7 +44,7 @@
                                 <ws:virtualScrollConfig pageSize="{{ 50 }}" />
                                 <ws:itemTemplate>
                                     <ws:partial template="Controls/list:ItemTemplate"
-                                                attr:class="{{ itemTemplate.itemData.item.isPinned ? 'devtools-Debugging__listItem' }}" />
+                                                attr:class="{{ itemTemplate.itemData.item.isPinned ? 'devtools-Debugging__listItem_pinned' }}" />
                                 </ws:itemTemplate>
                             </Controls.list:View>
                         </Controls.scroll:Container>

@@ -921,12 +921,14 @@ define([
             };
             instance.pinnedModules = new Set();
             sandbox.stub(chrome.storage.sync, 'set');
+            const rawData = {
+               id: 'UI',
+               title: 'UI',
+               isPinned: false
+            };
+            instance.unselectedModules = [rawData];
             const oldItem = new Record({
-               rawData: {
-                  id: 'UI',
-                  title: 'UI',
-                  isPinned: false
-               }
+               rawData
             });
 
             await instance._unselectedActions[0].handler(oldItem);
@@ -945,6 +947,7 @@ define([
             );
             sinon.assert.calledOnce(instance._children.unselectedList.reload);
             assert.deepEqual(instance.pinnedModules, new Set(['UI']));
+            assert.isTrue(instance.unselectedModules[0].isPinned);
             sinon.assert.calledWithExactly(chrome.storage.sync.set, {
                debuggingPinnedModules: ['UI']
             });
@@ -961,12 +964,14 @@ define([
             };
             instance.pinnedModules = new Set(['UI']);
             sandbox.stub(chrome.storage.sync, 'set');
+            const rawData = {
+               id: 'UI',
+               title: 'UI',
+               isPinned: true
+            };
+            instance.unselectedModules = [rawData];
             const oldItem = new Record({
-               rawData: {
-                  id: 'UI',
-                  title: 'UI',
-                  isPinned: true
-               }
+               rawData
             });
 
             await instance._unselectedActions[1].handler(oldItem);
@@ -985,6 +990,7 @@ define([
             );
             sinon.assert.calledOnce(instance._children.unselectedList.reload);
             assert.deepEqual(instance.pinnedModules, new Set());
+            assert.isFalse(instance.unselectedModules[0].isPinned);
             sinon.assert.calledWithExactly(chrome.storage.sync.set, {
                debuggingPinnedModules: []
             });
@@ -1001,12 +1007,14 @@ define([
             };
             instance.pinnedModules = new Set();
             sandbox.stub(chrome.storage.sync, 'set');
+            const rawData = {
+               id: 'UI',
+               title: 'UI',
+               isPinned: false
+            };
+            instance.selectedModules = [rawData];
             const oldItem = new Record({
-               rawData: {
-                  id: 'UI',
-                  title: 'UI',
-                  isPinned: false
-               }
+               rawData
             });
 
             await instance._selectedActions[0].handler(oldItem);
@@ -1025,6 +1033,7 @@ define([
             );
             sinon.assert.calledOnce(instance._children.selectedList.reload);
             assert.deepEqual(instance.pinnedModules, new Set(['UI']));
+            assert.isTrue(instance.selectedModules[0].isPinned);
             sinon.assert.calledWithExactly(chrome.storage.sync.set, {
                debuggingPinnedModules: ['UI']
             });
@@ -1041,12 +1050,14 @@ define([
             };
             instance.pinnedModules = new Set(['UI']);
             sandbox.stub(chrome.storage.sync, 'set');
+            const rawData = {
+               id: 'UI',
+               title: 'UI',
+               isPinned: true
+            };
+            instance.selectedModules = [rawData];
             const oldItem = new Record({
-               rawData: {
-                  id: 'UI',
-                  title: 'UI',
-                  isPinned: true
-               }
+               rawData
             });
 
             await instance._selectedActions[1].handler(oldItem);
@@ -1065,6 +1076,7 @@ define([
             );
             sinon.assert.calledOnce(instance._children.selectedList.reload);
             assert.deepEqual(instance.pinnedModules, new Set());
+            assert.isFalse(instance.selectedModules[0].isPinned);
             sinon.assert.calledWithExactly(chrome.storage.sync.set, {
                debuggingPinnedModules: []
             });
