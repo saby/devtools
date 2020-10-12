@@ -50,7 +50,7 @@
       "wasaby-app": "git+https://platform-git.sbis.ru/saby/wasaby-app.git#rc-21.1000",
       "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-21.1000",
       "saby-inferno": "git+https://platform-git.sbis.ru/saby/inferno.git#rc-21.1000",
-      "wasaby-requirejs-loader": "git+https://platform-git.sbis.ru/saby/wasaby-requirejs-loader#rc-20.7000"
+      "wasaby-requirejs-loader": "git+https://platform-git.sbis.ru/saby/wasaby-requirejs-loader#rc-21.1000"
    },
    "saby-units": {
       "moduleType": "amd",
