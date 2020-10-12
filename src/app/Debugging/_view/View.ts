@@ -60,8 +60,7 @@ class View extends Control<IControlOptions, void[]> {
             this.togglePin(
                item,
                true,
-               this._unselectedSource,
-               this._children.unselectedList
+               'unselected'
             )
       },
       {
@@ -72,8 +71,7 @@ class View extends Control<IControlOptions, void[]> {
             this.togglePin(
                item,
                false,
-               this._unselectedSource,
-               this._children.unselectedList
+               'unselected'
             )
       }
    ];
@@ -86,8 +84,7 @@ class View extends Control<IControlOptions, void[]> {
             this.togglePin(
                item,
                true,
-               this._selectedSource,
-               this._children.selectedList
+               'selected'
             )
       },
       {
@@ -98,8 +95,7 @@ class View extends Control<IControlOptions, void[]> {
             this.togglePin(
                item,
                false,
-               this._selectedSource,
-               this._children.selectedList
+               'selected'
             )
       }
    ];
@@ -484,18 +480,23 @@ class View extends Control<IControlOptions, void[]> {
    private togglePin(
       item: EntityRecord,
       state: boolean,
-      source: Memory,
-      list: ListView
+      currentList: 'selected' | 'unselected'
    ): void {
       const newItem = item.clone();
+      const id = item.get('id');
+      const source = currentList === 'selected' ? this._selectedSource : this._unselectedSource;
+      const list = currentList === 'selected' ? this._children.selectedList : this._children.unselectedList;
+      const modulesArray = currentList === 'selected' ? this.selectedModules : this.unselectedModules;
+      const itemInArray = modulesArray.find((elem) => elem.id === id) as IItem;
       newItem.set('isPinned', state);
+      itemInArray.isPinned = state;
       source.update(newItem).then(() => {
          list.reload();
       });
       if (state) {
-         this.pinnedModules.add(item.get('id'));
+         this.pinnedModules.add(id);
       } else {
-         this.pinnedModules.delete(item.get('id'));
+         this.pinnedModules.delete(id);
       }
       chrome.storage.sync.set({
          debuggingPinnedModules: Array.from(this.pinnedModules)
