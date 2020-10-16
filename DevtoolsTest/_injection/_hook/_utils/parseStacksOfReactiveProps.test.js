@@ -7,7 +7,7 @@ define(['injection/_hook/_utils/parseStacksOfReactiveProps'], function (
          parseStacksOfReactiveProps.parseStacksOfReactiveProps;
 
       const INTERNAL_STACK = 'eval at saveChangedProps (https://fix-cdn.sbis.ru/resources/UI/DevtoolsHook.js:188:71)\n'.repeat(
-         3
+         2
       );
 
       beforeEach(function () {
