@@ -30,7 +30,7 @@ function parseUrl(
    };
 }
 
-const INTERNAL_STACK_SIZE = 3;
+const INTERNAL_STACK_SIZE = 2;
 const CHROME_STACK_REGEXP = /^(eval )?at [^\(]*/;
 const INNER_FUNCTION = /\((.* \(.*\),)/;
 const CHROME_ERROR_REGEXP = /at (new )?(\S* (\[.*\] )?)?\(?(\S+)/;
