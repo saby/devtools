@@ -487,7 +487,11 @@ define([
                   actualBaseDuration: 42,
                   actualDuration: 37,
                   lifecycleDuration: 1,
-                  warnings: ['unusedReceivedState', 'asyncControl'],
+                  warnings: [
+                     'unusedReceivedState',
+                     'asyncControl',
+                     'manualForceUpdate'
+                  ],
                   hasChangesInSubtree: true
                },
                {

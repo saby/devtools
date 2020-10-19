@@ -8,7 +8,12 @@ export interface IWarning {
    template: string;
 }
 
-export type WARNING_NAMES = 'domUnchanged' | 'invisible' | 'unusedReceivedState' | 'asyncControl';
+export type WARNING_NAMES =
+   | 'domUnchanged'
+   | 'invisible'
+   | 'unusedReceivedState'
+   | 'asyncControl'
+   | 'manualForceUpdate';
 
 export const WARNINGS: Record<WARNING_NAMES, IWarning> = {
    domUnchanged: {
@@ -26,5 +31,9 @@ export const WARNINGS: Record<WARNING_NAMES, IWarning> = {
    asyncControl: {
       caption: 'Async control',
       template: 'Profiler/profiler:asyncControl'
+   },
+   manualForceUpdate: {
+      caption: 'Manual _forceUpdate',
+      template: 'Profiler/profiler:manualForceUpdate'
    }
 };

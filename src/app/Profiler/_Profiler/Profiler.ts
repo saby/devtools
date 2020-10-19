@@ -683,6 +683,12 @@ class Profiler extends Control<IOptions> {
                if (elementChanges.asyncControl) {
                   warnings.push('asyncControl');
                }
+               if (
+                  updateReason === 'forceUpdated' &&
+                  !elementChanges.changedReactiveProps
+               ) {
+                  warnings.push('manualForceUpdate');
+               }
             }
 
             snapshot.push({

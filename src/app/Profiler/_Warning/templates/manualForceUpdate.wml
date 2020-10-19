@@ -1,0 +1,3 @@
+<div class="ws-fragment">
+    <span>The <code>_forceUpdate</code> method was called manually. You should do this only if you want to trigger a synchronization without changing reactive properties.</span>
+</div>
