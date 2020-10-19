@@ -185,7 +185,7 @@ define([
                });
             });
 
-            it('should not send elements to devtools', function () {
+            it('should not send elements to devtools because the devtools already have the full tree', function () {
                stubWasabyDevHook();
                sandbox.stub(instance.channel, 'dispatch');
                instance.elements.set(0, {
@@ -197,11 +197,13 @@ define([
                   }
                });
                instance.isDevtoolsOpened = true;
+               instance.hasFullTree = true;
 
                postMessage('devtoolsInitialized');
 
                return waitForMessageHandler(() => {
                   assert.isTrue(instance.isDevtoolsOpened);
+                  assert.isTrue(instance.hasFullTree);
                   sinon.assert.notCalled(
                      window.__WASABY_DEV_HOOK__.pushMessage
                   );

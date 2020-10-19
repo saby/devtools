@@ -121,6 +121,8 @@ class Agent {
 
    private isDevtoolsOpened: boolean = false;
 
+   private hasFullTree: boolean = false
+
    private isProfiling: boolean = false;
 
    private channel: DevtoolChannel = new DevtoolChannel('elements');
@@ -306,11 +308,12 @@ class Agent {
    }
 
    private onDevtoolsOpened(): void {
-      if (this.isDevtoolsOpened) {
+      if (this.hasFullTree) {
          return;
       }
 
       this.isDevtoolsOpened = true;
+      this.hasFullTree = true;
 
       this.elements.forEach((node) => {
          const message: IOperationEvent['args'] = [
@@ -1199,6 +1202,7 @@ class Agent {
     * @private
     */
    private onDevtoolsClosed(): void {
+      this.hasFullTree = false;
       this.isDevtoolsOpened = false;
       this.toggleSelectFromPage(false);
    }
