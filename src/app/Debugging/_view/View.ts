@@ -56,23 +56,13 @@ class View extends Control<IControlOptions, void[]> {
          id: 'pin',
          showType: ShowType.TOOLBAR,
          icon: 'icon-PinNull',
-         handler: (item) =>
-            this.togglePin(
-               item,
-               true,
-               'unselected'
-            )
+         handler: (item) => this.togglePin(item, true, 'unselected')
       },
       {
          id: 'unpin',
          showType: ShowType.TOOLBAR,
          icon: 'icon-PinOff',
-         handler: (item) =>
-            this.togglePin(
-               item,
-               false,
-               'unselected'
-            )
+         handler: (item) => this.togglePin(item, false, 'unselected')
       }
    ];
    protected _selectedActions: IItemAction[] = [
@@ -80,23 +70,13 @@ class View extends Control<IControlOptions, void[]> {
          id: 'pin',
          showType: ShowType.TOOLBAR,
          icon: 'icon-PinNull',
-         handler: (item) =>
-            this.togglePin(
-               item,
-               true,
-               'selected'
-            )
+         handler: (item) => this.togglePin(item, true, 'selected')
       },
       {
          id: 'unpin',
          showType: ShowType.TOOLBAR,
          icon: 'icon-PinOff',
-         handler: (item) =>
-            this.togglePin(
-               item,
-               false,
-               'selected'
-            )
+         handler: (item) => this.togglePin(item, false, 'selected')
       }
    ];
    protected _children: {
@@ -122,7 +102,7 @@ class View extends Control<IControlOptions, void[]> {
       const [modules, url, pinnedModules]: [
          string[],
          string,
-         Set<string>
+         string[]
       ] = await Promise.all([
          this.getModules(),
          this.getUrl(),
@@ -130,12 +110,18 @@ class View extends Control<IControlOptions, void[]> {
       ]);
       const cookieValue = await this.getCookieValue(url);
 
+      this.pinnedModules = new Set(
+         pinnedModules.filter((moduleName) =>
+            this.existingModules.has(moduleName)
+         )
+      );
+
       if (cookieValue === 'true') {
          modules.forEach((value) => {
             this.selectedModules.push({
                id: value,
                title: value,
-               isPinned: pinnedModules.has(value)
+               isPinned: this.pinnedModules.has(value)
             });
          });
       } else {
@@ -147,7 +133,7 @@ class View extends Control<IControlOptions, void[]> {
             const newItem = {
                id: value,
                title: value,
-               isPinned: pinnedModules.has(value)
+               isPinned: this.pinnedModules.has(value)
             };
             if (selectedModulesSet.has(value)) {
                this.selectedModules.push(newItem);
@@ -465,13 +451,12 @@ class View extends Control<IControlOptions, void[]> {
       });
    }
 
-   private async getPinnedModules(): Promise<Set<string>> {
+   private async getPinnedModules(): Promise<string[]> {
       return new Promise((resolve) => {
          chrome.storage.sync.get(
             'debuggingPinnedModules',
             (result: { debuggingPinnedModules?: string[] }) => {
-               this.pinnedModules = new Set(result.debuggingPinnedModules);
-               resolve(this.pinnedModules);
+               resolve(result.debuggingPinnedModules || []);
             }
          );
       });
@@ -484,9 +469,18 @@ class View extends Control<IControlOptions, void[]> {
    ): void {
       const newItem = item.clone();
       const id = item.get('id');
-      const source = currentList === 'selected' ? this._selectedSource : this._unselectedSource;
-      const list = currentList === 'selected' ? this._children.selectedList : this._children.unselectedList;
-      const modulesArray = currentList === 'selected' ? this.selectedModules : this.unselectedModules;
+      const source =
+         currentList === 'selected'
+            ? this._selectedSource
+            : this._unselectedSource;
+      const list =
+         currentList === 'selected'
+            ? this._children.selectedList
+            : this._children.unselectedList;
+      const modulesArray =
+         currentList === 'selected'
+            ? this.selectedModules
+            : this.unselectedModules;
       const itemInArray = modulesArray.find((elem) => elem.id === id) as IItem;
       newItem.set('isPinned', state);
       itemInArray.isPinned = state;
