@@ -1,7 +1,6 @@
 import Agent from '../Agent';
 import { INamedLogger } from 'Extension/Logger/ILogger';
 
-// TODO: тесты на конструктор Agent дополнить, нужно проверять вызов обёртки
 type FunctionProperties<T> = {
    [K in keyof T]: T[K] extends Function ? T[K] : never;
 }[keyof T];

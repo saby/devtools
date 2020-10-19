@@ -1,10 +1,9 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
-import template = require('wml!Elements/_Details/Details');
+import * as template from 'wml!Elements/_Details/Details';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import Store from '../_store/Store';
-import tmplNotify = require('Controls/Utils/tmplNotify');
-import { NodeOptionType } from 'Extension/Plugins/Elements/IRenderer';
+import { EventUtils } from 'UI/Events';
 
 interface IOptions extends IControlOptions {
    id: IFrontendControlNode['id'];
@@ -34,7 +33,7 @@ const DEFAULT_EVAL_TIMEOUT = 100;
  */
 class Details extends Control<IOptions> {
    protected _template: TemplateFunction = template;
-   protected _notifyHandler: Function = tmplNotify;
+   protected _notifyHandler: Function = EventUtils.tmplNotify;
 
    protected _viewFunctionSource(e: Event, path: Array<string | number>): void {
       this._options.store.dispatch('viewFunctionSource', {
@@ -88,32 +87,6 @@ class Details extends Control<IOptions> {
       value: boolean
    ): void {
       this._notify('expandedChanged', [eventName, value]);
-   }
-
-   protected _setNodeOption(
-      e: Event,
-      optionType: NodeOptionType,
-      path: string[],
-      value: string
-   ): void {
-      this._options.store.dispatch('setNodeOption', {
-         id: this._options.id,
-         optionType,
-         path,
-         value
-      });
-   }
-
-   protected _revertNodeOption(
-      e: Event,
-      optionType: NodeOptionType,
-      path: string[]
-   ): void {
-      this._options.store.dispatch('revertNodeOption', {
-         id: this._options.id,
-         optionType,
-         path
-      });
    }
 
    static _theme: string[] = ['Elements/elements'];

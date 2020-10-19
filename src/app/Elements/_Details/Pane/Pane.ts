@@ -37,8 +37,6 @@ const enum ShowType {
 interface IItemAction {
    id:
       | 'storeAsGlobal'
-      | 'editValue'
-      | 'revertValue'
       | 'addBreakpoint'
       | 'removeBreakpoint';
    showType: ShowType;
@@ -47,11 +45,6 @@ interface IItemAction {
    handler?: (item: Model) => void;
    icon?: string;
    iconStyle?: string;
-}
-
-interface IEditingConfig {
-   sequentialEditing: boolean;
-   toolbarVisibility: boolean;
 }
 
 function getSource(
@@ -75,20 +68,6 @@ function getPath(item: Model): string[] {
       .reverse();
 }
 
-function getEditingConfig(
-   isControl: boolean,
-   tabCaption: Pane['_options']['caption']
-): IEditingConfig | undefined {
-   if (isControl && tabCaption !== 'Events') {
-      return {
-         sequentialEditing: false,
-         toolbarVisibility: true
-      };
-   } else {
-      return;
-   }
-}
-
 /**
  * Shows a list and a caption for a portion of the details pane.
  * @author Зайцев А.С.
@@ -103,8 +82,6 @@ class Pane extends Control<IOptions> {
       name?: string;
       parent?: string | Array<string | null>;
    } = {};
-   protected _editingConfig?: IEditingConfig;
-   protected _editingItem?: Model;
 
    protected _beforeMount(options: IOptions): void {
       this._source = getSource(
@@ -127,20 +104,6 @@ class Pane extends Control<IOptions> {
             handler: this.__storeAsGlobal.bind(this)
          },
          {
-            id: 'editValue',
-            icon: 'icon-Edit',
-            showType: ShowType.MENU_TOOLBAR,
-            title: 'Edit',
-            handler: this.__editValue.bind(this)
-         },
-         {
-            id: 'revertValue',
-            icon: 'icon-Undo2',
-            showType: ShowType.MENU_TOOLBAR,
-            title: 'Reset',
-            handler: this.__revertValue.bind(this)
-         },
-         {
             id: 'addBreakpoint',
             icon: 'icon-BigRemark',
             showType: ShowType.TOOLBAR,
@@ -158,10 +121,6 @@ class Pane extends Control<IOptions> {
          }
       ];
       this._visibilityCallback = this._itemActionVisibilityCallback.bind(this);
-      this._editingConfig = getEditingConfig(
-         options.isControl,
-         options.caption
-      );
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
@@ -183,15 +142,6 @@ class Pane extends Control<IOptions> {
             newOptions.data,
             newOptions.store,
             newOptions.controlId,
-            newOptions.caption
-         );
-      }
-      if (
-         this._options.isControl !== newOptions.isControl ||
-         this._options.caption !== newOptions.caption
-      ) {
-         this._editingConfig = getEditingConfig(
-            newOptions.isControl,
             newOptions.caption
          );
       }
@@ -228,15 +178,7 @@ class Pane extends Control<IOptions> {
       action: IItemAction,
       item: Model
    ): boolean {
-      if (item === this._editingItem) {
-         return false;
-      }
       switch (action.id) {
-         // TODO: отключил эти 2 операции пока не разобрался с редактированием
-         case 'editValue':
-            return false;
-         case 'revertValue':
-            return false;
          case 'storeAsGlobal':
             return (
                !!this._options.canStoreAsGlobal &&
@@ -281,32 +223,6 @@ class Pane extends Control<IOptions> {
             path.concat(this._options.caption.toLowerCase())
          ]);
       }
-   }
-
-   private __beforeBeginEdit(e: Event, { item }: { item: Model }): void {
-      this._editingItem = item;
-   }
-
-   private __beforeEndEdit(e: Event, item: Model, commit: boolean): void {
-      /**
-       * TODO: перейти на событие afterEndEdit после выполнения задачи:
-       * https://online.sbis.ru/opendoc.html?guid=a17c70e8-0cbf-4685-bfd1-423bba9ef3d4
-       */
-      if (commit) {
-         this._notify('setNodeOption', [getPath(item), item.get('value')]);
-         this._editingItem = undefined;
-      }
-   }
-
-   private __editValue(item: Model): void {
-      this._children.list.beginEdit({
-         item
-      });
-   }
-
-   private __revertValue(item: Model): void {
-      item.rejectChanges(item.getChanged());
-      this._notify('revertNodeOption', [getPath(item)]);
    }
 
    private __setBreakpoint(item: Model): void {

@@ -11,9 +11,9 @@ import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
 import Agent from './Agent';
 import { INamedLogger } from 'Extension/Logger/ILogger';
-import { IRenderer } from 'Extension/Plugins/Elements/IRenderer';
 import { GlobalMessages } from 'Extension/const';
 import { getGlobalChannel } from '../_devtool/globalChannel';
+import { IExtensionOptions } from 'Extension/Utils/loadOptions';
 
 /**
  * Manages communication between an agent and a framework.
@@ -23,11 +23,12 @@ import { getGlobalChannel } from '../_devtool/globalChannel';
 export class Hook implements IWasabyDevHook {
    saveReactivePropsStacks: boolean =
       window.wasabyDevtoolsOptions?.saveReactivePropsStacks;
-   private _breakpoints?: IWasabyDevHook['_breakpoints'];
+   _$hasWasaby: boolean = false;
+   _$hasChangedTabs: boolean = false;
+   _breakpoints?: IWasabyDevHook['_breakpoints'];
    private _agent: Agent;
    private _messageQueue: Array<[string, ISerializable?]> = [];
    private _logger: INamedLogger;
-   private _initialized: boolean = false;
    $0: IWasabyElement;
 
    constructor(logger: INamedLogger) {
@@ -85,12 +86,15 @@ export class Hook implements IWasabyDevHook {
       }
    }
 
-   init(renderer?: IRenderer): void {
-      if (renderer) {
+   init(): void {
+      const tabs = window.wasabyDevtoolsOptions?.tabs;
+      const pluginEnabled =
+         tabs?.includes('Elements') || tabs?.includes('Profiler');
+      this._$hasWasaby = true;
+      if (pluginEnabled) {
          this._agent = new Agent({
             logger: this._logger
          });
-         this._initialized = true;
          getGlobalChannel().addListener(GlobalMessages.devtoolsClosed, () => {
             this._breakpoints = undefined;
          });
@@ -105,5 +109,9 @@ export class Hook implements IWasabyDevHook {
       const messages = this._messageQueue.slice();
       this._messageQueue = [];
       return messages;
+   }
+
+   _$onTabsChanged(tabs: IExtensionOptions['tabs']): void {
+      this._$hasChangedTabs = true;
    }
 }

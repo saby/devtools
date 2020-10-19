@@ -201,53 +201,6 @@ define([
          });
       });
 
-      describe('_setNodeOption', function() {
-         it('should fire the setNodeOption event', function() {
-            const store = {
-               dispatch: sandbox.stub()
-            };
-            const path = ['placeholder', 'options'];
-            instance.saveOptions({
-               id: '1',
-               store
-            });
-
-            instance._setNodeOption({}, 0, path, 'testPlaceholder');
-
-            assert.isTrue(
-               store.dispatch.calledOnceWithExactly('setNodeOption', {
-                  id: '1',
-                  optionType: 0,
-                  path,
-                  value: 'testPlaceholder'
-               })
-            );
-         });
-      });
-
-      describe('_revertNodeOption', function() {
-         it('should fire the revertNodeOption event', function() {
-            const store = {
-               dispatch: sandbox.stub()
-            };
-            const path = ['placeholder', 'options'];
-            instance.saveOptions({
-               id: '1',
-               store
-            });
-
-            instance._revertNodeOption({}, 0, path);
-
-            assert.isTrue(
-               store.dispatch.calledOnceWithExactly('revertNodeOption', {
-                  id: '1',
-                  optionType: 0,
-                  path
-               })
-            );
-         });
-      });
-
       describe('getOptionTypes', function() {
          it('should call entity:Descriptor with correct values', function() {
             const { mockOptionTypes, testOption } = optionTypesMocks;

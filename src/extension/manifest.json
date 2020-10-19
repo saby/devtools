@@ -2,7 +2,7 @@
   "name": "Wasaby Developer Tools",
   "description": "Extension for debugging Wasaby applications.",
   "manifest_version": 2,
-  "version": "0.1.13",
+  "version": "0.1.14",
   "minimum_chrome_version": "60",
 
   "devtools_page": "page/devtool.html",
@@ -42,7 +42,7 @@
   ],
 
   "options_ui": {
-    "page": "options/index.html",
+    "page": "page/options.html",
     "open_in_tab": false
   },
 
