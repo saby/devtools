@@ -271,6 +271,37 @@ define([
                boundCallback
             );
          });
+
+         it('should not add nonexistent pinned module to any source', async function () {
+            const url = 'https://online.sbis.ru';
+            stubContentsModules(['Controls', 'UI', 'Core']);
+            stubTabURL(url);
+            stubCookieValue('Controls,UI,Core', url);
+            stubPinnedModules({
+               debuggingPinnedModules: ['UI', 'ThisModuleDoesntExist']
+            });
+
+            await instance._beforeMount();
+
+            assert.deepEqual(instance._unselectedSource.data, []);
+            assert.deepEqual(instance._selectedSource.data, [
+               {
+                  id: 'Controls',
+                  title: 'Controls',
+                  isPinned: false
+               },
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: true
+               },
+               {
+                  id: 'Core',
+                  title: 'Core',
+                  isPinned: false
+               }
+            ]);
+         });
       });
 
       describe('_changeCookie', function () {
