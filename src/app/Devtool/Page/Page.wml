@@ -3,7 +3,7 @@
     class="devtools-Devtool_Page"
     attr:key="{{ _rootKey }}"
 >
-    <ws:if data="{{ _hasWasabyOnPage }}">
+    <ws:if data="{{ _hasWasabyOnPage && !_hasChangedTabs }}">
         <Controls.tabs:Buttons
                 bind:selectedKey="_activeTab"
                 keyProperty="key"
@@ -28,10 +28,11 @@
                             <Controls.Container.Async
                                 templateName="Elements/elements:Elements"
                             >
-                                <ws:templateOptions
-                                    store="{{_store}}"
-                                    selected="{{ itemTemplate.templateOptions.selected }}"
-                                />
+                                <ws:partial template="{{ content.resolvedTemplate }}"
+                                            store="{{_store}}"
+                                            selected="{{ itemTemplate.templateOptions.selected }}"
+                                            on:subToPanelVisibility="_subToPanelVisibility()"
+                                            on:unsubFromPanelVisibility="_unsubFromPanelVisibility()" />
                             </Controls.Container.Async>
                         </ws:itemTemplate>
                     </ws:Object>
@@ -62,7 +63,18 @@
         </Controls.switchableArea:View>
     </ws:if>
     <ws:else>
-        Connecting to Wasaby...
+        <div class="devtools-Devtool_Page__emptyTemplate ws-flexbox ws-justify-content-center ws-align-items-center">
+            <ws:if data="{{ _hasChangedTabs }}">
+                You must reload the page after changing the tabs of the extension. Click here:&nbsp;<Controls.buttons:Button icon="icon-Refresh"
+                                                                                                                             iconSize="s"
+                                                                                                                             viewMode="toolButton"
+                                                                                                                             tooltip="Reload the page."
+                                                                                                                             on:click="_reloadPage()"/>&nbsp;to reload.
+            </ws:if>
+            <ws:else>
+                Connecting to Wasaby...
+            </ws:else>
+        </div>
     </ws:else>
 </div>
 </Devtool.Page.Application>

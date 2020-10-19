@@ -9,7 +9,7 @@ function createPanelIfNeeded(): void {
       return;
    }
    chrome.devtools.inspectedWindow.eval(
-      '!!window.__WASABY_DEV_HOOK__ && !!window.__WASABY_DEV_HOOK__._initialized',
+      '!!window.__WASABY_DEV_HOOK__ && !!window.__WASABY_DEV_HOOK__._$hasWasaby',
       (initialized) => {
          if (initialized) {
             chrome.devtools.panels.create(
@@ -18,15 +18,15 @@ function createPanelIfNeeded(): void {
                'devtool/app-index.html',
                (panel: chrome.devtools.panels.ExtensionPanel): void => {
                   panelCreated = true;
-                  let elementsPanel: Window['elementsPanel'] | undefined;
+                  let devtoolsPanel: Window['devtoolsPanel'] | undefined;
                   let loadInterval: number;
                   let panelVisible = false;
 
                   function addLoadInterval(): void {
                      loadInterval = window.setInterval(() => {
-                        if (window.elementsPanel) {
-                           elementsPanel = window.elementsPanel;
-                           elementsPanel.panelShownCallback();
+                        if (window.devtoolsPanel) {
+                           devtoolsPanel = window.devtoolsPanel;
+                           devtoolsPanel.panelShownCallback();
                            window.clearInterval(loadInterval);
                         }
                      }, WASABY_INIT_TIMEOUT);
@@ -34,17 +34,17 @@ function createPanelIfNeeded(): void {
 
                   panel.onShown.addListener((window) => {
                      panelVisible = true;
-                     if (window.elementsPanel) {
-                        elementsPanel = window.elementsPanel;
-                        elementsPanel.panelShownCallback();
+                     if (window.devtoolsPanel) {
+                        devtoolsPanel = window.devtoolsPanel;
+                        devtoolsPanel.panelShownCallback();
                      } else {
                         addLoadInterval();
                      }
                   });
                   panel.onHidden.addListener(() => {
                      panelVisible = false;
-                     if (elementsPanel) {
-                        elementsPanel.panelHiddenCallback();
+                     if (devtoolsPanel) {
+                        devtoolsPanel.panelHiddenCallback();
                      }
                      if (loadInterval) {
                         window.clearInterval(loadInterval);
@@ -52,7 +52,7 @@ function createPanelIfNeeded(): void {
                   });
 
                   chrome.devtools.network.onNavigated.addListener(() => {
-                     elementsPanel = undefined;
+                     devtoolsPanel = undefined;
                      if (panelVisible) {
                         addLoadInterval();
                      }

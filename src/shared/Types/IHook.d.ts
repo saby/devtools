@@ -8,6 +8,7 @@ import {
 } from 'Extension/Plugins/Elements/IControlNode';
 import { OperationType } from 'Extension/Plugins/Elements/const';
 import { ISerializable } from 'Extension/Event/IEventEmitter';
+import { IExtensionOptions } from 'Extension/Utils/loadOptions';
 
 type Breakpoint = [
    Function, // handler
@@ -17,6 +18,8 @@ type Breakpoint = [
 ];
 
 export interface IWasabyDevHook {
+   _$hasWasaby: boolean;
+   _$hasChangedTabs: boolean;
    onStartCommit: (
       operation: OperationType,
       name: string,
@@ -34,6 +37,7 @@ export interface IWasabyDevHook {
    pushMessage: (eventName: string, args?: ISerializable) => void;
    $0: IWasabyElement;
    saveReactivePropsStacks: boolean;
+   _$onTabsChanged: (tabs: IExtensionOptions['tabs']) => void;
    __node?: IBackendControlNode;
    __template?: Function;
    __constructor?: Function;
