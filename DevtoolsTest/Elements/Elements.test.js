@@ -4,7 +4,7 @@ define([
    'Extension/Plugins/Elements/const',
    'Elements/_utils/highlightUpdate',
    'DevtoolsTest/getJSDOM'
-], function(mockChrome, Elements, elementsConsts, highlightUpdate, getJSDOM) {
+], function (mockChrome, Elements, elementsConsts, highlightUpdate, getJSDOM) {
    let sandbox;
    Elements = Elements.default;
    const OperationType = elementsConsts.OperationType;
@@ -12,8 +12,8 @@ define([
    const BREAKPOINTS = 'window.__WASABY_DEV_HOOK__._breakpoints';
    const needJSDOM = typeof window === 'undefined';
 
-   describe('Elements/_Elements/Elements', function() {
-      before(async function() {
+   describe('Elements/_Elements/Elements', function () {
+      before(async function () {
          if (needJSDOM) {
             const { JSDOM } = await getJSDOM();
             const dom = new JSDOM('');
@@ -22,23 +22,23 @@ define([
          }
       });
 
-      after(function() {
+      after(function () {
          if (needJSDOM) {
             delete global.window;
             delete global.document;
          }
       });
 
-      beforeEach(function() {
+      beforeEach(function () {
          sandbox = sinon.createSandbox();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          sandbox.restore();
       });
 
-      describe('constructor', function() {
-         it('adds correct listeners, adds itself to window and gets full tree', function() {
+      describe('constructor', function () {
+         it('adds correct listeners, adds itself to window and gets full tree', function () {
             const items = [];
             const options = {
                store: {
@@ -50,32 +50,18 @@ define([
 
             const instance = new Elements(options);
 
-            // TODO: слабые проверки, но лучше чем ничего. Непонятно как тестить, что навесились нужные обработчики при этом игнорируя реализацию обработчиков
-            assert.isTrue(
-               options.store.addListener.calledWith('inspectedElement')
-            );
-            assert.isTrue(
-               options.store.addListener.calledWith('setSelectedItem')
-            );
-            assert.isTrue(
-               options.store.addListener.calledWith('endSynchronization')
-            );
-            assert.isTrue(options.store.addListener.calledWith('operation'));
-            assert.isTrue(
-               options.store.addListener.calledWith('stopSelectFromPage')
-            );
-            assert.equal(window.elementsPanel, instance);
-            assert.isTrue(
-               options.store.toggleDevtoolsOpened.calledOnceWithExactly(true)
-            );
-            assert.isTrue(options.store.getFullTree.calledOnceWithExactly());
-
-            delete window.elementsPanel;
+            sinon.assert.calledWith(options.store.addListener, 'inspectedElement');
+            sinon.assert.calledWith(options.store.addListener, 'setSelectedItem');
+            sinon.assert.calledWith(options.store.addListener, 'endSynchronization');
+            sinon.assert.calledWith(options.store.addListener, 'operation');
+            sinon.assert.calledWith(options.store.addListener, 'stopSelectFromPage');
+            sinon.assert.calledWith(options.store.toggleDevtoolsOpened, true);
+            sinon.assert.calledOnce(options.store.getFullTree);
          });
       });
 
-      describe('_beforeMount', function() {
-         it('should set _detailsWidth to default value because the storage is empty', async function() {
+      describe('_beforeMount', function () {
+         it('should set _detailsWidth to default value because the storage is empty', async function () {
             const items = [];
             const options = {
                store: {
@@ -93,11 +79,9 @@ define([
             await instance._beforeMount();
 
             assert.equal(instance._detailsWidth, 300);
-
-            delete window.elementsPanel;
          });
 
-         it('should set _detailsWidth to value from the storage', async function() {
+         it('should set _detailsWidth to value from the storage', async function () {
             const items = [];
             const options = {
                store: {
@@ -117,13 +101,11 @@ define([
             await instance._beforeMount();
 
             assert.equal(instance._detailsWidth, 123);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_beforeUpdate', function() {
-         it("should update everything on the tab and call __inspectElement because the store doesn't have a selectedId", function() {
+      describe('_beforeUpdate', function () {
+         it("should update everything on the tab and call __inspectElement because the store doesn't have a selectedId", function () {
             const items = [1, 2, 3];
             const store = {
                addListener: sandbox.stub(),
@@ -152,11 +134,9 @@ define([
             sinon.assert.calledWithExactly(instance.__inspectElement, store);
             sinon.assert.calledWithExactly(instance._throttledUpdateSearch);
             assert.isFalse(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
 
-         it('should update everything on the tab and call __inspectElement because the id from the store and id in the state are the same', function() {
+         it('should update everything on the tab and call __inspectElement because the id from the store and id in the state are the same', function () {
             const items = [1, 2, 3];
             const store = {
                addListener: sandbox.stub(),
@@ -186,11 +166,9 @@ define([
             sinon.assert.calledWithExactly(instance.__inspectElement, store);
             sinon.assert.calledWithExactly(instance._throttledUpdateSearch);
             assert.isFalse(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
 
-         it("should update everything on the tab and call __inspectElement because the item with the id from the store doesn't exist", function() {
+         it("should update everything on the tab and call __inspectElement because the item with the id from the store doesn't exist", function () {
             const items = [
                {
                   id: 1
@@ -229,11 +207,9 @@ define([
             sinon.assert.calledWithExactly(instance.__inspectElement, store);
             sinon.assert.calledWithExactly(instance._throttledUpdateSearch);
             assert.isFalse(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
 
-         it('should update everything on the tab and select the item with the id from the store', function() {
+         it('should update everything on the tab and select the item with the id from the store', function () {
             const items = [
                {
                   id: 1
@@ -274,11 +250,9 @@ define([
             sinon.assert.notCalled(instance.__inspectElement);
             sinon.assert.calledWithExactly(instance._throttledUpdateSearch);
             assert.isFalse(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
 
-         it('should not change anything because the tab was already selected', function() {
+         it('should not change anything because the tab was already selected', function () {
             const items = [1, 2, 3];
             const store = {
                addListener: sandbox.stub(),
@@ -309,13 +283,11 @@ define([
             assert.isTrue(inspectElementStub.notCalled);
             assert.isTrue(throttledUpdateSearchStub.notCalled);
             assert.isFalse(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_afterRender', function() {
-         it('should not do anything because the panel is not selected', function() {
+      describe('_afterRender', function () {
+         it('should not do anything because the panel is not selected', function () {
             const items = [];
             const options = {
                store: {
@@ -335,11 +307,9 @@ define([
             instance._afterRender();
 
             assert.equal(instance._currentIndentationSize, 15);
-
-            delete window.elementsPanel;
          });
 
-         it("should not do anything because there's no items in the panel", function() {
+         it("should not do anything because there's no items in the panel", function () {
             const items = [];
             const options = {
                store: {
@@ -356,8 +326,6 @@ define([
             instance._afterRender();
 
             assert.equal(instance._currentIndentationSize, 15);
-
-            delete window.elementsPanel;
          });
 
          function addChild(parent, width, depth) {
@@ -373,7 +341,7 @@ define([
             parent.appendChild(child);
          }
 
-         it('should calculate dynamic indentation based on the width of the children', function() {
+         it('should calculate dynamic indentation based on the width of the children', function () {
             const items = [];
             const options = {
                store: {
@@ -407,11 +375,9 @@ define([
             );
             assert.equal(instance._currentIndentationSize, 5);
             assert.equal(instance._listWidth, 150);
-
-            delete window.elementsPanel;
          });
 
-         it('should calculate dynamic indentation based on the width of the children (should not pick default value even though the list got wider)', function() {
+         it('should calculate dynamic indentation based on the width of the children (should not pick default value even though the list got wider)', function () {
             const items = [];
             const options = {
                store: {
@@ -444,11 +410,9 @@ define([
             );
             assert.equal(instance._currentIndentationSize, 5);
             assert.equal(instance._listWidth, 150);
-
-            delete window.elementsPanel;
          });
 
-         it('should use cached children widths', function() {
+         it('should use cached children widths', function () {
             const items = [];
             const options = {
                store: {
@@ -486,13 +450,11 @@ define([
             );
             assert.equal(instance._currentIndentationSize, 9);
             assert.equal(instance._listWidth, 150);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_afterUpdate', function() {
-         it('should scroll to item', function() {
+      describe('_afterUpdate', function () {
+         it('should scroll to item', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -523,13 +485,11 @@ define([
                })
             );
             assert.isUndefined(instance._scrollToId);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('panelShownCallback', function() {
-         it('should set $0 on __WASABY_DEV_HOOK__ and then fire getSelectedItem event', function() {
+      describe('panelVisibleCallback', function () {
+         it('should not do anything, because the panel is not selected', function () {
             const store = {
                addListener: sandbox.stub(),
                toggleDevtoolsOpened: sandbox.stub(),
@@ -537,7 +497,8 @@ define([
                dispatch: sandbox.stub()
             };
             const options = {
-               store
+               store,
+               selected: false
             };
             const instance = new Elements(options);
             instance.saveOptions(options);
@@ -547,23 +508,14 @@ define([
                }
             });
 
-            instance.panelShownCallback();
+            instance.panelVisibilityCallback(true);
+            instance.panelVisibilityCallback(false);
 
-            assert.isTrue(
-               chrome.devtools.inspectedWindow.eval.calledOnceWith(
-                  'window.__WASABY_DEV_HOOK__.$0 = $0'
-               )
-            );
-            assert.isTrue(
-               store.dispatch.calledOnceWithExactly('getSelectedItem')
-            );
-
-            delete window.elementsPanel;
+            sinon.assert.notCalled(chrome.devtools.inspectedWindow.eval);
+            sinon.assert.notCalled(store.dispatch);
          });
-      });
 
-      describe('panelHiddenCallback', function() {
-         it('should disable selection on the page', function() {
+         it('should set $0 on __WASABY_DEV_HOOK__ and then fire getSelectedItem event', function () {
             const store = {
                addListener: sandbox.stub(),
                toggleDevtoolsOpened: sandbox.stub(),
@@ -571,26 +523,45 @@ define([
                dispatch: sandbox.stub()
             };
             const options = {
-               store
+               store,
+               selected: true
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            sandbox.stub(chrome, 'devtools').value({
+               inspectedWindow: {
+                  eval: sandbox.stub().callsArg(1)
+               }
+            });
+
+            instance.panelVisibilityCallback(true);
+
+            sinon.assert.calledWith(chrome.devtools.inspectedWindow.eval, 'window.__WASABY_DEV_HOOK__.$0 = $0');
+            sinon.assert.calledWith(store.dispatch, 'getSelectedItem');
+         });
+
+         it('should disable selection on the page', function () {
+            const store = {
+               addListener: sandbox.stub(),
+               toggleDevtoolsOpened: sandbox.stub(),
+               getFullTree: sandbox.stub().resolves([]),
+               dispatch: sandbox.stub()
+            };
+            const options = {
+               store,
+               selected: true
             };
             const instance = new Elements(options);
             instance.saveOptions(options);
 
-            instance.panelHiddenCallback();
+            instance.panelVisibilityCallback(false);
 
-            assert.isTrue(
-               store.dispatch.calledOnceWithExactly(
-                  'toggleSelectFromPage',
-                  false
-               )
-            );
-
-            delete window.elementsPanel;
+            sinon.assert.calledWith(store.dispatch, 'toggleSelectFromPage', false);
          });
       });
 
-      describe('_beforeUnmount', function() {
-         it('should disable selection on the page, destroy model and cleanup inspectedItem and window', function() {
+      describe('_beforeUnmount', function () {
+         it('should disable selection on the page, destroy model and cleanup inspectedItem and window', function () {
             const store = {
                addListener: sandbox.stub(),
                toggleDevtoolsOpened: sandbox.stub(),
@@ -616,13 +587,11 @@ define([
             assert.isUndefined(instance._inspectedItem);
             assert.isTrue(destructorStub.calledOnceWithExactly());
             assert.isUndefined(window.elementsPanel);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_onItemClick', function() {
-         it('should call __selectElement with the passed id', function() {
+      describe('_onItemClick', function () {
+         it('should call __selectElement with the passed id', function () {
             const store = {
                addListener: sandbox.stub(),
                toggleDevtoolsOpened: sandbox.stub(),
@@ -638,14 +607,12 @@ define([
             instance._onItemClick({}, 0);
 
             assert.isTrue(stub.calledOnceWithExactly(0));
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_onListKeyDown', function() {
-         describe('ArrowDown', function() {
-            it('should select the next item', function() {
+      describe('_onListKeyDown', function () {
+         describe('ArrowDown', function () {
+            it('should select the next item', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -686,11 +653,9 @@ define([
 
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(stub.calledOnceWithExactly(1));
-
-               delete window.elementsPanel;
             });
 
-            it('should not call __selectElement because this is the last item', function() {
+            it('should not call __selectElement because this is the last item', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -731,13 +696,11 @@ define([
 
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(stub.notCalled);
-
-               delete window.elementsPanel;
             });
          });
 
-         describe('ArrowLeft', function() {
-            it('should collapse the selected item', function() {
+         describe('ArrowLeft', function () {
+            it('should collapse the selected item', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -778,11 +741,9 @@ define([
 
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(stub.calledOnceWithExactly(1, false));
-
-               delete window.elementsPanel;
             });
 
-            it('should select the parent of the selected item', function() {
+            it('should select the parent of the selected item', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -824,11 +785,9 @@ define([
 
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(stub.calledOnceWithExactly(0));
-
-               delete window.elementsPanel;
             });
 
-            it('should not do anything because this is the root element', function() {
+            it('should not do anything because this is the root element', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -877,13 +836,11 @@ define([
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(selectElementStub.notCalled);
                assert.isTrue(toggleExpandedStub.notCalled);
-
-               delete window.elementsPanel;
             });
          });
 
-         describe('ArrowRight', function() {
-            it('should select the first child', function() {
+         describe('ArrowRight', function () {
+            it('should select the first child', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -925,11 +882,9 @@ define([
 
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(stub.calledOnceWithExactly(1));
-
-               delete window.elementsPanel;
             });
 
-            it('should expand the selected item', function() {
+            it('should expand the selected item', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -971,11 +926,9 @@ define([
 
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(stub.calledOnceWithExactly(0, true));
-
-               delete window.elementsPanel;
             });
 
-            it('should not do anything because the selected item does not have children', function() {
+            it('should not do anything because the selected item does not have children', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -1024,13 +977,11 @@ define([
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(selectElementStub.notCalled);
                assert.isTrue(toggleExpandedStub.notCalled);
-
-               delete window.elementsPanel;
             });
          });
 
-         describe('ArrowUp', function() {
-            it('should select a previous item', function() {
+         describe('ArrowUp', function () {
+            it('should select a previous item', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -1071,11 +1022,9 @@ define([
 
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(stub.calledOnceWithExactly(0));
-
-               delete window.elementsPanel;
             });
 
-            it('should not call __selectElement because this is the first item', function() {
+            it('should not call __selectElement because this is the first item', function () {
                const options = {
                   store: {
                      addListener: sandbox.stub(),
@@ -1116,14 +1065,12 @@ define([
 
                assert.isTrue(event.stopPropagation.calledOnceWithExactly());
                assert.isTrue(stub.notCalled);
-
-               delete window.elementsPanel;
             });
          });
       });
 
-      describe('_operationHandler', function() {
-         it('should not do anything because the panel is not selected', function() {
+      describe('_operationHandler', function () {
+         it('should not do anything because the panel is not selected', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1148,11 +1095,9 @@ define([
             assert.isTrue(highlightNodeStub.notCalled);
             assert.isTrue(onOrderChangedStub.notCalled);
             assert.isFalse(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
 
-         it('should call __updateNode with the passed id', function() {
+         it('should call __updateNode with the passed id', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1168,11 +1113,9 @@ define([
             instance._operationHandler([OperationType.UPDATE, 0]);
 
             assert.isTrue(updateNodeStub.calledOnceWithExactly(0));
-
-            delete window.elementsPanel;
          });
 
-         it('should call __highlightNode with the passed id and set _itemsChanged to true', function() {
+         it('should call __highlightNode with the passed id and set _itemsChanged to true', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1195,11 +1138,9 @@ define([
 
             assert.isTrue(highlightNodeStub.calledOnceWithExactly(0));
             assert.isTrue(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
 
-         it('should set _itemsChanged to true and remove selection from the item', function() {
+         it('should set _itemsChanged to true and remove selection from the item', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1221,11 +1162,9 @@ define([
             assert.isUndefined(instance._selectedItemId);
             assert.isUndefined(instance._inspectedItem);
             assert.isUndefined(instance._path);
-
-            delete window.elementsPanel;
          });
 
-         it('should set _itemsChanged to true and without touching selection', function() {
+         it('should set _itemsChanged to true and without touching selection', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1247,11 +1186,9 @@ define([
             assert.equal(instance._selectedItemId, 1);
             assert.deepEqual(instance._inspectedItem, {});
             assert.deepEqual(instance._path, []);
-
-            delete window.elementsPanel;
          });
 
-         it('should call onOrderChanged', function() {
+         it('should call onOrderChanged', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1270,13 +1207,11 @@ define([
             instance._operationHandler([OperationType.REORDER, 0, 1, 2]);
 
             assert.isTrue(onOrderChangedStub.calledOnceWithExactly());
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__updateNode', function() {
-         it('should highlight the node without inspecting it', function() {
+      describe('__updateNode', function () {
+         it('should highlight the node without inspecting it', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1297,11 +1232,9 @@ define([
 
             assert.isTrue(inspectElementStub.notCalled);
             assert.isTrue(highlightNodeStub.calledOnceWithExactly(0));
-
-            delete window.elementsPanel;
          });
 
-         it('should highlight the node an inspect it', function() {
+         it('should highlight the node an inspect it', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1324,13 +1257,11 @@ define([
                inspectElementStub.calledOnceWithExactly(options.store)
             );
             assert.isTrue(highlightNodeStub.calledOnceWithExactly(0));
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__highlightElement', function() {
-         it('should fire highlightElement event', function() {
+      describe('__highlightElement', function () {
+         it('should fire highlightElement event', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1350,13 +1281,11 @@ define([
                   0
                )
             );
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__selectElement', function() {
-         it('should select the element and toggle select on the page', function() {
+      describe('__selectElement', function () {
+         it('should select the element and toggle select on the page', function () {
             const path = [
                {
                   id: 0,
@@ -1405,11 +1334,9 @@ define([
                options.store
             );
             sinon.assert.calledWithExactly(options.store.setSelectedId, 0);
-
-            delete window.elementsPanel;
          });
 
-         it('should select the element without toggling select on the page', function() {
+         it('should select the element without toggling select on the page', function () {
             const path = [
                {
                   id: 0,
@@ -1463,13 +1390,11 @@ define([
                inspectElementStub.calledOnceWithExactly(options.store)
             );
             sinon.assert.calledWithExactly(options.store.setSelectedId, 0);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__highlightNode', function() {
-         it('should not call highlightUpdate because the child with this id does not exist', function() {
+      describe('__highlightNode', function () {
+         it('should not call highlightUpdate because the child with this id does not exist', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1484,11 +1409,9 @@ define([
             instance.__highlightNode(0);
 
             assert.isTrue(stub.notCalled);
-
-            delete window.elementsPanel;
          });
 
-         it('should call highlight update because the child with this id does not exist', function() {
+         it('should call highlight update because the child with this id does not exist', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1506,13 +1429,11 @@ define([
             instance.__highlightNode(0);
 
             assert.isTrue(stub.calledOnceWithExactly(child));
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__toggleExpanded', function() {
-         it('should stop propagation of the event and call toggleExpanded', function() {
+      describe('__toggleExpanded', function () {
+         it('should stop propagation of the event and call toggleExpanded', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1533,11 +1454,9 @@ define([
 
             sinon.assert.calledOnce(event.stopPropagation);
             sinon.assert.calledWithExactly(instance._model.toggleExpanded, 0);
-
-            delete window.elementsPanel;
          });
 
-         it('should stop propagation of the event and call toggleExpandedRecursive', function() {
+         it('should stop propagation of the event and call toggleExpandedRecursive', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1561,13 +1480,11 @@ define([
                instance._model.toggleExpandedRecursive,
                0
             );
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__onEndSynchronization', function() {
-         it('should not do anything because the tab is not selected', function() {
+      describe('__onEndSynchronization', function () {
+         it('should not do anything because the tab is not selected', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1590,11 +1507,9 @@ define([
             assert.isTrue(setItemsStub.notCalled);
             assert.isTrue(throttledUpdateSearchStub.notCalled);
             assert.isTrue(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
 
-         it('should set new items and update search', function() {
+         it('should set new items and update search', function () {
             const items = [];
             const options = {
                store: {
@@ -1619,11 +1534,9 @@ define([
             assert.isTrue(setItemsStub.calledOnceWithExactly(items));
             assert.isTrue(throttledUpdateSearchStub.calledOnceWithExactly());
             assert.isFalse(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
 
-         it('should set new items without updating search', function() {
+         it('should set new items without updating search', function () {
             const items = [];
             const options = {
                store: {
@@ -1648,13 +1561,11 @@ define([
             assert.isTrue(setItemsStub.calledOnceWithExactly(items));
             assert.isTrue(throttledUpdateSearchStub.notCalled);
             assert.isFalse(instance._itemsChanged);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__toggleSelectElementFromPage', function() {
-         it('should fire toggleSelectFromPage event with true', function() {
+      describe('__toggleSelectElementFromPage', function () {
+         it('should fire toggleSelectFromPage event with true', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1676,11 +1587,9 @@ define([
                )
             );
             assert.isTrue(instance._selectingFromPage);
-
-            delete window.elementsPanel;
          });
 
-         it('should fire toggleSelectFromPage event with false', function() {
+         it('should fire toggleSelectFromPage event with false', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1702,13 +1611,11 @@ define([
                )
             );
             assert.isFalse(instance._selectingFromPage);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__onSearchValueChanged', function() {
-         it('should call __updateSearch with the passed value', function() {
+      describe('__onSearchValueChanged', function () {
+         it('should call __updateSearch with the passed value', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1722,13 +1629,11 @@ define([
             instance.__onSearchValueChanged({}, 'test');
 
             assert.isTrue(stub.calledOnceWithExactly('test'));
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__updateSearch', function() {
-         it('should not call selectElement', function() {
+      describe('__updateSearch', function () {
+         it('should not call selectElement', function () {
             const items = [];
             const options = {
                store: {
@@ -1755,11 +1660,9 @@ define([
             assert.isTrue(selectElementStub.notCalled);
             assert.equal(instance._lastFoundItemIndex, 0);
             assert.equal(instance._searchTotal, 0);
-
-            delete window.elementsPanel;
          });
 
-         it('should call selectElement', function() {
+         it('should call selectElement', function () {
             const items = [];
             const options = {
                store: {
@@ -1787,13 +1690,11 @@ define([
             assert.isTrue(selectElementStub.calledOnceWithExactly(1));
             assert.equal(instance._lastFoundItemIndex, 10);
             assert.equal(instance._searchTotal, 15);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__onSearchKeydown', function() {
-         it('should not do anything because a key other than Enter was pressed', function() {
+      describe('__onSearchKeydown', function () {
+         it('should not do anything because a key other than Enter was pressed', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1816,11 +1717,9 @@ define([
             assert.isTrue(selectElementStub.notCalled);
             assert.equal(instance._lastFoundItemIndex, 1);
             assert.equal(instance._searchTotal, 5);
-
-            delete window.elementsPanel;
          });
 
-         it('should not call selectElement because the next item was not found', function() {
+         it('should not call selectElement because the next item was not found', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1850,11 +1749,9 @@ define([
             assert.isTrue(selectElementStub.notCalled);
             assert.equal(instance._lastFoundItemIndex, 0);
             assert.equal(instance._searchTotal, 0);
-
-            delete window.elementsPanel;
          });
 
-         it('should call selectElement', function() {
+         it('should call selectElement', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1885,13 +1782,11 @@ define([
             assert.isTrue(selectElementStub.calledOnceWithExactly(2));
             assert.equal(instance._lastFoundItemIndex, 1);
             assert.equal(instance._searchTotal, 5);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__inspectElement', function() {
-         it('should fire inspectElement event with default params', function() {
+      describe('__inspectElement', function () {
+         it('should fire inspectElement event with default params', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1919,11 +1814,9 @@ define([
                   path: undefined
                }
             );
-
-            delete window.elementsPanel;
          });
 
-         it('should fire inspectElement event with passed params', function() {
+         it('should fire inspectElement event with passed params', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1953,13 +1846,11 @@ define([
                   expandedTabs
                }
             );
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__setInspectedElement', function() {
-         it('should not do anything because ids are not the same', function() {
+      describe('__setInspectedElement', function () {
+         it('should not do anything because ids are not the same', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1979,11 +1870,9 @@ define([
             });
 
             assert.isUndefined(instance._inspectedItem);
-
-            delete window.elementsPanel;
          });
 
-         it('should set _inspectedItem', function() {
+         it('should set _inspectedItem', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2037,11 +1926,9 @@ define([
                   }
                }
             });
-
-            delete window.elementsPanel;
          });
 
-         it('should merge _inspectedItem and node', function() {
+         it('should merge _inspectedItem and node', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2082,13 +1969,11 @@ define([
                   test: '456'
                }
             });
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__getVisibleTabs', function() {
-         it('should return empty array', function() {
+      describe('__getVisibleTabs', function () {
+         it('should return empty array', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2102,11 +1987,9 @@ define([
             instance._attributesExpanded = false;
 
             assert.deepEqual(instance.__getVisibleTabs(), []);
-
-            delete window.elementsPanel;
          });
 
-         it('should return array with every tab', function() {
+         it('should return array with every tab', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2124,13 +2007,11 @@ define([
                'state',
                'attributes'
             ]);
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_onDetailsTabExpanded', function() {
-         it('should change state to false without calling inspectElement', function() {
+      describe('_onDetailsTabExpanded', function () {
+         it('should change state to false without calling inspectElement', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2147,11 +2028,9 @@ define([
 
             assert.isFalse(instance._optionsExpanded);
             sinon.assert.notCalled(instance.__inspectElement);
-
-            delete window.elementsPanel;
          });
 
-         it('should change state to true and call inspectElement with the name of the tab', function() {
+         it('should change state to true and call inspectElement with the name of the tab', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2174,13 +2053,11 @@ define([
                   path: ['options']
                }
             );
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_setBreakpoint', function() {
-         it('should remove all breakpoints, then add them again.', async function() {
+      describe('_setBreakpoint', function () {
+         it('should remove all breakpoints, then add them again.', async function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2240,12 +2117,11 @@ define([
             assert.deepEqual(instance._elementsWithBreakpoints, new Set([0]));
 
             clock.restore();
-            delete window.elementsPanel;
          });
       });
 
-      describe('_removeAllBreakpoints', function() {
-         it('should remove all breakpoints', async function() {
+      describe('_removeAllBreakpoints', function () {
+         it('should remove all breakpoints', async function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2275,13 +2151,11 @@ define([
                oldElementsWithBreakpoints
             );
             assert.deepEqual(instance._elementsWithBreakpoints, new Set());
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('__removeBreakpoint', function() {
-         it("should not do anything because this element doesn't have a breakpoint", async function() {
+      describe('__removeBreakpoint', function () {
+         it("should not do anything because this element doesn't have a breakpoint", async function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2302,11 +2176,9 @@ define([
                oldElementsWithBreakpoints
             );
             assert.deepEqual(instance._elementsWithBreakpoints, new Set([1]));
-
-            delete window.elementsPanel;
          });
 
-         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Should not fail because 0 breakpoints were removed', async function() {
+         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Should not fail because 0 breakpoints were removed', async function () {
             // This test is for the case when frontend somehow got desynced with the backend
             const options = {
                store: {
@@ -2333,11 +2205,9 @@ define([
                oldElementsWithBreakpoints
             );
             assert.deepEqual(instance._elementsWithBreakpoints, new Set());
-
-            delete window.elementsPanel;
          });
 
-         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Should not fail if related breakpoints were already removed from elementsWithBreakpoints', async function() {
+         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Should not fail if related breakpoints were already removed from elementsWithBreakpoints', async function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2363,11 +2233,9 @@ define([
                oldElementsWithBreakpoints
             );
             assert.deepEqual(instance._elementsWithBreakpoints, new Set());
-
-            delete window.elementsPanel;
          });
 
-         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Also should remove every related breakpoint', async function() {
+         it('should remove the id from the elementsWithBreakpoints, then remove breakpoints. Also should remove every related breakpoint', async function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -2377,11 +2245,7 @@ define([
             };
             const instance = new Elements(options);
             instance.saveOptions(options);
-            instance._elementsWithBreakpoints
-               .add(0)
-               .add(1)
-               .add(2)
-               .add(3);
+            instance._elementsWithBreakpoints.add(0).add(1).add(2).add(3);
             const oldElementsWithBreakpoints =
                instance._elementsWithBreakpoints;
             sandbox.stub(chrome, 'devtools').value({
@@ -2397,13 +2261,11 @@ define([
                oldElementsWithBreakpoints
             );
             assert.deepEqual(instance._elementsWithBreakpoints, new Set());
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_offsetHandler', function() {
-         it('should change _offsetWidth on instance and save it', function() {
+      describe('_offsetHandler', function () {
+         it('should change _offsetWidth on instance and save it', function () {
             const items = [];
             const options = {
                store: {
@@ -2422,13 +2284,11 @@ define([
             sinon.assert.calledWithExactly(chrome.storage.sync.set, {
                elementsDetailsWidth: 200
             });
-
-            delete window.elementsPanel;
          });
       });
 
-      describe('_onSelectElementFromPageClick', function() {
-         it('should call __toggleSelectElementFromPage without arguments', function() {
+      describe('_onSelectElementFromPageClick', function () {
+         it('should call __toggleSelectElementFromPage without arguments', function () {
             const items = [];
             const options = {
                store: {
@@ -2445,8 +2305,6 @@ define([
             sinon.assert.calledWithExactly(
                instance.__toggleSelectElementFromPage
             );
-
-            delete window.elementsPanel;
          });
       });
    });

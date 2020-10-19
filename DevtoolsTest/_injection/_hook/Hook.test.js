@@ -237,17 +237,23 @@ define([
       });
 
       describe('init', function () {
-         it('should not create the agent if a renderer is not passed', function () {
+         it('should not create the agent if neither Elements nor Profiler tab is enabled', function () {
+            stubWasabyDevtoolsOptions({
+               tabs: ['Debugging']
+            });
             sandbox.stub(globalChannel, 'getGlobalChannel');
 
             instance.init();
 
             assert.isUndefined(instance._agent);
-            assert.isFalse(instance._initialized);
+            assert.isTrue(instance._$hasWasaby);
             sinon.assert.notCalled(globalChannel.getGlobalChannel);
          });
 
-         it('should create the agent', function () {
+         it('should create the agent because the Elements tabs is enabled', function () {
+            stubWasabyDevtoolsOptions({
+               tabs: ['Elements']
+            });
             const fakeGlobalChannel = {
                addListener: sandbox.stub()
             };
@@ -259,14 +265,50 @@ define([
             };
             sandbox.stub(Agent, 'default').returns(fakeAgent);
 
-            instance.init({});
+            instance.init();
 
             assert.equal(instance._agent, fakeAgent);
             sinon.assert.calledWithNew(Agent.default);
             sinon.assert.calledWithExactly(Agent.default, {
                logger: instance._logger
             });
-            assert.isTrue(instance._initialized);
+            assert.isTrue(instance._$hasWasaby);
+            assert.equal(
+               fakeGlobalChannel.addListener.firstCall.args[0],
+               'devtoolsClosed'
+            );
+            assert.isFunction(fakeGlobalChannel.addListener.firstCall.args[1]);
+
+            instance._breakpoints = [];
+
+            fakeGlobalChannel.addListener.firstCall.args[1]();
+
+            assert.isUndefined(instance._breakpoints);
+         });
+
+         it('should create the agent because the Profiler tabs is enabled', function () {
+            stubWasabyDevtoolsOptions({
+               tabs: ['Profiler']
+            });
+            const fakeGlobalChannel = {
+               addListener: sandbox.stub()
+            };
+            sandbox
+               .stub(globalChannel, 'getGlobalChannel')
+               .returns(fakeGlobalChannel);
+            const fakeAgent = {
+               onStartCommit: sandbox.stub()
+            };
+            sandbox.stub(Agent, 'default').returns(fakeAgent);
+
+            instance.init();
+
+            assert.equal(instance._agent, fakeAgent);
+            sinon.assert.calledWithNew(Agent.default);
+            sinon.assert.calledWithExactly(Agent.default, {
+               logger: instance._logger
+            });
+            assert.isTrue(instance._$hasWasaby);
             assert.equal(
                fakeGlobalChannel.addListener.firstCall.args[0],
                'devtoolsClosed'

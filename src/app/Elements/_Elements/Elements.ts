@@ -104,7 +104,6 @@ class Elements extends Control {
       this._throttledUpdateSearch = throttle(() => {
          this.__updateSearch(this._searchValue);
       }, SEARCH_THROTTLE_DURATION);
-      window.elementsPanel = this;
 
       options.store.toggleDevtoolsOpened(true);
       options.store.getFullTree().then((items) => {
@@ -125,6 +124,11 @@ class Elements extends Control {
       });
    }
 
+   protected _afterMount(): void {
+      this.panelVisibilityCallback = this.panelVisibilityCallback.bind(this);
+      this._notify('subToPanelVisibility', [this.panelVisibilityCallback]);
+   }
+
    protected _beforeUpdate(newOptions: IOptions): void {
       if (newOptions.selected && !this._options.selected) {
          const newElements = newOptions.store.getElements();
@@ -141,6 +145,10 @@ class Elements extends Control {
          }
          this._throttledUpdateSearch();
          this._itemsChanged = false;
+      }
+
+      if (!newOptions.selected && this._options.selected) {
+         this._options.store.dispatch('toggleSelectFromPage', false);
       }
    }
 
@@ -164,24 +172,30 @@ class Elements extends Control {
       }
    }
 
-   panelShownCallback(): void {
-      chrome.devtools.inspectedWindow.eval(
-         'window.__WASABY_DEV_HOOK__.$0 = $0',
-         () => {
-            this._options.store.dispatch('getSelectedItem');
+   panelVisibilityCallback(isVisible: boolean): void {
+      if (this._options.selected) {
+         if (isVisible) {
+            chrome.devtools.inspectedWindow.eval(
+               'window.__WASABY_DEV_HOOK__.$0 = $0',
+               () => {
+                  this._options.store.dispatch('getSelectedItem');
+               }
+            );
+         } else {
+            this._options.store.dispatch('toggleSelectFromPage', false);
          }
-      );
-   }
-
-   panelHiddenCallback(): void {
-      this._options.store.dispatch('toggleSelectFromPage', false);
+      }
    }
 
    protected _beforeUnmount(): void {
+      /*
+      We don't have to remove subscriptions from the store here,
+      because if any tab gets destroyed - the whole page gets destroyed, and the store is destroyed too.
+       */
       this._options.store.dispatch('toggleSelectFromPage', false);
       this._inspectedItem = undefined;
       this._model.destructor();
-      window.elementsPanel = undefined;
+      this._notify('unsubFromPanelVisibility', [this.panelVisibilityCallback]);
    }
 
    protected _onItemClick(e: Event, id: IFrontendControlNode['id']): void {

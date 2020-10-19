@@ -26,8 +26,6 @@
                                   on:viewFunctionSource="_viewFunctionSource()"
                                   on:storeAsGlobal="_storeAsGlobal()"
                                   on:expandedChanged="_forwardExpanded('_optionsExpanded')"
-                                  on:setNodeOption="_setNodeOption(1)"
-                                  on:revertNodeOption="_revertNodeOption(1)"
                                   expanded="{{_options.optionsExpanded}}"/>
    </ws:if>
    <ws:if data="{{_options.isControl}}">
@@ -41,8 +39,6 @@
                                      on:viewFunctionSource="_viewFunctionSource()"
                                      on:storeAsGlobal="_storeAsGlobal()"
                                      on:expandedChanged="_forwardExpanded('_stateExpanded')"
-                                     on:setNodeOption="_setNodeOption(2)"
-                                     on:revertNodeOption="_revertNodeOption(2)"
                                      expanded="{{_options.stateExpanded}}"/>
       </ws:if>
    </ws:if>
@@ -70,8 +66,6 @@
                                   isControl="{{ _options.isControl }}"
                                   store="{{ _options.store }}"
                                   on:expandedChanged="_forwardExpanded('_attributesExpanded')"
-                                  on:setNodeOption="_setNodeOption(0)"
-                                  on:revertNodeOption="_revertNodeOption(0)"
                                   expanded="{{_options.attributesExpanded}}"/>
    </ws:if>
 </div>
