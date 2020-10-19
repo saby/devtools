@@ -22,23 +22,23 @@ function createPanelIfNeeded(): void {
                   let loadInterval: number;
                   let panelVisible = false;
 
-                  function addLoadInterval(): void {
+                  function addLoadInterval(devtoolsWindow: Window): void {
                      loadInterval = window.setInterval(() => {
-                        if (window.devtoolsPanel) {
-                           devtoolsPanel = window.devtoolsPanel;
+                        if (devtoolsWindow.devtoolsPanel) {
+                           devtoolsPanel = devtoolsWindow.devtoolsPanel;
                            devtoolsPanel.panelShownCallback();
                            window.clearInterval(loadInterval);
                         }
                      }, WASABY_INIT_TIMEOUT);
                   }
 
-                  panel.onShown.addListener((window) => {
+                  panel.onShown.addListener((devtoolsWindow) => {
                      panelVisible = true;
-                     if (window.devtoolsPanel) {
-                        devtoolsPanel = window.devtoolsPanel;
+                     if (devtoolsWindow.devtoolsPanel) {
+                        devtoolsPanel = devtoolsWindow.devtoolsPanel;
                         devtoolsPanel.panelShownCallback();
                      } else {
-                        addLoadInterval();
+                        addLoadInterval(devtoolsWindow);
                      }
                   });
                   panel.onHidden.addListener(() => {
