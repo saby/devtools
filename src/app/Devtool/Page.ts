@@ -48,19 +48,21 @@ class Extension extends Control {
          this._initState();
       });
 
-      chrome.devtools.network.onNavigated.addListener(() => {
+      chrome.devtools.network.onNavigated.addListener(async () => {
          logger.log('получили нативное событие смены адреса страницы');
          this._hasWasabyOnPage = false;
+         if (this._hasChangedTabs) {
+            await this.loadTabs();
+         }
          this._hasChangedTabs = false;
          this.destroyStore();
          this._tabChanged = true;
       });
 
       this._hasChangedTabs = await hasChangedTabsOnPage();
-      const { tabs }: IExtensionOptions = await loadOptions(['tabs']);
-      const sortedTabs = getTabsInCanonicalOrder(tabs);
-      this._activeTab = sortedTabs[0];
-      this._tabsSource = getSource(sortedTabs);
+      if (!this._hasChangedTabs) {
+         await this.loadTabs();
+      }
 
       this.onTabsChanged = this.onTabsChanged.bind(this);
       chrome.storage.onChanged.addListener(this.onTabsChanged);
@@ -122,6 +124,13 @@ class Extension extends Control {
          this._store.destructor();
          this._store = undefined;
       }
+   }
+
+   private async loadTabs(): Promise<void> {
+      const { tabs }: IExtensionOptions = await loadOptions(['tabs']);
+      const sortedTabs = getTabsInCanonicalOrder(tabs);
+      this._activeTab = sortedTabs[0];
+      this._tabsSource = getSource(sortedTabs);
    }
 
    static _theme: string[] = [
