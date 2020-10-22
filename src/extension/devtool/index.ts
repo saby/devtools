@@ -53,9 +53,6 @@ function createPanelIfNeeded(): void {
 
                   chrome.devtools.network.onNavigated.addListener(() => {
                      devtoolsPanel = undefined;
-                     if (panelVisible) {
-                        addLoadInterval();
-                     }
                   });
                }
             );
