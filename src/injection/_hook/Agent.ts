@@ -121,7 +121,7 @@ class Agent {
 
    private isDevtoolsOpened: boolean = false;
 
-   private hasFullTree: boolean = false
+   private hasFullTree: boolean = false;
 
    private isProfiling: boolean = false;
 
