@@ -20,28 +20,28 @@ type Breakpoint = [
 export interface IWasabyDevHook {
    _$hasWasaby: boolean;
    _$hasChangedTabs: boolean;
-   onStartCommit: (
-      operation: OperationType,
-      name: string,
-      oldNode?: IControlNode | ITemplateNode
-   ) => void;
-   onStartLifecycle: (node: IControlNode) => void;
-   onEndCommit: (
-      node: IBackendControlNode,
-      data?: ITemplateChanges | IControlChanges
-   ) => void;
-   onEndLifecycle: (node: IControlNode) => void;
-   onStartSync: (rootId: number) => void;
-   onEndSync: (rootId: number) => void;
-   init: () => void;
-   pushMessage: (eventName: string, args?: ISerializable) => void;
    $0: IWasabyElement;
    saveReactivePropsStacks: boolean;
-   _$onTabsChanged: (tabs: IExtensionOptions['tabs']) => void;
    __node?: IBackendControlNode;
    __template?: Function;
    __constructor?: Function;
    __container?: IWasabyElement;
    __function?: Function;
    _breakpoints?: Breakpoint[];
+   onStartCommit(
+      operation: OperationType,
+      name: string,
+      oldNode?: IControlNode | ITemplateNode
+   ): void;
+   onStartLifecycle(node: IControlNode): void;
+   onEndCommit(
+      node: IBackendControlNode,
+      data?: ITemplateChanges | IControlChanges
+   ): void;
+   onEndLifecycle(node: IControlNode): void;
+   onStartSync(rootId: number): void;
+   onEndSync(rootId: number): void;
+   init(): void;
+   pushMessage(eventName: string, args?: ISerializable): void;
+   _$onTabsChanged(tabs: IExtensionOptions['tabs']): void;
 }

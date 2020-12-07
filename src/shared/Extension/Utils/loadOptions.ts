@@ -2,7 +2,8 @@ export type ExtenstionTabName =
    | 'Elements'
    | 'Profiler'
    | 'Dependencies'
-   | 'Debugging';
+   | 'Debugging'
+   | 'Focus';
 
 export interface IExtensionOptions {
    useUserTimingAPI: boolean;
@@ -14,7 +15,7 @@ export interface IExtensionOptions {
 export const DEFAULT_EXTENSION_OPTIONS: IExtensionOptions = {
    useUserTimingAPI: false,
    theme: 'devtools',
-   tabs: ['Elements', 'Profiler', 'Dependencies', 'Debugging'],
+   tabs: ['Elements', 'Profiler', 'Dependencies', 'Debugging', 'Focus'],
    saveReactivePropsStacks: false
 };
 
