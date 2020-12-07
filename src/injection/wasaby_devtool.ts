@@ -2,6 +2,7 @@ import { DependencyWatcher } from './DependencyWatcher';
 import { IPluginConstructor, IPlugin } from './IPlugin';
 import { InjectHook } from './InjectHook';
 import { DevtoolChannel } from './_devtool/Channel';
+import { Focus } from './Focus';
 import { GlobalMessages } from 'Extension/const';
 import { getGlobalChannel } from './_devtool/globalChannel';
 import { ConsoleLogger } from 'Extension/Logger/Console';
@@ -23,6 +24,9 @@ selectedTabs.forEach((tabName: ExtenstionTabName) => {
          pluginsForTabs.add(DependencyWatcher);
          break;
       case 'Debugging':
+         break;
+      case 'Focus':
+         pluginsForTabs.add(Focus);
          break;
    }
 });

@@ -1,0 +1,55 @@
+.devtools-Focus__History {
+   // TODO: use flex like a normal person
+   width: calc(100% - 5px);
+   margin-left: 5px;
+}
+
+.devtools-Focus__historyItem {
+   color: @text-color;
+}
+
+.devtools-Focus__item {
+   cursor: pointer;
+}
+
+.devtools-Focus__item_theme_@{themeName}:hover {
+   background-color: @hover_background-color_list;
+}
+
+.devtools-Focus__item_nonFocusable {
+   color: @secondary_color;
+}
+
+.devtools-Focus__item_withDangerousLabel {
+   color: @danger_color;
+}
+
+.devtools-Focus__item_focusable {
+   color: @text-color;
+}
+
+.devtools-Focus__item_selfFocused_theme_@{themeName} {
+   background-color: @background-color_selected_elements;
+}
+
+.devtools-Focus__item_childFocused_theme_@{themeName} {
+   background-color: @background-color_childFocused;
+}
+
+.devtools-Focus__tree {
+   padding-left: @offset_2xs;
+}
+
+.devtools-Focus__icon {
+   padding-left: @offset_2xs;
+}
+
+.devtools-Focus__resetButton {
+   margin-left: 6px;
+}
+
+.devtools-Focus__head__rightTemplate {
+   margin-left: auto;
+   height: 100%;
+   align-items: center;
+}

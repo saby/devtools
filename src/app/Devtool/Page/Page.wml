@@ -58,6 +58,13 @@
                             <Controls.Container.Async templateName="Debugging/debugging:View" />
                         </ws:itemTemplate>
                     </ws:Object>
+                    <ws:Object key="Focus">
+                        <ws:itemTemplate>
+                            <Controls.Container.Async templateName="Focus/focus:Focus">
+                                <ws:templateOptions selected="{{ itemTemplate.templateOptions.selected }}" />
+                            </Controls.Container.Async>
+                        </ws:itemTemplate>
+                    </ws:Object>
                 </ws:Array>
             </ws:items>
         </Controls.switchableArea:View>
