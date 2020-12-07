@@ -110,6 +110,7 @@ class Overlay {
       overlay.style.position = 'absolute';
       overlay.style.zIndex = '100000000';
       overlay.style.pointerEvents = 'none';
+      overlay.style.whiteSpace = 'nowrap';
 
       const caption = document.createElement('span');
       caption.style.pointerEvents = 'none';

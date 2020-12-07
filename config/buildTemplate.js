@@ -121,6 +121,10 @@ const EXTENSION_MODULES = [
       path: resolve(input.app, 'Debugging')
    },
    {
+      "name": "Focus",
+      "path": resolve(input.app, "Focus")
+   },
+   {
       name: 'Controls-devtools-theme',
       path: resolve(input.app, 'Controls-devtools-theme')
    },
@@ -147,6 +151,10 @@ const EXTENSION_MODULES = [
    {
       name: 'Profiler-devtools-theme',
       path: resolve(input.app, 'Profiler-devtools-theme')
+   },
+   {
+      name: 'Focus-devtools-theme',
+      path: resolve(input.app, 'Focus-devtools-theme')
    },
    {
       name: 'LogicParentPanel',
