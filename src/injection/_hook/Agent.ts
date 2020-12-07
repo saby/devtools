@@ -121,7 +121,7 @@ class Agent {
 
    private isDevtoolsOpened: boolean = false;
 
-   private hasFullTree: boolean = false
+   private hasFullTree: boolean = false;
 
    private isProfiling: boolean = false;
 
@@ -316,20 +316,7 @@ class Agent {
       this.hasFullTree = true;
 
       this.elements.forEach((node) => {
-         const message: IOperationEvent['args'] = [
-            OperationType.CREATE,
-            node.id,
-            node.name,
-            getControlType(node)
-         ];
-         if (typeof node.parentId !== 'undefined') {
-            message.push(node.parentId);
-         }
-         if (typeof node.logicParentId !== 'undefined') {
-            message.push(node.logicParentId);
-         }
-
-         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
+         this.constructCreateMessage(node);
       });
       window.__WASABY_DEV_HOOK__.pushMessage('endOfTree');
 
@@ -694,19 +681,7 @@ class Agent {
       }
 
       if (this.isDevtoolsOpened) {
-         const message: IOperationEvent['args'] = [
-            OperationType.CREATE,
-            node.id,
-            node.name,
-            getControlType(node)
-         ];
-         if (typeof node.parentId !== 'undefined') {
-            message.push(node.parentId);
-         }
-         if (typeof node.logicParentId !== 'undefined') {
-            message.push(node.logicParentId);
-         }
-         window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
+         this.constructCreateMessage(node);
       }
    }
 
@@ -1276,6 +1251,22 @@ class Agent {
          }
       }
       window.__WASABY_DEV_HOOK__._breakpoints = breakpoints;
+   }
+
+   private constructCreateMessage(node: IBackendControlNode): void {
+      const message: IOperationEvent['args'] = [
+         OperationType.CREATE,
+         node.id,
+         node.name,
+         getControlType(node)
+      ];
+      if (typeof node.parentId !== 'undefined') {
+         message.push(node.parentId);
+      }
+      if (typeof node.logicParentId !== 'undefined') {
+         message.push(node.logicParentId);
+      }
+      window.__WASABY_DEV_HOOK__.pushMessage('operation', message);
    }
 }
 

@@ -7,6 +7,10 @@ export const INSPECTED_ITEM_META = {
    type: Symbol('type')
 };
 
+/**
+ * This function is used to convert dehydrated data to a format that is understandable by the frontend.
+ * @author Зайцев А.С.
+ */
 export function hydrate(
    data: Record<string | number, unknown>,
    cleaned: Array<Array<string | number>>
