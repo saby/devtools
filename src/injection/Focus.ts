@@ -12,7 +12,7 @@ import {
    IHistoryItem
 } from 'Extension/Plugins/Focus/Focus';
 import { IWasabyElement } from 'Extension/Plugins/Elements/IControlNode';
-import { ElementFinderLoader } from './_focus/ElementFinderLoader';
+import { FocusLibLoader } from './_focus/FocusLibLoader';
 import { getFullFocusTree } from './_focus/getFullFocusTree';
 import { getCaption } from './_focus/getCaption';
 
@@ -24,6 +24,7 @@ export class Focus implements IPlugin {
    private removalObserver: RemovalObserver = new RemovalObserver();
    private items: Map<Node, IBackendItem> = new Map();
    private historyItems: Map<Node, IHistoryItem> = new Map();
+   private focusLibLoader: FocusLibLoader = new FocusLibLoader();
    private pluginInitialized: boolean = false;
    private elementFinder: IElementFinder;
    private highlighter: Highlighter = new Highlighter({
@@ -52,7 +53,10 @@ export class Focus implements IPlugin {
       this.saveContainer = this.saveContainer.bind(this);
       this.highlightElementByConfig = this.highlightElementByConfig.bind(this);
       this.constructTreeIfAlive = this.constructTreeIfAlive.bind(this);
-      this.throttledConstructTree = throttle(this.constructTreeIfAlive, TREE_UPDATE_FREQUENCY);
+      this.throttledConstructTree = throttle(
+         this.constructTreeIfAlive,
+         TREE_UPDATE_FREQUENCY
+      );
       this.mutationObserver = new MutationObserver(
          this.mutationObserverCallback
       );
@@ -95,7 +99,7 @@ export class Focus implements IPlugin {
 
    private async constructTree(): Promise<void> {
       this.removalObserver.clearObservedElements();
-      this.elementFinder = await new ElementFinderLoader().getElementFinder();
+      this.elementFinder = await this.focusLibLoader.getElementFinder();
       this.items = getFullFocusTree(
          this.elementFinder,
          this.removalObserver,
@@ -175,10 +179,12 @@ export class Focus implements IPlugin {
          reverse
       );
       if (next) {
-         next.focus();
-         // chrome doesn't fire focus event when focus is moved manually, so we have to call handlers here
-         this.addItemToHistory(next);
-         this.changeFocusedItem(next);
+         const focusFromLib = await this.focusLibLoader.getFocusFromLib();
+         if (focusFromLib(next)) {
+            // chrome doesn't fire focus event when focus is moved manually, so we have to call handlers here
+            this.addItemToHistory(next);
+            this.changeFocusedItem(next);
+         }
       }
    }
 
