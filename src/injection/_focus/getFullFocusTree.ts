@@ -25,6 +25,12 @@ export function getFullFocusTree(
    let i = 0;
 
    const addElement = (element: Element, parent?: Element): void => {
+      if (
+         element.classList.contains('vdom-focus-in') ||
+         element.classList.contains('vdom-focus-out')
+      ) {
+         return;
+      }
       const props = elementFinder.getElementProps(element);
       const elementLabels = getLabelsFromElement(element);
       const hasAutofocus: boolean = elementLabels.includes('autofocus');
