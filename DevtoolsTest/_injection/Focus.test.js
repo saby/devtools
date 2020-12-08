@@ -1,7 +1,6 @@
 define([
    'DevtoolsTest/mockChrome',
    'injection/Focus',
-   'injection/_focus/ElementFinderLoader',
    'injection/_focus/getFullFocusTree',
    'injection/_focus/getId',
    'injection/_devtool/globalChannel',
@@ -9,7 +8,6 @@ define([
 ], function (
    mockChrome,
    Focus,
-   ElementFinderLoader,
    getFullFocusTree,
    getId,
    globalChannel,
@@ -183,9 +181,9 @@ define([
       describe('constructTree', function () {
          it('should construct the tree and send it to the frontend', async function () {
             const elementFinder = {};
-            sandbox.stub(ElementFinderLoader, 'ElementFinderLoader').returns({
-               getElementFinder: sandbox.stub().resolves(elementFinder)
-            });
+            sandbox
+               .stub(instance.focusLibLoader, 'getElementFinder')
+               .resolves(elementFinder);
             sandbox.stub(instance.removalObserver, 'clearObservedElements');
             const items = new Map([
                [
@@ -493,18 +491,21 @@ define([
             sandbox.stub(instance, 'addItemToHistory');
             sandbox.stub(instance, 'changeFocusedItem');
             const nextElem = document.createElement('div');
-            sandbox.stub(nextElem, 'focus');
             instance.elementFinder = {
                findWithContexts: sandbox
                   .stub()
                   .withArgs(document.body, document.body, false)
                   .returns(nextElem)
             };
+            const focusFromLib = sandbox.stub().returns(true);
+            sandbox
+               .stub(instance.focusLibLoader, 'getFocusFromLib')
+               .resolves(focusFromLib);
             document.body.focus();
 
             await instance.moveFocus(false);
 
-            sinon.assert.calledOnce(nextElem.focus);
+            sinon.assert.calledWithExactly(focusFromLib, nextElem);
             sinon.assert.calledWithExactly(instance.addItemToHistory, nextElem);
             sinon.assert.calledWithExactly(
                instance.changeFocusedItem,
@@ -516,23 +517,67 @@ define([
             sandbox.stub(instance, 'addItemToHistory');
             sandbox.stub(instance, 'changeFocusedItem');
             const nextElem = document.createElement('div');
-            sandbox.stub(nextElem, 'focus');
             instance.elementFinder = {
                findWithContexts: sandbox
                   .stub()
                   .withArgs(document.body, document.body, true)
                   .returns(nextElem)
             };
+            const focusFromLib = sandbox.stub().returns(true);
+            sandbox
+               .stub(instance.focusLibLoader, 'getFocusFromLib')
+               .resolves(focusFromLib);
             document.body.focus();
 
             await instance.moveFocus(true);
 
-            sinon.assert.calledOnce(nextElem.focus);
+            sinon.assert.calledWithExactly(focusFromLib, nextElem);
             sinon.assert.calledWithExactly(instance.addItemToHistory, nextElem);
             sinon.assert.calledWithExactly(
                instance.changeFocusedItem,
                nextElem
             );
+         });
+
+         it("shouldn't move focus because there's no next element", async function () {
+            sandbox.stub(instance, 'addItemToHistory');
+            sandbox.stub(instance, 'changeFocusedItem');
+            instance.elementFinder = {
+               findWithContexts: sandbox
+                  .stub()
+                  .withArgs(document.body, document.body, false)
+            };
+            sandbox.stub(instance.focusLibLoader, 'getFocusFromLib');
+            document.body.focus();
+
+            await instance.moveFocus(false);
+
+            sinon.assert.notCalled(instance.focusLibLoader.getFocusFromLib);
+            sinon.assert.notCalled(instance.addItemToHistory);
+            sinon.assert.notCalled(instance.changeFocusedItem);
+         });
+
+         it("shouldn't move focus because the next element is not focusable", async function () {
+            sandbox.stub(instance, 'addItemToHistory');
+            sandbox.stub(instance, 'changeFocusedItem');
+            const nextElem = document.createElement('div');
+            instance.elementFinder = {
+               findWithContexts: sandbox
+                  .stub()
+                  .withArgs(document.body, document.body, false)
+                  .returns(nextElem)
+            };
+            const focusFromLib = sandbox.stub().returns(false);
+            sandbox
+               .stub(instance.focusLibLoader, 'getFocusFromLib')
+               .resolves(focusFromLib);
+            document.body.focus();
+
+            await instance.moveFocus(false);
+
+            sinon.assert.calledWithExactly(focusFromLib, nextElem);
+            sinon.assert.notCalled(instance.addItemToHistory);
+            sinon.assert.notCalled(instance.changeFocusedItem);
          });
       });
 

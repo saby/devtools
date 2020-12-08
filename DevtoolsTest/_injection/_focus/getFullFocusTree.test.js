@@ -42,7 +42,7 @@ define([
          sandbox.restore();
       });
 
-      it('TBD', function () {
+      it('should construct the right tree', function () {
          elementFinder.getElementProps.withArgs(document.body).returns({
             tabStop: false,
             tabCycling: false,
@@ -72,6 +72,20 @@ define([
             tabIndex: 0,
             delegateFocusToChildren: true
          });
+         const vdomFocusIn = addToBody('div', {
+            tabStop: true,
+            tabCycling: false,
+            tabIndex: 0,
+            delegateFocusToChildren: false
+         });
+         vdomFocusIn.classList.add('vdom-focus-in');
+         const vdomFocusOut = addToBody('div', {
+            tabStop: true,
+            tabCycling: false,
+            tabIndex: 0,
+            delegateFocusToChildren: false
+         });
+         vdomFocusOut.classList.add('vdom-focus-out');
          const tabCycling = addToBody('div', {
             tabStop: false,
             tabCycling: true,

@@ -33,3 +33,8 @@ export interface IElementFinder {
    ): HTMLElement | void;
    getElementProps(element: Node): IFocusElementProps;
 }
+
+export type FocusFromLib = (
+   element: Element,
+   config?: { enableScreenKeyboard: false; enableScrollToElement: false }
+) => boolean;

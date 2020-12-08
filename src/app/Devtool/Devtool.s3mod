@@ -28,6 +28,7 @@
         <module id="87addb9a-b1a3-4827-ad3a-abc0a0028184" name="Elements-devtools-theme"/>
         <module id="84715dd5-2bb6-4b55-9e80-8e1f62f0c887" name="Profiler-devtools-theme"/>
         <module id="ad0358c8-d003-49f2-a89d-9a826474c9f4" name="Focus-devtools-theme"/>
+        <module id="37e402f1-2fb0-4b73-81c5-113cf94dbf1c" name="WasabyLoader"/>
     </depends>
 
   <load_after/>
