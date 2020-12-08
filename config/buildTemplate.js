@@ -44,6 +44,10 @@ const WASABY_MODULES = [
       path: 'rmi/src/client/Env'
    },
    {
+      name: 'EnvConfig',
+      path: 'rmi/src/client/EnvConfig'
+   },
+   {
       name: 'Browser',
       path: 'rmi/src/client/Browser'
    },
@@ -82,6 +86,10 @@ const WASABY_MODULES = [
    {
       name: 'RequireJsLoader',
       path: 'wasaby-requirejs-loader/RequireJsLoader'
+   },
+   {
+      name: 'WasabyLoader',
+      path: 'wasaby-requirejs-loader/WasabyLoader'
    }
 ].map(({ path, ...config }) => {
    return {
