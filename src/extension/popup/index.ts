@@ -52,7 +52,7 @@ async function toggleFavoriteModules(state: boolean): Promise<void> {
 
 async function setCookie(value?: string): Promise<void> {
    const tab = await getCurrentTab();
-   const url = tab.url as string;
+   const url = new URL(tab.url as string).origin;
    const id = tab.id as number;
    if (value) {
       chrome.cookies.set(
