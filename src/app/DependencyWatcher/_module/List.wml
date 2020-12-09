@@ -35,7 +35,6 @@
                 nodeProperty="hasChildren"
                 columns="{{ _column }}"
                 header="{{ _headers }}"
-                columnScroll="{{ true }}"
                 displayProperty="name"
                 itemActions="{{ _itemActions }}"
                 itemActionsPosition="custom"
