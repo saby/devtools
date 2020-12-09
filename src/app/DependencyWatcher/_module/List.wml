@@ -11,6 +11,7 @@
     searchStartingWith="current"
     viewMode="table"
     root="{{ _root }}"
+    bind:sorting="_sorting"
 >
     <ws:search>
         <Controls.search:Input />
@@ -30,7 +31,6 @@
         >
             <Controls.explorer:View
                 name="listView"
-                bind:sorting="_sorting"
                 bind:root="_root"
                 nodeProperty="hasChildren"
                 columns="{{ _column }}"
