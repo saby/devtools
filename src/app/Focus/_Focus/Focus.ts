@@ -34,13 +34,13 @@ class Focus extends Control<IControlOptions> {
          iconStyle: 'secondary',
          title: 'This element will be focused on the page load/popup creation'
       },
-      invisible: {
+      hidden: {
          icon: 'icon-Hide',
          iconStyle: 'danger',
          title:
             "This element is hidden with visibility: hidden and can't be focused"
       },
-      hidden: {
+      invisible: {
          icon: 'icon-Hide',
          iconStyle: 'danger',
          title: "This element is hidden with display: none and can't be focused"
