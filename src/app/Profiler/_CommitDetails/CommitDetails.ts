@@ -1,7 +1,7 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import * as template from 'wml!Profiler/_CommitDetails/CommitDetails';
 import { descriptor } from 'Types/entity';
-import * as tmplNotify from 'Controls/Utils/tmplNotify';
+import {EventUtils} from 'UI/Events';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { IWarning } from 'Profiler/_Warning/const';
 import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
@@ -26,7 +26,7 @@ type Options = IControlOptions & ICommitDetailsOptions;
 class CommitDetails extends Control<Options> {
    protected _template: TemplateFunction = template;
 
-   protected _notifyHandler: Function = tmplNotify;
+   protected _notifyHandler: Function = EventUtils.tmplNotify;
 
    static _theme: string[] = ['Profiler/profiler'];
 

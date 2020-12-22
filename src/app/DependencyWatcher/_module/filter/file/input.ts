@@ -1,6 +1,6 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import template = require('wml!DependencyWatcher/_module/filter/file/input');
-import tmplNotify = require('Controls/Utils/tmplNotify');
+import {EventUtils} from 'UI/Events';
 
 interface IOptions extends IControlOptions {
    textValue: string;
@@ -15,7 +15,7 @@ So we stop value changed event, and replace the name of the selectedKeysChanged 
  */
 export default class Input extends Control<IOptions> {
    protected _template: TemplateFunction = template;
-   protected _notifyHandler: Function = tmplNotify;
+   protected _notifyHandler: Function = EventUtils.tmplNotify;
    private _onValueChanged(e: Event): void {
       e.stopPropagation();
    }
