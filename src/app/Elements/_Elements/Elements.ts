@@ -1,4 +1,4 @@
-import Control = require('Core/Control');
+import {Control} from 'UI/Base';
 import template = require('wml!Elements/_Elements/Elements');
 import {
    IBackendControlNode,
