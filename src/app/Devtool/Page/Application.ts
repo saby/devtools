@@ -215,9 +215,6 @@ export default class Application extends Control<IApplicationOptions> {
 
    private createTouchDetector(): void {
       this.touchDetector = new TouchDetect.getInstance();
-      this.touchObjectContext = new TouchContextField(this.touchDetector.isTouch());
-      this.touchDetector('touchChanged', (event: Event, isTouch: boolean) => {
-         this.touchObjectContext.setIsTouch(isTouch);
-      });
+      this.touchObjectContext = new TouchContextField.create();
    }
 }
