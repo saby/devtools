@@ -86,7 +86,7 @@ export default class Application extends Control<IApplicationOptions> {
    protected _mousemovePage(ev: SyntheticEvent<Event>): void {
       this.registers.mousemove.start(ev);
    }
-  
+
    protected _touchmovePage(ev: SyntheticEvent<Event>): void {
       this.registers.touchmove.start(ev);
    }
@@ -105,10 +105,10 @@ export default class Application extends Control<IApplicationOptions> {
    }
 
    // tslint:disable-next-line:no-empty
-   protected _keyPressHandler(event: SyntheticEvent<Event>): void {}
+   protected _keyPressHandler(event: SyntheticEvent<Event>): void { }
 
    // tslint:disable-next-line:no-empty
-   protected _suggestStateChangedHandler(event: Event): void {}
+   protected _suggestStateChangedHandler(event: Event): void { }
 
    protected _registerHandler(
       event: Event,
@@ -216,5 +216,8 @@ export default class Application extends Control<IApplicationOptions> {
    private createTouchDetector(): void {
       this.touchDetector = new TouchDetect.getInstance();
       this.touchObjectContext = new TouchContextField(this.touchDetector.isTouch());
+      this.touchDetector('touchChanged', (event: Event, isTouch: boolean) => {
+         this.touchObjectContext.setIsTouch(isTouch);
+      });
    }
 }
