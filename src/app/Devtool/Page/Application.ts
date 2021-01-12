@@ -5,7 +5,8 @@ import * as template from 'wml!Devtool/Page/Application';
 import { RegisterClass } from 'Controls/event';
 import { ControllerClass, IDragObject } from 'Controls/dragnDrop';
 import { GlobalController, ManagerClass } from 'Controls/popup';
-import * as TouchDetector from 'Controls/Application/TouchDetectorController';
+import { TouchDetect } from 'Env/Touch';
+import { TouchContextField } from 'Controls/context';
 
 interface IApplicationOptions extends IControlOptions {
    pagingVisible: unknown;
@@ -24,8 +25,8 @@ export default class Application extends Control<IApplicationOptions> {
    private dragnDropController: ControllerClass;
    private globalPopup: GlobalController;
    private popupManager: ManagerClass;
-   private touchDetector: TouchDetector;
-   private touchObjectContext: object;
+   private touchDetector: TouchDetect;
+   private touchObjectContext: TouchContextField;
 
    protected _beforeMount(cfg: IApplicationOptions): void {
       this.createDragnDropController();
@@ -84,13 +85,8 @@ export default class Application extends Control<IApplicationOptions> {
 
    protected _mousemovePage(ev: SyntheticEvent<Event>): void {
       this.registers.mousemove.start(ev);
-      this.touchDetector.moveHandler();
    }
-
-   protected _touchStartPage(ev: SyntheticEvent<Event>): void {
-      this.touchDetector.touchHandler();
-   }
-
+  
    protected _touchmovePage(ev: SyntheticEvent<Event>): void {
       this.registers.touchmove.start(ev);
    }
@@ -218,7 +214,7 @@ export default class Application extends Control<IApplicationOptions> {
    }
 
    private createTouchDetector(): void {
-      this.touchDetector = new TouchDetector();
-      this.touchObjectContext = this.touchDetector.createContext();
+      this.touchDetector = new TouchDetect.getInstance();
+      this.touchObjectContext = new TouchContextField(this.touchDetector.isTouch());
    }
 }
