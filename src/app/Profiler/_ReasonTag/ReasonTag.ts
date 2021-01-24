@@ -42,4 +42,13 @@ class ReasonTag extends Control<IOptions> {
    }
 }
 
+Object.defineProperty(ReasonTag, 'defaultProps', {
+   enumerable: true,
+   configurable: true,
+
+   get(): ReturnType<ReasonTag['getDefaultOptions']> {
+      return ReasonTag.getDefaultOptions();
+   }
+});
+
 export default ReasonTag;
