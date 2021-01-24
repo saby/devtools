@@ -265,7 +265,7 @@ Object.defineProperty(Pane, 'defaultProps', {
    enumerable: true,
    configurable: true,
 
-   get(): ReturnType<Pane['getDefaultOptions']> {
+   get(): object {
       return Pane.getDefaultOptions();
    }
 });

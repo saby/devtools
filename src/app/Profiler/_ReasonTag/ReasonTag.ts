@@ -46,7 +46,7 @@ Object.defineProperty(ReasonTag, 'defaultProps', {
    enumerable: true,
    configurable: true,
 
-   get(): ReturnType<ReasonTag['getDefaultOptions']> {
+   get(): object {
       return ReasonTag.getDefaultOptions();
    }
 });
