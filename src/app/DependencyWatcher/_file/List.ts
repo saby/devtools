@@ -41,7 +41,7 @@ Object.defineProperty(List, 'defaultProps', {
    enumerable: true,
    configurable: true,
 
-   get(): ReturnType<List['getDefaultOptions']> {
+   get(): object {
       return List.getDefaultOptions();
    }
 });
