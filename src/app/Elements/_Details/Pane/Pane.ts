@@ -261,4 +261,13 @@ class Pane extends Control<IOptions> {
    }
 }
 
+Object.defineProperty(Pane, 'defaultProps', {
+   enumerable: true,
+   configurable: true,
+
+   get(): ReturnType<Pane['getDefaultOptions']> {
+      return Pane.getDefaultOptions();
+   }
+});
+
 export default Pane;

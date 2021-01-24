@@ -36,4 +36,14 @@ export class List extends Control<IOptions> {
       };
    }
 }
+
+Object.defineProperty(List, 'defaultProps', {
+   enumerable: true,
+   configurable: true,
+
+   get(): ReturnType<List['getDefaultOptions']> {
+      return List.getDefaultOptions();
+   }
+});
+
 export default List;
