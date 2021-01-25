@@ -3,7 +3,6 @@
             on:scroll="_scrollPage()"
             on:resize="_resizePage()"
             on:mousemove="_mousemovePage()"
-            on:touchstart="_touchStartPage()"
             on:touchmove="_touchmovePage()"
             on:touchend="_touchendPage()"
             on:mousedown="_mousedownPage()"
