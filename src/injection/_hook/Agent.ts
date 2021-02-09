@@ -66,10 +66,7 @@ class Agent {
    /**
     * This map is just used to speed up search for virtual node by dom node.
     */
-   private domToIds: WeakMap<
-      Node,
-      Array<IBackendControlNode['id']>
-   > = new WeakMap();
+   private domToIds: WeakMap<Node, IBackendControlNode['id'][]> = new WeakMap();
    /**
     * This map stores container for each node.
     */
@@ -117,7 +114,7 @@ class Agent {
     */
    private rootStack: number[] = [];
 
-   private componentsStack: Array<IBackendControlNode['id']> = [];
+   private componentsStack: IBackendControlNode['id'][] = [];
 
    private isDevtoolsOpened: boolean = false;
 
@@ -770,8 +767,8 @@ class Agent {
 
    private inspectElement(options: {
       id: IBackendControlNode['id'];
-      expandedTabs: Array<'attributes' | 'state' | 'options' | 'events'>;
-      path?: Array<string | number>;
+      expandedTabs: ('attributes' | 'state' | 'options' | 'events')[];
+      path?: (string | number)[];
    }): void {
       const { id, expandedTabs } = options;
       const sameId = this.currentInspectedElementId === id;
@@ -928,7 +925,7 @@ class Agent {
       }
    }
 
-   private updateInspectedPaths(path: Array<string | number>): void {
+   private updateInspectedPaths(path: (string | number)[]): void {
       let currentPathMap = this.currentInspectedPaths;
       path.forEach((part) => {
          let nextPathMap = currentPathMap.get(part);
@@ -966,7 +963,7 @@ class Agent {
       path
    }: {
       id: IBackendControlNode['id'];
-      path: Array<string | number>;
+      path: (string | number)[];
    }): void {
       window.__WASABY_DEV_HOOK__.__function = this.getValueByPath(
          id,
@@ -979,7 +976,7 @@ class Agent {
       path
    }: {
       id: IBackendControlNode['id'];
-      path: Array<string | number>;
+      path: (string | number)[];
    }): void {
       window.$tmp = this.getValueByPath(id, path);
       // tslint:disable-next-line: no-console
@@ -988,7 +985,7 @@ class Agent {
 
    private getValueByPath(
       id: IBackendControlNode['id'],
-      path: Array<string | number>
+      path: (string | number)[]
    ): unknown {
       const currentProperty = path.pop();
       let value;

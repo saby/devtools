@@ -22,6 +22,10 @@ interface IFocusedItem {
 
 const DEFAULT_DETAILS_WIDTH = 300;
 
+/**
+ * Controller of the "Focus" tab.
+ * @author Зайцев А.С.
+ */
 class Focus extends Control<IControlOptions> {
    protected _template: TemplateFunction = template;
    protected _items?: IFrontendItem[];
