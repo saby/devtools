@@ -83,9 +83,7 @@ class View extends Control<IControlOptions, void[]> {
       unselectedList: ListView;
       selectedList: ListView;
    };
-   protected readonly _navigation: INavigationOptionValue<
-      INavigationPageSourceConfig
-   > = {
+   protected readonly _navigation: INavigationOptionValue<INavigationPageSourceConfig> = {
       source: 'page',
       view: 'infinity',
       sourceConfig: {
@@ -305,9 +303,9 @@ class View extends Control<IControlOptions, void[]> {
                .split(',')
                .filter((value) => value.length !== 0);
 
-            const currentSelectedModules: Array<
-               IItem['id']
-            > = this.selectedModules.map(({ id }) => id);
+            const currentSelectedModules: IItem['id'][] = this.selectedModules.map(
+               ({ id }) => id
+            );
 
             const diff = getArrayDifference(
                currentSelectedModules,
@@ -356,7 +354,7 @@ class View extends Control<IControlOptions, void[]> {
    private async moveItemsInSource(
       sourceSource: Memory,
       targetSource: Memory,
-      ids: Array<IItem['id']>
+      ids: IItem['id'][]
    ): Promise<void> {
       const operations = ids.map((elem) =>
          targetSource.update(
@@ -376,7 +374,7 @@ class View extends Control<IControlOptions, void[]> {
    private moveItemsInArrays(
       source: IItem[],
       target: IItem[],
-      ids: Array<IItem['id']>
+      ids: IItem['id'][]
    ): void {
       ids.forEach((id) => {
          const itemIndex = source.findIndex(

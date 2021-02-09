@@ -1,3 +1,7 @@
+/**
+ * Controller of the popup displayed by clicking on the extension icon.
+ * @author Зайцев А.С.
+ */
 import Tab = chrome.tabs.Tab;
 
 const selectFavoriteModules = document.getElementById(
