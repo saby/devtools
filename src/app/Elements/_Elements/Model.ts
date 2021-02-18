@@ -204,6 +204,10 @@ class Model {
       }
    }
 
+   isVisible(id: IFrontendControlNode['id']): boolean {
+      return this._visibleItems.has(id);
+   }
+
    destructor(): void {
       this._items = [];
       this._visibleItems.clear();

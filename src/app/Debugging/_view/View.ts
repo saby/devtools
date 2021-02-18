@@ -243,20 +243,117 @@ class View extends Control<IControlOptions, void[]> {
             }
          }
 
-         chrome.cookies.set({
-            name: 's3debug',
-            url,
-            value: modules.join(',')
+         return new Promise((resolve, reject) => {
+            chrome.cookies.set(
+               {
+                  name: 's3debug',
+                  url,
+                  value: modules.join(',')
+               },
+               async (cookie) => {
+                  if (cookie) {
+                     this._hasUnsavedChanges = true;
+
+                     const currentSelectedModules: IItem['id'][] = this.selectedModules.map(
+                        ({ id }) => id
+                     );
+
+                     const diff = getArrayDifference(
+                        currentSelectedModules,
+                        modules
+                     );
+
+                     this.moveItemsInArrays(
+                        this.unselectedModules,
+                        this.selectedModules,
+                        diff.added
+                     );
+                     this.moveItemsInArrays(
+                        this.selectedModules,
+                        this.unselectedModules,
+                        diff.removed
+                     );
+
+                     const operations = [];
+
+                     operations.push(
+                        this.moveItemsInSource(
+                           this._unselectedSource,
+                           this._selectedSource,
+                           diff.added
+                        )
+                     );
+
+                     operations.push(
+                        this.moveItemsInSource(
+                           this._selectedSource,
+                           this._unselectedSource,
+                           diff.removed
+                        )
+                     );
+
+                     await Promise.all(operations);
+
+                     await Promise.all([
+                        this._children.unselectedList.reload(),
+                        this._children.selectedList.reload()
+                     ]);
+                     resolve();
+                  } else {
+                     reject(chrome.runtime.lastError);
+                  }
+               }
+            );
          });
       } else {
-         chrome.cookies.remove({
-            name: 's3debug',
-            url
+         return new Promise((resolve, reject) => {
+            chrome.cookies.remove(
+               {
+                  name: 's3debug',
+                  url
+               },
+               async (details) => {
+                  if (!details) {
+                     reject(chrome.runtime.lastError);
+                  }
+                  this._hasUnsavedChanges = true;
+                  const unselectedItemsNames: string[] = this.selectedModules.map(({ id }) => id);
+
+                  this.selectedModules.forEach((item) => {
+                     this.unselectedModules.push(item);
+                  });
+                  this.selectedModules = [];
+
+                  await this.moveItemsInSource(
+                     this._selectedSource,
+                     this._unselectedSource,
+                     unselectedItemsNames
+                  );
+
+                  await Promise.all([
+                     this._children.unselectedList.reload(),
+                     this._children.selectedList.reload()
+                  ]);
+                  resolve();
+               }
+            );
          });
       }
    }
 
+   /*
+   TODO: получается, этот обработчик должен отслеживать только изменения не из расширения
+   а расширение будет само проставлять нужное состояние в коллбеках
+   не очень понятно как отслеживать именно свои изменения...
+   Обычно коллбек срабатывает раньше, чем этот обработчик, т.е. можно было бы флагами разрулить
+
+   но можно разрулить и без флагов, diff и так гоняется. Т.е. коллбеки должны быть самодостаточны,
+   но если после них сработает событие - ничего не отвалится.
+
+   TODO: не забыть про this._hasUnsavedChanges, он должен проставляться в коллбеках
+    */
    private async onCookieChange(changeInfo: CookieChangeInfo): Promise<void> {
+      // TODO: в идеале, ещё тут должен отваливаться
       if (changeInfo.cookie.name !== 's3debug') {
          return;
       }

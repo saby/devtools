@@ -30,6 +30,9 @@
       "UI/*": [
         "../node_modules/saby-ui/UI/*"
       ],
+      "Compiler/*": [
+        "../node_modules/saby-ui/Compiler/*"
+      ],
       "Controls/*": [
         "../node_modules/wasaby-controls/Controls/*"
       ],

@@ -63,6 +63,37 @@ define([
             .callsArgWith(1, value);
       }
 
+      function stubModulesAndLists(
+         inst,
+         unselectedModules,
+         selectedModules,
+         pinnedModules
+      ) {
+         inst.pinnedModules = new Set(pinnedModules);
+         inst.unselectedModules = unselectedModules.slice();
+         inst.selectedModules = selectedModules.slice();
+         inst._unselectedSource = new Memory({
+            data: unselectedModules.slice(),
+            keyProperty: 'id'
+         });
+         inst._selectedSource = new Memory({
+            data: selectedModules.slice(),
+            keyProperty: 'id'
+         });
+         sandbox.stub(inst._unselectedSource, 'update');
+         sandbox.stub(inst._unselectedSource, 'destroy');
+         sandbox.stub(inst._selectedSource, 'update');
+         sandbox.stub(inst._selectedSource, 'destroy');
+         inst._children = {
+            unselectedList: {
+               reload: sandbox.stub()
+            },
+            selectedList: {
+               reload: sandbox.stub()
+            }
+         };
+      }
+
       beforeEach(function () {
          sandbox = sinon.createSandbox();
          instance = new View();
@@ -310,7 +341,19 @@ define([
             stubTabURL(url);
             stubCookieValue(null, url);
             stubCookiesGetAll([], url);
-            sandbox.stub(chrome.cookies, 'set');
+            stubModulesAndLists(
+               instance,
+               [
+                  {
+                     id: 'UI',
+                     title: 'UI',
+                     isPinned: false
+                  }
+               ],
+               [],
+               []
+            );
+            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {});
 
             await instance._changeCookie(
                {},
@@ -324,11 +367,33 @@ define([
                })
             );
 
-            sinon.assert.calledWithExactly(chrome.cookies.set, {
+            sinon.assert.calledWith(chrome.cookies.set, {
                name: 's3debug',
                value: 'UI',
                url
             });
+            assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(instance.unselectedModules, []);
+            assert.deepEqual(instance.selectedModules, [
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            ]);
+            assert.deepEqual(
+               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            );
+            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
+               'UI'
+            ]);
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
          });
 
          it('should remove a module from the cookie', async function () {
@@ -345,7 +410,24 @@ define([
                ],
                url
             );
-            sandbox.stub(chrome.cookies, 'set');
+            stubModulesAndLists(
+               instance,
+               [],
+               [
+                  {
+                     id: 'UI',
+                     title: 'UI',
+                     isPinned: false
+                  },
+                  {
+                     id: 'Controls',
+                     title: 'Controls',
+                     isPinned: false
+                  }
+               ],
+               []
+            );
+            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {});
 
             await instance._changeCookie(
                {},
@@ -359,11 +441,39 @@ define([
                })
             );
 
-            sinon.assert.calledWithExactly(chrome.cookies.set, {
+            sinon.assert.calledWith(chrome.cookies.set, {
                name: 's3debug',
                value: 'Controls',
                url
             });
+            assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(instance.unselectedModules, [
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            ]);
+            assert.deepEqual(instance.selectedModules, [
+               {
+                  id: 'Controls',
+                  title: 'Controls',
+                  isPinned: false
+               }
+            ]);
+            assert.deepEqual(
+               instance._unselectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            );
+            sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
+               'UI'
+            ]);
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
          });
 
          it("should remove the cookie, because there're no selected modules left", async function () {
@@ -380,7 +490,19 @@ define([
                ],
                url
             );
-            sandbox.stub(chrome.cookies, 'remove');
+            stubModulesAndLists(
+               instance,
+               [],
+               [
+                  {
+                     id: 'UI',
+                     title: 'UI',
+                     isPinned: false
+                  }
+               ],
+               []
+            );
+            sandbox.stub(chrome.cookies, 'remove').callsArgWith(1, {});
 
             await instance._changeCookie(
                {},
@@ -394,10 +516,24 @@ define([
                })
             );
 
-            sinon.assert.calledWithExactly(chrome.cookies.remove, {
+            sinon.assert.calledWith(chrome.cookies.remove, {
                name: 's3debug',
                url
             });
+            assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(instance.unselectedModules, [
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               }
+            ]);
+            assert.deepEqual(instance.selectedModules, []);
+            sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
+               'UI'
+            ]);
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
          });
 
          it('should add existing WS.Core modules to the cookie', async function () {
@@ -410,7 +546,29 @@ define([
                'WS.Deprecated',
                'Core'
             ]);
-            sandbox.stub(chrome.cookies, 'set');
+            stubModulesAndLists(
+               instance,
+               [
+                  {
+                     id: 'WS.Core',
+                     title: 'WS.Core',
+                     isPinned: false
+                  },
+                  {
+                     id: 'WS.Deprecated',
+                     title: 'WS.Deprecated',
+                     isPinned: false
+                  },
+                  {
+                     id: 'Core',
+                     title: 'Core',
+                     isPinned: false
+                  }
+               ],
+               [],
+               []
+            );
+            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {});
 
             await instance._changeCookie(
                {},
@@ -424,11 +582,61 @@ define([
                })
             );
 
-            sinon.assert.calledWithExactly(chrome.cookies.set, {
+            sinon.assert.calledWith(chrome.cookies.set, {
                name: 's3debug',
                value: 'WS.Core,WS.Deprecated,Core',
                url
             });
+            assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(instance.unselectedModules, []);
+            assert.deepEqual(instance.selectedModules, [
+               {
+                  id: 'WS.Core',
+                  title: 'WS.Core',
+                  isPinned: false
+               },
+               {
+                  id: 'WS.Deprecated',
+                  title: 'WS.Deprecated',
+                  isPinned: false
+               },
+               {
+                  id: 'Core',
+                  title: 'Core',
+                  isPinned: false
+               }
+            ]);
+            assert.deepEqual(
+               instance._selectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'WS.Core',
+                  title: 'WS.Core',
+                  isPinned: false
+               }
+            );
+            assert.deepEqual(
+               instance._selectedSource.update.secondCall.args[0].getRawData(),
+               {
+                  id: 'WS.Deprecated',
+                  title: 'WS.Deprecated',
+                  isPinned: false
+               }
+            );
+            assert.deepEqual(
+               instance._selectedSource.update.thirdCall.args[0].getRawData(),
+               {
+                  id: 'Core',
+                  title: 'Core',
+                  isPinned: false
+               }
+            );
+            sinon.assert.calledWithExactly(instance._unselectedSource.destroy, [
+               'WS.Core',
+               'WS.Deprecated',
+               'Core'
+            ]);
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
          });
 
          it('should remove existing WS.Core modules from the cookie', async function () {
@@ -450,7 +658,39 @@ define([
                'WS.Deprecated',
                'Core'
             ]);
-            sandbox.stub(chrome.cookies, 'set');
+            stubModulesAndLists(
+               instance,
+               [],
+               [
+                  {
+                     id: 'UI',
+                     title: 'UI',
+                     isPinned: false
+                  },
+                  {
+                     id: 'Controls',
+                     title: 'Controls',
+                     isPinned: false
+                  },
+                  {
+                     id: 'WS.Core',
+                     title: 'WS.Core',
+                     isPinned: false
+                  },
+                  {
+                     id: 'WS.Deprecated',
+                     title: 'WS.Deprecated',
+                     isPinned: false
+                  },
+                  {
+                     id: 'Core',
+                     title: 'Core',
+                     isPinned: false
+                  }
+               ],
+               []
+            );
+            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {});
 
             await instance._changeCookie(
                {},
@@ -464,11 +704,72 @@ define([
                })
             );
 
-            sinon.assert.calledWithExactly(chrome.cookies.set, {
+            sinon.assert.calledWith(chrome.cookies.set, {
                name: 's3debug',
                value: 'UI,Controls',
                url
             });
+            assert.isTrue(instance._hasUnsavedChanges);
+            assert.deepEqual(instance.unselectedModules, [
+               {
+                  id: 'WS.Core',
+                  title: 'WS.Core',
+                  isPinned: false
+               },
+               {
+                  id: 'WS.Deprecated',
+                  title: 'WS.Deprecated',
+                  isPinned: false
+               },
+               {
+                  id: 'Core',
+                  title: 'Core',
+                  isPinned: false
+               }
+            ]);
+            assert.deepEqual(instance.selectedModules, [
+               {
+                  id: 'UI',
+                  title: 'UI',
+                  isPinned: false
+               },
+               {
+                  id: 'Controls',
+                  title: 'Controls',
+                  isPinned: false
+               }
+            ]);
+            assert.deepEqual(
+               instance._unselectedSource.update.firstCall.args[0].getRawData(),
+               {
+                  id: 'WS.Core',
+                  title: 'WS.Core',
+                  isPinned: false
+               }
+            );
+            assert.deepEqual(
+               instance._unselectedSource.update.secondCall.args[0].getRawData(),
+               {
+                  id: 'WS.Deprecated',
+                  title: 'WS.Deprecated',
+                  isPinned: false
+               }
+            );
+            assert.deepEqual(
+               instance._unselectedSource.update.thirdCall.args[0].getRawData(),
+               {
+                  id: 'Core',
+                  title: 'Core',
+                  isPinned: false
+               }
+            );
+            sinon.assert.calledWithExactly(instance._selectedSource.destroy, [
+               'WS.Core',
+               'WS.Deprecated',
+               'Core'
+            ]);
+            sinon.assert.calledOnce(instance._children.unselectedList.reload);
+            sinon.assert.calledOnce(instance._children.selectedList.reload);
          });
 
          it("should show popup because the cookie doesn't fit in the available space", async function () {
