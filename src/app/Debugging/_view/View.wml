@@ -20,6 +20,7 @@
                                 markerVisibility="hidden"
                                 minSearchLength="{{ 0 }}"
                                 sorting="{{ _sorting }}"
+                                navigation="{{ _navigation }}"
                                 attr:class="devtools-Debugging__browser">
                     <ws:search>
                         <Controls.search:Input bind:value="_unselectedSearchValue" />
@@ -39,7 +40,6 @@
                             <Controls.list:View name="unselectedList"
                                                 itemActions="{{ _unselectedActions }}"
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
-                                                navigation="{{ _navigation }}"
                                                 on:itemClick="_changeCookie('add')">
                                 <ws:virtualScrollConfig pageSize="{{ 50 }}" />
                                 <ws:itemTemplate>
@@ -63,6 +63,7 @@
                                 markerVisibility="hidden"
                                 minSearchLength="{{ 0 }}"
                                 sorting="{{ _sorting }}"
+                                navigation="{{ _navigation }}"
                                 attr:class="devtools-Debugging__browser">
                     <ws:search>
                         <Controls.search:Input bind:value="_selectedSearchValue" />
@@ -82,7 +83,6 @@
                             <Controls.list:View name="selectedList"
                                                 itemActions="{{ _selectedActions }}"
                                                 itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
-                                                navigation="{{ _navigation }}"
                                                 on:itemClick="_changeCookie('delete')">
                                 <ws:virtualScrollConfig pageSize="{{ 50 }}"/>
                                 <ws:itemTemplate>

@@ -464,7 +464,7 @@ class Elements extends Control {
    }
 
    private __highlightNode(id: IFrontendControlNode['id']): void {
-      if (this._children[id]) {
+      if (this._model.isVisible(id)) {
          highlightUpdate(this._children[id]);
       }
    }

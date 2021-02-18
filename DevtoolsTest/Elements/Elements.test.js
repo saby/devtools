@@ -50,11 +50,23 @@ define([
 
             const instance = new Elements(options);
 
-            sinon.assert.calledWith(options.store.addListener, 'inspectedElement');
-            sinon.assert.calledWith(options.store.addListener, 'setSelectedItem');
-            sinon.assert.calledWith(options.store.addListener, 'endSynchronization');
+            sinon.assert.calledWith(
+               options.store.addListener,
+               'inspectedElement'
+            );
+            sinon.assert.calledWith(
+               options.store.addListener,
+               'setSelectedItem'
+            );
+            sinon.assert.calledWith(
+               options.store.addListener,
+               'endSynchronization'
+            );
             sinon.assert.calledWith(options.store.addListener, 'operation');
-            sinon.assert.calledWith(options.store.addListener, 'stopSelectFromPage');
+            sinon.assert.calledWith(
+               options.store.addListener,
+               'stopSelectFromPage'
+            );
             sinon.assert.calledWith(options.store.toggleDevtoolsOpened, true);
             sinon.assert.calledOnce(options.store.getFullTree);
          });
@@ -536,7 +548,10 @@ define([
 
             instance.panelVisibilityCallback(true);
 
-            sinon.assert.calledWith(chrome.devtools.inspectedWindow.eval, 'window.__WASABY_DEV_HOOK__.$0 = $0');
+            sinon.assert.calledWith(
+               chrome.devtools.inspectedWindow.eval,
+               'window.__WASABY_DEV_HOOK__.$0 = $0'
+            );
             sinon.assert.calledWith(store.dispatch, 'getSelectedItem');
          });
 
@@ -556,7 +571,11 @@ define([
 
             instance.panelVisibilityCallback(false);
 
-            sinon.assert.calledWith(store.dispatch, 'toggleSelectFromPage', false);
+            sinon.assert.calledWith(
+               store.dispatch,
+               'toggleSelectFromPage',
+               false
+            );
          });
       });
 
@@ -1421,6 +1440,10 @@ define([
             };
             const instance = new Elements(options);
             const child = {};
+            sandbox
+               .stub(instance._model, 'isVisible')
+               .withArgs(0)
+               .returns(true);
             instance._children = {
                0: child
             };

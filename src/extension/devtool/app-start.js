@@ -9,18 +9,15 @@
         ispl.features.compatibleLayer = false;
 
         require([
-            'Controls/Application/HeadData',
             'Application/Env',
-            'Application/Initializer'
-        ], function(HeadData, AppEnv, AppInit) {
+            'Application/Initializer',
+            'Application/State',
+            'UI/State'
+        ], function(AppEnv, AppInit, AppState, UIState) {
             require(['UI/Base'], function(UI) {
                 window.startContextData = { AppData: new UI.AppData({}) };
-                var sr = new UI.StateReceiver();
+                var sr = new AppState.StateReceiver(UIState.Serializer);
                 AppInit.default(window.wsConfig, void 0, sr);
-
-                var headData = new HeadData([], true);
-                headData.isNewEnvironment = true;
-                AppEnv.setStore('HeadData', headData);
 
                 require(['Devtool/PageWrapper'], (Extension) => {
                     Extension.default.createControl(

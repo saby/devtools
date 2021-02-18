@@ -84,6 +84,10 @@ const WASABY_MODULES = [
       path: 'saby-ui/UI'
    },
    {
+      name: 'Compiler',
+      path: 'saby-ui/Compiler'
+   },
+   {
       name: 'RequireJsLoader',
       path: 'wasaby-requirejs-loader/RequireJsLoader'
    },
