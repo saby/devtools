@@ -18,6 +18,7 @@
                 window.startContextData = { AppData: new UI.AppData({}) };
                 var sr = new AppState.StateReceiver(UIState.Serializer);
                 AppInit.default(window.wsConfig, void 0, sr);
+                UI.headDataStore.write('isNewEnvironment', true);
 
                 require(['Devtool/PageWrapper'], (Extension) => {
                     Extension.default.createControl(

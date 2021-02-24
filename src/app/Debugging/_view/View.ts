@@ -252,52 +252,7 @@ class View extends Control<IControlOptions, void[]> {
                },
                async (cookie) => {
                   if (cookie) {
-                     this._hasUnsavedChanges = true;
-
-                     const currentSelectedModules: IItem['id'][] = this.selectedModules.map(
-                        ({ id }) => id
-                     );
-
-                     const diff = getArrayDifference(
-                        currentSelectedModules,
-                        modules
-                     );
-
-                     this.moveItemsInArrays(
-                        this.unselectedModules,
-                        this.selectedModules,
-                        diff.added
-                     );
-                     this.moveItemsInArrays(
-                        this.selectedModules,
-                        this.unselectedModules,
-                        diff.removed
-                     );
-
-                     const operations = [];
-
-                     operations.push(
-                        this.moveItemsInSource(
-                           this._unselectedSource,
-                           this._selectedSource,
-                           diff.added
-                        )
-                     );
-
-                     operations.push(
-                        this.moveItemsInSource(
-                           this._selectedSource,
-                           this._unselectedSource,
-                           diff.removed
-                        )
-                     );
-
-                     await Promise.all(operations);
-
-                     await Promise.all([
-                        this._children.unselectedList.reload(),
-                        this._children.selectedList.reload()
-                     ]);
+                     await this.handleAdd(cookie.value);
                      resolve();
                   } else {
                      reject(chrome.runtime.lastError);
@@ -313,28 +268,12 @@ class View extends Control<IControlOptions, void[]> {
                   url
                },
                async (details) => {
-                  if (!details) {
+                  if (details) {
+                     await this.handleRemove();
+                     resolve();
+                  } else {
                      reject(chrome.runtime.lastError);
                   }
-                  this._hasUnsavedChanges = true;
-                  const unselectedItemsNames: string[] = this.selectedModules.map(({ id }) => id);
-
-                  this.selectedModules.forEach((item) => {
-                     this.unselectedModules.push(item);
-                  });
-                  this.selectedModules = [];
-
-                  await this.moveItemsInSource(
-                     this._selectedSource,
-                     this._unselectedSource,
-                     unselectedItemsNames
-                  );
-
-                  await Promise.all([
-                     this._children.unselectedList.reload(),
-                     this._children.selectedList.reload()
-                  ]);
-                  resolve();
                }
             );
          });
@@ -345,7 +284,6 @@ class View extends Control<IControlOptions, void[]> {
       if (changeInfo.cookie.name !== 's3debug') {
          return;
       }
-      this._hasUnsavedChanges = true;
       if (changeInfo.removed) {
          if (
             this.selectedModules.length === 0 ||
@@ -353,87 +291,94 @@ class View extends Control<IControlOptions, void[]> {
          ) {
             return;
          }
-         const unselectedItemsNames: string[] =
-            changeInfo.cookie.value === 'true'
-               ? this.selectedModules.map(({ id }) => id)
-               : changeInfo.cookie.value.split(',');
+         await this.handleRemove();
+      } else {
+         await this.handleAdd(changeInfo.cookie.value);
+      }
+   }
 
-         this.selectedModules.forEach((item) => {
-            this.unselectedModules.push(item);
-         });
-         this.selectedModules = [];
-
-         await this.moveItemsInSource(
-            this._selectedSource,
-            this._unselectedSource,
-            unselectedItemsNames
+   private async handleAdd(newCookieValue: string): Promise<void> {
+      this._hasUnsavedChanges = true;
+      if (newCookieValue === 'true') {
+         this.selectedModules = this.unselectedModules.concat(
+            this.selectedModules
          );
+         this.unselectedModules = [];
+         this._unselectedSource = this.getMemory(this.unselectedModules);
+         this._selectedSource = this.getMemory(this.selectedModules);
+      } else {
+         const newSelectedModules = newCookieValue
+            .split(',')
+            .filter((value) => value.length !== 0);
+
+         const currentSelectedModules: IItem['id'][] = this.selectedModules.map(
+            ({ id }) => id
+         );
+
+         const diff = getArrayDifference(
+            currentSelectedModules,
+            newSelectedModules
+         );
+
+         this.moveItemsInArrays(
+            this.unselectedModules,
+            this.selectedModules,
+            diff.added
+         );
+         this.moveItemsInArrays(
+            this.selectedModules,
+            this.unselectedModules,
+            diff.removed
+         );
+
+         const operations = [];
+
+         operations.push(
+            this.moveItemsInSource(
+               this._unselectedSource,
+               this._selectedSource,
+               diff.added
+            )
+         );
+
+         operations.push(
+            this.moveItemsInSource(
+               this._selectedSource,
+               this._unselectedSource,
+               diff.removed
+            )
+         );
+
+         await Promise.all(operations);
 
          await Promise.all([
             this._children.unselectedList.reload(),
             this._children.selectedList.reload()
          ]);
-      } else {
-         const newValue = changeInfo.cookie.value;
-
-         if (newValue === 'true') {
-            this.selectedModules = this.unselectedModules.concat(
-               this.selectedModules
-            );
-            this.unselectedModules = [];
-            this._unselectedSource = this.getMemory(this.unselectedModules);
-            this._selectedSource = this.getMemory(this.selectedModules);
-         } else {
-            const newSelectedModules = newValue
-               .split(',')
-               .filter((value) => value.length !== 0);
-
-            const currentSelectedModules: IItem['id'][] = this.selectedModules.map(
-               ({ id }) => id
-            );
-
-            const diff = getArrayDifference(
-               currentSelectedModules,
-               newSelectedModules
-            );
-
-            this.moveItemsInArrays(
-               this.unselectedModules,
-               this.selectedModules,
-               diff.added
-            );
-            this.moveItemsInArrays(
-               this.selectedModules,
-               this.unselectedModules,
-               diff.removed
-            );
-
-            const operations = [];
-
-            operations.push(
-               this.moveItemsInSource(
-                  this._unselectedSource,
-                  this._selectedSource,
-                  diff.added
-               )
-            );
-
-            operations.push(
-               this.moveItemsInSource(
-                  this._selectedSource,
-                  this._unselectedSource,
-                  diff.removed
-               )
-            );
-
-            await Promise.all(operations);
-
-            await Promise.all([
-               this._children.unselectedList.reload(),
-               this._children.selectedList.reload()
-            ]);
-         }
       }
+   }
+
+   private async handleRemove(): Promise<void> {
+      this._hasUnsavedChanges = true;
+      const unselectedItemsNames: string[] = this.selectedModules.map(
+         ({ id }) => id
+      );
+
+      this.selectedModules.forEach((item) => {
+         this.unselectedModules.push(item);
+      });
+      this.selectedModules = [];
+
+      await this.moveItemsInSource(
+         this._selectedSource,
+         this._unselectedSource,
+         unselectedItemsNames
+      );
+
+      await Promise.all([
+         this._children.unselectedList.reload(),
+         this._children.selectedList.reload()
+      ]);
    }
 
    private async moveItemsInSource(

@@ -353,7 +353,9 @@ define([
                [],
                []
             );
-            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {});
+            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {
+               value: 'UI'
+            });
 
             await instance._changeCookie(
                {},
@@ -427,7 +429,9 @@ define([
                ],
                []
             );
-            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {});
+            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {
+               value: 'Controls'
+            });
 
             await instance._changeCookie(
                {},
@@ -502,7 +506,9 @@ define([
                ],
                []
             );
-            sandbox.stub(chrome.cookies, 'remove').callsArgWith(1, {});
+            sandbox.stub(chrome.cookies, 'remove').callsArgWith(1, {
+               value: ''
+            });
 
             await instance._changeCookie(
                {},
@@ -568,7 +574,9 @@ define([
                [],
                []
             );
-            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {});
+            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {
+               value: 'WS.Core,WS.Deprecated,Core'
+            });
 
             await instance._changeCookie(
                {},
@@ -690,7 +698,9 @@ define([
                ],
                []
             );
-            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {});
+            sandbox.stub(chrome.cookies, 'set').callsArgWith(1, {
+               value: 'UI,Controls'
+            });
 
             await instance._changeCookie(
                {},
@@ -887,7 +897,7 @@ define([
                cause: 'explicit'
             });
 
-            assert.isTrue(instance._hasUnsavedChanges);
+            assert.isFalse(instance._hasUnsavedChanges);
             assert.isEmpty(instance.selectedModules);
             sinon.assert.notCalled(instance.moveItemsInSource);
          });
@@ -912,7 +922,7 @@ define([
                cause: 'overwrite'
             });
 
-            assert.isTrue(instance._hasUnsavedChanges);
+            assert.isFalse(instance._hasUnsavedChanges);
             assert.deepEqual(instance.selectedModules, rawData);
             sinon.assert.notCalled(instance.moveItemsInSource);
          });
