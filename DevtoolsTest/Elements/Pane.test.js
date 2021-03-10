@@ -9,7 +9,7 @@ define([
    'Types/entity',
    'DevtoolsTest/optionTypesMocks',
    'Elements/_store/Store'
-], function(
+], function (
    mockChrome,
    Pane,
    PaneSource,
@@ -27,18 +27,18 @@ define([
    PaneSource = PaneSource.Source;
    Store = Store.default;
 
-   describe('Elements/_Details/Pane/Pane', function() {
-      beforeEach(function() {
+   describe('Elements/_Details/Pane/Pane', function () {
+      beforeEach(function () {
          sandbox = sinon.createSandbox();
          instance = new Pane();
       });
 
-      afterEach(function() {
+      afterEach(function () {
          sandbox.restore();
       });
 
-      describe('_beforeMount', function() {
-         it('isControl: false, should correctly init state', function() {
+      describe('_beforeMount', function () {
+         it('isControl: false, should correctly init state', function () {
             const options = {
                data: {
                   text: 'test',
@@ -85,8 +85,8 @@ define([
          });
       });
 
-      describe('_beforeUpdate', function() {
-         it('nothing changed, should not update state', function() {
+      describe('_beforeUpdate', function () {
+         it('nothing changed, should not update state', function () {
             const options = {
                data: {
                   text: 'test',
@@ -100,7 +100,7 @@ define([
             assert.doesNotThrow(() => instance._beforeUpdate(options));
          });
 
-         it('nothing changed, should not update state', function() {
+         it('nothing changed, should not update state', function () {
             const data = {
                text: 'test',
                items: [1, 2, 3]
@@ -124,7 +124,7 @@ define([
             assert.doesNotThrow(() => instance._beforeUpdate(newOptions));
          });
 
-         it('should update source without reloading list', function() {
+         it('should update source', function () {
             const data = {
                text: {
                   value: 'test'
@@ -154,78 +154,17 @@ define([
             instance._source = {
                update: sandbox.stub()
             };
-            instance._children = {
-               list: {
-                  reload: sandbox.stub()
-               }
-            };
             instance.saveOptions(oldOptions);
-            Object.freeze(instance);
 
-            assert.doesNotThrow(() => instance._beforeUpdate(newOptions));
-            sinon.assert.calledWithExactly(
-               instance._source.update,
-               {
-                  text: {
-                     value: 'test2'
-                  }
-               }
-            );
-            sinon.assert.notCalled(instance._children.list.reload);
-         });
-
-         it('should update source and reload the list', function() {
-            const data = {
+            instance._beforeUpdate(newOptions);
+            sinon.assert.calledWithExactly(instance._source.update, {
                text: {
-                  value: 'test'
-               },
-               items: {
-                  value: [1, 2, 3]
+                  value: 'test2'
                }
-            };
-            const oldOptions = {
-               data,
-               changedData: {
-                  text: {
-                     value: 'test1'
-                  }
-               },
-               isControl: false
-            };
-            const newOptions = {
-               changedData: {
-                  text: {
-                     value: 'test2'
-                  }
-               },
-               data,
-               isControl: false,
-               expanded: true
-            };
-            instance._source = {
-               update: sandbox.stub()
-            };
-            instance._children = {
-               list: {
-                  reload: sandbox.stub()
-               }
-            };
-            instance.saveOptions(oldOptions);
-            Object.freeze(instance);
-
-            assert.doesNotThrow(() => instance._beforeUpdate(newOptions));
-            sinon.assert.calledWithExactly(
-               instance._source.update,
-               {
-                  text: {
-                     value: 'test2'
-                  }
-               }
-            );
-            sinon.assert.calledOnce(instance._children.list.reload);
+            });
          });
 
-         it('should create new source because the controlId has changed', function() {
+         it('should create new source because the controlId has changed', function () {
             const oldOptions = {
                data: {
                   text: 'test'
@@ -262,7 +201,7 @@ define([
             ]);
          });
 
-         it('should create new source because the data changed', function() {
+         it('should create new source because the data changed', function () {
             const oldOptions = {
                data: {
                   text: 'test'
@@ -300,8 +239,8 @@ define([
          });
       });
 
-      describe('_afterUpdate', function() {
-         it('should not call highlightUpdate because there is no changedData', function() {
+      describe('_afterUpdate', function () {
+         it('should not call highlightUpdate because there is no changedData', function () {
             const highlightUpdateMock = sandbox.stub(
                highlightUpdate,
                'highlightUpdate'
@@ -313,7 +252,7 @@ define([
             assert.isTrue(highlightUpdateMock.notCalled);
          });
 
-         it('should not call highlightUpdate because there changedData is the same', function() {
+         it('should not call highlightUpdate because there changedData is the same', function () {
             const highlightUpdateMock = sandbox.stub(
                highlightUpdate,
                'highlightUpdate'
@@ -332,7 +271,7 @@ define([
             assert.isTrue(highlightUpdateMock.notCalled);
          });
 
-         it('should not call highlightUpdate because child with that key does not exist', function() {
+         it('should not call highlightUpdate because child with that key does not exist', function () {
             const highlightUpdateMock = sandbox.stub(
                highlightUpdate,
                'highlightUpdate'
@@ -352,7 +291,7 @@ define([
             assert.isTrue(highlightUpdateMock.notCalled);
          });
 
-         it('should not call highlightUpdate because child with that key does not exist', function() {
+         it('should not call highlightUpdate because child with that key does not exist', function () {
             const highlightUpdateMock = sandbox.stub(
                highlightUpdate,
                'highlightUpdate'
@@ -371,7 +310,8 @@ define([
 
             assert.isTrue(highlightUpdateMock.notCalled);
          });
-         it('should call highlightUpdate for all changed children', function() {
+
+         it('should call highlightUpdate for all changed children', function () {
             const highlightUpdateMock = sandbox.stub(
                highlightUpdate,
                'highlightUpdate'
@@ -410,7 +350,7 @@ define([
             assert.isTrue(highlightUpdateMock.calledTwice);
          });
 
-         it('should not call highlightUpdate', function() {
+         it('should not call highlightUpdate', function () {
             const highlightUpdateMock = sandbox.stub(
                highlightUpdate,
                'highlightUpdate'
@@ -428,11 +368,90 @@ define([
 
             assert.isTrue(highlightUpdateMock.notCalled);
          });
+
+         it('should not reload the list if the panel is not expanded', function () {
+            const data = {
+               text: {
+                  value: 'test'
+               },
+               items: {
+                  value: [1, 2, 3]
+               }
+            };
+            const oldOptions = {
+               data,
+               changedData: {
+                  text: {
+                     value: 'test1'
+                  }
+               },
+               isControl: false
+            };
+            const newOptions = {
+               changedData: {
+                  text: {
+                     value: 'test2'
+                  }
+               },
+               data,
+               isControl: false
+            };
+            instance._children = {
+               list: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance.saveOptions(newOptions);
+
+            instance._afterUpdate(oldOptions);
+
+            sinon.assert.notCalled(instance._children.list.reload);
+         });
+
+         it('should reload the list', function () {
+            const data = {
+               text: {
+                  value: 'test'
+               },
+               items: {
+                  value: [1, 2, 3]
+               }
+            };
+            const oldOptions = {
+               data,
+               changedData: {
+                  text: {
+                     value: 'test1'
+                  }
+               },
+               isControl: false
+            };
+            const newOptions = {
+               changedData: {
+                  text: {
+                     value: 'test2'
+                  }
+               },
+               data,
+               isControl: false,
+               expanded: true
+            };
+            instance._children = {
+               list: {
+                  reload: sandbox.stub()
+               }
+            };
+            instance.saveOptions(newOptions);
+
+            instance._afterUpdate(oldOptions);
+
+            sinon.assert.calledOnce(instance._children.list.reload);
+         });
       });
 
-      describe('_itemActionVisibilityCallback', function() {
-         describe('canStoreAsGlobal', function() {
-            it('should return false because _options.canStoreAsGlobal is false', function() {
+      describe('_itemActionVisibilityCallback', function () {
+         describe('canStoreAsGlobal', function () {
+            it('should return false because _options.canStoreAsGlobal is false', function () {
                const action = {
                   id: 'storeAsGlobal'
                };
@@ -456,7 +475,7 @@ define([
                );
             });
 
-            it("should return false because the item is not an object", function() {
+            it('should return false because the item is not an object', function () {
                const action = {
                   id: 'storeAsGlobal'
                };
@@ -480,7 +499,7 @@ define([
                );
             });
 
-            it('should return true', function() {
+            it('should return true', function () {
                const action = {
                   id: 'storeAsGlobal'
                };
@@ -505,8 +524,8 @@ define([
             });
          });
 
-         describe('addBreakpoint', function() {
-            it('should return false because this is not the events tab', function() {
+         describe('addBreakpoint', function () {
+            it('should return false because this is not the events tab', function () {
                const action = {
                   id: 'addBreakpoint'
                };
@@ -530,7 +549,7 @@ define([
                );
             });
 
-            it('should return false because the item is not on the top level', function() {
+            it('should return false because the item is not on the top level', function () {
                const action = {
                   id: 'addBreakpoint'
                };
@@ -554,7 +573,7 @@ define([
                );
             });
 
-            it('should return false because the item has a breakpoint', function() {
+            it('should return false because the item has a breakpoint', function () {
                const action = {
                   id: 'addBreakpoint'
                };
@@ -581,7 +600,7 @@ define([
                );
             });
 
-            it('should return true', function() {
+            it('should return true', function () {
                const action = {
                   id: 'addBreakpoint'
                };
@@ -607,8 +626,8 @@ define([
             });
          });
 
-         describe('removeBreakpoint', function() {
-            it('should return false because this is not the events tab', function() {
+         describe('removeBreakpoint', function () {
+            it('should return false because this is not the events tab', function () {
                const action = {
                   id: 'removeBreakpoint'
                };
@@ -632,7 +651,7 @@ define([
                );
             });
 
-            it('should return false because the item is not on the top level', function() {
+            it('should return false because the item is not on the top level', function () {
                const action = {
                   id: 'removeBreakpoint'
                };
@@ -656,7 +675,7 @@ define([
                );
             });
 
-            it("should return false because the item doesn't have a breakpoint", function() {
+            it("should return false because the item doesn't have a breakpoint", function () {
                const action = {
                   id: 'removeBreakpoint'
                };
@@ -681,7 +700,7 @@ define([
                );
             });
 
-            it('should return true', function() {
+            it('should return true', function () {
                const action = {
                   id: 'removeBreakpoint'
                };
@@ -710,8 +729,8 @@ define([
          });
       });
 
-      describe('__toggleExpanded', function() {
-         it('should fire expandedChanged event with true', function() {
+      describe('__toggleExpanded', function () {
+         it('should fire expandedChanged event with true', function () {
             const stub = sandbox.stub(instance, '_notify');
             instance.saveOptions({
                expanded: false
@@ -724,7 +743,7 @@ define([
             );
          });
 
-         it('should fire expandedChanged event with false', function() {
+         it('should fire expandedChanged event with false', function () {
             const stub = sandbox.stub(instance, '_notify');
             instance.saveOptions({
                expanded: true
@@ -738,8 +757,8 @@ define([
          });
       });
 
-      describe('__viewFunctionSource', function() {
-         it('should stop event propagation, add caption from options to the path and fire viewFunctionSource event', function() {
+      describe('__viewFunctionSource', function () {
+         it('should stop event propagation, add caption from options to the path and fire viewFunctionSource event', function () {
             const event = {
                stopPropagation: sandbox.stub()
             };
@@ -760,8 +779,8 @@ define([
          });
       });
 
-      describe('__storeAsGlobal', function() {
-         it('should not fire storeAsGlobal event', function() {
+      describe('__storeAsGlobal', function () {
+         it('should not fire storeAsGlobal event', function () {
             const item = new entityLib.Model({
                rawData: {
                   key: 'item---value',
@@ -779,7 +798,7 @@ define([
             assert.isTrue(stub.notCalled);
          });
 
-         it('should fire storeAsGlobal event', function() {
+         it('should fire storeAsGlobal event', function () {
             const item = new entityLib.Model({
                rawData: {
                   key: 'item---value',
@@ -803,8 +822,8 @@ define([
          });
       });
 
-      describe('getOptionTypes', function() {
-         it('should call entity:Descriptor with correct values', function() {
+      describe('getOptionTypes', function () {
+         it('should call entity:Descriptor with correct values', function () {
             const { mockOptionTypes, testOption } = optionTypesMocks;
             mockOptionTypes(sandbox, entityLib);
 
@@ -873,15 +892,15 @@ define([
          });
       });
 
-      it('getDefaultOptions', function() {
+      it('getDefaultOptions', function () {
          assert.deepEqual(Pane.getDefaultOptions(), {
             canStoreAsGlobal: true,
             highlightUpdates: true
          });
       });
 
-      describe('__setBreakpoint', function() {
-         it('should fire setBreakpoint event', function() {
+      describe('__setBreakpoint', function () {
+         it('should fire setBreakpoint event', function () {
             const item = new entityLib.Model({
                rawData: {
                   name: 'click'
@@ -897,7 +916,7 @@ define([
             );
          });
 
-         it('should fire removeBreakpoint event', function() {
+         it('should fire removeBreakpoint event', function () {
             const stub = sandbox.stub(instance, '_notify');
             instance.saveOptions({
                controlId: 0
