@@ -7,7 +7,7 @@ import { headers } from './header';
 import { IRPCModuleFilter } from 'Extension/Plugins/DependencyWatcher/IRPCModule';
 import { IFilterItem, getButtonSource } from './getButtonSource';
 import { getItemActions, IItemAction, ItemActionNames } from './getItemActions';
-import { IColumn } from '../interface/IColumn';
+import { IColumn } from 'Controls/grid';
 import { IHeaders } from '../interface/IHeaders';
 import {
    INavigationOptionValue,
@@ -32,11 +32,9 @@ interface IOptions extends IControlOptions {
 export default class List extends Control<IOptions> {
    protected readonly _template: TemplateFunction = template;
    protected readonly _children: IChildren;
-   protected readonly _column: Array<Partial<IColumn<IListItem>>> = columns;
+   protected readonly _column: IColumn[] = columns;
    protected readonly _headers: IHeaders<IListItem> = headers;
-   protected readonly _navigation: INavigationOptionValue<
-      IBasePageSourceConfig
-   > = {
+   protected readonly _navigation: INavigationOptionValue<IBasePageSourceConfig> = {
       source: 'page',
       view: 'infinity',
       sourceConfig: {

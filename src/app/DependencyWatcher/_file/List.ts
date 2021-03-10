@@ -4,15 +4,15 @@ import { columns } from './columns';
 import { headers } from './header';
 import { ITransportFile } from 'Extension/Plugins/DependencyWatcher/IFile';
 import { IHeaders } from '../interface/IHeaders';
-import { IColumns } from '../interface/IColumn';
+import { IColumn } from 'Controls/grid';
 import {
    INavigationPageSourceConfig,
    INavigationOptionValue
 } from 'Controls/_interface/INavigation';
 
-type Sorting = Array<Partial<Record<keyof ITransportFile, 'ASC' | 'DESC'>>>;
+type Sorting = Partial<Record<keyof ITransportFile, 'ASC' | 'DESC'>>[];
 interface IOptions extends IControlOptions {
-   columns: IColumns<ITransportFile>;
+   columns: IColumn[];
    headers: IHeaders<ITransportFile>;
    navigation: INavigationOptionValue<INavigationPageSourceConfig>;
    sorting: Sorting;
