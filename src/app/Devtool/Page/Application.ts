@@ -10,6 +10,7 @@ import { TouchContextField } from 'Controls/context';
 
 interface IApplicationOptions extends IControlOptions {
    pagingVisible: unknown;
+   popupHeaderTheme: string;
 }
 
 /*
@@ -63,7 +64,7 @@ export default class Application extends Control<IApplicationOptions> {
    }
 
    protected _afterUpdate(cfg: IApplicationOptions): void {
-      this.popupManager.updateOptions(this._options, this._getChildContext());
+      this.popupManager.updateOptions(this._options.popupHeaderTheme, this._getChildContext());
    }
 
    protected _getChildContext(): object {
