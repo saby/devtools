@@ -127,6 +127,8 @@ class Elements extends Control {
    protected _afterMount(): void {
       this.panelVisibilityCallback = this.panelVisibilityCallback.bind(this);
       this._notify('subToPanelVisibility', [this.panelVisibilityCallback]);
+      this.__updateIndentation = this.__updateIndentation.bind(this);
+      this._notify('register', ['controlResize', this, this.__updateIndentation], {bubbling: true});
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
@@ -196,6 +198,7 @@ class Elements extends Control {
       this._inspectedItem = undefined;
       this._model.destructor();
       this._notify('unsubFromPanelVisibility', [this.panelVisibilityCallback]);
+      this._notify('unregister', ['controlResize', this], {bubbling: true});
    }
 
    protected _onItemClick(e: Event, id: IFrontendControlNode['id']): void {

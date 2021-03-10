@@ -40,9 +40,7 @@ export default class Application extends Control<IApplicationOptions> {
    }
 
    protected _afterMount(cfg: IApplicationOptions): void {
-      document.body.onresize = (event: Event) => {
-         this._resizePage(new SyntheticEvent(event));
-      };
+      window.addEventListener('resize',  this._resizePage.bind(this));
       this.globalPopup.registerGlobalPopup();
       this.popupManager.init(cfg, this._getChildContext());
    }
@@ -79,7 +77,7 @@ export default class Application extends Control<IApplicationOptions> {
       this.registers.scroll.start(ev);
    }
 
-   protected _resizePage(ev: SyntheticEvent<Event>): void {
+   protected _resizePage(ev: Event): void {
       this.registers.controlResize.start(ev);
    }
 

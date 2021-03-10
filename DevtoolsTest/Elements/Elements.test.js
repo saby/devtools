@@ -594,6 +594,7 @@ define([
             instance.saveOptions(options);
             instance._inspectedItem = {};
             const destructorStub = sandbox.stub(instance._model, 'destructor');
+            sandbox.stub(instance, '_notify');
 
             instance._beforeUnmount();
 
@@ -606,6 +607,47 @@ define([
             assert.isUndefined(instance._inspectedItem);
             assert.isTrue(destructorStub.calledOnceWithExactly());
             assert.isUndefined(window.elementsPanel);
+            sinon.assert.calledWith(
+               instance._notify,
+               'unsubFromPanelVisibility',
+               [instance.panelVisibilityCallback]
+            );
+            sinon.assert.calledWith(
+               instance._notify,
+               'unregister',
+               ['controlResize', instance],
+               { bubbling: true }
+            );
+         });
+      });
+
+      describe('_afterMount', function () {
+         it('should pass event callbacks to parents', function () {
+            const store = {
+               addListener: sandbox.stub(),
+               toggleDevtoolsOpened: sandbox.stub(),
+               getFullTree: sandbox.stub().resolves([]),
+               dispatch: sandbox.stub()
+            };
+            const options = {
+               store
+            };
+            const instance = new Elements(options);
+            instance.saveOptions(options);
+            instance._inspectedItem = {};
+            sandbox.stub(instance, '_notify');
+
+            instance._afterMount();
+
+            sinon.assert.calledWith(instance._notify, 'subToPanelVisibility', [
+               instance.panelVisibilityCallback
+            ]);
+            sinon.assert.calledWith(
+               instance._notify,
+               'register',
+               ['controlResize', instance, instance.__updateIndentation],
+               { bubbling: true }
+            );
          });
       });
 
