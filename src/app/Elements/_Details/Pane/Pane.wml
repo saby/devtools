@@ -13,6 +13,7 @@
                                     keyProperty="key"
                                     parentProperty="parent"
                                     nodeProperty="hasChildren"
+                                    bind:expandedItems="_expandedItems"
                                     bind:filter="_filter">
            <Controls.search:Controller searchParam="name">
                <div class="devtools-Pane__listWrapper ws-flexbox ws-flex-column">

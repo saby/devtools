@@ -35,10 +35,7 @@ const enum ShowType {
 }
 
 interface IItemAction {
-   id:
-      | 'storeAsGlobal'
-      | 'addBreakpoint'
-      | 'removeBreakpoint';
+   id: 'storeAsGlobal' | 'addBreakpoint' | 'removeBreakpoint';
    showType: ShowType;
    title: string;
    style?: string;
@@ -62,10 +59,7 @@ function getSource(
 }
 
 function getPath(item: Model): string[] {
-   return item
-      .get('key')
-      .split('---')
-      .reverse();
+   return item.get('key').split('---').reverse();
 }
 
 /**
@@ -80,8 +74,9 @@ class Pane extends Control<IOptions> {
    protected _visibilityCallback: (action: IItemAction, item: Model) => boolean;
    protected _filter: {
       name?: string;
-      parent?: string | Array<string | null>;
+      parent?: string | (string | null)[];
    } = {};
+   protected _expandedItems: string[] = [];
 
    protected _beforeMount(options: IOptions): void {
       this._source = getSource(
@@ -124,30 +119,21 @@ class Pane extends Control<IOptions> {
    }
 
    protected _beforeUpdate(newOptions: IOptions): void {
-      let needReload =
-         this._options.eventWithBreakpoint !== newOptions.eventWithBreakpoint;
       if (
          newOptions.changedData &&
          this._options.changedData !== newOptions.changedData
       ) {
          this._source.update(newOptions.changedData);
-         needReload = true;
       }
-      if (
-         this._options.controlId !== newOptions.controlId ||
-         this._options.caption !== newOptions.caption ||
-         this._options.data !== newOptions.data
-      ) {
+      if (needRecreateSource(this._options, newOptions)) {
          this._source = getSource(
             newOptions.data,
             newOptions.store,
             newOptions.controlId,
             newOptions.caption
          );
-      }
-
-      if (needReload && newOptions.expanded && this._children.list) {
-         this._children.list.reload();
+         this._filter = {};
+         this._expandedItems = [];
       }
    }
 
@@ -171,6 +157,20 @@ class Pane extends Control<IOptions> {
                highlightUpdate(child._container.parentElement);
             }
          });
+      }
+      let needReload =
+         this._options.eventWithBreakpoint !== oldOptions.eventWithBreakpoint;
+      if (
+         this._options.changedData &&
+         this._options.changedData !== oldOptions.changedData
+      ) {
+         needReload = true;
+      }
+      if (needRecreateSource(oldOptions, this._options)) {
+         needReload = false;
+      }
+      if (needReload && this._options.expanded && this._children.list) {
+         this._children.list.reload();
       }
    }
 
@@ -259,6 +259,17 @@ class Pane extends Control<IOptions> {
          highlightUpdates: true
       };
    }
+}
+
+function needRecreateSource(
+   oldOptions: IOptions,
+   newOptions: IOptions
+): boolean {
+   return (
+      oldOptions.controlId !== newOptions.controlId ||
+      oldOptions.caption !== newOptions.caption ||
+      oldOptions.data !== newOptions.data
+   );
 }
 
 Object.defineProperty(Pane, 'defaultProps', {
