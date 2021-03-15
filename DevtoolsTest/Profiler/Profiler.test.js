@@ -272,6 +272,10 @@ define([
                syncList
             };
             sandbox.stub(instance, '__setSynchronization');
+            instance._changesBySynchronization = new Map([
+               ['test', []],
+               ['test2', []]
+            ]);
             instance._didProfile = false;
 
             instance.__setProfilingData(backendProfilingData);
@@ -1329,16 +1333,18 @@ define([
             sinon.assert.calledWithExactly(instance.resetState);
          });
 
-         it('should fire getSynchronizationsList and getProfilingData events', function () {
+         it('should fire getProfilingData event when profiling ends', function () {
             instance.saveOptions(options);
             instance._isProfiling = true;
-            const stub = sandbox.stub(instance._options.store, 'dispatch');
+            sandbox.stub(instance._options.store, 'dispatch');
 
             instance.__onProfilingStatusChanged(false);
 
             assert.isFalse(instance._isProfiling);
-            assert.isTrue(stub.calledWith('getSynchronizationsList'));
-            assert.isTrue(stub.calledWith('getProfilingData'));
+            sinon.assert.calledWith(
+               instance._options.store.dispatch,
+               'getProfilingData'
+            );
          });
 
          it('should not change _isProfiling and state', function () {
