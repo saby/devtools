@@ -177,8 +177,26 @@ class Profiler extends Control<IOptions> {
       this.rankedViewItems = items;
    }
 
-   private __setProfilingData(profilingData: IBackendProfilingData): void {
+   private __setProfilingData(
+      profilingData: IBackendProfilingData,
+      fromImport: boolean = false
+   ): void {
       this._didProfile = true;
+      /**
+       * Backend and frontend can have different lists of synchronizations because they start and end profiling at different times.
+       * Because we need the data from both sources to create a profile we have to filter out non-matching ids.
+       * But, there's one caveat: we shouldn't do this for imported profiles.
+       */
+      if (!fromImport) {
+         profilingData.syncList = profilingData.syncList.filter(([id]) =>
+            this._changesBySynchronization.has(id)
+         );
+         this._changesBySynchronization.forEach((_, key) => {
+            if (!profilingData.syncList.find(([id]) => id === key)) {
+               this._changesBySynchronization.delete(key);
+            }
+         });
+      }
 
       this._profilingData = convertProfilingData(profilingData);
       this._synchronizations = profilingData.syncList.map(
@@ -368,7 +386,6 @@ class Profiler extends Control<IOptions> {
          if (status) {
             this.resetState();
          } else {
-            this._options.store.dispatch('getSynchronizationsList');
             this._options.store.dispatch('getProfilingData');
          }
       }
@@ -533,10 +550,13 @@ class Profiler extends Control<IOptions> {
          this._destroyedCountBySynchronization = new Map(
             parsedData.destroyedCountBySynchronization
          );
-         this.__setProfilingData({
-            initialIdToDuration: [],
-            syncList: parsedData.syncList
-         });
+         this.__setProfilingData(
+            {
+               initialIdToDuration: [],
+               syncList: parsedData.syncList
+            },
+            true
+         );
       }
    }
    /**
