@@ -1,5 +1,4 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-import { _scrollContext } from 'Controls/scroll';
 import { SyntheticEvent } from 'Vdom/Vdom';
 import * as template from 'wml!Devtool/Page/Application';
 import { RegisterClass } from 'Controls/event';
@@ -9,7 +8,6 @@ import { TouchDetect } from 'Env/Touch';
 import { TouchContextField } from 'Controls/context';
 
 interface IApplicationOptions extends IControlOptions {
-   pagingVisible: unknown;
    popupHeaderTheme: string;
 }
 
@@ -21,7 +19,6 @@ interface IApplicationOptions extends IControlOptions {
  */
 export default class Application extends Control<IApplicationOptions> {
    protected _template: TemplateFunction = template;
-   protected _scrollContext: _scrollContext;
    private registers: Record<string, RegisterClass> = {};
    private dragnDropController: ControllerClass;
    private globalPopup: GlobalController;
@@ -35,9 +32,6 @@ export default class Application extends Control<IApplicationOptions> {
       this.createPopupManager(cfg);
       this.createTouchDetector();
       this.createRegisters();
-      this._scrollContext = new _scrollContext({
-         pagingVisible: false
-      });
    }
 
    protected _afterMount(cfg: IApplicationOptions): void {
@@ -56,20 +50,12 @@ export default class Application extends Control<IApplicationOptions> {
       this.dragnDropController.destroy();
    }
 
-   protected _beforeUpdate(cfg: IApplicationOptions): void {
-      if (this._scrollContext.pagingVisible !== cfg.pagingVisible) {
-         this._scrollContext.pagingVisible = cfg.pagingVisible;
-         this._scrollContext.updateConsumers();
-      }
-   }
-
    protected _afterUpdate(cfg: IApplicationOptions): void {
       this.popupManager.updateOptions(this._options.popupHeaderTheme, this._getChildContext());
    }
 
    protected _getChildContext(): object {
       return {
-         ScrollData: this._scrollContext,
          isTouch: this.touchObjectContext
       };
    }
