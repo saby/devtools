@@ -25,7 +25,7 @@
 
                <Controls.list:Container>
                    <Controls.scroll:Container>
-                       <Controls.treeGrid:View name="list"
+                       <Controls.treeGridNew:View name="list"
                                                root="{{ null }}"
                                                columns="{{ _columns }}"
                                                itemActions="{{ _itemActions }}"
@@ -34,11 +34,11 @@
                                                editingConfig="{{ _editingConfig }}"
                                                on:viewFunctionSource="__viewFunctionSource()">
                            <ws:itemTemplate>
-                               <ws:partial template="Controls/treeGrid:ItemTemplate"
+                               <ws:partial template="Controls/treeGridNew:ItemTemplate"
                                            expanderSize="s" />
                            </ws:itemTemplate>
                            <ws:itemPadding left="s" right="s" top="s" bottom="s" />
-                       </Controls.treeGrid:View>
+                       </Controls.treeGridNew:View>
                    </Controls.scroll:Container>
                </Controls.list:Container>
            </div>

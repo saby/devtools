@@ -1,5 +1,4 @@
-<Controls.grid:ColumnTemplate
-    displayProperty="name"
-    itemData="{{ itemData }}"
-    attr:title="{{ itemData.item.get('path') }}"
-/>
+<ws:partial template="Controls/gridNew:ColumnTemplate"
+            scope="{{ _options }}"
+            displayProperty="name"
+            attr:title="{{ item.contents.get('path') }}"/>
