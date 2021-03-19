@@ -9,40 +9,39 @@
                               fontColorStyle="secondary" />
    </div>
    <ws:if data="{{ _options.expanded }}">
-       <Controls.list:DataContainer source="{{ _source }}"
+       <Controls.browser:Browser source="{{ _source }}"
                                     keyProperty="key"
                                     parentProperty="parent"
                                     nodeProperty="hasChildren"
                                     bind:expandedItems="_expandedItems"
-                                    bind:filter="_filter">
-           <Controls.search:Controller searchParam="name">
-               <div class="devtools-Pane__listWrapper ws-flexbox ws-flex-column">
-                   <div class="devtools-Pane__searchInputWrapper_theme_{{ _options.theme }} ws-flexbox">
-                       <Controls.search:InputContainer>
-                           <Controls.search:Input attr:class="devtools-Pane__searchInput ws-flex-shrink-0 ws-flex-grow-1" />
-                       </Controls.search:InputContainer>
-                   </div>
-
-                   <Controls.list:Container>
-                       <Controls.scroll:Container>
-                           <Controls.treeGrid:View name="list"
-                                                   root="{{ null }}"
-                                                   columns="{{ _columns }}"
-                                                   itemActions="{{ _itemActions }}"
-                                                   itemActionVisibilityCallback="{{ _visibilityCallback }}"
-                                                   markerVisibility="hidden"
-                                                   editingConfig="{{ _editingConfig }}"
-                                                   on:viewFunctionSource="__viewFunctionSource()">
-                               <ws:itemTemplate>
-                                   <ws:partial template="Controls/treeGrid:ItemTemplate"
-                                               expanderSize="s" />
-                               </ws:itemTemplate>
-                               <ws:itemPadding left="s" right="s" top="s" bottom="s" />
-                           </Controls.treeGrid:View>
-                       </Controls.scroll:Container>
-                   </Controls.list:Container>
+                                    bind:filter="_filter"
+                                    searchParam="name">
+           <div class="devtools-Pane__listWrapper ws-flexbox ws-flex-column">
+               <div class="devtools-Pane__searchInputWrapper_theme_{{ _options.theme }} ws-flexbox">
+                   <Controls.search:InputContainer>
+                       <Controls.search:Input attr:class="devtools-Pane__searchInput ws-flex-shrink-0 ws-flex-grow-1" />
+                   </Controls.search:InputContainer>
                </div>
-           </Controls.search:Controller>
-       </Controls.list:DataContainer>
+
+               <Controls.list:Container>
+                   <Controls.scroll:Container>
+                       <Controls.treeGrid:View name="list"
+                                               root="{{ null }}"
+                                               columns="{{ _columns }}"
+                                               itemActions="{{ _itemActions }}"
+                                               itemActionVisibilityCallback="{{ _visibilityCallback }}"
+                                               markerVisibility="hidden"
+                                               editingConfig="{{ _editingConfig }}"
+                                               on:viewFunctionSource="__viewFunctionSource()">
+                           <ws:itemTemplate>
+                               <ws:partial template="Controls/treeGrid:ItemTemplate"
+                                           expanderSize="s" />
+                           </ws:itemTemplate>
+                           <ws:itemPadding left="s" right="s" top="s" bottom="s" />
+                       </Controls.treeGrid:View>
+                   </Controls.scroll:Container>
+               </Controls.list:Container>
+           </div>
+       </Controls.browser:Browser>
    </ws:if>
 </div>
