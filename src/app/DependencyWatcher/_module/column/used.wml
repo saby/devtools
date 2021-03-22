@@ -1,9 +1,9 @@
-<Controls.grid:ColumnTemplate itemData="{{ itemData }}">
+<ws:partial template="Controls/gridNew:ColumnTemplate" scope="{{ _options }}">
     <ws:contentTemplate>
-        <ws:if data="{{ !itemData.item.initialized }}">
+        <ws:if data="{{ !item.contents.initialized }}">
             <Controls.popup:InfoboxTarget attr:style="width: 100%;">
                 <ws:content>
-                    <ws:if data="{{ !itemData.item.defined }}">
+                    <ws:if data="{{ !item.contents.defined }}">
                         <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Alert controls-icon_style-info_theme-{{ _options.theme }}"></div>
                     </ws:if>
                     <ws:else>
@@ -11,7 +11,7 @@
                     </ws:else>
                 </ws:content>
                 <ws:template>
-                    <ws:if data="{{ !itemData.item.defined }}">
+                    <ws:if data="{{ !item.contents.defined }}">
                         <h1>{[Незагруженный модуль]}</h1>
                         <span>{[Модуль является зависимостью неиспользуемого модуля в бандле]}</span>
                     </ws:if>
@@ -23,5 +23,4 @@
             </Controls.popup:InfoboxTarget>
         </ws:if>
     </ws:contentTemplate>
-</Controls.grid:ColumnTemplate>
-
+</ws:partial>

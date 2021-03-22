@@ -1,15 +1,15 @@
-<ws:partial template="Controls/grid:GroupTemplate" scope="{{ _options }}">
+<ws:partial template="Controls/gridNew:GroupTemplate" scope="{{ _options }}">
     <ws:contentTemplate>
-        <ws:if data="{{ itemData.item === 'mounted' }}">
+        <ws:if data="{{ item.contents === 'mounted' }}">
             Mounted
         </ws:if>
-        <ws:else data="{{ itemData.item === 'selfUpdated' }}">
+        <ws:else data="{{ item.contents === 'selfUpdated' }}">
             Updated
         </ws:else>
-        <ws:else data="{{ itemData.item === 'parentUpdated' }}">
+        <ws:else data="{{ item.contents === 'parentUpdated' }}">
             Parent updated
         </ws:else>
-        <ws:else data="{{ itemData.item === 'forceUpdated' }}">
+        <ws:else data="{{ item.contents === 'forceUpdated' }}">
             Force updated
         </ws:else>
     </ws:contentTemplate>
