@@ -15,7 +15,7 @@
             'UI/State'
         ], function(AppEnv, AppInit, AppState, UIState) {
             require(['UI/Base'], function(UI) {
-                window.startContextData = { AppData: new UI.AppData({}) };
+                window.startContextData = { AppData: new UIState.AppData({}) };
                 var sr = new AppState.StateReceiver(UIState.Serializer);
                 AppInit.default(window.wsConfig, void 0, sr);
                 UI.headDataStore.write('isNewEnvironment', true);
