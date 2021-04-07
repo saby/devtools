@@ -1,4 +1,4 @@
-import { Control, TemplateFunction } from 'UI/Base';
+import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import template = require('wml!Devtool/PageWrapper/PageWrapper');
 
 function getThemeName(userTheme?: 'dark' | 'light' | 'devtools'): string {
@@ -17,13 +17,9 @@ class Extension extends Control {
    protected _template: TemplateFunction = template;
    protected _currentTheme: string;
 
-   protected _beforeMount(): Promise<void> {
-      return new Promise((resolve) => {
-         chrome.storage.sync.get('theme', (result) => {
-            this._currentTheme = getThemeName(result.theme);
-            resolve();
-         });
-      });
+   protected _beforeMount(options: IControlOptions): void {
+      // we get the theme during initialization, so first time we can take it from options
+      this._currentTheme = options.theme as string;
    }
 
    protected _afterMount(): void {
