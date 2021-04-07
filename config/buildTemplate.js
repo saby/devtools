@@ -84,6 +84,14 @@ const WASABY_MODULES = [
       path: 'saby-ui/UI'
    },
    {
+      name: 'UICore',
+      path: 'saby-ui/UIInferno/UICore'
+   },
+   {
+      name: 'UICommon',
+      path: 'saby-ui/UICommon'
+   },
+   {
       name: 'Compiler',
       path: 'saby-ui/Compiler'
    },
