@@ -30,7 +30,7 @@ class Breadcrumbs extends Control<IOptions> {
       }
    }
 
-   protected _afterRender(): void {
+   protected _componentDidUpdate(): void {
       if (this._shouldScrollToElement) {
          this._shouldScrollToElement = false;
          this.__scrollToElement();
