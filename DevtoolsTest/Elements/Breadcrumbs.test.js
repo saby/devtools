@@ -58,12 +58,12 @@ define([
          });
       });
 
-      describe('_componentDidUpdate', function() {
+      describe('_afterRender', function() {
          it('should call __scrollToElement', function() {
             const stub = sandbox.stub(instance, '__scrollToElement');
             instance._shouldScrollToElement = true;
 
-            instance._componentDidUpdate();
+            instance._afterRender();
 
             assert.isTrue(stub.calledOnceWithExactly());
             assert.isFalse(instance._shouldScrollToElement);
@@ -73,7 +73,7 @@ define([
             const stub = sandbox.stub(instance, '__scrollToElement');
             instance._shouldScrollToElement = false;
 
-            instance._componentDidUpdate();
+            instance._afterRender();
 
             assert.isTrue(stub.notCalled);
             assert.isFalse(instance._shouldScrollToElement);
