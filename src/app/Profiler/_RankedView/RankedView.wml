@@ -1,5 +1,5 @@
 <Controls.scroll:Container>
-    <Controls.gridNew:View
+    <Controls.grid:View
                         name="grid"
                         keyProperty="id"
                         source="{{ _source }}"
@@ -21,7 +21,7 @@
                 <!-- TODO: здесь highlightedValue не нужно, но иначе список просто не будет перерисовываться -->
                 <ws:Object highlightedValue="{{ _options.searchValue }}">
                     <ws:template>
-                        <ws:partial template="Controls/gridNew:ColumnTemplate" attr:class="ws-ellipsis">
+                        <ws:partial template="Controls/grid:ColumnTemplate" attr:class="ws-ellipsis">
                             <ws:contentTemplate>
                                 <ws:if data="{{ contentTemplate.item.contents.name.toLowerCase().includes(_options.searchValue.toLowerCase()) }}">
                                     <Controls.decorator:Highlight value="{{ contentTemplate.item.contents.name }}"
@@ -42,9 +42,9 @@
             </ws:Array>
         </ws:columns>
         <ws:emptyTemplate>
-            <ws:partial template="Controls/gridNew:EmptyTemplate">
+            <ws:partial template="Controls/grid:EmptyTemplate">
                 <ws:contentTemplate>There is no profiling data available for this synchronization.</ws:contentTemplate>
             </ws:partial>
         </ws:emptyTemplate>
-    </Controls.gridNew:View>
+    </Controls.grid:View>
 </Controls.scroll:Container>

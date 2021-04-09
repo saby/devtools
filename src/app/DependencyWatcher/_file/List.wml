@@ -1,4 +1,4 @@
-<Controls.gridNew:View
+<Controls.grid:View
     keyProperty="id"
     name="listView"
     bind:sorting="_sorting"
@@ -10,8 +10,8 @@
 >
     <ws:virtualScrollConfig pageSize="{{ 70 }}" />
     <ws:emptyTemplate>
-        <ws:partial template="Controls/gridNew:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
+        <ws:partial template="Controls/grid:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
             <ws:contentTemplate>{[Не найдено]}</ws:contentTemplate>
         </ws:partial>
     </ws:emptyTemplate>
-</Controls.gridNew:View>
+</Controls.grid:View>
