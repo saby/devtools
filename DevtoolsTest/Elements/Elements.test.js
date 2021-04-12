@@ -1472,7 +1472,7 @@ define([
             assert.isTrue(stub.notCalled);
          });
 
-         it('should call highlight update because the child with this id does not exist', function () {
+         it('should call highlight update because the child with this id exists', function () {
             const options = {
                store: {
                   addListener: sandbox.stub(),
@@ -1494,6 +1494,30 @@ define([
             instance.__highlightNode(0);
 
             assert.isTrue(stub.calledOnceWithExactly(child));
+         });
+
+         it('should not call highlight update because the child with this id exists but not visible', function () {
+            const options = {
+               store: {
+                  addListener: sandbox.stub(),
+                  toggleDevtoolsOpened: sandbox.stub(),
+                  getFullTree: sandbox.stub().resolves([])
+               }
+            };
+            const instance = new Elements(options);
+            const child = {};
+            sandbox
+               .stub(instance._model, 'isVisible')
+               .withArgs(0)
+               .returns(false);
+            instance._children = {
+               0: child
+            };
+            sandbox.stub(highlightUpdate, 'highlightUpdate');
+
+            instance.__highlightNode(0);
+
+            sandbox.assert.notCalled(highlightUpdate.highlightUpdate);
          });
       });
 
