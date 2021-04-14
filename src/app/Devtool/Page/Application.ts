@@ -4,9 +4,6 @@ import * as template from 'wml!Devtool/Page/Application';
 import { RegisterClass } from 'Controls/event';
 import { ControllerClass, IDragObject } from 'Controls/dragnDrop';
 import { GlobalController, ManagerClass } from 'Controls/popup';
-import { TouchDetect } from 'Env/Touch';
-import { TouchContextField } from 'Controls/context';
-
 interface IApplicationOptions extends IControlOptions {
    popupHeaderTheme: string;
 }
@@ -23,21 +20,18 @@ export default class Application extends Control<IApplicationOptions> {
    private dragnDropController: ControllerClass;
    private globalPopup: GlobalController;
    private popupManager: ManagerClass;
-   private touchDetector: TouchDetect;
-   private touchObjectContext: TouchContextField;
 
    protected _beforeMount(cfg: IApplicationOptions): void {
       this.createDragnDropController();
       this.createGlobalPopup();
       this.createPopupManager(cfg);
-      this.createTouchDetector();
       this.createRegisters();
    }
 
    protected _afterMount(cfg: IApplicationOptions): void {
       window.addEventListener('resize',  this._resizePage.bind(this));
       this.globalPopup.registerGlobalPopup();
-      this.popupManager.init(cfg, this._getChildContext());
+      this.popupManager.init(cfg);
    }
 
    protected _beforeUnmount(): void {
@@ -51,13 +45,7 @@ export default class Application extends Control<IApplicationOptions> {
    }
 
    protected _afterUpdate(cfg: IApplicationOptions): void {
-      this.popupManager.updateOptions(this._options.popupHeaderTheme, this._getChildContext());
-   }
-
-   protected _getChildContext(): object {
-      return {
-         isTouch: this.touchObjectContext
-      };
+      this.popupManager.updateOptions(this._options.popupHeaderTheme);
    }
 
    protected _scrollPage(ev: SyntheticEvent<Event>): void {
@@ -196,10 +184,5 @@ export default class Application extends Control<IApplicationOptions> {
 
    private createPopupManager(cfg: object): void {
       this.popupManager = new ManagerClass(cfg);
-   }
-
-   private createTouchDetector(): void {
-      this.touchDetector = new TouchDetect.getInstance();
-      this.touchObjectContext = new TouchContextField.create();
    }
 }
