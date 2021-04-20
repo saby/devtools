@@ -252,7 +252,6 @@ function getCaption(value: unknown): string {
 
 function getTemplate(value: unknown): string {
    const type = value?.[INSPECTED_ITEM_META.type] ?? typeof value;
-   // TODO: отдельный шаблон для undefined, а то сейчас строка undefined не отличается от значения undefined
    if (TEMPLATES.hasOwnProperty(type)) {
       return TEMPLATES[type];
    }

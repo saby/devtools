@@ -170,7 +170,7 @@ define([
                   name: 'undef',
                   parent: null,
                   hasChildren: null,
-                  template: 'Elements/elements:StringTemplate'
+                  template: 'Elements/elements:UndefinedTemplate'
                }
             ]);
             assert.strictEqual(instance._store, store);

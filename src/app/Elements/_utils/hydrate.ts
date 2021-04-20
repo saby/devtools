@@ -39,7 +39,9 @@ export function hydrate(
 
       switch (value.type) {
          case 'undefined':
-            parent[last] = undefined;
+            parent[last] = {
+               [INSPECTED_ITEM_META.type]: 'undefined'
+            };
             break;
          default:
             const replaced: Record<symbol, boolean | string> = {
