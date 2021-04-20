@@ -9,3 +9,7 @@ export { default as StringTemplate } from 'Elements/_Details/Pane/templates/Stri
 export { default as BooleanTemplate } from 'Elements/_Details/Pane/templates/BooleanTemplate';
 export { default as NumberTemplate } from 'Elements/_Details/Pane/templates/NumberTemplate';
 export { default as ObjectTemplate } from 'Elements/_Details/Pane/templates/ObjectTemplate';
+import * as UndefinedTemplate from 'wml!Elements/_Details/Pane/templates/UndefinedTemplate';
+export {
+    UndefinedTemplate
+};

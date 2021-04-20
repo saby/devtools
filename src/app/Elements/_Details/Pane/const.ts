@@ -7,5 +7,6 @@ export const TEMPLATES: Record<string, string> = {
    boolean: 'Elements/elements:BooleanTemplate',
    number: 'Elements/elements:NumberTemplate',
    object: 'Elements/elements:ObjectTemplate',
-   array: 'Elements/elements:ObjectTemplate'
+   array: 'Elements/elements:ObjectTemplate',
+   undefined: 'Elements/elements:UndefinedTemplate'
 };
