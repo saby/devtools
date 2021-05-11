@@ -1,5 +1,5 @@
 import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
-import { SyntheticEvent } from 'Vdom/Vdom';
+import { SyntheticEvent } from 'UICommon/Events';
 import * as template from 'wml!Devtool/Page/Application';
 import { RegisterClass } from 'Controls/event';
 import { ControllerClass, IDragObject } from 'Controls/dragnDrop';
