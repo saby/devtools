@@ -12,7 +12,7 @@ import Store from '../_store/Store';
 import Model from './Model';
 import { throttle } from 'Types/function';
 import Controller from 'Search/Controller';
-import { SyntheticEvent } from 'Vdom/Vdom';
+import { SyntheticEvent } from 'UICommon/Events';
 import { InspectedElementPayload } from 'Types/ElementInspection';
 import { hydrate } from '../_utils/hydrate';
 
