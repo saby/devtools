@@ -42,7 +42,7 @@
                             <ws:for data="label in item.labels">
                                     <span class="devtools-Focus__icon
                                     controls-icon
-                                    controls-icon_size-s_theme-{{ _options.theme }}
+                                    controls-icon_size-s
                                     controls-icon_style-{{ _icons[label].iconStyle }}_theme-{{ _options.theme }}
                                     {{ _icons[label].icon }}"
                                           title="{{ _icons[label].title }}"></span>
