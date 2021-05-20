@@ -15,7 +15,7 @@ elements would be lost.
          attr:style="padding-left: calc(var(--indentation-size) * {{_options.depth}});">
         <div attr:class="ws-flexbox ws-align-items-center js-devtools-Elements__name">
             <ws:if data="{{ _options.hasChildren }}">
-                <i attr:class="controls-icon {{_options.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} controls-icon_size-s_theme-{{ _options.theme }} controls-icon_style-secondary_theme-{{ _options.theme }}"
+                <i attr:class="controls-icon {{_options.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} controls-icon_size-s controls-icon_style-secondary"
                    on:click="__toggleExpanded(_options.id)" />
             </ws:if>
             <span attr:class="{{_options.class}}_theme_{{ _options.theme }}{{ !_options.hasChildren ? ' devtools-Elements__node_childless' }}">
@@ -28,7 +28,7 @@ elements would be lost.
                 </ws:else>
             </span>
             <ws:if data="{{ _options.hasBreakpoint }}">
-                <i attr:class="controls-icon icon-BigRemark controls-icon_size-s_theme-{{ _options.theme }} controls-icon_style-danger_theme-{{ _options.theme }}" />
+                <i attr:class="controls-icon icon-BigRemark controls-icon_size-s controls-icon_style-danger" />
             </ws:if>
             <ws:if data="{{_options.selectedItemId === _options.id}}">
                 <span attr:class="devtools-Elements__hint devtools-Elements__hint_theme_{{ _options.theme }}">&nbsp;== $wasaby</span>

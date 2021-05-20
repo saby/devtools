@@ -4,7 +4,7 @@
             <ws:if data="{{ item.contents.isDeprecated }}">
                 <Controls.popup:InfoboxTarget attr:style="width: 100%;">
                     <ws:content>
-                        <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Alert controls-icon_style-danger_theme-{{ _options.theme }}"></div>
+                        <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-danger"></div>
                     </ws:content>
                     <ws:template>
                         <p>
@@ -16,7 +16,7 @@
             <ws:if data="{{ item.contents.isDynamic }}">
                 <Controls.popup:InfoboxTarget attr:style="width: 100%;">
                     <ws:content>
-                        <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Info controls-icon_style-info_theme-{{ _options.theme }}"></div>
+                        <div class="controls-icon controls-icon_size-s icon-Info controls-icon_style-info"></div>
                     </ws:content>
                     <ws:template>
                         <p>
