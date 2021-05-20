@@ -4,10 +4,10 @@
             <Controls.popup:InfoboxTarget attr:style="width: 100%;">
                 <ws:content>
                     <ws:if data="{{ !item.contents.defined }}">
-                        <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Alert controls-icon_style-info_theme-{{ _options.theme }}"></div>
+                        <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-info"></div>
                     </ws:if>
                     <ws:else>
-                        <div class="controls-icon controls-icon_size-s_theme-{{ _options.theme }} icon-Alert controls-icon_style-warning_theme-{{ _options.theme }}"></div>
+                        <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-warning"></div>
                     </ws:else>
                 </ws:content>
                 <ws:template>
