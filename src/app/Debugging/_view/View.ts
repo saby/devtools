@@ -215,7 +215,9 @@ class View extends Control<IControlOptions, void[]> {
       const url = await this.getUrl();
       const cookieValue = await this.getCookieValue(url);
       const newModules = new Set(
-         cookieValue.split(',').filter((value) => value.length !== 0)
+         cookieValue === 'true'
+             ? this.unselectedModules.concat(this.selectedModules).map((module) => module.id)
+             : cookieValue.split(',').filter((value) => value.length !== 0)
       );
       items.forEach((id) => newModules[action](id));
 
