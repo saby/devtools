@@ -11,7 +11,7 @@ Otherwise dynamic indentation size would be much more expensive to calculate bec
 elements would be lost.
 -->
 <div>
-    <div attr:class="devtools-Elements__node devtools-Elements__node_theme_{{ _options.theme }} ws-flexbox ws-align-items-center {{_options.selectedItemId === _options.id ? 'devtools-Elements__node_selected_theme_' + _options.theme }} {{ _options.logicParentId === _options.id ? 'devtools-Elements__node_logicParent_theme_' + _options.theme }}"
+    <div attr:class="devtools-Elements__node ws-flexbox ws-align-items-center {{_options.selectedItemId === _options.id ? 'devtools-Elements__node_selected' }} {{ _options.logicParentId === _options.id ? 'devtools-Elements__node_logicParent' }}"
          attr:style="padding-left: calc(var(--indentation-size) * {{_options.depth}});">
         <div attr:class="ws-flexbox ws-align-items-center js-devtools-Elements__name">
             <ws:if data="{{ _options.hasChildren }}">
@@ -31,7 +31,7 @@ elements would be lost.
                 <i attr:class="controls-icon icon-BigRemark controls-icon_size-s controls-icon_style-danger" />
             </ws:if>
             <ws:if data="{{_options.selectedItemId === _options.id}}">
-                <span attr:class="devtools-Elements__hint devtools-Elements__hint_theme_{{ _options.theme }}">&nbsp;== $wasaby</span>
+                <span attr:class="devtools-Elements__hint">&nbsp;== $wasaby</span>
             </ws:if>
         </div>
     </div>

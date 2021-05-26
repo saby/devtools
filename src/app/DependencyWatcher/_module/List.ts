@@ -13,6 +13,7 @@ import {
    INavigationOptionValue,
    IBasePageSourceConfig
 } from 'Controls/interface';
+import 'css!DependencyWatcher/module';
 
 interface IChildren {
    listView: {
@@ -151,6 +152,4 @@ export default class List extends Control<IOptions> {
       item.visibility = true;
       return true;
    }
-
-   static _theme: string[] = ['DependencyWatcher/module'];
 }

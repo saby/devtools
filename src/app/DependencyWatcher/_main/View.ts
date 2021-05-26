@@ -16,6 +16,7 @@ import { ConsoleLogger } from 'Extension/Logger/Console';
 import { ViewMode } from './ViewMode';
 import { getTabConfig, tabs } from './Tabs';
 import { List } from '../module';
+import 'css!DependencyWatcher/main';
 
 interface IChildren {
    moduleList: List;
@@ -117,6 +118,4 @@ export default class View extends Control {
    private __toggleRecording(): void {
       this._isRecording = !this._isRecording;
    }
-
-   static _theme: string[] = ['DependencyWatcher/main'];
 }
