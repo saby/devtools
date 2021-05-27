@@ -13,6 +13,7 @@ import {
 import { hasChangedTabs } from 'Extension/Utils/hasChangedTabs';
 import 'css!Controls/Application/oldCss'; // TODO: пока не подключили application берём шрифты отсюда
 import 'css!Controls/application';
+import 'css!Devtool/Page/Page';
 
 type VisibilityCallback = (visibility: boolean) => void;
 
@@ -134,8 +135,6 @@ class Extension extends Control {
       this._activeTab = sortedTabs[0];
       this._tabsSource = getSource(sortedTabs);
    }
-
-   static _theme: string[] = ['Devtool/Page/Page'];
 
    static _styles: string[] = ['Controls/dragnDrop'];
 }

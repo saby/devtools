@@ -9,14 +9,11 @@
    position: absolute;
    box-sizing: border-box;
    transition: width ease-in-out 500ms;
+   border-right: var(--border-thickness) solid var(--separator_color_block);
 }
 
 .devtools-Flamegraph__node:hover {
    filter: brightness(0.9);
-}
-
-.devtools-Flamegraph__node_theme_@{themeName} {
-   border-right: @border-thickness solid @color_separator;
 }
 
 .devtools-Flamegraph__node_withCaption {
@@ -46,10 +43,7 @@
    height: 8px;
    cursor: pointer;
    box-sizing: border-box;
-}
-
-.devtools-Flamegraph__node_warning_theme_@{themeName} {
-   border-right-color: @danger_color;
+   border-right-color: var(--danger_color);
 }
 
 .devtools-Profiler__content_logicParentHovered .devtools-Flamegraph__node__logicParent {

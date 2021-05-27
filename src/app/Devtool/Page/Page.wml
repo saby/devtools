@@ -8,7 +8,7 @@
                 bind:selectedKey="_activeTab"
                 keyProperty="key"
                 source="{{ _tabsSource }}"
-                attr:class="devtools-Devtool_Page__tabButtons devtools-Devtool_Page__tabButtons_theme_{{ _options.theme }}"
+                attr:class="devtools-Devtool_Page__tabButtons"
         >
             <ws:tabSpaceTemplate>
                 <Controls.buttons:Button icon="icon-Settings"

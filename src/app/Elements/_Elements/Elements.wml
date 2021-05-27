@@ -52,7 +52,7 @@
                                                  on:itemClick="_onItemClick()"/>
             </ws:if>
          </div>
-          <div attr:class="ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer_theme_{{ _options.theme }}"
+          <div attr:class="ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer"
                attr:style="width: {{ _detailsWidth }}px;">
               <Controls.dragnDrop:ResizingLine direction="reverse"
                                                attr:class="devtools-Elements__resizingLine"

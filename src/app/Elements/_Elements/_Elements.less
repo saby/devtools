@@ -6,10 +6,7 @@
 
 .devtools-Elements__DetailsContainer {
    position: relative;
-}
-
-.devtools-Elements__DetailsContainer_theme_@{themeName} {
-   border-left: @border-thickness solid @color_separator;
+   border-left: var(--border-thickness) solid var(--separator_color_block);
 }
 
 .devtools-Elements__resizingLine {
@@ -27,8 +24,8 @@
    white-space: nowrap;
 }
 
-.devtools-Elements__node_theme_@{themeName}:hover {
-   background-color: @hover_background-color_list;
+.devtools-Elements__node:hover {
+   background-color: var(--hover_background-color_list);
 }
 
 .devtools-Elements__node_control_theme_@{themeName} {
@@ -43,8 +40,8 @@
    color: @color_template_elements;
 }
 
-.devtools-Elements__node_selected_theme_@{themeName} {
-   background-color: @background-color_selected_elements;
+.devtools-Elements__node_selected {
+   background-color: var(--background-color_selected_elements);
 }
 
 .devtools-Elements__headElement {
@@ -57,14 +54,11 @@
 
 .devtools-Elements__hint {
    font-size: 13px;
-}
-
-.devtools-Elements__hint_theme_@{themeName} {
-   color: @unaccented_color;
+   color: var(--unaccented_color);
 }
 
 .devtools-Elements__tree_logicParentHovered {
-   .devtools-Elements__node_logicParent_theme_@{themeName} {
-      background-color: @hover_background-color_list;
+   .devtools-Elements__node_logicParent {
+      background-color: var(--hover_background-color_list);
    }
 }

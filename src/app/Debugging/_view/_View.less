@@ -12,11 +12,11 @@
 }
 
 .devtools-Debugging__header {
-   padding-left: @offset_s;
+   padding-left: var(--offset_s);
 }
 
-.devtools-Debugging__browserWrapper_@{themeName}:first-child {
-   border-right: @border-thickness solid @color_separator;
+.devtools-Debugging__browserWrapper:first-child {
+   border-right: var(--border-thickness) solid var(--separator_color_block);
 }
 
 .devtools-Debugging__scrollContainer {
