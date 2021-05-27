@@ -92,7 +92,7 @@
                                                          attr:class="devtools-Debugging__savedSetsFooter" />
                             </ws:footerContentTemplate>
                             <ws:menuPopupOptions>
-                                <ws:Object maxWidth="{{ 300 }}" />
+                                <ws:Object maxWidth="{{ 300 }}" minWidth="{{ 150 }}" />
                             </ws:menuPopupOptions>
                         </Controls.dropdown:Button>
                     </ws:beforeFilterTemplate>
