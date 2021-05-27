@@ -11,6 +11,7 @@ import {
    INavigationOptionValue,
    INavigationPageSourceConfig
 } from 'Controls/interface';
+import { Button } from 'Controls/dropdown'
 import * as template from 'wml!Debugging/_view/View';
 import { getArrayDifference } from 'Controls/Utils/ArraySimpleValuesUtil';
 import 'css!Debugging/debugging';
@@ -35,6 +36,11 @@ interface IItem {
    id: string;
    title: string;
    isPinned: boolean;
+}
+
+interface ISavedSet {
+   id: string;
+   title: string;
 }
 
 /**
@@ -80,9 +86,29 @@ class View extends Control<IControlOptions, void[]> {
          handler: (item) => this.togglePin(item, false, 'selected')
       }
    ];
+   protected _savedSetsItemActions: IItemAction[] = [
+      {
+         id: 'remove',
+         showType: ShowType.TOOLBAR,
+         icon: 'icon-Erase',
+         iconStyle: 'danger',
+         handler: (item) => {
+            const id = item.get('id');
+            const newData = this._savedSetsSource.data.slice().filter((savedSet: ISavedSet) => savedSet.id !== id);
+            this._savedSetsSource = new Memory({
+               data: newData
+            });
+            chrome.storage.sync.set({
+               debuggingSavedSets: newData.slice(2)
+            });
+         }
+      }
+   ];
+   protected _savedSetsSource: Memory;
    protected _children: {
       unselectedList: ListView;
       selectedList: ListView;
+      savedSetsDropdown: Button
    };
    protected readonly _navigation: INavigationOptionValue<INavigationPageSourceConfig> = {
       source: 'page',
@@ -98,14 +124,16 @@ class View extends Control<IControlOptions, void[]> {
    private pinnedModules: Set<string>;
 
    protected async _beforeMount(): Promise<void> {
-      const [modules, url, pinnedModules]: [
+      const [modules, url, pinnedModules, savedSets]: [
          string[],
          string,
-         string[]
+         string[],
+         ISavedSet[]
       ] = await Promise.all([
          this.getModules(),
          this.getUrl(),
-         this.getPinnedModules()
+         this.getPinnedModules(),
+         this.getSavedSets()
       ]);
       const cookieValue = await this.getCookieValue(url);
 
@@ -114,6 +142,17 @@ class View extends Control<IControlOptions, void[]> {
             this.existingModules.has(moduleName)
          )
       );
+
+      this._savedSetsSource = new Memory(({
+         keyProperty: 'id',
+         data: [{
+            id: 'all',
+            title: 'All'
+         }, {
+            id: 'favorites',
+            title: 'Favorites'
+         }].concat(savedSets)
+      }));
 
       if (cookieValue === 'true') {
          modules.forEach((value) => {
@@ -197,6 +236,12 @@ class View extends Control<IControlOptions, void[]> {
       }
    }
 
+   protected _savedSetsItemActionsCallback(action: IItemAction,
+                                           item: EntityRecord): boolean {
+      const id = item.get('id');
+      return id !== 'all' && id !== 'favorites';
+   }
+
    protected async _changeCookie(
       e: Event,
       action: 'add' | 'delete',
@@ -215,11 +260,46 @@ class View extends Control<IControlOptions, void[]> {
       const url = await this.getUrl();
       const cookieValue = await this.getCookieValue(url);
       const newModules = new Set(
-         cookieValue.split(',').filter((value) => value.length !== 0)
+         cookieValue === 'true'
+             ? this.unselectedModules.concat(this.selectedModules).map((module) => module.id)
+             : cookieValue.split(',').filter((value) => value.length !== 0)
       );
       items.forEach((id) => newModules[action](id));
 
       await this.setCookie(Array.from(newModules));
+   }
+
+   protected _addSet(): void {
+      const title = this.selectedModules.map((item) => item.id).join(',');
+      const newSet = {
+         id: Date.now(),
+         title
+      };
+      const newData = this._savedSetsSource.data.slice();
+      newData.push(newSet);
+      this._savedSetsSource = new Memory({
+         data: newData
+      });
+      chrome.storage.sync.set({
+         debuggingSavedSets: newData.slice(2)
+      });
+      this._children.savedSetsDropdown.closeMenu();
+   }
+
+   protected _applySavedSet(e: Event, set: EntityRecord<ISavedSet>): void {
+      const id = set.get('id');
+      if (id === 'all') {
+         this.setCookie(['true']);
+      } else if (id === 'favorites') {
+         const newItems = new Set(this.pinnedModules);
+         this.selectedModules.forEach((item) => {
+            newItems.add(item.id);
+         });
+         this.setCookie(Array.from(newItems));
+      } else {
+         const modules = set.get('title').split(',');
+         this.setCookie(modules);
+      }
    }
 
    private async setCookie(modules: string[]): Promise<void> {
@@ -487,6 +567,17 @@ class View extends Control<IControlOptions, void[]> {
             (result: { debuggingPinnedModules?: string[] }) => {
                resolve(result.debuggingPinnedModules || []);
             }
+         );
+      });
+   }
+
+   private async getSavedSets(): Promise<ISavedSet[]> {
+      return new Promise((resolve) => {
+         chrome.storage.sync.get(
+             'debuggingSavedSets',
+             (result: { debuggingSavedSets?: ISavedSet[] }) => {
+                resolve(result.debuggingSavedSets || []);
+             }
          );
       });
    }

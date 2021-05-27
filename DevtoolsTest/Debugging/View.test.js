@@ -56,11 +56,18 @@ define([
             .callsArgWith(1, cookies);
       }
 
-      function stubPinnedModules(value) {
-         sandbox
-            .stub(chrome.storage.sync, 'get')
-            .withArgs('debuggingPinnedModules')
-            .callsArgWith(1, value);
+      function stubStorage(values) {
+         const stub = sandbox
+            .stub(chrome.storage.sync, 'get');
+         const defaultValue = {
+            debuggingPinnedModules: [],
+            debuggingSavedSets: []
+         };
+         Object.entries(defaultValue).forEach(([key, value]) => {
+            stub.withArgs(key).callsArgWith(1, {
+               [key]: values[key] ? values[key] : value
+            })
+         });
       }
 
       function stubModulesAndLists(
@@ -109,7 +116,7 @@ define([
             stubContentsModules(['Controls', 'UI', 'Core']);
             stubTabURL(url);
             stubCookieValue('true', url);
-            stubPinnedModules({});
+            stubStorage({});
 
             await instance._beforeMount();
 
@@ -138,7 +145,7 @@ define([
             stubContentsModules(['Controls', 'UI', 'Core']);
             stubTabURL(url);
             stubCookieValue('Controls,UI,Core', url);
-            stubPinnedModules({});
+            stubStorage({});
 
             await instance._beforeMount();
 
@@ -167,7 +174,7 @@ define([
             stubContentsModules(['Controls', 'UI', 'Core']);
             stubTabURL(url);
             stubCookieValue('', url);
-            stubPinnedModules({});
+            stubStorage({});
 
             await instance._beforeMount();
 
@@ -196,7 +203,7 @@ define([
             stubContentsModules(['Controls', 'UI', 'Core']);
             stubTabURL(url);
             stubCookieValue(null, url);
-            stubPinnedModules({});
+            stubStorage({});
 
             await instance._beforeMount();
 
@@ -225,7 +232,7 @@ define([
             stubContentsModules(['Controls', 'UI', 'Core']);
             stubTabURL(url);
             stubCookieValue('Controls,UI,Core', url);
-            stubPinnedModules({
+            stubStorage({
                debuggingPinnedModules: ['UI']
             });
 
@@ -256,7 +263,7 @@ define([
             stubContentsModules(['Controls', 'UI', 'Core']);
             stubTabURL(url);
             stubCookieValue('true', url);
-            stubPinnedModules({
+            stubStorage({
                debuggingPinnedModules: ['UI']
             });
 
@@ -287,7 +294,7 @@ define([
             stubContentsModules(['Controls', 'UI', 'Core']);
             stubTabURL(url);
             stubCookieValue('true', url);
-            stubPinnedModules({});
+            stubStorage({});
             const boundCallback = sandbox.stub();
             sandbox
                .stub(instance.onCookieChange, 'bind')
@@ -308,7 +315,7 @@ define([
             stubContentsModules(['Controls', 'UI', 'Core']);
             stubTabURL(url);
             stubCookieValue('Controls,UI,Core', url);
-            stubPinnedModules({
+            stubStorage({
                debuggingPinnedModules: ['UI', 'ThisModuleDoesntExist']
             });
 
