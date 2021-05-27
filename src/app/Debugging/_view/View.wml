@@ -77,6 +77,24 @@
                                                  viewMode="linkButton"
                                                  tooltip="Unselect all modules"
                                                  on:click="_moveAllItems(false)" />
+                        <Controls.dropdown:Button name="savedSetsDropdown"
+                                                  keyProperty="id"
+                                                  viewMode="link"
+                                                  source="{{ _savedSetsSource }}"
+                                                  caption="Choose a set"
+                                                  itemActions="{{ _savedSetsItemActions }}"
+                                                  itemActionVisibilityCallback="{{ _savedSetsItemActionsCallback }}"
+                                                  on:menuItemActivate="_applySavedSet()">
+                            <ws:footerContentTemplate>
+                                <Controls.buttons:Button caption="Save current set"
+                                                         viewMode="link"
+                                                         on:click="_addSet()"
+                                                         attr:class="devtools-Debugging__savedSetsFooter" />
+                            </ws:footerContentTemplate>
+                            <ws:menuPopupOptions>
+                                <ws:Object maxWidth="{{ 300 }}" />
+                            </ws:menuPopupOptions>
+                        </Controls.dropdown:Button>
                     </ws:beforeFilterTemplate>
                     <ws:content>
                         <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
