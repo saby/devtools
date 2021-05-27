@@ -1,5 +1,5 @@
 <div attr:class="ws-flexbox ws-flex-column{{ _options.expanded ? ' devtools-Pane_expanded' : ' ws-flex-shrink-0' }}">
-   <div attr:class="devtools-Pane__header_theme_{{ _options.theme }}"
+   <div attr:class="devtools-Pane__header"
         on:click="__toggleExpanded()">
       <Controls.buttons:Button icon="{{_options.expanded ? 'icon-ArrowDown' : 'icon-DayForward'}}"
                                iconSize="s"
@@ -17,7 +17,7 @@
                                     bind:filter="_filter"
                                     searchParam="name">
            <div class="devtools-Pane__listWrapper ws-flexbox ws-flex-column">
-               <div class="devtools-Pane__searchInputWrapper_theme_{{ _options.theme }} ws-flexbox">
+               <div class="devtools-Pane__searchInputWrapper ws-flexbox">
                    <Controls.search:InputContainer>
                        <Controls.search:Input attr:class="devtools-Pane__searchInput ws-flex-shrink-0 ws-flex-grow-1" />
                    </Controls.search:InputContainer>

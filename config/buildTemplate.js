@@ -64,6 +64,14 @@ const WASABY_MODULES = [
       path: 'rmi/src/client/SbisEnvUI-default-theme'
    },
    {
+      name: 'TransportCore',
+      path: 'rmi/src/client/TransportCore'
+   },
+   {
+      name: 'ParametersWebAPI',
+      path: 'rmi/src/client/ParametersWebAPI'
+   },
+   {
       name: 'File',
       path: 'rmi/src/client/File'
    },
@@ -151,18 +159,6 @@ const EXTENSION_MODULES = [
    {
       name: 'Layout-devtools-theme',
       path: resolve(input.app, 'Layout-devtools-theme')
-   },
-   {
-      name: 'Debugging-devtools-theme',
-      path: resolve(input.app, 'Debugging-devtools-theme')
-   },
-   {
-      name: 'DependencyWatcher-devtools-theme',
-      path: resolve(input.app, 'DependencyWatcher-devtools-theme')
-   },
-   {
-      name: 'Debugging-devtools-theme',
-      path: resolve(input.app, 'Devtool-devtools-theme')
    },
    {
       name: 'Elements-devtools-theme',

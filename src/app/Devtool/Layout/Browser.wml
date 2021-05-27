@@ -1,6 +1,6 @@
 <div class="devtools-Browser ws-flexbox ws-flex-column">
     <ws:if data="{{ _options.headTemplate }}">
-        <div class="devtools-Browser__head devtools-Browser__head_theme_{{ _options.theme }} ws-flexbox ws-align-items-center ws-flex-shrink-0">
+        <div class="devtools-Browser__head ws-flexbox ws-align-items-center ws-flex-shrink-0">
             <ws:partial template="{{ _options.headTemplate }}" />
         </div>
     </ws:if>

@@ -4,9 +4,7 @@
 .controls_theme-@{themeName} {
 
   // Devtools
-  --color_separator:                                     #525252;
   --hover_background-color_list:                         rgba(56, 121, 217, 0.1);
-  --background-color_toolbar:                            #333;
   --background-color_selected_elements:                  #073d69;
 
   // Common
@@ -26,46 +24,30 @@
   --marker_color: #9f9f9f;
   --readonly_marker-color: var(--readonly_color);
   --readonly_color: #626262;
+  --separator_color_block: #525252;
+  --secondary_same_background-color: #333;
 
   --background-color_default: var(--background-color);
 
   // Input
   --placeholder-color_inputText: rgba(230, 230, 230, 0.54);
-  --border-color_inputText: var(--color_separator);
-  --border-color_hover_inputText: var(--color_separator);
-  --border-color_focus_inputText: var(--color_separator);
+  --border-color_inputText: var(--separator_color_block);
+  --border-color_hover_inputText: var(--separator_color_block);
+  --border-color_focus_inputText: var(--separator_color_block);
 
   // SearchInput
   --border-color_hover_searchInput:                #5a5a5a #5a5a5a #5a5a5a #5a5a5a;
   --border-color_focus_searchInput:                var(--border-color_hover_searchInput);
   --background-color_searchInput:                  #242424;
-
-  // Scroll
-  --start-color-gradient_Scroll-shadow: rgba(83, 92, 104, .5);
-  --end-color-gradient_Scroll-shadow: rgba(83, 92, 104, 0);
-
-  // Scrollbar
-  --accented_thumb_background-color_scrollbar: #333;
-  --accented_thumb_hover_background-color_scrollbar: var(--accented_thumb_background-color_scrollbar);
-
-  // List
-  --master_item_background-color_list: var(--background-color);
-  --master_separator_contrast-color_list: var(--color_separator);
-
   // Buttons
   --background-color_contrast_button_toolButton: #202020;
   --primary_hover_background-color_button: #202020;
   --primary_active_background-color_button: #202020;
   --secondary_hover_background-color_button: #202020;
   --secondary_active_background-color_button: #202020;
-  --background-color_button_toolButton: var(--background-color_toolbar);
+  --background-color_button_toolButton: var(--secondary_same_background-color);
   --border-color_button_toolButton: #353535;
   --border-color_hover_button_toolButton: var(--border-color_button_toolButton);
-
-  // Back
-  --color-Back__caption_style-secondary_val: var(--secondary_text-color);
-  --color-Back__caption_style-secondary_hovered_val: var(--secondary_hover_text-color);
-  --backArrowOrange_icon: url("img/BackArrowOrange.svg");
 
   // Toggle
   --marker-box_border-color_switcher: var(--secondary_color);
@@ -73,11 +55,15 @@
 
   // Tabs
   --separator_color_tabs: var(--secondary_text-color);
-  --border-color_tabs: var(--color_separator);
+  --border-color_tabs: var(--separator_color_block);
   --primary_marker_color_tabs: #a5a5a5;
 }
 
 .controls_list_theme-@{themeName} {
+  --master_item_background-color_list: var(--background-color);
+  --master_separator_contrast-color_list: var(--separator_color_block);
+  --master_item_selected_background-color_list: var(--background-color_selected_elements);
+  --master_item_hover_background-color_list: var(--hover_background-color_list);
   // TreeGrid
   --node_expander_icon-color_treeGrid: var(--unaccented_icon-color);
   --node_expander_hover_icon-color_treeGrid: var(--link_hover_text-color);
@@ -86,23 +72,23 @@
 
 .controls_filterPopup_theme-@{themeName} {
   // Filter panel
-  --background-color_vertical_filterPanel: var(--background-color_toolbar);
+  --background-color_vertical_filterPanel: var(--secondary_same_background-color);
 }
 
 .controls_popupTemplate_theme-@{themeName} {
   // Sticky
-  --border-color_sticky: var(--color_separator);
+  --border-color_sticky: var(--separator_color_block);
 
   // popupTemplate
   --header_background-color_sticky: #333;
   --header_background-color_stack: #333;
-  --header_bottom-border-color_stack: var(--color_separator);
-  --border-color_dialog: var(--color_separator);
-  --border-color_stack: var(--color_separator);
+  --header_bottom-border-color_stack: var(--separator_color_block);
+  --border-color_dialog: var(--separator_color_block);
+  --border-color_stack: var(--separator_color_block);
   --background-color_infobox: var(--background-color);
-  --border-color_infobox: var(--color_separator);
+  --border-color_infobox: var(--separator_color_block);
   --footer_background-color_dialog: var(--background-color);
-  --footer_top-border-color_dialog: var(--color_separator);
+  --footer_top-border-color_dialog: var(--separator_color_block);
 
   // Close button
   --icon_background-image_closeButton_toolButton: url("img/DefaultCloseIcon.svg");

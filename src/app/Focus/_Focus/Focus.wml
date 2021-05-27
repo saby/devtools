@@ -9,7 +9,7 @@
                                  tooltip="Move focus to the next element"
                                  on:click="_moveFocus(false)" />
         <!-- TODO: почти копипаста из Elements, прямо с классами, потом везде перейду на обёртку -->
-        <div attr:class="devtools-Focus__head__rightTemplate ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer_theme_{{ _options.theme }}"
+        <div attr:class="devtools-Focus__head__rightTemplate ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer"
              attr:style="width: {{ _detailsWidth }}px;">
             <Controls.dragnDrop:ResizingLine direction="reverse"
                                              attr:class="devtools-Elements__resizingLine"
@@ -29,7 +29,6 @@
                          attr:name="{{ item.id }}"
                          attr:style="padding-left: calc(10px * {{ item.depth }});"
                          attr:class="devtools-Focus__item
-                         devtools-Focus__item_theme_{{ _options.theme }}
                          ws-flexbox
                          ws-align-items-center
                          {{ _getColorClassForItem(item) }}
@@ -52,7 +51,7 @@
                 </ws:for>
             </Controls.scroll:Container>
             <!-- TODO: копипаста из Elements, прямо с классами, потом везде перейду на обёртку -->
-            <div attr:class="ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer_theme_{{ _options.theme }}"
+            <div attr:class="ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer"
                  attr:style="width: {{ _detailsWidth }}px;">
                 <Controls.dragnDrop:ResizingLine direction="reverse"
                                                  attr:class="devtools-Elements__resizingLine"
@@ -60,7 +59,7 @@
                 <Controls.scroll:Container attr:class="devtools-Focus__History ws-flex-shrink-0">
                     <ws:for data="item in _historyItems">
                         <div attr:key="{{ item.ids[item.ids.length - 1] }}"
-                             attr:class="devtools-Focus__item devtools-Focus__item_theme_{{ _options.theme }} devtools-Focus__historyItem"
+                             attr:class="devtools-Focus__item devtools-Focus__historyItem"
                              on:click="_onItemClick(true, item.ids[item.ids.length - 1])"
                              on:mouseenter="_highlightElement(true, item.ids[item.ids.length - 1])"
                              on:mouseleave="_highlightElement()">

@@ -22,9 +22,6 @@
         <module id="61cc9fd1-7bf3-43d0-9905-54dbe6b084bb" name="Debugging"/>
         <module id="14fc0dc0-9b76-4e5e-97b7-696a82b8d545" name="Focus"/>
         <module id="a696c0f9-8a5b-44da-ad11-8fb084e002da" name="Controls-devtools-theme"/>
-        <module id="572940bb-286c-4c95-9a2f-7ea28fd38752" name="Debugging-devtools-theme"/>
-        <module id="606ba894-c3c1-4631-9853-d8c3826d92bd" name="DependencyWatcher-devtools-theme"/>
-        <module id="d5a1c6fc-5ade-4194-b7d1-5f614f06043f" name="Devtool-devtools-theme"/>
         <module id="87addb9a-b1a3-4827-ad3a-abc0a0028184" name="Elements-devtools-theme"/>
         <module id="84715dd5-2bb6-4b55-9e80-8e1f62f0c887" name="Profiler-devtools-theme"/>
         <module id="ad0358c8-d003-49f2-a89d-9a826474c9f4" name="Focus-devtools-theme"/>

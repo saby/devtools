@@ -13,6 +13,7 @@ import {
 } from 'Controls/interface';
 import * as template from 'wml!Debugging/_view/View';
 import { getArrayDifference } from 'Controls/Utils/ArraySimpleValuesUtil';
+import 'css!Debugging/debugging';
 import Cookie = chrome.cookies.Cookie;
 import Tab = chrome.tabs.Tab;
 import CookieChangeInfo = chrome.cookies.CookieChangeInfo;
@@ -524,8 +525,6 @@ class View extends Control<IControlOptions, void[]> {
          debuggingPinnedModules: Array.from(this.pinnedModules)
       });
    }
-
-   static _theme: string[] = ['Debugging/debugging'];
 
    private static openPopup(): Promise<void> {
       return Confirmation.openPopup({

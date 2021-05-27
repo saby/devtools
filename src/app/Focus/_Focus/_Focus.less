@@ -5,7 +5,7 @@
 }
 
 .devtools-Focus__historyItem {
-   color: @text-color;
+   color: var(--text-color);
 }
 
 .devtools-Focus__item {
@@ -13,25 +13,25 @@
 }
 
 .ws-is-hover {
-   .devtools-Focus__item_theme_@{themeName}:hover {
-      background-color: @hover_background-color_list;
+   .devtools-Focus__item:hover {
+      background-color: var(--hover_background-color_list);
    }
 }
 
 .devtools-Focus__item_nonFocusable {
-   color: @secondary_color;
+   color: var(--secondary_color);
 }
 
 .devtools-Focus__item_withDangerousLabel {
-   color: @danger_color;
+   color: var(--secondary_color);
 }
 
 .devtools-Focus__item_focusable {
-   color: @text-color;
+   color: var(--text-color);
 }
 
 .devtools-Focus__item_selfFocused_theme_@{themeName} {
-   background-color: @background-color_selected_elements;
+   background-color: var(--background-color_selected_elements);
 }
 
 .devtools-Focus__item_childFocused_theme_@{themeName} {
@@ -39,11 +39,11 @@
 }
 
 .devtools-Focus__tree {
-   padding-left: @offset_2xs;
+   padding-left: var(--offset_2xs);
 }
 
 .devtools-Focus__icon {
-   padding-left: @offset_2xs;
+   padding-left: var(--offset_2xs);
 }
 
 .devtools-Focus__resetButton {

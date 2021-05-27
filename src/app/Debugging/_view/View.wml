@@ -8,7 +8,7 @@
     </ws:headTemplate>
     <ws:content>
         <div class="devtools-Debugging">
-            <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }} ws-flexbox ws-flex-column">
+            <div class="devtools-Debugging__browserWrapper ws-flexbox ws-flex-column">
                 <Controls.heading:Title caption="Minified modules"
                                         fontSize="l"
                                         fontColorStyle="secondary"
@@ -51,7 +51,7 @@
                     </ws:content>
                 </Layout.browsers:Browser>
             </div>
-            <div class="devtools-Debugging__browserWrapper devtools-Debugging__browserWrapper_{{ _options.theme }} ws-flexbox ws-flex-column">
+            <div class="devtools-Debugging__browserWrapper ws-flexbox ws-flex-column">
                 <Controls.heading:Title caption="Unminified modules"
                                         fontSize="l"
                                         fontColorStyle="secondary"

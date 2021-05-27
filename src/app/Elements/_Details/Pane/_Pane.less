@@ -2,10 +2,10 @@
    height: 100%;
 }
 
-.devtools-Pane__header_theme_@{themeName} {
-   background-color: @background-color_toolbar;
-   border-top: @border-thickness solid @color_separator;
-   border-bottom: @border-thickness solid @color_separator;
+.devtools-Pane__header {
+   background-color: var(--secondary_same_background-color);
+   border-top: var(--border-thickness) solid var(--separator_color_block);
+   border-bottom: var(--border-thickness) solid var(--separator_color_block);
 }
 
 .devtools-Pane__listWrapper {
@@ -16,8 +16,8 @@
    margin: 6px 6px;
 }
 
-.devtools-Pane__searchInputWrapper_theme_@{themeName} {
-   background-color: @background-color_toolbar;
+.devtools-Pane__searchInputWrapper {
+   background-color: var(--secondary_same_background-color);
 }
 
 .devtools-Pane-template__fieldName {
