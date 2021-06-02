@@ -6,6 +6,7 @@ import { formatTime, getBackgroundClassBasedOnReason } from '../_utils/Utils';
 import * as template from 'wml!Profiler/_Flamegraph/Flamegraph';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
 import { WARNING_NAMES } from 'Profiler/_Warning/const';
+import 'css!Profiler/profiler';
 
 export interface IFlamegraphControlNode extends IFrontendControlNode {
    selfDuration: number;
@@ -503,8 +504,6 @@ class Flamegraph extends Control<IOptions> {
       this._shouldRestoreFocus = true;
       this._notify('markedKeyChanged', [id]);
    }
-
-   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

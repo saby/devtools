@@ -15,6 +15,7 @@ import Controller from 'Search/Controller';
 import { SyntheticEvent } from 'UICommon/Events';
 import { InspectedElementPayload } from 'Types/ElementInspection';
 import { hydrate } from '../_utils/hydrate';
+import 'css!Elements/elements';
 
 interface IOptions {
    store: Store;
@@ -688,8 +689,6 @@ class Elements extends Control {
          `${maxIndentationSize}px`
       );
    }
-
-   static _theme: string[] = ['Elements/elements'];
 }
 
 export default Elements;

@@ -1,4 +1,4 @@
-<div class="devtools-Flamegraph__node {{ _options.itemData.caption ? ' devtools-Flamegraph__node_withCaption' }}{{ _options.itemData.isSelected ? ' devtools-Flamegraph__node_selected devtools-Flamegraph__node_selected_theme_' + _options.theme }} {{ _options.itemData.class + '_theme_' + _options.theme }}"
+<div class="devtools-Flamegraph__node {{ _options.itemData.caption ? ' devtools-Flamegraph__node_withCaption' }}{{ _options.itemData.isSelected ? ' devtools-Flamegraph__node_selected' }} {{ _options.itemData.class }}"
      title="{{ _options.itemData.tooltip }}"
      attr:style="{{ _options.itemData.style }}">
     <ws:if data="{{ _options.itemData.caption }}">

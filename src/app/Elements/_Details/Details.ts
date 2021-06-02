@@ -4,6 +4,7 @@ import { IFrontendControlNode } from 'Extension/Plugins/Elements/IControlNode';
 import { descriptor } from 'Types/entity';
 import Store from '../_store/Store';
 import { EventUtils } from 'UI/Events';
+import 'css!Elements/elements';
 
 interface IOptions extends IControlOptions {
    id: IFrontendControlNode['id'];
@@ -88,8 +89,6 @@ class Details extends Control<IOptions> {
    ): void {
       this._notify('expandedChanged', [eventName, value]);
    }
-
-   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

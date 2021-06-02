@@ -2,6 +2,7 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import * as template from 'wml!Profiler/_StackedBar/StackedBar';
 import { descriptor } from 'Types/entity';
 import { formatTime } from '../_utils/Utils';
+import 'css!Profiler/profiler';
 
 export interface IStackedBar {
    name: string;
@@ -33,8 +34,6 @@ class StackedBar extends Control<IOptions> {
          this._formattedBars = formatBars(newOptions.bars);
       }
    }
-
-   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

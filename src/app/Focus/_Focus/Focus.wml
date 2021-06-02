@@ -1,4 +1,4 @@
-<Devtool.Layout.Browser keyForDetailsWidth="Focus">
+<Devtool.Layout.Browser keyForDetailsWidth="Focus" attr:class="devtools-focus_theme{{ _options.theme }}">
     <ws:headTemplate>
         <Controls.buttons:Button icon="icon-DayBackward"
                                  viewMode="linkButton"
@@ -32,7 +32,7 @@
                          ws-flexbox
                          ws-align-items-center
                          {{ _getColorClassForItem(item) }}
-                         {{ _focusedItem && item.id === _focusedItem.id ? _getBackgroundClassForFocusedItem(_focusedItem) + '_theme_' + _options.theme }}"
+                         {{ _focusedItem && item.id === _focusedItem.id ? _getBackgroundClassForFocusedItem(_focusedItem) }}"
                          on:click="_onItemClick(false, item.id)"
                          on:mouseenter="_highlightElement(false, item.id)"
                          on:mouseleave="_highlightElement()">
@@ -42,7 +42,7 @@
                                     <span class="devtools-Focus__icon
                                     controls-icon
                                     controls-icon_size-s
-                                    controls-icon_style-{{ _icons[label].iconStyle }}_theme-{{ _options.theme }}
+                                    controls-icon_style-{{ _icons[label].iconStyle }}
                                     {{ _icons[label].icon }}"
                                           title="{{ _icons[label].title }}"></span>
                             </ws:for>

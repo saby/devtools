@@ -1,6 +1,7 @@
 import { Control, TemplateFunction, IControlOptions } from 'UI/Base';
 import template = require('wml!Profiler/_Overview/Overview');
 import { descriptor } from 'Types/entity';
+import 'css!Profiler/profiler';
 
 interface IOptions extends IControlOptions {
    mountedCount: number;
@@ -17,8 +18,6 @@ interface IOptions extends IControlOptions {
  */
 class Overview extends Control<IOptions> {
    protected _template: TemplateFunction = template;
-
-   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
