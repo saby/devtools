@@ -16,7 +16,6 @@
         <module id="f6fdf353-3ab3-4dbb-8671-01c2b418bf0a" name="Controls"/>
         <module id="fe7ac5f4-313e-4fea-93be-9f54fca9a946" name="Extension"/>
         <module id="c7af5b1b-ad28-4cf8-ba55-c892c0b59245" name="Elements"/>
-        <module id="ad0358c8-d003-49f2-a89d-9a826474c9f4" name="Focus-devtools-theme"/>
     </depends>
 
   <load_after/>

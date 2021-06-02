@@ -2,6 +2,7 @@ import { Control, TemplateFunction } from 'UI/Base';
 import * as template from 'wml!Elements/_Details/Pane/templates/StringTemplate';
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
+import 'css!Elements/elements';
 
 /**
  * Template for strings.
@@ -19,8 +20,6 @@ class StringTemplate extends Control<ITemplateOptions> {
          }
       );
    }
-
-   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof ITemplateOptions, unknown> {
       return {

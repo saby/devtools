@@ -2,6 +2,7 @@ import { Control, TemplateFunction } from 'UI/Base';
 import * as template from 'wml!Elements/_Details/Pane/templates/ObjectTemplate';
 import { descriptor } from 'Types/entity';
 import { ITemplateOptions } from './ITemplate';
+import 'css!Elements/elements';
 
 /**
  * Template for objects.
@@ -9,8 +10,6 @@ import { ITemplateOptions } from './ITemplate';
  */
 class ObjectTemplate extends Control<ITemplateOptions> {
    protected _template: TemplateFunction = template;
-
-   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof ITemplateOptions, unknown> {
       return {

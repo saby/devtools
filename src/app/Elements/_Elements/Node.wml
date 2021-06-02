@@ -18,7 +18,7 @@ elements would be lost.
                 <i attr:class="controls-icon {{_options.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} controls-icon_size-s controls-icon_style-secondary"
                    on:click="__toggleExpanded(_options.id)" />
             </ws:if>
-            <span attr:class="{{_options.class}}_theme_{{ _options.theme }}{{ !_options.hasChildren ? ' devtools-Elements__node_childless' }}">
+            <span attr:class="{{_options.class}} {{ !_options.hasChildren ? ' devtools-Elements__node_childless' }}">
                 <ws:if data="{{ _options.name.toLowerCase().includes(_options.searchValue.toLowerCase()) }}">
                     <Controls.decorator:Highlight value="{{ _options.name }}"
                                                   highlightedValue="{{ _options.searchValue }}" />

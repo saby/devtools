@@ -2,6 +2,9 @@ import { Control, IControlOptions, TemplateFunction } from 'UI/Base';
 import * as template from 'wml!Focus/_Focus/Focus';
 import { ContentChannel } from '../../Devtool/Event/ContentChannel';
 import { IBackendItem, IHistoryItem } from 'Extension/Plugins/Focus/Focus';
+import 'css!Focus/focus';
+// TODO: это нужно из-за того, что в шаблоне скопирована правая панелька, потом просто перенесу стили
+import 'css!Elements/elements';
 
 const DEFAULT_EVAL_TIMEOUT = 100;
 
@@ -232,12 +235,6 @@ class Focus extends Control<IControlOptions> {
 
       this._items = constructTree(topItems, itemsToChildren);
    }
-
-   static _theme: string[] = [
-      'Focus/focus',
-      // TODO: это нужно из-за того, что в шаблоне скопирована правая панелька, нужно будет её вынести на уровень раскладки
-      'Elements/elements'
-   ];
 }
 
 function constructTree(

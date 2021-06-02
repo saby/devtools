@@ -11,6 +11,7 @@ import './templates/ObjectTemplate';
 import './templates/BooleanTemplate';
 import Store from '../../_store/Store';
 import { TEMPLATES } from './const';
+import 'css!Elements/elements';
 
 type IOptions = IControlOptions & {
    caption: string;
@@ -232,8 +233,6 @@ class Pane extends Control<IOptions> {
    private __removeBreakpoint(): void {
       this._notify('removeBreakpoint', [this._options.controlId]);
    }
-
-   static _theme: string[] = ['Elements/elements'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {
