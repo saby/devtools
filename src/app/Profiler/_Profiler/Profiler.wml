@@ -1,4 +1,4 @@
-<Devtool.Layout.Browser>
+<Devtool.Layout.Browser attr:class="devtools-profiler_theme-{{ _options.theme }}">
     <ws:headTemplate>
         <Controls.buttons:Button icon="icon-Rec"
                                  iconSize="s"

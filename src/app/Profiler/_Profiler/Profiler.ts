@@ -28,6 +28,7 @@ import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateRea
 import { WARNING_NAMES, WARNINGS, IWarning } from 'Profiler/_Warning/const';
 import { Getter as FileSystem } from 'File/ResourceGetter/fileSystem';
 import { Confirmation } from 'Controls/popup';
+import 'css!Profiler/profiler';
 
 interface IOptions extends IControlOptions {
    store: Store;
@@ -731,8 +732,6 @@ class Profiler extends Control<IOptions> {
 
       return snapshot;
    }
-
-   static _theme: string[] = ['Profiler/profiler'];
 
    /**
     * Opens popup with the passed error text.

@@ -3,6 +3,7 @@ import * as template from 'wml!Profiler/_TimeRender/TimeRender';
 import { descriptor } from 'Types/entity';
 import { formatTime } from '../_utils/Utils';
 import { IStackedBar } from '../_StackedBar/StackedBar';
+import 'css!Profiler/profiler';
 
 interface IOptions extends IControlOptions {
    value: number;
@@ -26,8 +27,6 @@ class TimeRender extends Control<IOptions> {
          this._formattedValue = formatTime(newOptions.value);
       }
    }
-
-   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

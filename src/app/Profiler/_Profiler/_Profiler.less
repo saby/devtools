@@ -19,45 +19,45 @@
    height: 100%;
 }
 
-.devtools-reason_background_noChangesInSubtree_theme_@{themeName} {
-   background: @background-color_reason_noChangesInSubtree;
+.devtools-reason_background_noChangesInSubtree {
+   background: var(--background-color_reason_noChangesInSubtree);
 }
 
-.devtools-reason_background_mounted_theme_@{themeName} {
-   background: @background-color_reason_mounted;
+.devtools-reason_background_mounted{
+   background: var(--background-color_reason_mounted);
 }
 
-.devtools-reason_background_forceUpdated_theme_@{themeName} {
-   background: @background-color_reason_forceUpdated;
+.devtools-reason_background_forceUpdated {
+   background: var(--background-color_reason_forceUpdated);
 }
 
-.devtools-reason_background_selfUpdated_theme_@{themeName} {
-   background: @background-color_reason_selfUpdated;
+.devtools-reason_background_selfUpdated {
+   background: var(--background-color_reason_selfUpdated);
 }
 
-.devtools-reason_background_parentUpdated_theme_@{themeName} {
-   background: @background-color_reason_parentUpdated;
+.devtools-reason_background_parentUpdated {
+   background: var(--background-color_reason_parentUpdated);
 }
 
-.devtools-reason_background_unchanged_theme_@{themeName} {
-   background: @background-color_reason_unchanged;
+.devtools-reason_background_unchanged {
+   background: var(--background-color_reason_unchanged);
 }
 
-.devtools-reason_background_destroyed_theme_@{themeName} {
-   background: @background-color_reason_destroyed;
+.devtools-reason_background_destroyed {
+   background: var(--background-color_reason_destroyed);
 }
 
-.devtools-Profiler__duration_renderDuration_theme_@{themeName} {
-   background: @background-color_duration_renderDuration;
+.devtools-Profiler__duration_renderDuration {
+   background: var(--background-color_duration_renderDuration);
 }
 
-.devtools-Profiler__duration_lifecycleDuration_theme_@{themeName} {
-   background: @background-color_duration_lifecycleDuration;
+.devtools-Profiler__duration_lifecycleDuration {
+   background: var(--background-color_duration_lifecycleDuration);
 }
 
 .for(0, 8, {
-   .devtools-Profiler__duration_@{_i}_theme_@{themeName} {
-      @color: "background-color_duration_@{_i}";
-      background: @@color;
+   .devtools-Profiler__duration_@{_i} {
+      @color: "var(--background-color_duration_@{_i})";
+      background: @color;
    }
 });

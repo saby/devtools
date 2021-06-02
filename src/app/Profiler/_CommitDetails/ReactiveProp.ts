@@ -5,6 +5,7 @@ import {
    IFrontendChangedReactiveProp,
    IStackFrame
 } from 'Extension/Plugins/Elements/IProfilingData';
+import 'css!Profiler/profiler';
 
 export interface IOptions extends IControlOptions {
    reactiveProp: IFrontendChangedReactiveProp;
@@ -20,8 +21,6 @@ class ReactiveProp extends Control<IOptions> {
          Math.max(0, item.lineNumber)
       );
    }
-
-   static _theme: string[] = ['Profiler/profiler'];
 
    static getOptionTypes(): Record<keyof IOptions, unknown> {
       return {

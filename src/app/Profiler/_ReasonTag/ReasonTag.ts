@@ -3,6 +3,7 @@ import template = require('wml!Profiler/_ReasonTag/ReasonTag');
 import { descriptor } from 'Types/entity';
 import { getBackgroundClassBasedOnReason } from '../_utils/Utils';
 import { ControlUpdateReason } from 'Extension/Plugins/Elements/ControlUpdateReason';
+import 'css!Profiler/profiler';
 
 interface IOptions extends IControlOptions {
    updateReason?: ControlUpdateReason;
@@ -17,8 +18,6 @@ class ReasonTag extends Control<IOptions> {
    protected _getClass: (
       updateReason: ControlUpdateReason
    ) => string = getBackgroundClassBasedOnReason;
-
-   static _theme: string[] = ['Profiler/profiler'];
 
    static getDefaultOptions(): Partial<IOptions> {
       return {
