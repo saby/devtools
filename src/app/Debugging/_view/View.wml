@@ -21,9 +21,11 @@
                                 minSearchLength="{{ 0 }}"
                                 sorting="{{ _sorting }}"
                                 navigation="{{ _navigation }}"
+                                bind:filter="_unselectedFilter"
                                 attr:class="devtools-Debugging__browser">
                     <ws:search>
-                        <Controls.search:Input bind:value="_unselectedSearchValue" />
+                        <Controls.search:Input bind:value="_unselectedSearchValue"
+                                               attr:class="layout-Browser__search_width_s" />
                     </ws:search>
                     <ws:beforeFilterTemplate>
                         <Controls.buttons:Button icon="icon-DayForwardNull"
@@ -64,9 +66,11 @@
                                 minSearchLength="{{ 0 }}"
                                 sorting="{{ _sorting }}"
                                 navigation="{{ _navigation }}"
+                                bind:filter="_selectedFilter"
                                 attr:class="devtools-Debugging__browser">
                     <ws:search>
-                        <Controls.search:Input bind:value="_selectedSearchValue" />
+                        <Controls.search:Input bind:value="_selectedSearchValue"
+                                               attr:class="layout-Browser__search_width_s" />
                     </ws:search>
                     <ws:beforeFilterTemplate>
                         <Controls.buttons:Button icon="icon-DayBackwardNull"
@@ -81,13 +85,14 @@
                                                   keyProperty="id"
                                                   viewMode="link"
                                                   source="{{ _savedSetsSource }}"
-                                                  caption="Choose a set"
+                                                  caption="Choose preset"
                                                   itemActions="{{ _savedSetsItemActions }}"
                                                   itemActionVisibilityCallback="{{ _savedSetsItemActionsCallback }}"
                                                   on:menuItemActivate="_applySavedSet()">
                             <ws:footerContentTemplate>
                                 <Controls.buttons:Button caption="Save current set"
                                                          viewMode="link"
+                                                         readOnly="{{ !selectedModules.length }}"
                                                          on:click="_addSet()"
                                                          attr:class="devtools-Debugging__savedSetsFooter" />
                             </ws:footerContentTemplate>
