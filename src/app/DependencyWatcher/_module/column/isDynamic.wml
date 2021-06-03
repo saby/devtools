@@ -2,28 +2,10 @@
     <ws:contentTemplate>
         <ws:if data="{{ item.contents.isDynamic || item.contents.isDeprecated }}">
             <ws:if data="{{ item.contents.isDeprecated }}">
-                <Controls.popup:InfoboxTarget attr:style="width: 100%;">
-                    <ws:content>
-                        <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-danger"></div>
-                    </ws:content>
-                    <ws:template>
-                        <p>
-                        <h1>{[Устаревший модуль]}</h1>
-                        </p>
-                    </ws:template>
-                </Controls.popup:InfoboxTarget>
+                <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-danger" title="Deprecated module"></div>
             </ws:if>
             <ws:if data="{{ item.contents.isDynamic }}">
-                <Controls.popup:InfoboxTarget attr:style="width: 100%;">
-                    <ws:content>
-                        <div class="controls-icon controls-icon_size-s icon-Info controls-icon_style-info"></div>
-                    </ws:content>
-                    <ws:template>
-                        <p>
-                        <h1>{[Динамическая зависимость модуля]}</h1>
-                        </p>
-                    </ws:template>
-                </Controls.popup:InfoboxTarget>
+                <div class="controls-icon controls-icon_size-s icon-Info controls-icon_style-info" title="Dynamic dependency"></div>
             </ws:if>
         </ws:if>
     </ws:contentTemplate>

@@ -2,6 +2,7 @@
     <ws:headTemplate>
         <ws:if data="{{ _hasUnsavedChanges }}">
             <Controls.buttons:Button caption="Apply"
+                                     style="primary"
                                      tooltip="You have unsaved changes. Click here to reload the page and apply them."
                                      on:click="_reloadPage()" />
         </ws:if>
