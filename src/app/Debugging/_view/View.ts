@@ -11,7 +11,7 @@ import {
    INavigationOptionValue,
    INavigationPageSourceConfig
 } from 'Controls/interface';
-import { Button } from 'Controls/dropdown'
+import { Button } from 'Controls/dropdown';
 import * as template from 'wml!Debugging/_view/View';
 import { getArrayDifference } from 'Controls/Utils/ArraySimpleValuesUtil';
 import 'css!Debugging/debugging';
@@ -55,9 +55,11 @@ class View extends Control<IControlOptions, void[]> {
    protected _selectedSource: Memory;
    protected _unselectedSearchValue: string = '';
    protected _selectedSearchValue: string = '';
+   protected _unselectedFilter: object = {};
+   protected _selectedFilter: object = {};
    protected _sorting: object = [{ isPinned: 'DESC' }, { title: 'ASC' }];
    private unselectedModules: IItem[] = [];
-   private selectedModules: IItem[] = [];
+   protected selectedModules: IItem[] = [];
    protected _unselectedActions: IItemAction[] = [
       {
          id: 'pin',
