@@ -1,26 +1,12 @@
 <ws:partial template="Controls/grid:ColumnTemplate" scope="{{ _options }}">
     <ws:contentTemplate>
         <ws:if data="{{ !item.contents.initialized }}">
-            <Controls.popup:InfoboxTarget attr:style="width: 100%;">
-                <ws:content>
-                    <ws:if data="{{ !item.contents.defined }}">
-                        <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-info"></div>
-                    </ws:if>
-                    <ws:else>
-                        <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-warning"></div>
-                    </ws:else>
-                </ws:content>
-                <ws:template>
-                    <ws:if data="{{ !item.contents.defined }}">
-                        <h1>{[Незагруженный модуль]}</h1>
-                        <span>{[Модуль является зависимостью неиспользуемого модуля в бандле]}</span>
-                    </ws:if>
-                    <ws:else>
-                        <h1>{[Неиспользуемый модуль]}</h1>
-                        <span>{[Попробуйте отфильтровать данные по файлу, чтобы посмотреть кто его загрузил]}</span>
-                    </ws:else>
-                </ws:template>
-            </Controls.popup:InfoboxTarget>
+            <ws:if data="{{ !item.contents.defined }}">
+                <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-info" title="This module is a dependency of an unused module in a bundle."></div>
+            </ws:if>
+            <ws:else>
+                <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-warning" title="Unused module. Try filtering data by module name to see who downloaded it."></div>
+            </ws:else>
         </ws:if>
     </ws:contentTemplate>
 </ws:partial>
