@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui_module for_cdn="0" id="4fa34966-41cf-495b-94ba-456b7e1ec53c" name="LogicParentPanel" package="Wasaby" required="0" responsible="Зайцев А. С." responsible_uuid="9ac20e80-7163-4fc9-8238-1e3b7d7c6f74" version="1.00">
+
+  <description/>
+
+  <depends>
+    <module id="f6fdf353-3ab3-4dbb-8671-01c2b418bf0a" name="Controls"/>
+  </depends>
+
+  <load_after/>
+
+  <parameters/>
+
+  <resources/>
+
+  <preload/>
+
+</ui_module>
