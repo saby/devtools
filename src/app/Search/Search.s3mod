@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui_module for_cdn="0" id="8c7f5a73-e594-404f-ac3e-0615cc8ae4f3" name="Search" responsible="Зайцев А. С." version="1.00">
+
+  <description/>
+
+  <depends>
+        <module id="fe7ac5f4-313e-4fea-93be-9f54fca9a946" name="Extension"/>
+  </depends>
+
+  <load_after/>
+
+  <parameters/>
+
+  <resources/>
+
+  <preload/>
+
+</ui_module>

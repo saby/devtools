@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui_module for_cdn="0" id="a696c0f9-8a5b-44da-ad11-8fb084e002da" name="Controls-devtools-theme" required="0" responsible="Зайцев А. С." version="1.00">
+
+  <description/>
+
+  <depends>
+    <module id="f515eba2-dad5-4cc3-bef8-2ff45bd2a880" name="ThemesModule"/>
+  </depends>
+
+  <load_after/>
+
+  <parameters/>
+
+  <resources/>
+
+  <preload/>
+
+</ui_module>
