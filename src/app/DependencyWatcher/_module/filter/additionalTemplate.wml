@@ -1,0 +1,17 @@
+<ws:template name="css">
+    <Controls.filterPopup:Link caption="{{ item.additionalText }}"/>
+</ws:template>
+
+<ws:template name="json">
+    <Controls.filterPopup:Link caption="{{ item.additionalText }}"/>
+</ws:template>
+
+<ws:template name="i18n">
+    <Controls.filterPopup:Link caption="{{ item.additionalText }}"/>
+</ws:template>
+
+<ws:template name="onlyDeprecated">
+    <Controls.filterPopup:Link caption="{{ item.additionalText }}"/>
+</ws:template>
+
+<ws:partial template="{{ _options.item.id }}" item="{{ _options.item }}"/>

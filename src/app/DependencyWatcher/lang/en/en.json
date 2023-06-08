@@ -1,0 +1,17 @@
+{
+  "Не найдено": "No data",
+  "Режим отображения": "View mode",
+  "Модули файла": "Modules of file",
+  "Зависят от файла": "File dependents",
+  "": "",
+  "Включая файлы стилей": "Including stylesheets",
+  "Файлы стилей": "Stylesheets",
+  "Включая файлы локализаций": "Including localization files",
+  "Файлы локализации": "Localization files",
+  "Включая файлы конфигураций": "Including configuration files",
+  "Файлы конфигурации": "Configuration files",
+  "Выберите файл": "Select a file",
+  "Отобразить модули, зависящие от файла": "Show dependants of this module",
+  "Отобразить модули файла": "Show modules of this file",
+  "Только устаревшие модули": "Only deprecated modules"
+}
