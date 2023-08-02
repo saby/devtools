@@ -1,0 +1,5 @@
+<Controls.suggestPopup:ListContainer>
+    <DependencyWatcher.file:List
+        scope="{{ _options }}"
+    />
+</Controls.suggestPopup:ListContainer>
