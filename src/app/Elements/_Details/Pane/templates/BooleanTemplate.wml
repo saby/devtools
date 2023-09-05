@@ -1,0 +1,6 @@
+<span>
+   <span attr:class="devtools-Pane-template__fieldName">{{_options.name}}</span>:
+   <Controls.toggle:Checkbox value="{{_options.caption === 'true'}}"
+                             readOnly="{{ true }}" />
+   <span attr:class="devtools-BooleanTemplate__value"> {{_options.caption}}</span>
+</span>
