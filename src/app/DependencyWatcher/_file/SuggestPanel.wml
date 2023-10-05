@@ -1,0 +1,30 @@
+<Layout.Selector.Stack
+    headingCaption="{[Выберите файл]}"
+    selectedItems="{{ _options.selectedItems }}"
+    attr:class="DependencyFilter__FilePanel"
+>
+    <ws:bodyContentTemplate>
+        <Layout.Selector.Browser
+            multiSelectVisibility="{{ _options.multiSelect ? 'visible' : 'hidden' }}"
+            searchParam="name"
+            source="{{ _options.source }}"
+            keyProperty="id"
+            bind:filter="_filter"
+            navigation="{{ _navigation }}"
+        >
+            <ws:search>
+                <Controls.search:Input/>
+            </ws:search>
+            <ws:content>
+                <Controls.scroll:Container
+                    attr:class="devtools-DependencyFilter__FilePanel_scroll"
+                >
+                    <DependencyWatcher._file.List
+                            columns="{{ _options.columns }}"
+                            header="{{ _options.headers }}"
+                    />
+                </Controls.scroll:Container>
+            </ws:content>
+        </Layout.Selector.Browser>
+    </ws:bodyContentTemplate>
+</Layout.Selector.Stack>
