@@ -1,0 +1,71 @@
+<div attr:class="devtools-Details devtools-Details_theme_{{ _options.theme }} ws-flexbox ws-flex-column">
+   <div attr:class="ws-flexbox ws-flex-column ws-flex-shrink-0">
+      <Controls.buttons:Button caption="View template"
+                               viewMode="link"
+                               on:click="_viewTemplate()" />
+      <Controls.buttons:Button caption="View DOM element"
+                               viewMode="link"
+                               on:click="_viewContainer()" />
+      <Controls.buttons:Button if="{{_options.isControl}}"
+                               caption="View constructor"
+                               viewMode="link"
+                               on:click="_viewConstructor()" />
+      <ws:if data="{{ _options.logicParentName }}">
+         <LogicParentPanel.logicParentPanel:LogicParentPanel controlName="{{ _options.logicParentName }}"
+                                                             on:hoveredItemChanged="_notifyHandler('logicParentHoverChanged')"
+                                                             on:itemClick="_notifyHandler('logicParentClick')" />
+      </ws:if>
+   </div>
+   <ws:if data="{{ _options.options }}">
+      <Elements._Details.Pane.Pane caption="Options"
+                                  data="{{ _options.options }}"
+                                  changedData="{{ _options.changedOptions }}"
+                                  controlId="{{ _options.id }}"
+                                  isControl="{{ _options.isControl }}"
+                                  store="{{ _options.store }}"
+                                  on:viewFunctionSource="_viewFunctionSource()"
+                                  on:storeAsGlobal="_storeAsGlobal()"
+                                  on:expandedChanged="_forwardExpanded('_optionsExpanded')"
+                                  expanded="{{_options.optionsExpanded}}"/>
+   </ws:if>
+   <ws:if data="{{_options.isControl}}">
+      <ws:if data="{{ _options.state }}">
+         <Elements._Details.Pane.Pane caption="State"
+                                     data="{{ _options.state }}"
+                                     changedData="{{ _options.changedState }}"
+                                     controlId="{{ _options.id }}"
+                                     isControl="{{ _options.isControl }}"
+                                     store="{{ _options.store }}"
+                                     on:viewFunctionSource="_viewFunctionSource()"
+                                     on:storeAsGlobal="_storeAsGlobal()"
+                                     on:expandedChanged="_forwardExpanded('_stateExpanded')"
+                                     expanded="{{_options.stateExpanded}}"/>
+      </ws:if>
+   </ws:if>
+   <ws:if data="{{ _options.events }}">
+      <Elements._Details.Pane.Pane caption="Events"
+                                  data="{{_options.events}}"
+                                  changedData="{{_options.changedEvents}}"
+                                  canStoreAsGlobal="{{false}}"
+                                  controlId="{{ _options.id }}"
+                                  isControl="{{ _options.isControl }}"
+                                  store="{{ _options.store }}"
+                                  elementsWithBreakpoints="{{ _options.elementsWithBreakpoints }}"
+                                  eventWithBreakpoint="{{ _options.eventWithBreakpoint }}"
+                                  on:viewFunctionSource="_viewFunctionSource()"
+                                  on:expandedChanged="_forwardExpanded('_eventsExpanded')"
+                                  on:setBreakpoint="_notifyHandler('setBreakpoint')"
+                                  on:removeBreakpoint="_notifyHandler('removeBreakpoint')"
+                                  expanded="{{_options.eventsExpanded}}"/>
+   </ws:if>
+   <ws:if data="{{ _options.attributes }}">
+      <Elements._Details.Pane.Pane caption="Attributes"
+                                  data="{{ _options.attributes }}"
+                                  changedData="{{ _options.changedAttributes }}"
+                                  controlId="{{ _options.id }}"
+                                  isControl="{{ _options.isControl }}"
+                                  store="{{ _options.store }}"
+                                  on:expandedChanged="_forwardExpanded('_attributesExpanded')"
+                                  expanded="{{_options.attributesExpanded}}"/>
+   </ws:if>
+</div>
