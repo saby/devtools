@@ -1,0 +1,50 @@
+<Controls.scroll:Container>
+    <Controls.grid:View
+                        name="grid"
+                        keyProperty="id"
+                        source="{{ _source }}"
+                        markedKey="{{ _options.markedKey }}"
+                        markerVisibility="visible"
+                        groupTemplate="{{ _groupTemplate }}"
+                        groupProperty="updateReason"
+                        navigation="{{ _navigation }}"
+                        itemsReadyCallback="{{ _options.itemsReadyCallback }}"
+                        on:markedKeyChanged="_markedKeyChanged()">
+        <ws:virtualScrollConfig pageSize="{{ 50 }}" />
+        <ws:columns>
+            <ws:Array>
+                <ws:Object width="30px">
+                    <ws:template>
+                        <ws:partial template="wml!Profiler/_RankedView/reasonTemplate" />
+                    </ws:template>
+                </ws:Object>
+                <!-- TODO: здесь highlightedValue не нужно, но иначе список просто не будет перерисовываться -->
+                <ws:Object highlightedValue="{{ _options.searchValue }}">
+                    <ws:template>
+                        <ws:partial template="Controls/grid:ColumnTemplate" attr:class="ws-ellipsis">
+                            <ws:contentTemplate>
+                                <ws:if data="{{ contentTemplate.item.contents.name.toLowerCase().includes(_options.searchValue.toLowerCase()) }}">
+                                    <Controls.baseDecorator:Highlight value="{{ contentTemplate.item.contents.name }}"
+                                                                  highlightedValue="{{ _options.searchValue }}" />
+                                </ws:if>
+                                <ws:else>
+                                    {{ contentTemplate.item.contents.name }}
+                                </ws:else>
+                            </ws:contentTemplate>
+                        </ws:partial>
+                    </ws:template>
+                </ws:Object>
+                <ws:Object>
+                    <ws:template>
+                        <ws:partial template="wml!Profiler/_RankedView/commitTimeTemplate" />
+                    </ws:template>
+                </ws:Object>
+            </ws:Array>
+        </ws:columns>
+        <ws:emptyTemplate>
+            <ws:partial template="Controls/grid:EmptyTemplate">
+                <ws:contentTemplate>There is no profiling data available for this synchronization.</ws:contentTemplate>
+            </ws:partial>
+        </ws:emptyTemplate>
+    </Controls.grid:View>
+</Controls.scroll:Container>
