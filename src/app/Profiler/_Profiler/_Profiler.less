@@ -1,0 +1,63 @@
+.devtools-Profiler__headElement {
+   margin-right: 6px;
+}
+
+.devtools-Profiler__master {
+   height: 100%;
+}
+
+.devtools-Profiler__greeting {
+   margin: auto;
+}
+
+.devtools-Profiler__stopButton {
+   margin-top: 6px;
+}
+
+.devtools-Profiler__content {
+   overflow: hidden;
+   height: 100%;
+}
+
+.devtools-reason_background_noChangesInSubtree {
+   background: var(--background-color_reason_noChangesInSubtree);
+}
+
+.devtools-reason_background_mounted{
+   background: var(--background-color_reason_mounted);
+}
+
+.devtools-reason_background_forceUpdated {
+   background: var(--background-color_reason_forceUpdated);
+}
+
+.devtools-reason_background_selfUpdated {
+   background: var(--background-color_reason_selfUpdated);
+}
+
+.devtools-reason_background_parentUpdated {
+   background: var(--background-color_reason_parentUpdated);
+}
+
+.devtools-reason_background_unchanged {
+   background: var(--background-color_reason_unchanged);
+}
+
+.devtools-reason_background_destroyed {
+   background: var(--background-color_reason_destroyed);
+}
+
+.devtools-Profiler__duration_renderDuration {
+   background: var(--background-color_duration_renderDuration);
+}
+
+.devtools-Profiler__duration_lifecycleDuration {
+   background: var(--background-color_duration_lifecycleDuration);
+}
+
+.for(0, 8, {
+   .devtools-Profiler__duration_@{_i} {
+      @color: ~"var(--background-color_duration_@{_i})";
+      background: @color;
+   }
+});
