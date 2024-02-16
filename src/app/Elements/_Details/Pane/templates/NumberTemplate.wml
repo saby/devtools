@@ -1,0 +1,4 @@
+<span>
+   <span attr:class="devtools-Pane-template__fieldName">{{_options.name}}</span>:
+   <span attr:class="devtools-NumberTemplate__value"> {{_options.caption}}</span>
+</span>

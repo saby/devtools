@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <style>
+         .button {
+            margin: 4px;
+            white-space: nowrap;
+         }
+         .validationError {
+            color: red;
+         }
+      </style>
+   </head>
+   <body>
+      <fieldset>
+         <legend>Debug</legend>
+         <button class="button" id="selectFavoriteModules">
+            Debug favorite modules
+         </button>
+         <button class="button" id="selectAllModules">Debug all modules</button>
+         <button class="button" id="resetAllModules">Reset</button>
+      </fieldset>
+      <fieldset>
+         <legend><a href="https://online.sbis.ru/news/ced29dcd-cfe5-462f-b82f-ad0105bea246" target="_blank">Hot reload</a></legend>
+         <input type="number" min="1" max="65535" required step="1" id="hotReloadPort" />
+         <button class="button" id="enableHotReload">
+            Enable hot reload
+         </button>
+         <button class="button" id="disableHotReload">
+            Disable hot reload
+         </button>
+      </fieldset>
+      <script src="./index.js"></script>
+   </body>
+</html>

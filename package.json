@@ -1,0 +1,79 @@
+{
+   "name": "saby-devtool",
+   "version": "24.1100.0",
+   "license": "MS-RL",
+   "repository": {
+      "type": "git",
+      "url": "git@git.sbis.ru:saby/devtools.git"
+   },
+   "scripts": {
+      "build": "npm run build:shared && npm run build:extension && npm run build:injection && npm run build:app && npm run build:cdn",
+      "build:production": "cross-env-shell NODE_ENV=production \"npm run build && node ./scripts/cleaner.js\"",
+      "build:injection": "node ./scripts/build_injection.js",
+      "build:injection:production": "cross-env-shell NODE_ENV=production \"node ./scripts/build_injection.js\"",
+      "build:content": "node ./scripts/build_content.js",
+      "build:content:production": "cross-env-shell NODE_ENV=production \"node ./scripts/build_content.js\"",
+      "build:extension": "node ./scripts/build_extension.js && npm run build:content",
+      "build:app": "node ./scripts/build_app.js",
+      "build:cdn": "node ./scripts/build_cdn.js",
+      "build:shared": "node ./scripts/copy_shared.js",
+      "test": "saby-units --isolated",
+      "test:coverage": "saby-units --isolated --coverage",
+      "test:app": "saby-units --server"
+   },
+   "devDependencies": {
+      "@types/chai": "^4.2.4",
+      "@types/chrome": "0.0.124",
+      "@types/jsdom": "^12.2.4",
+      "@types/sinon": "^7.5.0",
+      "cross-env": "^5.2.0",
+      "saby-units": "git+https://git.sbis.ru/saby/Units.git#rc-24.1100",
+      "tslint": "6.1.3"
+   },
+   "dependencies": {
+      "cdn": "git+https://git.sbis.ru/saby/wasaby-cdn.git#rc-24.1100",
+      "gulp": "^4.0.0",
+      "rollup": "^1.6.0",
+      "rollup-plugin-terser": "^5.0.0",
+      "rollup-plugin-typescript": "^1.0.0",
+      "tslib": "^1.9.3",
+      "typescript": "^3.7.2",
+      "rmi": "git+https://git.sbis.ru/sbis/rmi.git#rc-24.1100",
+      "saby-i18n": "git+https://git.sbis.ru/saby/i18n.git#rc-24.1100",
+      "saby-types": "git+https://git.sbis.ru/saby/Types.git#rc-24.1100",
+      "saby-typescript": "git+https://git.sbis.ru/saby/TypeScript.git#rc-24.1100",
+      "sbis3-json-generator": "git+https://git.sbis.ru/root/sbis3-json-generator.git#rc-24.1100",
+      "sbis3-builder": "git+https://git.sbis.ru/saby/Builder.git#rc-24.1100",
+      "wasaby-controls": "git+https://git.sbis.ru/saby/wasaby-controls.git#rc-24.1100",
+      "saby-ui": "git+https://git.sbis.ru/saby/UI.git#rc-24.1100",
+      "sbis3-ws": "git+https://git.sbis.ru/sbis/ws.git#rc-24.1100",
+      "wasaby-app": "git+https://git.sbis.ru/saby/wasaby-app.git#rc-24.1100",
+      "sbis3.engine": "git+https://git.sbis.ru/sbis/engine.git#rc-24.1100",
+      "saby-inferno": "git+https://git.sbis.ru/saby/inferno.git#rc-24.1100",
+      "wasaby-requirejs-loader": "git+https://git.sbis.ru/saby/wasaby-requirejs-loader#rc-24.1100"
+   },
+   "saby-units": {
+      "moduleType": "amd",
+      "root": "build/resources",
+      "tests": "DevtoolsTest"
+   },
+   "nyc": {
+      "include": [
+         "build/resources/DependencyWatcher/**/*.js",
+         "build/resources/Devtool/**/*.js",
+         "build/resources/Elements/**/*.js",
+         "build/resources/Extension/**/*.js",
+         "build/resources/Profiler/**/*.js",
+         "build/resources/Search/**/*.js",
+         "build/resources/Debugging/**/*.js",
+         "build/resources/injection/**/*.js"
+      ],
+      "reporter": [
+         "text",
+         "html"
+      ],
+      "cache": false,
+      "eager": true,
+      "report-dir": "./artifacts/coverage"
+   }
+}
