@@ -1,0 +1,38 @@
+<!--
+Top div is used for update highlighting.
+
+The next div is used for other backgrounds, like background on hover or background of a selected element.
+
+The next div is used to get the content width.
+If it becomes a problem then it can be deleted and then the width can be calculated by walking children.
+
+It is important that the width of the element always stays the same, that means no cropping, no word-wrapping, etc.
+Otherwise dynamic indentation size would be much more expensive to calculate because the ability to cache the size of
+elements would be lost.
+-->
+<div>
+    <div attr:class="devtools-Elements__node ws-flexbox ws-align-items-center {{_options.selectedItemId === _options.id ? 'devtools-Elements__node_selected' }} {{ _options.logicParentId === _options.id ? 'devtools-Elements__node_logicParent' }}"
+         attr:style="padding-left: calc(var(--indentation-size) * {{_options.depth}});">
+        <div attr:class="ws-flexbox ws-align-items-center js-devtools-Elements__name">
+            <ws:if data="{{ _options.hasChildren }}">
+                <i attr:class="controls-icon {{_options.isExpanded ? 'icon-ArrowDown' : 'icon-DayForward'}} controls-icon_size-s controls-icon_style-secondary"
+                   on:click="__toggleExpanded(_options.id)" />
+            </ws:if>
+            <span attr:class="{{_options.class}} {{ !_options.hasChildren ? ' devtools-Elements__node_childless' }}">
+                <ws:if data="{{ _options.name.toLowerCase().includes(_options.searchValue.toLowerCase()) }}">
+                    <Controls.baseDecorator:Highlight value="{{ _options.name }}"
+                                                  highlightedValue="{{ _options.searchValue }}" />
+                </ws:if>
+                <ws:else>
+                    {{_options.name}}
+                </ws:else>
+            </span>
+            <ws:if data="{{ _options.hasBreakpoint }}">
+                <i attr:class="controls-icon icon-BigRemark controls-icon_size-s controls-icon_style-danger" />
+            </ws:if>
+            <ws:if data="{{_options.selectedItemId === _options.id}}">
+                <span attr:class="devtools-Elements__hint">&nbsp;== $wasaby</span>
+            </ws:if>
+        </div>
+    </div>
+</div>

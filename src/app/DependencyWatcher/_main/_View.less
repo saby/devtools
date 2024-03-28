@@ -1,0 +1,12 @@
+@height-tab-button-panel: 31px;
+@height-search-panel: 48px;
+@height-head-panels: @height-tab-button-panel + @height-search-panel;
+
+.devtools-DependencyWatcher_Page__scroll {
+  max-height: calc(100vh - @height-head-panels);
+  width: 100vw;
+}
+
+.devtools-DependencyWatcher__headElement {
+  margin-right: 6px;
+}
