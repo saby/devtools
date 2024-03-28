@@ -1,0 +1,51 @@
+{
+  "extends": "./config/tsconfig",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "strictBindCallApply": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "paths": {
+      "Extension/*": [
+        "./shared/Extension/*"
+      ],
+      "tslib": [
+        "./extension/ext/tslib"
+      ],
+      "Types/*": [
+        "../node_modules/saby-types/Types/*"
+      ],
+      "Core/*": [
+        "../node_modules/sbis3-ws/WS.Core/core/*"
+      ],
+      "Browser/*": [
+        "../node_modules/rmi/src/client/Browser/*"
+      ],
+      "Env/*": [
+        "../node_modules/rmi/src/client/Env/*"
+      ],
+      "UI/*": [
+        "../node_modules/saby-ui/UI/*"
+      ],
+      "Compiler/*": [
+        "../node_modules/saby-ui/Compiler/*"
+      ],
+      "Controls/*": [
+        "../node_modules/wasaby-controls/Controls/*"
+      ],
+      "File/*": [
+        "../node_modules/rmi/src/client/File/*"
+      ],
+      "SbisFile/*": [
+        "../node_modules/rmi/src/client/SbisFile/*"
+      ],
+      "Vdom/*": [
+        "../node_modules/sbis3-ws/Vdom/*"
+      ]
+    },
+    "types": ["chrome"]
+  }
+}

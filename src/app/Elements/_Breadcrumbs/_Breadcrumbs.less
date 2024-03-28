@@ -1,0 +1,42 @@
+
+.devtools-Breadcrumbs {
+   white-space: nowrap;
+   width: 100%;
+   overflow-x: auto;
+   /*
+   TODO: пока нет горизонтального скролл контейнера делаем нечто очень похожее на него
+   сделают по этой задаче: https://online.sbis.ru/opendoc.html?guid=f6171d86-08f1-4503-b8fc-b0b82ec528b7
+   */
+   &::-webkit-scrollbar {
+      height: 8px;
+   }
+   &::-webkit-scrollbar-thumb {
+      height: 200%;
+      border-radius: 5px;
+   }
+}
+
+.devtools-Breadcrumbs_theme_@{themeName} {
+   border-top: var(--border-thickness) solid var(--separator_color_block);
+   background: var(--background-color);
+
+   &::-webkit-scrollbar-thumb {
+      background-color: var(--accented_thumb_background-color_scrollbar);
+   }
+   &::-webkit-scrollbar-thumb:hover {
+      background-color: var(--accented_thumb_hover_background-color_scrollbar);
+   }
+}
+
+.devtools-Breadcrumbs__crumb {
+   padding: 0 6px;
+   cursor: pointer;
+}
+
+.devtools-Breadcrumbs__crumb:hover {
+   background: var(--hover_background-color);
+}
+
+.devtools-Breadcrumbs__crumb_selected {
+   background: var(--background-color_selected_breadCrumbs);
+}

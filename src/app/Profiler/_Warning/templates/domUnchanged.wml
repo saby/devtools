@@ -1,0 +1,3 @@
+<div class="ws-fragment">
+    <span>Synchronization of this subtree did not change the content of the page. Most likely you are passing unnecessary options down via <code>scope="&#123;&#123; _options &#125;&#125;"</code>. Consider manually passing only necessary options.</span>
+</div>
