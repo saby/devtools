@@ -1,0 +1,3 @@
+<div class="ws-fragment">
+    <span>This control or one of its parents is hidden with <code>display: none</code>. Consider using <code>ws:if</code> instead.</span>
+</div>
