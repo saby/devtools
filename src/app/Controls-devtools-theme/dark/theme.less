@@ -1,0 +1,154 @@
+@import "_theme";
+@import "Controls-default-theme/_variables";
+
+.controls_theme-@{themeName} {
+
+  // Devtools
+  --hover_background-color_list:                         rgba(56, 121, 217, 0.1);
+  --background-color_selected_elements:                  #073d69;
+  --color_PaneTemplate_fieldName:                        #e36eec;
+  --color_PaneTemplate-value:                            var(--text-color);
+  --color_PaneTemplate-value_string:                     #f07775;
+
+  --color_control_elements:                              #5db0d7;
+  --color_hoc_elements:                                  #9bbbdc;
+  --color_template_elements:                             #ababab;
+
+  --background-color_selected_breadCrumbs:               #333333;
+
+  // Common
+  --background-color: #242424;
+  --hover_background-color: #333;
+  --text-color: #d5d5d5;
+  --primary_text-color: #eaeaea;
+  --secondary_text-color: #a5a5a5;
+  --secondary_hover_text-color: #ccc;
+  --link_text-color: #ababab;
+  --link_hover_text-color: #ccc;
+  --primary_color: #0e639c;
+  --secondary_color: #919191;
+  --secondary_hover_icon-color: var(--link_hover_text-color);
+  --danger_color: #FF4D4D;
+  --unaccented_text-color: #d5d5d5;
+  --unaccented_icon-color: #919191;
+  --secondary_icon-color: var(--secondary_color);
+  --marker_color: #9f9f9f;
+  --readonly_marker-color: var(--readonly_text-color);
+  --readonly_text-color: #626262;
+  --separator_color: #525252;
+  --secondary_same_background-color: #333;
+  --master_separator_color_list: var(--separator_color);
+  --background-color_default: var(--background-color);
+
+  // Input
+  --placeholder-color_inputText: rgba(230, 230, 230, 0.54);
+  --border-color_inputText: var(--separator_color);
+  --border-color_hover_inputText: var(--separator_color);
+  --border-color_focus_inputText: var(--separator_color);
+
+  // Buttons
+  --primary_background-color_button: transparent;
+  --primary_hover_background-color_button: #202020;
+  --primary_active_background-color_button: #202020;
+  --secondary_hover_background-color_button: #202020;
+  --secondary_active_background-color_button: #202020;
+  --secondary_background-color_button: transparent;
+  --background-color_button_toolButton: var(--secondary_same_background-color);
+  --border-color_button_toolButton: #353535;
+  --border-color_hover_button_toolButton: var(--border-color_button_toolButton);
+
+  // Toggle
+  --marker-box_border-color_switcher: var(--secondary_color);
+  --readonly_marker-box_border-color_checkbox: var(--readonly_text-color);
+
+  // Tabs
+  --separator_color_tabs: var(--secondary_text-color);
+  --primary_marker_color_tabs: #a5a5a5;
+}
+
+.controls_list_theme-@{themeName} {
+  --master_item_background-color_list: var(--background-color);
+  --master_separator_contrast-color_list: var(--separator_color);
+  --master_item_selected_background-color_list: var(--background-color_selected_elements);
+  --master_item_hover_background-color_list: var(--hover_background-color_list);
+  // TreeGrid
+  --node_expander_icon-color_treeGrid: var(--unaccented_icon-color);
+  --node_expander_hover_icon-color_treeGrid: var(--link_hover_text-color);
+  --node_font-size_treeGrid: var(--font-size_m);
+}
+
+.controls_filterPopup_theme-@{themeName} {
+  // Filter panel
+  --background-color_vertical_filterPanel: var(--secondary_same_background-color);
+}
+
+.controls_popupTemplate_theme-@{themeName} {
+  // Sticky
+  --border-color_sticky: var(--separator_color);
+
+  // popupTemplate
+  --header_background-color_sticky: #333;
+  --header_background-color_stack: #333;
+  --header_background-color_stack_unaccented: #333;
+  --header_bottom-border-color_stack: var(--separator_color);
+  --border-color_dialog: var(--separator_color);
+  --border-color_stack: var(--separator_color);
+  --background-color_infobox: var(--background-color);
+  --border-color_infobox: var(--separator_color);
+  --footer_background-color_dialog: var(--background-color);
+  --footer_top-border-color_dialog: var(--separator_color);
+
+  // Close button
+  --border-color_hover_closeButton_toolButton: #919191;
+  --icon_hovered_background-image_closeButton_link: url("img/CloseIconHovered.svg");
+}
+
+.controls_suggestPopup_theme-@{themeName} {
+  --popup_border-color_suggest: var(--separator_color);
+}
+
+.devtools-profiler_theme-@{themeName} {
+  --background-color_reason_noChangesInSubtree:                     repeating-linear-gradient(-55deg, #333, #333 2px, #242424 2px, #242424 4px);
+  --background-color_reason_mounted:                                #51768D;
+  --background-color_reason_forceUpdated:                           #481264;
+  --background-color_reason_selfUpdated:                            #09585d;
+  --background-color_reason_parentUpdated:                          #2e4a9e;
+  --background-color_reason_unchanged:                              #333;
+  --background-color_reason_destroyed:                              #512da8;
+
+  --background-color_duration_0:                                    #3d9bbd;
+  --background-color_duration_1:                                    #468fb5;
+  --background-color_duration_2:                                    #4983ac;
+  --background-color_duration_3:                                    #4878a1;
+  --background-color_duration_4:                                    #466e96;
+  --background-color_duration_5:                                    #43648a;
+  --background-color_duration_6:                                    #3e5a7e;
+  --background-color_duration_7:                                    #395172;
+  --background-color_duration_8:                                    #334866;
+  --background-color_duration_renderDuration:                       #51768D;
+  --background-color_duration_lifecycleDuration:                    #2e4a9e;
+
+  --border-color_Flamegraph_focus:                                  #626262;
+
+  --background-color_Warning:                                       #3a0303;
+}
+
+.devtools-focus_theme-@{themeName} {
+  --background-color_childFocused:                 #454545;
+}
+
+.controls_scroll_theme-@{themeName} {
+  // Scroll
+  --shadow_start-color_scroll:                           rgba(83, 92, 104, .5);
+  --shadow_end-color_scroll:                             rgba(83, 92, 104, 0);
+
+  // Scrollbar
+  --accented_thumb_background-color_scrollbar:           #333;
+  --accented_thumb_hover_background-color_scrollbar:     var(--accented_thumb_background-color_scrollbar);
+}
+
+.controls_search_theme-@{themeName} {
+  --border-color_hover_searchInput:                #5a5a5a #5a5a5a #5a5a5a #5a5a5a;
+  --border-color_focus_searchInput:                var(--border-color_hover_searchInput);
+  --background-color_searchInput:                  #242424;
+}
