@@ -1,0 +1,17 @@
+<Controls.grid:View
+    keyProperty="id"
+    name="listView"
+    bind:sorting="_sorting"
+    displayProperty="name"
+    columns="{{ _options.columns }}"
+    header="{{ _options.headers }}"
+    navigation="{{ _options.navigation }}"
+    scope="{{ _options }}"
+>
+    <ws:virtualScrollConfig pageSize="{{ 70 }}" />
+    <ws:emptyTemplate>
+        <ws:partial template="Controls/grid:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
+            <ws:contentTemplate>{[Не найдено]}</ws:contentTemplate>
+        </ws:partial>
+    </ws:emptyTemplate>
+</Controls.grid:View>
