@@ -1,0 +1,73 @@
+<Devtool.Layout.Browser keyForDetailsWidth="Focus" attr:class="devtools-focus_theme{{ _options.theme }}">
+    <ws:headTemplate>
+        <Controls.buttons:Button icon="icon-DayBackward"
+                                 viewMode="linkButton"
+                                 tooltip="Move focus to the previous element"
+                                 on:click="_moveFocus(true)" />
+        <Controls.buttons:Button icon="icon-DayForward"
+                                 viewMode="linkButton"
+                                 tooltip="Move focus to the next element"
+                                 on:click="_moveFocus(false)" />
+        <!-- TODO: почти копипаста из Elements, прямо с классами, потом везде перейду на обёртку -->
+        <div attr:class="devtools-Focus__head__rightTemplate ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer"
+             attr:style="width: {{ _detailsWidth }}px;">
+            <Controls.dragnDrop:ResizingLine direction="reverse"
+                                             attr:class="devtools-Elements__resizingLine"
+                                             on:offset="_offsetHandler()"/>
+            <Controls.buttons:Button icon="icon-Decline"
+                                     viewMode="linkButton"
+                                     tooltip="Clear history"
+                                     attr:class="devtools-Focus__resetButton"
+                                     on:click="_clearHistory()" />
+        </div>
+    </ws:headTemplate>
+    <ws:content>
+        <ws:if data="{{ _items }}">
+            <Controls.scroll:Container attr:class="devtools-Focus__tree ws-flexbox ws-flex-grow-1 ws-flex-shrink-0">
+                <ws:for data="item in _items">
+                    <div attr:key="{{ item.id }}"
+                         attr:name="{{ item.id }}"
+                         attr:style="padding-left: calc(10px * {{ item.depth }});"
+                         attr:class="devtools-Focus__item
+                         ws-flexbox
+                         ws-align-items-center
+                         {{ _getColorClassForItem(item) }}
+                         {{ _focusedItem && item.id === _focusedItem.id ? _getBackgroundClassForFocusedItem(_focusedItem) }}"
+                         on:click="_onItemClick(false, item.id)"
+                         on:mouseenter="_highlightElement(false, item.id)"
+                         on:mouseleave="_highlightElement()">
+                        <span>{{ item.caption }}</span>
+                        <ws:if data="{{ item.labels.length }}">
+                            <ws:for data="label in item.labels">
+                                    <span class="devtools-Focus__icon
+                                    controls-icon
+                                    controls-icon_size-s
+                                    controls-icon_style-{{ _icons[label].iconStyle }}
+                                    {{ _icons[label].icon }}"
+                                          title="{{ _icons[label].title }}"></span>
+                            </ws:for>
+                        </ws:if>
+                    </div>
+                </ws:for>
+            </Controls.scroll:Container>
+            <!-- TODO: копипаста из Elements, прямо с классами, потом везде перейду на обёртку -->
+            <div attr:class="ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer"
+                 attr:style="width: {{ _detailsWidth }}px;">
+                <Controls.dragnDrop:ResizingLine direction="reverse"
+                                                 attr:class="devtools-Elements__resizingLine"
+                                                 on:offset="_offsetHandler()"/>
+                <Controls.scroll:Container attr:class="devtools-Focus__History ws-flex-shrink-0">
+                    <ws:for data="item in _historyItems">
+                        <div attr:key="{{ item.ids[item.ids.length - 1] }}"
+                             attr:class="devtools-Focus__item devtools-Focus__historyItem"
+                             on:click="_onItemClick(true, item.ids[item.ids.length - 1])"
+                             on:mouseenter="_highlightElement(true, item.ids[item.ids.length - 1])"
+                             on:mouseleave="_highlightElement()">
+                            <span>{{ item.caption }}</span>
+                        </div>
+                    </ws:for>
+                </Controls.scroll:Container>
+            </div>
+        </ws:if>
+    </ws:content>
+</Devtool.Layout.Browser>
