@@ -1,0 +1,33 @@
+<Devtool.Layout.Browser>
+    <ws:headTemplate>
+        <Controls.buttons:Button icon="icon-Rec"
+                                 iconSize="s"
+                                 iconStyle="{{ _isRecording ? 'danger' : 'secondary' }}"
+                                 viewMode="link"
+                                 tooltip="{{ _isRecording ? 'Stop recording' : 'Start recording' }}"
+                                 attr:class="devtools-DependencyWatcher__headElement"
+                                 on:click="__toggleRecording()"/>
+    </ws:headTemplate>
+    <ws:content>
+        <DependencyWatcher.module:List
+                name="moduleList"
+                source="{{ _source }}"
+                fileSource="{{ _fileSource }}"
+                on:openSource="_openSource()"
+        >
+            <ws:headButton>
+                <Controls.dropdown:Button
+                        displayProperty="caption"
+                        viewMode="link"
+                        caption="{{ _modeCaption }}"
+                        tooltip="{[Режим отображения]}: {{ _modeTitle }}"
+                        source="{{ _modeSource }}"
+                        keyProperty="id"
+                        navigation="{{ null }}"
+                        filter="{{ null }}"
+                        on:menuItemActivate="_changeView()"
+                />
+            </ws:headButton>
+        </DependencyWatcher.module:List>
+    </ws:content>
+</Devtool.Layout.Browser>

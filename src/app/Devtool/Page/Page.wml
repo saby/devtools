@@ -1,0 +1,87 @@
+<Devtool.Page.Application attr:class="Application-body {{ _options.theme }} controls_theme-{{ _options.theme }}">
+<div
+    class="devtools-Devtool_Page"
+    attr:key="{{ _rootKey }}"
+>
+    <ws:if data="{{ _hasWasabyOnPage && !_hasChangedTabs }}">
+        <Controls.tabs:Buttons
+                bind:selectedKey="_activeTab"
+                keyProperty="key"
+                source="{{ _tabsSource }}"
+                attr:class="devtools-Devtool_Page__tabButtons"
+        >
+            <ws:tabSpaceTemplate>
+                <Controls.buttons:Button icon="icon-Settings"
+                                         tooltip="Options"
+                                         viewMode="link"
+                                         iconSize="s"
+                                         attr:class="devtools-Devtool_Page__settings"
+                                         on:click="_openOptionsPage()" />
+            </ws:tabSpaceTemplate>
+        </Controls.tabs:Buttons>
+
+        <Controls.switchableArea:View bind:selectedKey="_activeTab">
+            <ws:items>
+                <ws:Array>
+                    <ws:Object key="Elements">
+                        <ws:itemTemplate>
+                            <Controls.Container.Async
+                                templateName="Elements/elements:Elements"
+                            >
+                                <ws:partial template="{{ content.resolvedTemplate }}"
+                                            store="{{_store}}"
+                                            selected="{{ itemTemplate.templateOptions.selected }}"
+                                            on:subToPanelVisibility="_subToPanelVisibility()"
+                                            on:unsubFromPanelVisibility="_unsubFromPanelVisibility()" />
+                            </Controls.Container.Async>
+                        </ws:itemTemplate>
+                    </ws:Object>
+                    <ws:Object key="Profiler">
+                        <ws:itemTemplate>
+                            <Controls.Container.Async
+                                templateName="Profiler/profiler:Profiler"
+                            >
+                                <ws:templateOptions
+                                    store="{{_store}}"
+                                    selected="{{ itemTemplate.templateOptions.selected }}"
+                                />
+                            </Controls.Container.Async>
+                        </ws:itemTemplate>
+                    </ws:Object>
+                    <ws:Object key="Dependencies">
+                        <ws:itemTemplate>
+                            <Controls.Container.Async templateName="DependencyWatcher/main:View" />
+                        </ws:itemTemplate>
+                    </ws:Object>
+                    <ws:Object key="Debugging">
+                        <ws:itemTemplate>
+                            <Controls.Container.Async templateName="Debugging/debugging:View" />
+                        </ws:itemTemplate>
+                    </ws:Object>
+                    <ws:Object key="Focus">
+                        <ws:itemTemplate>
+                            <Controls.Container.Async templateName="Focus/focus:Focus">
+                                <ws:templateOptions selected="{{ itemTemplate.templateOptions.selected }}" />
+                            </Controls.Container.Async>
+                        </ws:itemTemplate>
+                    </ws:Object>
+                </ws:Array>
+            </ws:items>
+        </Controls.switchableArea:View>
+    </ws:if>
+    <ws:else>
+        <div class="devtools-Devtool_Page__emptyTemplate ws-flexbox ws-justify-content-center ws-align-items-center">
+            <ws:if data="{{ _hasChangedTabs }}">
+                You must reload the page after changing the tabs of the extension. Click here:&nbsp;<Controls.buttons:Button icon="icon-Refresh"
+                                                                                                                             iconSize="s"
+                                                                                                                             viewMode="ghost"
+                                                                                                                             tooltip="Reload the page."
+                                                                                                                             on:click="_reloadPage()"/>&nbsp;to reload.
+            </ws:if>
+            <ws:else>
+                Connecting to Wasaby...
+            </ws:else>
+        </div>
+    </ws:else>
+</div>
+</Devtool.Page.Application>
