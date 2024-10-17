@@ -1,0 +1,13 @@
+<div class="devtools-Warning">
+    <div class="devtools-Warning__header">
+        <span class="devtools-Warning__caption">Warning: </span>{{ _options.caption }}
+        <Controls.buttons:Button icon="{{ _expanded ? 'icon-MarkCollapseBold' : 'icon-MarkExpandBold' }}"
+                                 iconSize="s"
+                                 viewMode="link"
+                                 attr:class="devtools-Warning__expander"
+                                 on:click="_toggleExpanded()" />
+    </div>
+    <ws:if data="{{ _expanded }}">
+        <ws:partial template="{{ _options.content }}" />
+    </ws:if>
+</div>
