@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui_module for_cdn="0" id="0bad3dc3-e17e-441f-a91e-7aecf37867f1" name="Profiler" package="Wasaby" responsible="Зайцев А.С." version="1.00">
+
+  <description/>
+
+  <depends>
+      <module id="686f183d-0bcc-4732-b4e4-6016c2a67a0f" name="Types"/>
+      <module id="323fd54f-1fab-42a6-8aea-6726d6392d53" name="Application"/>
+      <module id="63e1a7e5-4d75-42fa-91a3-977dc90ff1e1" name="SbisEnv"/>
+      <module id="0df0fce3-53ba-47f8-987d-edf1fd078295" name="WS.Core"/>
+      <module id="636177e5-4d75-44fa-9173-977dc90ff111" name="Env"/>
+      <module id="656177e2-4d75-42fa-9173-977dc90ff121" name="Browser"/>
+      <module id="10efeac7-0f02-4c73-9474-0d1d0db077b6" name="View"/>
+      <module id="0f5d26db-dd61-4957-9375-8861ad66f219" name="Vdom"/>
+      <module id="f27abe12-19df-4c9f-b886-634bd20a0011" name="UI"/>
+      <module id="f6fdf353-3ab3-4dbb-8671-01c2b418bf0a" name="Controls"/>
+      <module id="d61e9307-ee6b-47f5-8a16-5d056fe644f4" name="Layout"/>
+      <module id="8c7f5a73-e594-404f-ac3e-0615cc8ae4f3" name="Search"/>
+      <module id="fe7ac5f4-313e-4fea-93be-9f54fca9a946" name="Extension"/>
+      <module id="a696c0f9-8a5b-44da-ad11-8fb084e002da" name="Controls-devtools-theme"/>
+  </depends>
+
+  <load_after/>
+
+  <parameters/>
+
+  <resources/>
+
+  <preload/>
+
+  <typescript>
+    <arg key="typecheck" value="0"/>
+  </typescript>
+</ui_module>
