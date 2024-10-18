@@ -1,0 +1,12 @@
+<ws:partial template="Controls/grid:ColumnTemplate" scope="{{ _options }}">
+    <ws:contentTemplate>
+        <ws:if data="{{ !item.contents.initialized }}">
+            <ws:if data="{{ !item.contents.defined }}">
+                <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-info" title="This module is a dependency of an unused module in a bundle."></div>
+            </ws:if>
+            <ws:else>
+                <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-warning" title="Unused module. Try filtering data by module name to see who downloaded it."></div>
+            </ws:else>
+        </ws:if>
+    </ws:contentTemplate>
+</ws:partial>
