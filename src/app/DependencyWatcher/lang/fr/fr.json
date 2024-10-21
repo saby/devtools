@@ -1,0 +1,17 @@
+{
+   "Не найдено": "Pas de données",
+   "Режим отображения": "Mode d'affichage",
+   "Зависят от файла": "Fichiers dépendants",
+   "Модули файла": "Modules de fichier",
+   "": "",
+   "Включая файлы стилей": "Y compris les feuilles de style",
+   "Файлы стилей": "Feuilles de style",
+   "Включая файлы локализаций": "Y compris les fichiers de localisation",
+   "Файлы локализации": "Fichiers de localisation",
+   "Включая файлы конфигураций": "Y compris les fichiers de configuration",
+   "Файлы конфигурации": "Fichiers de configuration",
+   "Выберите файл": "Sélectionner un fichier",
+   "Отобразить модули, зависящие от файла": "Afficher les dépendances de ce module",
+   "Отобразить модули файла": "Afficher les modules de ce fichier",
+   "Только устаревшие модули": "Seuls les modules obsolètes"
+}
