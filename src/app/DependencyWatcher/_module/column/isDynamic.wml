@@ -1,0 +1,12 @@
+<ws:partial template="Controls/grid:ColumnTemplate" scope="{{ _options }}">
+    <ws:contentTemplate>
+        <ws:if data="{{ item.contents.isDynamic || item.contents.isDeprecated }}">
+            <ws:if data="{{ item.contents.isDeprecated }}">
+                <div class="controls-icon controls-icon_size-s icon-Alert controls-icon_style-danger" title="Deprecated module"></div>
+            </ws:if>
+            <ws:if data="{{ item.contents.isDynamic }}">
+                <div class="controls-icon controls-icon_size-s icon-Info controls-icon_style-info" title="Dynamic dependency"></div>
+            </ws:if>
+        </ws:if>
+    </ws:contentTemplate>
+</ws:partial>

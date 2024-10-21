@@ -1,0 +1,84 @@
+<Devtool.Layout.Browser>
+    <ws:headTemplate>
+        <ws:if data="{{_model.getVisibleItems().length > 0}}">
+            <Controls.buttons:Button icon="icon-Handwrite1"
+                                     iconSize="s"
+                                     iconStyle="{{ _selectingFromPage ? 'primary' : 'secondary' }}"
+                                     tooltip="Select an element from the page"
+                                     viewMode="link"
+                                     on:click="_onSelectElementFromPageClick()"
+                                     attr:class="devtools-Elements__headElement" />
+            <Controls.search:Input bind:value="_searchValue"
+                                   on:valueChanged="__onSearchValueChanged()"
+                                   on:keydown="__onSearchKeydown()"
+                                   attr:class="devtools-Elements__headElement" />
+            <ws:if data="{{ _searchTotal > 0 }}">
+                <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchTotal }}</span>
+            </ws:if>
+        </ws:if>
+    </ws:headTemplate>
+   <ws:content>
+      <ws:if data="{{_model.getVisibleItems().length > 0}}">
+         <div attr:class="devtools-Elements__treeContainer devtools-Elements__treeContainer_theme_{{ _options.theme }} ws-flexbox ws-flex-column"
+              on:keydown="_onListKeyDown()">
+            <!--TODO: удалить task1178703223 после https://online.sbis.ru/opendoc.html?guid=bcc4b6be-7513-4f3d-8f26-eb27512d0a28 -->
+            <Controls.scroll:Container attr:class="devtools-Elements__treeWrapper"
+                                       scrollMode="vertical"
+                                       task1178703223="{{ true }}">
+                <div attr:class="devtools-Elements__tree {{ _logicParentHovered ? 'devtools-Elements__tree_logicParentHovered' }}"
+                     name="list">
+                    <ws:for data="element in _model.getVisibleItems()">
+                        <ws:partial template="wml!Elements/_Elements/Node"
+                                    attr:key="{{element.id}}"
+                                    attr:name="{{element.id}}"
+                                    attr:data-depth="{{ element.depth }}"
+                                    on:mouseenter="__highlightElement(element.id)"
+                                    on:mouseleave="__highlightElement()"
+                                    on:click="_onItemClick(element.id)"
+                                    selectedItemId="{{ _selectedItemId }}"
+                                    logicParentId="{{ _logicParentId }}"
+                                    searchValue="{{ _searchValue }}"
+                                    hasBreakpoint="{{ _elementsWithBreakpoints.has(element.id) }}"
+                                    task1178532066="{{ _task1178532066 }}"
+                                    scope="{{ element }}" />
+                    </ws:for>
+                </div>
+            </Controls.scroll:Container>
+            <ws:if data="{{_path}}">
+               <Elements._Breadcrumbs.Breadcrumbs items="{{_path}}"
+                                                 selectedItemId="{{_selectedItemId}}"
+                                                 on:itemMouseEnter="__highlightElement()"
+                                                 on:itemMouseLeave="__highlightElement()"
+                                                 on:itemClick="_onItemClick()"/>
+            </ws:if>
+         </div>
+          <div attr:class="ws-flexbox ws-flex-shrink-0 devtools-Elements__DetailsContainer devtools-Elements__DetailsContainer"
+               attr:style="width: {{ _detailsWidth }}px;">
+              <Controls.dragnDrop:ResizingLine direction="reverse"
+                                               attr:class="devtools-Elements__resizingLine"
+                                               on:offset="_offsetHandler()"/>
+              <ws:if data="{{_inspectedItem}}">
+                  <Elements._Details.Details scope="{{_inspectedItem}}"
+                                             attr:style="width: {{ _detailsWidth }}px;"
+                                             store="{{_options.store}}"
+                                             inspectedItem="{{ _inspectedItem }}"
+                                             logicParentName="{{ _logicParentName }}"
+                                             elementsWithBreakpoints="{{ _elementsWithBreakpoints }}"
+                                             eventWithBreakpoint="{{ _eventWithBreakpoint }}"
+                                             on:logicParentHoverChanged="_logicParentHoverChanged()"
+                                             on:logicParentClick="_onLogicParentClick()"
+                                             on:expandedChanged="_onDetailsTabExpanded()"
+                                             optionsExpanded="{{_optionsExpanded}}"
+                                             stateExpanded="{{_stateExpanded}}"
+                                             eventsExpanded="{{_eventsExpanded}}"
+                                             attributesExpanded="{{_attributesExpanded}}"
+                                             on:setBreakpoint="_setBreakpoint()"
+                                             on:removeBreakpoint="_removeAllBreakpoints()" />
+              </ws:if>
+          </div>
+      </ws:if>
+      <ws:else>
+         <div>Connecting to Wasaby...</div>
+      </ws:else>
+   </ws:content>
+</Devtool.Layout.Browser>

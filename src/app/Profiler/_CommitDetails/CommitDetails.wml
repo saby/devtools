@@ -1,0 +1,64 @@
+<div class="devtools-CommitDetails ws-flexbox ws-flex-column">
+    <ws:if data="{{ _options.updateReason === 'unchanged' }}">
+        <div>This control didn't re-render during this synchronization.</div>
+    </ws:if>
+    <ws:else>
+        <ws:if data="{{ _options.warnings }}">
+            <ws:for data="warning in _options.warnings">
+                <Profiler._Warning.Warning attr:key="{{ warning.caption }}"
+                                           caption="{{ warning.caption }}">
+                    <Controls.Container.Async templateName="{{ warning.template }}">
+                        <ws:partial template="{{ content.resolvedTemplate }}" />
+                    </Controls.Container.Async>
+                </Profiler._Warning.Warning>
+            </ws:for>
+        </ws:if>
+        <Controls.heading:Title caption="Why did this render:"
+                                fontSize="m"
+                                fontColorStyle="secondary" />
+        <div class="devtools-CommitDetails__changesContainer ws-flexbox ws-flex-column">
+            <Controls.scroll:Container>
+                <ws:if data="{{ _options.updateReason === 'mounted' }}">
+                    <div>This was the first time this control was rendered.</div>
+                </ws:if>
+                <ws:else data="{{ _options.updateReason === 'forceUpdated' }}">
+                    <div>This component was force updated.</div>
+                </ws:else>
+                <ws:else data="{{ _options.updateReason === 'parentUpdated' }}">
+                    <div>The parent control re-rendered.</div>
+                </ws:else>
+                <ws:else>
+                    <ws:if data="{{ _options.changedOptions }}">
+                        <div>
+                            Changed options:
+                            <ws:for data="item in _options.changedOptions">
+                                <div class="devtools-CommitDetails__changedValueName">{{ item }}</div>
+                            </ws:for>
+                        </div>
+                    </ws:if>
+                    <ws:if data="{{ _options.changedAttributes }}">
+                        <div>
+                            Changed attributes:
+                            <ws:for data="item in _options.changedAttributes">
+                                <div class="devtools-CommitDetails__changedValueName">{{ item }}</div>
+                            </ws:for>
+                        </div>
+                    </ws:if>
+                </ws:else>
+                <ws:if data="{{ _options.changedReactiveProps }}">
+                    <div>
+                        Changed reactive properties:
+                        <ws:for data="item in _options.changedReactiveProps">
+                            <Profiler._CommitDetails.ReactiveProp reactiveProp="{{ item }}" />
+                        </ws:for>
+                    </div>
+                </ws:if>
+            </Controls.scroll:Container>
+        </div>
+    </ws:else>
+    <ws:if data="{{ _options.logicParentName }}">
+        <LogicParentPanel.logicParentPanel:LogicParentPanel controlName="{{ _options.logicParentName }}"
+                                                            on:hoveredItemChanged="_notifyHandler('logicParentHoverChanged')"
+                                                            on:itemClick="_notifyHandler('logicParentClick')" />
+    </ws:if>
+</div>
