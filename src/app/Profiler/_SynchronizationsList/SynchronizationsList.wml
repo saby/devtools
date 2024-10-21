@@ -1,0 +1,7 @@
+<Controls.list:View keyProperty="id"
+                    source="{{ _source }}"
+                    itemTemplate="{{ _itemTemplate }}"
+                    style="master"
+                    markedKey="{{ _options.markedKey }}"
+                    markerVisibility="visible"
+                    on:markedKeyChanged="__markedKeyChanged()"/>
