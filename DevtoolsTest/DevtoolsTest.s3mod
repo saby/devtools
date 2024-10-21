@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui_module for_cdn="0" id="cfa0d2ed-6026-476a-9244-042099a8a5b8" name="DevtoolsTest" package="Wasaby" responsible="Зайцев А.С." version="1.00">
+
+  <description/>
+
+  <depends>
+        <module id="0bad3dc3-e17e-441f-a91e-7aecf37867f1" name="Profiler"/>
+        <module id="c7af5b1b-ad28-4cf8-ba55-c892c0b59245" name="Elements"/>
+        <module id="8768d783-37e7-4f0d-a476-16766b4635b8" name="DependencyWatcher"/>
+        <module id="8fc415e2-ad25-4452-aabb-a94e0e290dfe" name="Devtool"/>
+        <module id="8c7f5a73-e594-404f-ac3e-0615cc8ae4f3" name="Search"/>
+        <module id="61cc9fd1-7bf3-43d0-9905-54dbe6b084bb" name="Debugging"/>
+        <module id="8c360c99-f4dd-438a-8dba-f7895687565a" name="injection"/>
+        <module id="14fc0dc0-9b76-4e5e-97b7-696a82b8d545" name="Focus"/>
+  </depends>
+
+  <load_after/>
+
+  <parameters/>
+
+  <resources/>
+
+  <test framework="Mocha" environment="NodeJS" />
+
+  <typescript>
+    <arg key="typecheck" value="0"/>
+  </typescript>
+</ui_module>

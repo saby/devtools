@@ -1,0 +1,6 @@
+<ws:partial template="Controls/grid:ColumnTemplate"
+            scope="{{ _options }}">
+    <ws:contentTemplate>
+        <Profiler._ReasonTag.ReasonTag updateReason="{{ item.contents.updateReason }}" />
+    </ws:contentTemplate>
+</ws:partial>
