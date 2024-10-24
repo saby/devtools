@@ -1,0 +1,1 @@
+<div attr:class="devtools-ReasonTag ws-inline-flexbox {{ _getClass(_options.updateReason) }}"></div>

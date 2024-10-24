@@ -1,0 +1,15 @@
+<Controls.scroll:Container on:click="_onMarkedKeyChanged()">
+    <div class="devtools-Flamegraph"
+         on:keydown="_onKeyDown()">
+        <ws:for data="rowData in _depthToItemData">
+            <ws:for data="index, itemData in rowData">
+                <ws:partial template="wml!Profiler/_Flamegraph/Node"
+                            itemData="{{ itemData }}"
+                            attr:key="{{ itemData.id }}"
+                            attr:name="{{ itemData.id }}"
+                            attr:class="{{ _options.logicParentId === itemData.id ? 'devtools-Flamegraph__node__logicParent' }}"
+                            on:click="_onMarkedKeyChanged(itemData.id)" />
+            </ws:for>
+        </ws:for>
+    </div>
+</Controls.scroll:Container>
