@@ -1,0 +1,54 @@
+<Layout.browsers:Browser
+    filterButtonSource="{{ _filterButtonSource }}"
+    filter="{{ _filter }}"
+    on:filterChanged="_onFilterChanged()"
+    source="{{ _options.source }}"
+    keyProperty="id"
+    parentProperty="parent"
+    navigation="{{ _navigation }}"
+    minSearchLength="{{ 3 }}"
+    searchParam="name"
+    searchStartingWith="current"
+    viewMode="table"
+    root="{{ _root }}"
+    bind:sorting="_sorting"
+>
+    <ws:search>
+        <Controls.search:Input />
+    </ws:search>
+    <ws:filterButton>
+        <Controls.filter:View
+            detailPanelTemplateName="DependencyWatcher/module:filter.Panel"
+            on:itemsChanged="_onItemsChanged()"
+        />
+    </ws:filterButton>
+    <ws:beforeFilterTemplate>
+        <ws:partial template="{{ _options.headButton }}" />
+    </ws:beforeFilterTemplate>
+    <ws:content>
+        <Controls.scroll:Container
+            attr:class="devtools-DependencyWatcher_Page__scroll"
+        >
+            <Controls.explorer:View
+                
+                name="listView"
+                bind:root="_root"
+                nodeProperty="hasChildren"
+                columns="{{ _column }}"
+                header="{{ _headers }}"
+                displayProperty="name"
+                itemActions="{{ _itemActions }}"
+                itemActionsPosition="custom"
+                stickyHeader="{{ true }}"
+                stickyColumnsCount="{{ 4 }}"
+            >
+                <ws:virtualScrollConfig pageSize="{{ 70 }}" />
+                <ws:emptyTemplate>
+                    <ws:partial template="Controls/grid:EmptyTemplate" topSpacing="xl" bottomSpacing="xxl">
+                        <ws:contentTemplate>{[Не найдено]}</ws:contentTemplate>
+                    </ws:partial>
+                </ws:emptyTemplate>
+            </Controls.explorer:View>
+        </Controls.scroll:Container>
+    </ws:content>
+</Layout.browsers:Browser>
