@@ -1,0 +1,11 @@
+<div class="ws-flexbox ws-flex-column">
+    <Controls.heading:Title caption="Logic parent"
+                            fontSize="m"
+                            fontColorStyle="secondary" />
+    <Controls.buttons:Button caption="{{ _options.controlName }}"
+                             viewMode="link"
+                             tooltip="{{ _options.controlName }}"
+                             on:click="_notifyClick()"
+                             on:mouseenter="_notifyHoveredItem(true)"
+                             on:mouseleave="_notifyHoveredItem(false)" />
+</div>

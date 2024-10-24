@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui_module for_cdn="0" id="4b105013-c6bb-4bd5-b324-c7395edb0d62" name="Layout-devtools-theme" package="Wasaby" required="0" responsible="Зайцев А. С." version="1.00">
+
+  <description/>
+
+  <depends/>
+
+  <load_after/>
+
+  <parameters/>
+
+  <resources/>
+
+  <preload/>
+
+  <typescript>
+    <arg key="typecheck" value="0"/>
+  </typescript>
+</ui_module>
