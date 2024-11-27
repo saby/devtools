@@ -1,0 +1,13 @@
+<ws:partial template="Controls/grid:ColumnTemplate" scope="{{ _options }}">
+    <ws:contentTemplate>
+        <ws:if data="{{ _options.item.contents.fileName }}">
+            <Controls.buttons:Button caption="{{ _options.item.contents.fileName }}"
+                                     tooltip="{{ _options.item.contents.path }}"
+                                     viewMode="link"
+                                     on:click="__openResource(_options.item.contents)"/>
+        </ws:if>
+        <ws:else>
+            <invisible-node/>
+        </ws:else>
+    </ws:contentTemplate>
+</ws:partial>

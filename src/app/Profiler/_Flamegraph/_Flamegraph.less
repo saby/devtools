@@ -1,0 +1,48 @@
+.devtools-Flamegraph {
+   position: relative;
+}
+
+.devtools-Flamegraph__node {
+   .text-overflow();
+   cursor: pointer;
+   height: 18px;
+   position: absolute;
+   box-sizing: border-box;
+   transition: width ease-in-out 500ms;
+   border-right: var(--border-thickness) solid var(--separator_color);
+}
+
+.devtools-Flamegraph__node:hover {
+   filter: brightness(0.9);
+}
+
+.devtools-Flamegraph__node_withCaption {
+   padding: 0 4px;
+}
+
+.devtools-Flamegraph__node_selected {
+   padding: 0 4px;
+   outline-offset: -2px;
+   outline: 2px solid var(--border-color_Flamegraph_focus);
+}
+
+.devtools-Flamegraph__node_warning {
+   display: inline-block;
+   position: absolute;
+   right: 0;
+   top: 0;
+   border-style: solid;
+   border-width: 0 8px 8px 0;
+   border-top-color: transparent;
+   border-left-color: transparent;
+   border-bottom-color: transparent;
+   width: 8px;
+   height: 8px;
+   cursor: pointer;
+   box-sizing: border-box;
+   border-right-color: var(--danger_color);
+}
+
+.devtools-Profiler__content_logicParentHovered .devtools-Flamegraph__node__logicParent {
+   filter: brightness(0.9);
+}
