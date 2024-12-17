@@ -1,0 +1,142 @@
+<Devtool.Layout.Browser attr:class="devtools-profiler_theme-{{ _options.theme }}">
+    <ws:headTemplate>
+        <Controls.buttons:Button icon="icon-Rec"
+                                 iconSize="s"
+                                 iconStyle="{{ _isProfiling ? 'danger' : 'secondary' }}"
+                                 viewMode="link"
+                                 tooltip="{{ _isProfiling ? 'Stop recording' : 'Start recording' }}"
+                                 attr:class="devtools-Profiler__headElement"
+                                 on:click="_toggleProfiling()"/>
+        <Controls.buttons:Button icon="icon-Refresh"
+                                 iconSize="s"
+                                 viewMode="link"
+                                 readOnly="{{ _isProfiling }}"
+                                 tooltip="Reload the page and start recording"
+                                 attr:class="devtools-Profiler__headElement"
+                                 on:click="_reloadAndProfile()"/>
+        <Controls.buttons:Button icon="icon-DownloadNew"
+                                 iconSize="s"
+                                 viewMode="link"
+                                 readOnly="{{ _isProfiling || !_snapshot }}"
+                                 tooltip="Save profile"
+                                 attr:class="devtools-Profiler__headElement"
+                                 on:click="_exportToJSON()"/>
+        <Controls.buttons:Button icon="icon-UnloadNew"
+                                 iconSize="s"
+                                 viewMode="link"
+                                 readOnly="{{ _isProfiling }}"
+                                 tooltip="Load profile"
+                                 attr:class="devtools-Profiler__headElement"
+                                 on:click="_importFromJSON()"/>
+        <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
+            <Controls.toggle:RadioGroup source="{{ _radioGroupSource }}"
+                                        direction="horizontal"
+                                        keyProperty="title"
+                                        attr:class="ws-align-self-end devtools-Profiler__headElement"
+                                        bind:selectedKey="_selectedTab" />
+        </ws:if>
+        <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
+            <Controls.search:Input bind:value="_searchValue"
+                                   on:valueChanged="_onSearchValueChanged()"
+                                   on:keydown="_onSearchKeydown()"
+                                   attr:class="devtools-Profiler__headElement" />
+            <ws:if data="{{ _searchTotal > 0 }}">
+                <span>{{ _lastFoundItemIndex + 1 }} из {{ _searchTotal }}</span>
+            </ws:if>
+        </ws:if>
+    </ws:headTemplate>
+    <ws:content>
+        <SbisFile.ResourceGetter.DropArea
+                on:dropFiles="_onFileDrop()"
+                dragText="Drop profile here"
+                dropText="Drop profile here"
+                extensions="{{ _supportedFileExtensions }}"
+                elementClass="ws-flexbox devtools-Profiler__content">
+            <ws:if data="{{ !_isProfiling && _synchronizations && _snapshot }}">
+                <Controls.masterDetail:Base attr:class="ws-flex-grow-1" masterWidth="{{300}}">
+                    <ws:master>
+                        <Controls.scroll:Container attr:class="devtools-Profiler__master">
+                            <Profiler._SynchronizationsList.SynchronizationsList synchronizations="{{ _synchronizations }}"
+                                                                                 markedKey="{{ _selectedSynchronizationId }}"
+                                                                                 filter="{{ _masterFilter }}"
+                                                                                 on:markedKeyChanged="_masterMarkedKeyChanged()"/>
+                        </Controls.scroll:Container>
+                    </ws:master>
+                    <ws:detail>
+                        <ws:if data="{{ _selectedTab === 'Flamegraph' }}">
+                            <Profiler._Flamegraph.Flamegraph snapshot="{{ _snapshot }}"
+                                                             markedKey="{{ _selectedCommitId }}"
+                                                             logicParentId="{{ _logicParentId }}"
+                                                             on:markedKeyChanged="_detailMarkedKeyChanged()"
+                                                             attr:class="ws-flex-grow-1 {{ _logicParentHovered ? 'devtools-Profiler__content_logicParentHovered' }}"/>
+                        </ws:if>
+                        <ws:else>
+                            <Profiler._RankedView.RankedView snapshot="{{ _snapshot }}"
+                                                             markedKey="{{ _selectedCommitId }}"
+                                                             filter="{{ _detailFilter }}"
+                                                             searchValue="{{ _searchValue }}"
+                                                             itemsReadyCallback="{{ _rankedViewItemsReadyCallback }}"
+                                                             on:markedKeyChanged="_detailMarkedKeyChanged()"
+                                                             attr:class="ws-flex-grow-1"/>
+                        </ws:else>
+                    </ws:detail>
+                </Controls.masterDetail:Base>
+                <ws:if data="{{ _selectedCommitChanges }}">
+                    <Profiler._CommitDetails.CommitDetails updateReason="{{ _selectedCommitChanges.updateReason }}"
+                                                           changedOptions="{{ _selectedCommitChanges.changedOptions }}"
+                                                           changedAttributes="{{ _selectedCommitChanges.changedAttributes }}"
+                                                           changedReactiveProps="{{ _selectedCommitChanges.changedReactiveProps }}"
+                                                           warnings="{{ _selectedCommitChanges.warnings }}"
+                                                           logicParentName="{{ _selectedTab === 'Flamegraph' ? _logicParentName : '' }}"
+                                                           on:logicParentHoverChanged="_logicParentHoverChanged()"
+                                                           on:logicParentClick="_detailMarkedKeyChanged(_logicParentId)" />
+                </ws:if>
+                <ws:else>
+                    <Profiler._Overview.Overview mountedCount="{{ _synchronizationOverview.mountedCount }}"
+                                                 selfUpdatedCount="{{ _synchronizationOverview.selfUpdatedCount }}"
+                                                 parentUpdatedCount="{{ _synchronizationOverview.parentUpdatedCount }}"
+                                                 unchangedCount="{{ _synchronizationOverview.unchangedCount }}"
+                                                 destroyedCount="{{ _synchronizationOverview.destroyedCount }}"
+                                                 forceUpdatedCount="{{ _synchronizationOverview.forceUpdatedCount }}" />
+                </ws:else>
+            </ws:if>
+            <ws:else>
+                <div class="devtools-Profiler__greeting ws-flexbox ws-align-items-center">
+                    <ws:if data="{{ _isProfiling }}">
+                        <div class="ws-flexbox ws-flex-column">
+                            Profiling...
+                            <Controls.buttons:Button caption="Stop"
+                                                     buttonStyle="secondary"
+                                                     fontColorStyle="link"
+                                                     viewMode="link"
+                                                     attr:class="devtools-Profiler__stopButton ws-align-self-center"
+                                                     on:click="_toggleProfiling()"/>
+                        </div>
+                    </ws:if>
+                    <ws:else>
+                        <div class="ws-flexbox ws-flex-column">
+                            <ws:if data="{{ _didProfile }}">
+                                <div>There were no synchronizations during the last profiling session.</div>
+                            </ws:if>
+                            <div>
+                                Click the record button <Controls.buttons:Button icon="icon-Rec"
+                                                                                 iconSize="s"
+                                                                                 iconStyle="secondary"
+                                                                                 viewMode="ghost"
+                                                                                 tooltip="Start recording"
+                                                                                 on:click="_toggleProfiling()"/> to start recording.
+                            </div>
+                            <div>
+                                Click the reload button <Controls.buttons:Button icon="icon-Refresh"
+                                                                                 iconSize="s"
+                                                                                 viewMode="ghost"
+                                                                                 tooltip="Reload the page and start recording"
+                                                                                 on:click="_reloadAndProfile()"/> to reload the page and start recording.
+                            </div>
+                        </div>
+                    </ws:else>
+                </div>
+            </ws:else>
+        </SbisFile.ResourceGetter.DropArea>
+    </ws:content>
+</Devtool.Layout.Browser>

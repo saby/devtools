@@ -1,0 +1,3 @@
+<div class="ws-fragment">
+    <span>If you see waterfall of controls with this warning then you're delaying the first render. Consider loading data in parallel in the topmost control and passing it down as options.</span>
+</div>
