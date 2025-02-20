@@ -1,0 +1,58 @@
+@import "_theme";
+@import "Controls-default-theme/_variables";
+
+
+.controls_theme-@{themeName} {
+
+  // Devtools
+  --background-color_selected_elements:                  rgba(0, 190, 210, 0.2);
+  --hover_background-color_list:                         rgba(0, 190, 210, 0.1);
+  --color_PaneTemplate_fieldName:                        #881391;
+  --color_PaneTemplate-value:                            #1a1aa6;
+  --color_PaneTemplate-value_string:                     #C80000;
+
+  --color_control_elements:                              var(--primary_text-color);
+  --color_hoc_elements:                                  var(--secondary_text-color);
+  --color_template_elements:                             #555;
+
+  --background-color_selected_breadCrumbs:               #e4e4e4;
+
+
+  // Common
+  --secondary_same_background-color:                    #fff;
+}
+
+.controls_list_theme-@{themeName} {
+  // TreeGrid
+  --node_font-size_treeGrid:                             var(--font-size_m);
+}
+
+.devtools-profiler_theme-@{themeName} {
+  --background-color_reason_noChangesInSubtree:                     repeating-linear-gradient(-55deg, #ccc, #ccc 2px, #d9d9d9 2px, #d9d9d9 4px);
+  --background-color_reason_mounted:                                #ffab66;
+  --background-color_reason_forceUpdated:                           #baf7c8;
+  --background-color_reason_selfUpdated:                            #e6d174;
+  --background-color_reason_parentUpdated:                          #b3e6e6;
+  --background-color_reason_unchanged:                              #e2e2e2;
+  --background-color_reason_destroyed:                              #000;
+
+  --background-color_duration_0:                                    #baf7c8;
+  --background-color_duration_1:                                    #c4f1ba;
+  --background-color_duration_2:                                    #cdeaac;
+  --background-color_duration_3:                                    #d5e49e;
+  --background-color_duration_4:                                    #dbde90;
+  --background-color_duration_5:                                    #e1d782;
+  --background-color_duration_6:                                    #e6d174;
+  --background-color_duration_7:                                    #ebca66;
+  --background-color_duration_8:                                    #efc457;
+  --background-color_duration_renderDuration:                       #ffab66;
+  --background-color_duration_lifecycleDuration:                    #b3e6e6;
+
+  --border-color_Flamegraph_focus:                                  #4d90fe;
+
+  --background-color_Warning:                                       #FADADD;
+}
+
+.devtools-focus_theme-@{themeName} {
+  --background-color_childFocused:                 #e0e0e0;
+}

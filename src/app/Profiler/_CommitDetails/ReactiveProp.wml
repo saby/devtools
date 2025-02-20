@@ -1,0 +1,16 @@
+<ws:if data="{{ _options.reactiveProp.stack }}">
+    <Controls.spoiler:View captions="{{ _options.reactiveProp.name }}">
+        <div class="ws-flexbox ws-flex-column" style="margin-left: 20px;">
+            <ws:for data="item in _options.reactiveProp.stack">
+                <Controls.buttons:Button caption="{{ item.name }}"
+                                         tooltip="{{ item.url }}"
+                                         buttonStyle="secondary"
+                                         viewMode="link"
+                                         on:click="_openFile(item)" />
+            </ws:for>
+        </div>
+    </Controls.spoiler:View>
+</ws:if>
+<ws:else>
+    <div class="devtools-CommitDetails__changedValueName">{{ _options.reactiveProp.name }}</div>
+</ws:else>
