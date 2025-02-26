@@ -1,0 +1,123 @@
+<Devtool.Layout.Browser>
+    <ws:headTemplate>
+        <ws:if data="{{ _hasUnsavedChanges }}">
+            <Controls.buttons:Button caption="Apply"
+                                     style="primary"
+                                     tooltip="You have unsaved changes. Click here to reload the page and apply them."
+                                     on:click="_reloadPage()" />
+        </ws:if>
+    </ws:headTemplate>
+    <ws:content>
+        <div class="devtools-Debugging">
+            <div class="devtools-Debugging__browserWrapper ws-flexbox ws-flex-column">
+                <Controls.heading:Title caption="Minified modules"
+                                        fontSize="l"
+                                        fontColorStyle="secondary"
+                                        attr:class="devtools-Debugging__header" />
+                <Layout.browsers:Browser
+                                source="{{ _unselectedSource }}"
+                                keyProperty="id"
+                                searchParam="title"
+                                markerVisibility="hidden"
+                                minSearchLength="{{ 0 }}"
+                                sorting="{{ _sorting }}"
+                                navigation="{{ _navigation }}"
+                                bind:filter="_unselectedFilter"
+                                attr:class="devtools-Debugging__browser">
+                    <ws:search>
+                        <Controls.search:Input bind:value="_unselectedSearchValue"
+                                               attr:class="layout-Browser__search_width_s" />
+                    </ws:search>
+                    <ws:beforeFilterTemplate>
+                        <Controls.buttons:Button icon="icon-DayForwardNull"
+                                                 viewMode="linkButton"
+                                                 tooltip="Select favorite modules"
+                                                 on:click="_moveFavoriteItems(true)" />
+                        <Controls.buttons:Button icon="icon-DayForward"
+                                                 viewMode="linkButton"
+                                                 tooltip="Select all modules"
+                                                 on:click="_moveAllItems(true)" />
+                    </ws:beforeFilterTemplate>
+                    <ws:content>
+                        <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
+                            <Controls.list:View name="unselectedList"
+                                                itemActions="{{ _unselectedActions }}"
+                                                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
+                                                on:itemClick="_changeCookie('add')">
+                                <ws:virtualScrollConfig pageSize="{{ 50 }}" />
+                                <ws:itemTemplate>
+                                    <ws:partial template="Controls/list:ItemTemplate"
+                                                attr:class="{{ itemTemplate.item.contents.isPinned ? 'devtools-Debugging__listItem_pinned' }}" />
+                                </ws:itemTemplate>
+                            </Controls.list:View>
+                        </Controls.scroll:Container>
+                    </ws:content>
+                </Layout.browsers:Browser>
+            </div>
+            <div class="devtools-Debugging__browserWrapper ws-flexbox ws-flex-column">
+                <Controls.heading:Title caption="Unminified modules"
+                                        fontSize="l"
+                                        fontColorStyle="secondary"
+                                        attr:class="devtools-Debugging__header" />
+                <Layout.browsers:Browser
+                                source="{{ _selectedSource }}"
+                                keyProperty="id"
+                                searchParam="title"
+                                markerVisibility="hidden"
+                                minSearchLength="{{ 0 }}"
+                                sorting="{{ _sorting }}"
+                                navigation="{{ _navigation }}"
+                                bind:filter="_selectedFilter"
+                                attr:class="devtools-Debugging__browser">
+                    <ws:search>
+                        <Controls.search:Input bind:value="_selectedSearchValue"
+                                               attr:class="layout-Browser__search_width_s" />
+                    </ws:search>
+                    <ws:beforeFilterTemplate>
+                        <Controls.buttons:Button icon="icon-DayBackwardNull"
+                                                 viewMode="linkButton"
+                                                 tooltip="Unselect favorite modules"
+                                                 on:click="_moveFavoriteItems(false)" />
+                        <Controls.buttons:Button icon="icon-DayBackward"
+                                                 viewMode="linkButton"
+                                                 tooltip="Unselect all modules"
+                                                 on:click="_moveAllItems(false)" />
+                        <Controls.dropdown:Button name="savedSetsDropdown"
+                                                  keyProperty="id"
+                                                  viewMode="link"
+                                                  source="{{ _savedSetsSource }}"
+                                                  caption="Choose preset"
+                                                  itemActions="{{ _savedSetsItemActions }}"
+                                                  itemActionVisibilityCallback="{{ _savedSetsItemActionsCallback }}"
+                                                  on:menuItemActivate="_applySavedSet()">
+                            <ws:footerContentTemplate>
+                                <Controls.buttons:Button caption="Save current set"
+                                                         viewMode="link"
+                                                         readOnly="{{ !selectedModules.length }}"
+                                                         on:click="_addSet()"
+                                                         attr:class="devtools-Debugging__savedSetsFooter" />
+                            </ws:footerContentTemplate>
+                            <ws:menuPopupOptions>
+                                <ws:Object maxWidth="{{ 300 }}" minWidth="{{ 150 }}" />
+                            </ws:menuPopupOptions>
+                        </Controls.dropdown:Button>
+                    </ws:beforeFilterTemplate>
+                    <ws:content>
+                        <Controls.scroll:Container attr:class="devtools-Debugging__scrollContainer">
+                            <Controls.list:View name="selectedList"
+                                                itemActions="{{ _selectedActions }}"
+                                                itemActionVisibilityCallback="{{ _itemActionVisibilityCallback }}"
+                                                on:itemClick="_changeCookie('delete')">
+                                <ws:virtualScrollConfig pageSize="{{ 50 }}"/>
+                                <ws:itemTemplate>
+                                    <ws:partial template="Controls/list:ItemTemplate"
+                                                attr:class="{{ itemTemplate.item.contents.isPinned ? 'devtools-Debugging__listItem_pinned' }}" />
+                                </ws:itemTemplate>
+                            </Controls.list:View>
+                        </Controls.scroll:Container>
+                    </ws:content>
+                </Layout.browsers:Browser>
+            </div>
+        </div>
+    </ws:content>
+</Devtool.Layout.Browser>

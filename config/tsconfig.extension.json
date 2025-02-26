@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "module": "AMD",
+    "outDir": "../build/",
+    "baseUrl": "../src",
+    "paths": {
+      "tslib": [
+        "./extension/ext/tslib"
+      ]
+    }
+  },
+  "include": [
+    "../src/extension"
+  ],
+  "exclude": [
+    "../src/extension/content/*",
+    "../src/extension/Extension/*"
+  ]
+}
