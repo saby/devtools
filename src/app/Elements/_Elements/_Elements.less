@@ -1,0 +1,64 @@
+.devtools-Elements__treeContainer {
+   flex-grow: 1;
+   flex-shrink: 1;
+   min-width: 0;
+}
+
+.devtools-Elements__DetailsContainer {
+   position: relative;
+   border-left: var(--border-thickness) solid var(--separator_color);
+}
+
+.devtools-Elements__resizingLine {
+   position: absolute;
+   height: 100%;
+   width: 5px;
+}
+
+.devtools-Elements__treeWrapper {
+   height: 100%;
+}
+
+.devtools-Elements__node {
+   cursor: pointer;
+   white-space: nowrap;
+}
+
+.devtools-Elements__node:hover {
+   background-color: var(--hover_background-color_list);
+}
+
+.devtools-Elements__node_control {
+   color: var(--color_control_elements);
+}
+
+.devtools-Elements__node_hoc {
+   color: var(--color_hoc_elements);
+}
+
+.devtools-Elements__node_template {
+   color: var(--color_template_elements);
+}
+
+.devtools-Elements__node_selected {
+   background-color: var(--background-color_selected_elements);
+}
+
+.devtools-Elements__headElement {
+   margin-right: 6px;
+}
+
+.devtools-Elements__node_childless {
+   padding-left: 16px;
+}
+
+.devtools-Elements__hint {
+   font-size: 13px;
+   color: var(--unaccented_text-color);
+}
+
+.devtools-Elements__tree_logicParentHovered {
+   .devtools-Elements__node_logicParent {
+      background-color: var(--hover_background-color_list);
+   }
+}
