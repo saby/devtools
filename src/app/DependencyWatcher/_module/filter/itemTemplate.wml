@@ -1,0 +1,67 @@
+<ws:template name="filterPopup">
+    <Controls.filterPopup:Text
+        value="{{ true }}"
+        caption="{{ item.itemText }}"
+    />
+</ws:template>
+<ws:template name="fileInput">
+    <span class="controls-text-secondary"
+          style="width:120px">{{ caption }}</span>
+    <DependencyWatcher._module.filter.file.input
+            attr:style="width: 334px"
+            bind:textValue="item.textValue"
+            bind:value="item.value"
+            displayProperty="name"
+            keyProperty="id"
+            searchParam="name"
+            source="{{ item.source }}"
+            trim="{{ true }}"
+            searchDelay="{{ 0 }}"
+            placeholder="{[Выберите файл]}"
+            multiSelect="{{ false }}"
+    >
+        <ws:navigation
+                source="page"
+                view="infinity"
+        >
+            <ws:sourceConfig
+                    pageSize="{{ 50 }}"
+                    page="{{ 0 }}"
+                    mode="totalCount"
+            />
+        </ws:navigation>
+        <ws:selectorTemplate templateName="DependencyWatcher/file:SuggestPanel">
+            <ws:templateOptions
+                    source="{{ item.source }}"
+                    searchValue="{{ item.textValue }}"
+            />
+        </ws:selectorTemplate>
+        <ws:suggestTemplate templateName="DependencyWatcher/module:suggest" />
+    </DependencyWatcher._module.filter.file.input>
+</ws:template>
+
+<ws:template name="css">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
+<ws:template name="json">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
+<ws:template name="i18n">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
+<ws:template name="onlyDeprecated">
+    <ws:partial template="filterPopup" item="{{ item }}"/>
+</ws:template>
+
+<ws:template name="files">
+    <ws:partial template="fileInput" item="{{ item }}" caption="{[Модули файла]}" />
+</ws:template>
+
+<ws:template name="dependentOnFiles">
+    <ws:partial template="fileInput" item="{{ item }}" caption="{[Зависят от файла]}" />
+</ws:template>
+
+<ws:partial template="{{ _options.item.id }}" item="{{ _options.item }}"/>

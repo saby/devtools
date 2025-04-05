@@ -1,0 +1,48 @@
+<ws:template name="row">
+    <div class="ws-flexbox ws-align-items-center">
+        <Profiler._ReasonTag.ReasonTag updateReason="{{ updateReason }}"
+                                      attr:class="devtools-Overview__reasonTag" />{{ caption }}: {{ count }}
+    </div>
+</ws:template>
+
+<div class="devtools-Overview ws-flexbox ws-flex-column">
+    <Controls.heading:Title caption="Synchronization overview"
+                            fontSize="m"
+                            fontColorStyle="secondary" />
+    <ws:if data="{{ _options.mountedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="mounted"
+                    caption="Mounted"
+                    count="{{ _options.mountedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.forceUpdatedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="forceUpdated"
+                    caption="Force updated"
+                    count="{{ _options.forceUpdatedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.selfUpdatedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="selfUpdated"
+                    caption="Updated"
+                    count="{{ _options.selfUpdatedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.parentUpdatedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="parentUpdated"
+                    caption="Parent updated"
+                    count="{{ _options.parentUpdatedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.destroyedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="destroyed"
+                    caption="Destroyed"
+                    count="{{ _options.destroyedCount }}" />
+    </ws:if>
+    <ws:if data="{{ _options.unchangedCount > 0 }}">
+        <ws:partial template="row"
+                    updateReason="unchanged"
+                    caption="Unchanged"
+                    count="{{ _options.unchangedCount }}" />
+    </ws:if>
+</div>

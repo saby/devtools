@@ -1,0 +1,28 @@
+<UI.HotKeys:Dispatcher>
+    <Controls.scroll:ScrollContextProvider pagingVisible="{{ false }}">
+        <div
+                on:scroll="_scrollPage()"
+                on:resize="_resizePage()"
+                on:mousemove="_mousemovePage()"
+                on:touchmove="_touchmovePage()"
+                on:touchend="_touchendPage()"
+                on:mousedown="_mousedownPage()"
+                on:mouseup="_mouseupPage()"
+                on:keyPress="_keyPressHandler()"
+                on:suggestStateChanged="_suggestStateChangedHandler()"
+                on:register="_registerHandler()"
+                on:unregister="_unregisterHandler()"
+                on:workspaceResize="_popupEventHandler('workspaceResize')"
+                on:pageScrolled="_popupEventHandler('pageScrolled')"
+                on:_updateDraggingTemplate="_updateDraggingTemplate()"
+                on:_documentDragStart="_documentDragStart()"
+                on:_documentDragEnd="_documentDragEnd()"
+        >
+            <ws:partial
+                    template="{{ _options.content }}"
+                    scope="{{ _options }}"
+            />
+            <Controls.popup:Container attr:id="popup" eventHandler="{{content._managerEventHandler}}"/>
+        </div>
+    </Controls.scroll:ScrollContextProvider>
+</UI.HotKeys:Dispatcher>
