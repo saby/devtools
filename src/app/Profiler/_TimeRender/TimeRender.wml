@@ -1,0 +1,4 @@
+<div class="devtools-TimeRender ws-flexbox ws-align-items-center">
+    <span class="devtools-TimeRender__value ws-flex-shrink-0">{{ _formattedValue }}</span>
+    <Profiler._StackedBar.StackedBar bars="{{ _options.bars }}"/>
+</div>
