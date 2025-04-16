@@ -1,0 +1,7 @@
+<div class="ws-flexbox ws-flex-grow-1">
+    <ws:for data="bar in _formattedBars">
+        <div title="{{ bar.caption }}"
+             class="devtools-StackedBar__bar {{ bar.color }}"
+             attr:style="width: {{ bar.length }}%;"></div>
+    </ws:for>
+</div>

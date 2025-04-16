@@ -1,0 +1,13 @@
+<div attr:class="devtools-Breadcrumbs devtools-Breadcrumbs_theme_{{ _options.theme }} ws-flexbox ws-flex-shrink-0"
+     on:wheel="_wheelHandler()">
+   <ws:if data="{{_options.items.length > 0}}">
+      <ws:for data="crumb in _options.items">
+         <div attr:key="{{crumb.id}}"
+              attr:name="{{crumb.id}}"
+              attr:class="devtools-Breadcrumbs__crumb devtools-Breadcrumbs__crumb {{crumb.class}} {{crumb.id === _options.selectedItemId ? 'devtools-Breadcrumbs__crumb_selected' }}"
+              on:mouseenter="_onMouseEnter(crumb.id)"
+              on:mouseleave="_onMouseLeave()"
+              on:click="_onItemClick(crumb.id)">{{crumb.name}}</div>
+      </ws:for>
+   </ws:if>
+</div>

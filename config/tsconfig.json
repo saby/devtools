@@ -1,0 +1,24 @@
+{
+  "extends": "../tsconfig.base",
+  "compilerOptions": {
+    "target": "es2017",
+    "allowJs": false,
+    "alwaysStrict": true,
+    "importHelpers": true,
+    "sourceMap": false,
+    "moduleResolution": "classic",
+    "module": "es2015",
+    "declaration": false,
+    "noImplicitAny": false,
+    "stripInternal": true,
+    "traceResolution": false,
+    "pretty": false,
+    "diagnostics": false,
+    "locale": "ru",
+    "experimentalDecorators": true,
+    "typeRoots": [
+      "../node_modules/@types",
+      "../node_modules/sbis3-ws/WS.Core/ws.d.ts"
+    ]
+  }
+}
